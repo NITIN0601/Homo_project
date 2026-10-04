@@ -1,0 +1,39 @@
+{
+  "name": "project-suspense",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:user": "vite --port 5173",
+    "dev:admin": "vite --port 5174",
+    "dev:both": "vite --port 5173 & vite --port 5174",
+    "dev:backend": "cd backend && (test -d venv && ./venv/bin/uvicorn main:app --reload --port 8000 || uvicorn main:app --reload --port 8000)",
+    "dev:all": "npm run dev:backend & npm run dev:both",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "test": "./test/run_tests.sh",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "libphonenumber-js": "^1.13.14",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4.3.3",
+    "validator": "^13.15.35",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@types/validator": "^13.15.10",
+    "@vitejs/plugin-react": "^6.1.1",
+    "jsdom": "^29.1.1",
+    "oxlint": "^1.81.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.3"
+  }
+}

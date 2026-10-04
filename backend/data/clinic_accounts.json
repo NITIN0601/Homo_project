@@ -1,0 +1,32 @@
+{
+  "vaishnavikshetty@gmail.com": {
+    "id": "usr-admin-001",
+    "name": "Dr. Bramarambha K",
+    "email": "vaishnavikshetty@gmail.com",
+    "role": "admin",
+    "phone": "+91 70195 76255",
+    "hash": "559be0013f0a6d362c19eeff7bfc5e10d7ae9b3c5c81b086558ede8b40a540c1",
+    "salt": "f4bc15a028f9712d8bc2525dfe9dce4c",
+    "created_at": "2026-10-01T00:47:15.775069"
+  },
+  "admin@agastyahomoeo.com": {
+    "id": "usr-admin-001",
+    "name": "Dr. Bramarambha K",
+    "email": "admin@agastyahomoeo.com",
+    "role": "admin",
+    "phone": "+91 70195 76255",
+    "hash": "559be0013f0a6d362c19eeff7bfc5e10d7ae9b3c5c81b086558ede8b40a540c1",
+    "salt": "f4bc15a028f9712d8bc2525dfe9dce4c",
+    "created_at": "2026-10-01T00:47:15.775069"
+  },
+  "john@agastyahomoeo.com": {
+    "id": "usr-001",
+    "name": "John Doe",
+    "email": "john@agastyahomoeo.com",
+    "role": "patient",
+    "phone": "+91 98765 43210",
+    "hash": "89d55129b1103d437cce75a32ee1a5b488f6c70977d5e7c9a360431fa5a12e9c",
+    "salt": "2f8d53fc009b8d9b5fc2ec643be35936",
+    "created_at": "2026-10-01T00:47:15.775303"
+  }
+}

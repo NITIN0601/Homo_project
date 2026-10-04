@@ -1,0 +1,8 @@
+# robots.txt for AyuHomeo Telemedicine Platform
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin-dashboard
+Disallow: /api/
+
+Sitemap: https://ayuhomeo.com/sitemap.xml

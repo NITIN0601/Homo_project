@@ -1,0 +1,681 @@
+{
+  "usr-001": {
+    "patientId": "usr-001",
+    "patientName": "John Doe",
+    "age": 34,
+    "gender": "Male",
+    "bloodGroup": "O+",
+    "knownAllergies": [
+      "Dust Mites",
+      "Penicillin"
+    ],
+    "medicalHistory": [
+      "Chronic Dyspepsia since 2024",
+      "Trauma Soreness (Post-Sports)",
+      "Constitutional Rash"
+    ],
+    "visits": [
+      {
+        "id": "vis-1791126033438",
+        "visitDate": "Oct 04, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1791125473647",
+        "visitDate": "Oct 04, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790988680046",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790988545940",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790988280663",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790988170933",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790987322716",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790987156578",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790987012336",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790986884352",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790986693578",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790986349770",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790985699417",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790984757915",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790984323263",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790983929531",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790982775208",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790982011876",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790981622441",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790981351223",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-1790980549962",
+        "visitDate": "Oct 02, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/uploaded_prescription.jpg"
+      },
+      {
+        "id": "vis-101",
+        "visitDate": "Sep 15, 2026",
+        "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+        "clinicBranch": "Tele-Consultation / Bangalore",
+        "chiefDiagnosis": "Acute Dyspepsia with Post-Exercise Muscle Fatigue",
+        "symptomsObserved": [
+          "Bloating post meals",
+          "Hamstring strain",
+          "Acidity after coffee"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m3",
+            "medicineName": "Nux Vomica",
+            "potency": "30C",
+            "dosage": "4 drops post dinner",
+            "duration": "7 days"
+          }
+        ],
+        "clinicalNotes": "Patient reports improvement in indigestion. Prescribed Arnica 30C for muscular soreness post marathon training. Nux Vomica 30C added for hyperacidity.",
+        "lifestyleAdvice": "Avoid caffeine after 6 PM. Drink warm water post meals.",
+        "followUpDate": "Oct 15, 2026"
+      }
+    ]
+  }
+}

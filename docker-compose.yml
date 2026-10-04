@@ -1,0 +1,183 @@
+version: "3.8"
+
+# ==============================================================================
+# Agastya Classical Homeopathy EHR - Local Clinic On-Premise Stack
+# Self-Hosted Supabase Architecture running on Admin PC Desktop
+# Supports local Wi-Fi mobile clients (Android/iOS web views)
+# ==============================================================================
+
+networks:
+  clinic-network:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local
+  storage_data:
+    driver: local
+
+services:
+  # ─── 1. PostgreSQL Database with GIN & JSONB Support ────────────────────────
+  db:
+    image: supabase/postgres:15.1.1.78
+    container_name: agastya-ehr-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agastya_local_secure_pwd_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-for-local-agastya-clinic-token-auth-2026}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./supabase/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    networks:
+      - clinic-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ─── 2. PostgREST: Instant REST API for Tables and Views ───────────────────
+  rest:
+    image: postgrest/postgrest:v12.0.1
+    container_name: agastya-ehr-rest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://postgres:${POSTGRES_PASSWORD:-agastya_local_secure_pwd_2026}@db:5432/${POSTGRES_DB:-postgres}
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-for-local-agastya-clinic-token-auth-2026}
+      PGRST_OPENAPI_SERVER_PROXY_URI: http://localhost:54321/rest/v1
+    networks:
+      - clinic-network
+
+  # ─── 3. GoTrue Auth: Local User Authentication & JWT Issuer ─────────────────
+  auth:
+    image: supabase/gotrue:v2.158.1
+    container_name: agastya-ehr-auth
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: http://localhost:54321/auth/v1
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-agastya_local_secure_pwd_2026}@db:5432/${POSTGRES_DB:-postgres}?sslmode=disable
+      GOTRUE_SITE_URL: http://localhost:5173
+      GOTRUE_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-for-local-agastya-clinic-token-auth-2026}
+      GOTRUE_JWT_EXP: 604800
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+    networks:
+      - clinic-network
+
+  # ─── 4. Storage Engine: Local Volume Image & Document Storage ──────────────
+  storage:
+    image: supabase/storage-api:v1.0.6
+    container_name: agastya-ehr-storage
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ANON_KEY: ${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy}
+      SERVICE_KEY: ${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy_service}
+      POSTGREST_URL: http://rest:3000
+      PGRST_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-for-local-agastya-clinic-token-auth-2026}
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-agastya_local_secure_pwd_2026}@db:5432/${POSTGRES_DB:-postgres}
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      REGION: local
+      GLOBAL_S3_BUCKET: clinic-files
+    volumes:
+      - storage_data:/var/lib/storage
+    networks:
+      - clinic-network
+
+  # ─── 5. Kong API Gateway: Single Port (54321) for Mobile & Local Clients ────
+  kong:
+    image: kong:2.8.1
+    container_name: agastya-ehr-gateway
+    restart: unless-stopped
+    ports:
+      - "54321:8000"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl
+    volumes:
+      - ./supabase/kong.yml:/var/lib/kong/kong.yml:ro
+    networks:
+      - clinic-network
+
+  # ─── 6. Supabase Studio: Doctor/Admin Local Management GUI ───────────────────
+  studio:
+    image: supabase/studio:20240429-5fe4126
+    container_name: agastya-ehr-studio
+    restart: unless-stopped
+    ports:
+      - "54323:3000"
+    environment:
+      STUDIO_PG_META_URL: http://db:5432
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agastya_local_secure_pwd_2026}
+      DEFAULT_ORGANIZATION_NAME: "Agastya Homoeopathy Clinic"
+      DEFAULT_PROJECT_NAME: "Local On-Prem EHR"
+      SUPABASE_URL: http://localhost:54321
+      SUPABASE_PUBLIC_URL: http://localhost:54321
+      SUPABASE_ANON_KEY: ${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy_service}
+    networks:
+      - clinic-network
+
+  # ─── 7. FastAPI Backend Engine: EHR, Voice Scribe, & Clinical Automation ───
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agastya-ehr-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      rest:
+        condition: service_started
+      kong:
+        condition: service_started
+    environment:
+      HOST: "0.0.0.0"
+      PORT: 8000
+      SUPABASE_REST_URL: http://kong:8000/rest/v1
+      SUPABASE_ANON_KEY: ${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy_service}
+      USE_MOCK_DATA: "false"
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-for-local-agastya-clinic-token-auth-2026}
+    volumes:
+      - ./backend/data:/app/data
+    networks:
+      - clinic-network
+
+  # ─── 8. React/Vite Frontend Application: Complete Clinic Interface ─────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agastya-ehr-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - clinic-network
+
