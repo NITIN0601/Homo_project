@@ -1,6 +1,12 @@
-# Agastya Classical Homeopathy EHR — Microservice Platform
+# [Homo_project](https://github.com/NITIN0601/Homo_project) — Microservice Healthcare Platform
 
-A multi-tenant, cloud-and-edge Electronic Health Records (EHR) and clinical management platform designed for classical homeopathy practices. Built on a decoupled microservice architecture to support independent horizontal and vertical scaling across frontend, backend, database, and API gateway services.
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Homo__project-blue?logo=github)](https://github.com/NITIN0601/Homo_project)
+[![Maintainer](https://img.shields.io/badge/Maintainer-NITIN0601-green?logo=github)](https://github.com/NITIN0601)
+[![Python Version](https://img.shields.io/badge/Python-3.14-blue?logo=python)](https://www.python.org/)
+[![Node Version](https://img.shields.io/badge/Node-%3E%3D20-green?logo=node.js)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-MIT-purple)]()
+
+A multi-tenant, cloud-and-edge Electronic Health Records (EHR) and clinical management platform designed for classical homeopathy practices. Maintained by [NITIN0601](https://github.com/NITIN0601) under the [Homo_project](https://github.com/NITIN0601/Homo_project) repository. Built on a decoupled microservice architecture to support independent horizontal and vertical scaling across frontend, backend, database, and API gateway services.
 
 ---
 
@@ -55,7 +61,7 @@ A multi-tenant, cloud-and-edge Electronic Health Records (EHR) and clinical mana
 ## 📂 Repository Structure
 
 ```
-Project_Suspense/
+Homo_project/
 ├── frontend/                  # React 19 + TypeScript + Vite Workspace
 │   ├── src/                   # Components, contexts, pages, hooks, services, types
 │   ├── public/                # Static assets, branding logos, banners
@@ -68,7 +74,7 @@ Project_Suspense/
 │   ├── data/                  # Dynamic tenant datastores (hospitals.json, doctors.json)
 │   ├── main.py                # FastAPI app bootstrap & middleware pipeline
 │   ├── Dockerfile             # Python 3.14-slim production container
-│   ├── requirements.txt       # Python dependencies
+│   ├── requirements.txt       # Pinned Python dependencies
 │   └── venv/                  # Python 3.14 virtual environment
 ├── db/                        # Database Schemas, Migrations & Seed Data
 │   ├── schema.sql             # Consolidated PostgreSQL / Supabase DDL
@@ -85,7 +91,7 @@ Project_Suspense/
 │   └── test_*.py              # Modular test suites (security, auth, booking, multi-tenant)
 ├── doc/                       # System Architecture, HLD/LLD diagrams, and technical reviews
 ├── scripts/                   # Developer utilities and holiday synchronization scripts
-├── .env                       # Local environment variables & secrets
+├── .env.example               # Clean client environment template (zero PII)
 ├── package.json               # Root npm workspace manifest delegating monorepo tasks
 └── README.md                  # Project documentation (this file)
 ```
@@ -108,15 +114,16 @@ Before launching locally, ensure you have the following installed:
 ### Step 1: Clone and Configure Environment
 
 ```bash
-# Clone the repository
-git clone <repo-url> Project_Suspense
-cd Project_Suspense
+# Clone the repository from GitHub
+git clone https://github.com/NITIN0601/Homo_project.git Homo_project
+cd Homo_project
 
-# Copy the example environment variables (if .env doesn't exist)
+# Copy the example environment variables
 cp .env.example .env
+cp backend/.env.example backend/.env
 ```
 
-Review `.env` to verify default settings. The system operates out-of-the-box in local development mode without requiring external API keys.
+The system operates out-of-the-box in local development mode without requiring external API keys.
 
 ---
 
@@ -136,7 +143,7 @@ Review `.env` to verify default settings. The system operates out-of-the-box in 
    python --version
    ```
 
-2. **Install Python Dependencies**:
+2. **Install Pinned Dependencies**:
    ```bash
    pip install --upgrade pip
    pip install -r requirements.txt
@@ -171,7 +178,7 @@ From the project root:
 
 ### Step 4: Running Both Services Concurrently
 
-From the project root, you can launch both the backend and frontend simultaneously with a single command:
+From the project root, launch both the backend and frontend simultaneously with a single command:
 
 ```bash
 npm run dev:all
@@ -251,7 +258,7 @@ The application natively supports multi-tenant operation. Hospital settings, bra
 2. **Query Parameter**: `http://localhost:5173/?tenant=agastya` or `http://localhost:5173/?tenant=apollo`
 3. **HTTP Header**: `X-Tenant-ID: agastya` (sent to `/api/v1/...` backend endpoints)
 
-Hospital configurations are decoupled in [`backend/data/hospitals.json`](file:///Users/nitin/Desktop/Project_Suspense/backend/data/hospitals.json) and doctor rosters in [`backend/data/doctors.json`](file:///Users/nitin/Desktop/Project_Suspense/backend/data/doctors.json).
+Hospital configurations are decoupled in `backend/data/hospitals.json` and doctor rosters in `backend/data/doctors.json`.
 
 ---
 
@@ -261,3 +268,10 @@ Hospital configurations are decoupled in [`backend/data/hospitals.json`](file://
 - **Role-Based Access Control (RBAC)**: Admin routes enforce JWT bearer verification and role checking.
 - **PHI Data Protection Guard**: The `mobile_patient_view` database view strips raw audio and local disk paths before mobile access.
 - **Audit Logging**: Every request is tagged with `X-Trace-ID` and `X-Session-ID` headers and logged to `audit_traces.jsonl`.
+
+---
+
+## 👥 Authors & Repository
+
+- **Project**: [Homo_project](https://github.com/NITIN0601/Homo_project)
+- **Maintainer**: [NITIN0601](https://github.com/NITIN0601)
