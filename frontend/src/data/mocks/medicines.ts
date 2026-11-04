@@ -1,0 +1,88 @@
+import type { Medicine } from "../../types";
+import { CLINIC } from "../../config";
+
+export const MOCK_MEDICINES: Medicine[] = [
+  {
+    id: "m1",
+    name: "Arnica Montana",
+    potency: "30C",
+    formulation: "Globules 4g",
+    priceINR: 160,
+    category: "acute",
+    prescribedToPatientIds: ["usr-001", "usr-002"],
+    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Muscle Soreness & Trauma · Take 4 globules BD after meals`,
+  },
+  {
+    id: "m2",
+    name: "Lycopodium Clavatum",
+    potency: "200C",
+    formulation: "Globules 4g",
+    priceINR: 210,
+    category: "constitutional",
+    prescribedToPatientIds: ["usr-002"],
+    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Chronic Bloating & Anxiety · Take 2 drops in water before bedtime`,
+  },
+  {
+    id: "m3",
+    name: "Nux Vomica",
+    potency: "30C",
+    formulation: "Drops 30ml",
+    priceINR: 140,
+    category: "acute",
+    prescribedToPatientIds: ["usr-001"],
+    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Dyspepsia & Acidity · Take 4 drops post dinner`,
+  },
+  {
+    id: "m4",
+    name: "Sulphur",
+    potency: "200C",
+    formulation: "Globules 4g",
+    priceINR: 195,
+    category: "constitutional",
+    prescribedToPatientIds: ["usr-001", "usr-002"],
+    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Constitutional Skin Rash · Single weekly dose on Sunday morning`,
+  },
+  {
+    id: "m5",
+    name: "Belladonna",
+    potency: "6C",
+    formulation: "Globules 4g",
+    priceINR: 120,
+    category: "acute",
+    prescribedToPatientIds: ["usr-002"],
+    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Acute Throbbing Headache · Take 4 globules hourly during acute attack`,
+  },
+  {
+    id: "m6",
+    name: "Natrum Muriaticum",
+    potency: "200C",
+    formulation: "Globules 4g",
+    priceINR: 220,
+    category: "constitutional",
+    prescribedToPatientIds: ["usr-002"],
+    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Sun Headache & Allergic Rhinitis · Take 4 globules daily`,
+  },
+  {
+    id: "m7",
+    name: "Calcarea Fluorica",
+    potency: "6X",
+    formulation: "Tissue Salt",
+    priceINR: 185,
+    category: "tissue-salt",
+    prescribedToPatientIds: ["usr-001"],
+    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Joint Flexibility · Take 4 tablets thrice daily`,
+  },
+  {
+    id: "m8",
+    name: "Ferrum Phosphoricum",
+    potency: "6X",
+    formulation: "Tissue Salt",
+    priceINR: 175,
+    category: "tissue-salt",
+    prescribedToPatientIds: ["usr-001", "usr-002"],
+    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Immunity Support & First Stage Inflammation · Take 4 tablets BD`,
+  },
+];
+
+export const MEDICINE_CATALOGUE = MOCK_MEDICINES;
+
