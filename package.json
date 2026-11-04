@@ -1,19 +1,26 @@
 {
   "name": "project-suspense",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
-    "dev": "vite",
-    "dev:user": "vite --port 5173",
-    "dev:admin": "vite --port 5174",
-    "dev:both": "vite --port 5173 & vite --port 5174",
+    "dev": "npm --prefix frontend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:user": "npm --prefix frontend run dev:user",
+    "dev:admin": "npm --prefix frontend run dev:admin",
+    "dev:both": "npm --prefix frontend run dev:both",
     "dev:backend": "cd backend && (test -d venv && ./venv/bin/uvicorn main:app --reload --port 8000 || uvicorn main:app --reload --port 8000)",
-    "dev:all": "npm run dev:backend & npm run dev:both",
-    "build": "tsc -b && vite build",
-    "lint": "oxlint",
+    "dev:all": "npm run dev:backend & npm run dev:frontend",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
     "test": "./test/run_tests.sh",
-    "preview": "vite preview"
+    "test:backend": "./test/run_tests.sh",
+    "test:frontend": "npm --prefix frontend run test",
+    "test:all": "npm run test:backend && npm run test:frontend",
+    "preview": "npm --prefix frontend run preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
