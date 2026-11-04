@@ -58,6 +58,39 @@ A multi-tenant, cloud-and-edge Electronic Health Records (EHR) and clinical mana
 
 ---
 
+## ✨ Features Overview
+
+The platform provides two dedicated, role-tailored web interfaces backed by modular microservices:
+
+### 🏥 1. Patient & Customer Portal
+- **Atomic Online Consultation Booking**: Interactive calendar picker with real-time slot availability, conflict detection, and calendar invite generation.
+- **Personal Health Record (PHR) / My Summary**: Secure access to medical consultations, clinical case summaries, diagnosis timeline, and symptom progression records.
+- **Prescription & Remedy Viewer**: Clear display of prescribed homeopathic remedies, potencies (30C, 200C, 1M, 6X), dosage forms (globules, drops, tissue salts), frequency, and dietary guidelines.
+- **Online Medicine Dispensary & Cart**: Seamless ordering of prescribed remedies with formulation information, real-time stock status, price calculations (INR), and delivery checkout.
+- **Billing & Invoice Management**: Transparent consultation fee breakdown, payment simulation (UPI, Cards, NetBanking), transaction reference (UTR) tracking, and printable tax receipts.
+- **Follow-Up & Feedback Management**: Post-consultation recovery status reporting, automated follow-up due date alerts, and patient satisfaction feedback.
+- **AI Health Assistant (AgastyaBot)**: Integrated chat widget providing instant answers to patient inquiries, clinic hours, booking assistance, and remedy precautions.
+- **Mobile Worker Mode**: Lightweight, high-performance PWA view optimized for field health workers and low-bandwidth connections.
+
+### 🩺 2. Doctor & Clinical Administration Console
+- **Multi-Tenant Medical Center Switching**: Instant toggle between hospital tenants (e.g., *Agastya Classical Homeopathy* vs *Apollo TeleHealth*) with dynamic theme and roster adaptation.
+- **AI Voice Repertorization & Clinical Scribe**: Real-time voice recording / audio upload with automated transcription, symptom extraction, miasmatic predominance analysis (Psora, Sycosis, Syphilis, Tubercular), and structured case record generation via Gemini / TypeSafe Jev.
+- **Comprehensive Patient Records Browser**: Full clinical history search with JSONB repertorization queries, thermal states, cravings/aversions, modalities, and mental/emotional symptoms.
+- **Prescription Scanner & Media Capture**: Mobile camera scanner and image upload pipeline with automatic SHA-256 deduplication and anti-spam hashing.
+- **Appointments & Leave Management**: Daily/weekly calendar scheduling, appointment status updates (confirmed, completed, cancelled), and doctor leave/out-of-office blocking with reason templates.
+- **Dispensary & Inventory Control**: Real-time stock tracking, automated reorder thresholds, low-inventory alerts, one-click restock, batch order consolidation, and purchase orders.
+- **Logistics & Dispatch Operations**: Order fulfillment dashboard, courier partner tracking (BlueDart, etc.), tracking ID assignment, and delivery lifecycle management.
+- **Billing Ledger & UTR Reconciliation**: Financial invoice ledger, admin UTR payment verification modal, manual status overrides, and Excel/CSV export capabilities.
+- **White-Label Customization Panel**: Granular admin toggles for portal features (e-Commerce, billing, PHR visibility, chatbot, profile editing) with passcode protection and audit logging.
+
+### 🔒 3. Enterprise Security & Concurrency
+- **Atomic Double-Booking Prevention**: Database-level unique constraint on `(start_time, doctor_title)` preventing race conditions across 100+ concurrent users.
+- **HIPAA PHI Privacy Guard**: Sanitized database views (`mobile_patient_view`) preventing internal server file paths from reaching client mobile applications.
+- **Forensic Audit Pipeline**: Automated `X-Trace-ID` and `X-Session-ID` injection on every request, recorded in an append-only audit trace ledger.
+- **Zero-Config Local Development**: Built-in JSON fallback engine enabling immediate offline testing without installing PostgreSQL.
+
+---
+
 ## 📂 Repository Structure
 
 ```
