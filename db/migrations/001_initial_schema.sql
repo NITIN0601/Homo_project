@@ -1,14 +1,9 @@
--- ==============================================================================
--- Agastya Classical Homeopathy Clinic - Self-Hosted Supabase Complete Schema
--- Configured for On-Premise Admin PC & Local Wi-Fi Mobile Clients
--- ==============================================================================
+-- Migration: 001_initial_schema.sql
+-- Description: Core tables, GIN indexes, RLS security policies, and mobile_patient_view for Agastya Clinic EHR
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- ==============================================================================
--- 1. Anti-Spam Control: Image & Camera Upload Hashes Table
--- ==============================================================================
 CREATE TABLE IF NOT EXISTS public.uploaded_file_hashes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     file_hash TEXT NOT NULL UNIQUE,
@@ -21,9 +16,6 @@ CREATE TABLE IF NOT EXISTS public.uploaded_file_hashes (
 
 CREATE INDEX IF NOT EXISTS idx_uploaded_file_hashes_hash ON public.uploaded_file_hashes (file_hash);
 
--- ==============================================================================
--- 2. Core Clinical Table: patient_records
--- ==============================================================================
 CREATE TABLE IF NOT EXISTS public.patient_records (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     patient_name TEXT NOT NULL,
@@ -35,7 +27,6 @@ CREATE TABLE IF NOT EXISTS public.patient_records (
     updated_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL
 );
 
--- GIN Index for fast JSONB querying & repertory lookup
 CREATE INDEX IF NOT EXISTS idx_patient_records_homeopathic_analysis_gin 
 ON public.patient_records USING gin (homeopathic_analysis);
 
@@ -45,10 +36,6 @@ ON public.patient_records (patient_name);
 CREATE INDEX IF NOT EXISTS idx_patient_records_visiting_date 
 ON public.patient_records (visiting_date DESC);
 
--- ==============================================================================
--- 3. Mobile Data Restriction View: mobile_patient_view
--- Drops raw local audio & image disk paths to enforce Wi-Fi mobile security
--- ==============================================================================
 CREATE OR REPLACE VIEW public.mobile_patient_view AS
 SELECT
     id,
@@ -64,9 +51,6 @@ SELECT
     created_at
 FROM public.patient_records;
 
--- ==============================================================================
--- 4. Clinic Appointments Table
--- ==============================================================================
 CREATE TABLE IF NOT EXISTS public.appointments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     patient_name TEXT NOT NULL,
@@ -82,9 +66,68 @@ CREATE TABLE IF NOT EXISTS public.appointments (
 
 CREATE INDEX IF NOT EXISTS idx_appointments_start_time ON public.appointments (start_time);
 
--- ==============================================================================
--- 5. Inventory & Medicine Catalogue Table
--- ==============================================================================
+CREATE UNIQUE INDEX IF NOT EXISTS idx_appointments_slot_unique 
+ON public.appointments (start_time, doctor_title) 
+WHERE status != 'cancelled';
+
+CREATE TABLE IF NOT EXISTS public.doctor_blocked_dates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    date DATE NOT NULL UNIQUE,
+    reason TEXT DEFAULT 'Doctor Leave / Clinic Closed',
+    blocked_by TEXT DEFAULT 'admin',
+    created_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_blocked_dates_date ON public.doctor_blocked_dates (date);
+
+CREATE TABLE IF NOT EXISTS public.consultation_invoices (
+    id TEXT PRIMARY KEY,
+    invoice_number TEXT UNIQUE NOT NULL,
+    patient_id TEXT NOT NULL,
+    patient_name TEXT NOT NULL,
+    patient_email TEXT,
+    patient_phone TEXT,
+    doctor_title TEXT DEFAULT 'Dr. Bramarambha K, MD (Homoeopathy)',
+    appointment_id UUID REFERENCES public.appointments(id) ON DELETE SET NULL,
+    amount_inr NUMERIC(10,2) NOT NULL,
+    status TEXT NOT NULL DEFAULT 'unpaid',
+    payment_method TEXT,
+    utr_number TEXT,
+    notes TEXT,
+    paid_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_invoices_patient ON public.consultation_invoices (patient_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_status ON public.consultation_invoices (status);
+
+CREATE TABLE IF NOT EXISTS public.clinic_users (
+    id TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    phone TEXT,
+    password_hash TEXT NOT NULL,
+    password_salt TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'patient',
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_clinic_users_email ON public.clinic_users (email);
+
+CREATE TABLE IF NOT EXISTS public.otp_verifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email TEXT NOT NULL,
+    otp_code TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    verified BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_otp_lookup ON public.otp_verifications (email, otp_code, expires_at);
+
 CREATE TABLE IF NOT EXISTS public.inventory (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -102,9 +145,6 @@ CREATE TABLE IF NOT EXISTS public.inventory (
     created_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL
 );
 
--- ==============================================================================
--- 6. Orders & Shipments Table
--- ==============================================================================
 CREATE TABLE IF NOT EXISTS public.orders (
     id TEXT PRIMARY KEY,
     customer_name TEXT NOT NULL,
@@ -123,45 +163,39 @@ CREATE TABLE IF NOT EXISTS public.orders (
     created_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL
 );
 
--- ==============================================================================
--- 7. Seed Initial Inventory from Codebase Defaults
--- ==============================================================================
-INSERT INTO public.inventory (id, name, potency, formulation, price_inr, category, stock_qty, reorder_qty, supplier, batch_number)
-VALUES
-    ('m1', 'Arnica Montana', '30C', 'Globules 4g', 160.00, 'acute', 45, 10, 'SBL Pvt Ltd', 'BTH-M1-2026'),
-    ('m2', 'Lycopodium Clavatum', '200C', 'Globules 4g', 210.00, 'constitutional', 12, 10, 'Boiron India', 'BTH-M2-2026'),
-    ('m3', 'Nux Vomica', '30C', 'Drops 30ml', 140.00, 'acute', 88, 10, 'Reckeweg India', 'BTH-M3-2026'),
-    ('m4', 'Sulphur', '200C', 'Globules 4g', 195.00, 'constitutional', 5, 10, 'SBL Pvt Ltd', 'BTH-M4-2026'),
-    ('m5', 'Belladonna', '6C', 'Globules 4g', 120.00, 'acute', 30, 10, 'Schwabe India', 'BTH-M5-2026'),
-    ('m6', 'Natrum Muriaticum', '200C', 'Globules 4g', 220.00, 'constitutional', 67, 10, 'SBL Pvt Ltd', 'BTH-M6-2026'),
-    ('m7', 'Calcarea Fluorica', '6X', 'Tissue Salt', 185.00, 'tissue-salt', 9, 10, 'Reckeweg India', 'BTH-M7-2026'),
-    ('m8', 'Silicea', '12X', 'Tissue Salt', 175.00, 'tissue-salt', 22, 10, 'Schwabe India', 'BTH-M8-2026')
-ON CONFLICT (id) DO NOTHING;
-
--- ==============================================================================
--- 8. Row-Level Security (RLS) Policies
--- ==============================================================================
 ALTER TABLE public.patient_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.uploaded_file_hashes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.appointments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.doctor_blocked_dates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.consultation_invoices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.clinic_users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.otp_verifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inventory ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
--- Allow insert and read on standard clinic tables
 CREATE POLICY "Allow public select on inventory" ON public.inventory FOR SELECT USING (true);
 CREATE POLICY "Allow insert on appointments" ON public.appointments FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow select on appointments" ON public.appointments FOR SELECT USING (true);
+CREATE POLICY "Allow update on appointments" ON public.appointments FOR UPDATE USING (true);
+CREATE POLICY "Allow select on blocked dates" ON public.doctor_blocked_dates FOR SELECT USING (true);
+CREATE POLICY "Allow select on invoices" ON public.consultation_invoices FOR SELECT USING (true);
+CREATE POLICY "Allow insert on invoices" ON public.consultation_invoices FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow update on invoices" ON public.consultation_invoices FOR UPDATE USING (true);
 CREATE POLICY "Allow insert on orders" ON public.orders FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow select on orders" ON public.orders FOR SELECT USING (true);
 CREATE POLICY "Allow hash check and insert for all" ON public.uploaded_file_hashes FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow insert for all clinic users" ON public.patient_records FOR INSERT WITH CHECK (true);
 CREATE POLICY "Admins view full patient records" ON public.patient_records FOR SELECT USING (true);
 
--- Permissions
 GRANT SELECT ON public.inventory TO anon, authenticated;
-GRANT SELECT, INSERT ON public.appointments TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.appointments TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.doctor_blocked_dates TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.consultation_invoices TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.clinic_users TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.otp_verifications TO anon, authenticated;
 GRANT SELECT, INSERT ON public.orders TO anon, authenticated;
 GRANT SELECT, INSERT ON public.uploaded_file_hashes TO anon, authenticated;
 GRANT INSERT ON public.patient_records TO anon, authenticated;
 GRANT SELECT ON public.mobile_patient_view TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+
