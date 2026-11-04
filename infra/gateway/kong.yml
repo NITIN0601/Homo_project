@@ -54,3 +54,4 @@ plugins:
         - Range
       credentials: true
       max_age: 3600
+

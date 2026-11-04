@@ -30,7 +30,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-for-local-agastya-clinic-token-auth-2026}
     volumes:
       - db_data:/var/lib/postgresql/data
-      - ./supabase/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+      - ../db/schema.sql:/docker-entrypoint-initdb.d/00-schema.sql:ro
+      - ../db/seeds/001_seed_initial_data.sql:/docker-entrypoint-initdb.d/01-seed.sql:ro
     networks:
       - clinic-network
     healthcheck:
@@ -114,7 +115,7 @@ services:
       KONG_DNS_ORDER: LAST,A,CNAME
       KONG_PLUGINS: request-transformer,cors,key-auth,acl
     volumes:
-      - ./supabase/kong.yml:/var/lib/kong/kong.yml:ro
+      - ./gateway/kong.yml:/var/lib/kong/kong.yml:ro
     networks:
       - clinic-network
 
@@ -140,7 +141,7 @@ services:
   # ─── 7. FastAPI Backend Engine: EHR, Voice Scribe, & Clinical Automation ───
   backend:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile
     container_name: agastya-ehr-backend
     restart: unless-stopped
@@ -162,15 +163,15 @@ services:
       USE_MOCK_DATA: "false"
       JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-for-local-agastya-clinic-token-auth-2026}
     volumes:
-      - ./backend/data:/app/data
+      - ../backend/data:/app/data
     networks:
       - clinic-network
 
   # ─── 8. React/Vite Frontend Application: Complete Clinic Interface ─────────
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: infra/Dockerfile
     container_name: agastya-ehr-frontend
     restart: unless-stopped
     ports:

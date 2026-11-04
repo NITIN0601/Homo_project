@@ -9,12 +9,13 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies with npm ci
+# Install dependencies using root lockfile and workspace config
 COPY package.json package-lock.json ./
+COPY frontend/package.json ./frontend/
 RUN npm ci
 
-# Copy source tree and compile
-COPY . .
+# Copy source tree and compile production bundle
+COPY frontend ./frontend
 RUN npm run build
 
 # ─── Stage 2: Production Nginx Server ─────────────────────────────────────────
@@ -24,10 +25,10 @@ FROM nginx:alpine
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copy built distribution from builder
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/frontend/dist /usr/share/nginx/html
 
 # Copy custom Nginx configuration with reverse proxy and SPA routing
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY infra/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 5173
 
