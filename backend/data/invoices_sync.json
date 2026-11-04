@@ -1,0 +1,148 @@
+[
+  {
+    "id": "inv-e2e-demo-rec",
+    "patientId": "usr-001",
+    "patientName": "John Doe",
+    "patientEmail": "john@agastyahomoeo.com",
+    "amountINR": 750,
+    "status": "paid",
+    "consultationType": "In-Person Clinic Visit",
+    "issuedAt": "Nov 03, 2026 05:00 PM",
+    "notes": "Follow-up consultation fee",
+    "transactionRef": "UTR-2026-9988776655",
+    "paidAt": "Nov 03, 2026 05:15 PM"
+  },
+  {
+    "id": "inv-e2e-1",
+    "patientId": "usr-001",
+    "patientName": "John Doe",
+    "patientEmail": "john@agastyahomoeo.com",
+    "amountINR": 750,
+    "status": "paid",
+    "consultationType": "In-Person Clinic Visit",
+    "issuedAt": "Nov 03, 2026 05:00 PM",
+    "notes": "Follow-up consultation fee",
+    "transactionRef": "UTR-2026-9988776655",
+    "paidAt": "Nov 03, 2026 05:15 PM"
+  },
+  {
+    "id": "inv-load-7",
+    "invoiceNumber": "INV-2026-L007",
+    "patientName": "Patient L7",
+    "patientPhone": "+91 98450 00000",
+    "amount": 750,
+    "date": "2027-02-02",
+    "status": "unpaid"
+  },
+  {
+    "id": "inv-load-5",
+    "invoiceNumber": "INV-2026-L005",
+    "patientName": "Patient L5",
+    "patientPhone": "+91 98450 00000",
+    "amount": 750,
+    "date": "2027-02-02",
+    "status": "unpaid"
+  },
+  {
+    "id": "inv-load-11",
+    "invoiceNumber": "INV-2026-L011",
+    "patientName": "Patient L11",
+    "patientPhone": "+91 98450 00000",
+    "amount": 750,
+    "date": "2027-02-02",
+    "status": "unpaid"
+  },
+  {
+    "id": "inv-load-15",
+    "invoiceNumber": "INV-2026-L015",
+    "patientName": "Patient L15",
+    "patientPhone": "+91 98450 00000",
+    "amount": 750,
+    "date": "2027-02-02",
+    "status": "unpaid"
+  },
+  {
+    "id": "inv-load-3",
+    "invoiceNumber": "INV-2026-L003",
+    "patientName": "Patient L3",
+    "patientPhone": "+91 98450 00000",
+    "amount": 750,
+    "date": "2027-02-02",
+    "status": "unpaid"
+  },
+  {
+    "id": "inv-load-17",
+    "invoiceNumber": "INV-2026-L017",
+    "patientName": "Patient L17",
+    "patientPhone": "+91 98450 00000",
+    "amount": 750,
+    "date": "2027-02-02",
+    "status": "unpaid"
+  },
+  {
+    "id": "inv-load-9",
+    "invoiceNumber": "INV-2026-L009",
+    "patientName": "Patient L9",
+    "patientPhone": "+91 98450 00000",
+    "amount": 750,
+    "date": "2027-02-02",
+    "status": "unpaid"
+  },
+  {
+    "id": "inv-load-19",
+    "invoiceNumber": "INV-2026-L019",
+    "patientName": "Patient L19",
+    "patientPhone": "+91 98450 00000",
+    "amount": 750,
+    "date": "2027-02-02",
+    "status": "unpaid"
+  },
+  {
+    "id": "inv-load-13",
+    "invoiceNumber": "INV-2026-L013",
+    "patientName": "Patient L13",
+    "patientPhone": "+91 98450 00000",
+    "amount": 750,
+    "date": "2027-02-02",
+    "status": "unpaid"
+  },
+  {
+    "id": "inv-load-1",
+    "invoiceNumber": "INV-2026-L001",
+    "patientName": "Patient L1",
+    "patientPhone": "+91 98450 00000",
+    "amount": 750,
+    "date": "2027-02-02",
+    "status": "unpaid"
+  },
+  {
+    "id": "INV-2026-101",
+    "patientId": "usr-001",
+    "patientName": "John Doe",
+    "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+    "visitDate": "2026-10-02",
+    "amountINR": 750,
+    "consultationType": "In-Person Clinic Visit",
+    "notes": "Chronic constitutional assessment & acute dyspepsia remedy prescription",
+    "status": "processing",
+    "issuedAt": "2026-10-02 10:30 AM",
+    "paymentMethod": "upi",
+    "transactionRef": "UPI/20261103/99221144",
+    "patientUpiId": "john.doe@okaxis"
+  },
+  {
+    "id": "INV-2026-102",
+    "patientId": "usr-002",
+    "patientName": "Priya Sharma",
+    "doctorName": "Dr. Bramarambha K, MD (Homoeopathy)",
+    "visitDate": "2026-09-28",
+    "amountINR": 750,
+    "consultationType": "Online Tele-Consultation",
+    "notes": "Migraine follow-up review & totality potency adjustment",
+    "status": "paid",
+    "issuedAt": "2026-09-28 11:45 AM",
+    "paidAt": "2026-09-28 12:10 PM",
+    "paymentMethod": "upi",
+    "transactionRef": "UPI-984210982-IN"
+  }
+]

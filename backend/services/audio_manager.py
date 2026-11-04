@@ -21,6 +21,8 @@ from typing import Any
 import aiofiles
 from fastapi import UploadFile
 
+from core.config import settings
+
 # Local immutable directories
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 RECORDINGS_DIR = DATA_DIR / "recordings"
@@ -39,9 +41,9 @@ WATERMARK_SECRET_KEY = os.getenv(
 def generate_clinical_watermark(
     interaction_id: str,
     file_sha256: str,
-    doctor_name: str = "Dr. Bramarambha K, MD (Homeopathic Materia Medica), SCPH",
-    doctor_id: str = "DOC-BK-001",
-    clinic_name: str = "Agastya Homoeopathy Clinic",
+    doctor_name: str | None = None,
+    doctor_id: str = "DOC-001",
+    clinic_name: str | None = None,
     patient_id: str | None = None
 ) -> dict[str, Any]:
     """
@@ -53,11 +55,13 @@ def generate_clinical_watermark(
       • Legal misuse warning (Unauthorized duplication punishable under ABDM / DISHA / HIPAA)
       • Tamper-proof timestamp & audio checksum
     """
+    doc_name = doctor_name or settings.DOCTOR_NAME
+    c_name = clinic_name or settings.CLINIC_NAME
     timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     pseudonymized_patient = hashlib.sha256((patient_id or "ANONYMOUS").encode()).hexdigest()[:16]
 
     payload_string = (
-        f"{interaction_id}|{file_sha256}|{doctor_id}|{clinic_name}|{timestamp}|{pseudonymized_patient}"
+        f"{interaction_id}|{file_sha256}|{doctor_id}|{c_name}|{timestamp}|{pseudonymized_patient}"
     )
     signature = hmac.new(WATERMARK_SECRET_KEY, payload_string.encode("utf-8"), hashlib.sha256).hexdigest()
 
@@ -66,13 +70,13 @@ def generate_clinical_watermark(
         "watermark_version": "v2.1-clinical",
         "compliance_standard": "ABDM-M3 / DISHA / HIPAA Security Rule §164.312",
         "legal_warning": (
-            "CONFIDENTIAL HEALTH DATA: Property of Agastya Homoeopathy Clinic & Registered Patient. "
+            f"CONFIDENTIAL HEALTH DATA: Property of {c_name} & Registered Patient. "
             "Unauthorized extraction, cloning, re-identification, or distribution is strictly prohibited "
             "under the Digital Personal Data Protection Act (DPDPA 2023) and ABDM health data standards."
         ),
         "clinic_provenance": {
-            "clinic_name": clinic_name,
-            "attending_physician": doctor_name,
+            "clinic_name": c_name,
+            "attending_physician": doc_name,
             "physician_license_id": doctor_id,
         },
         "audio_integrity": {

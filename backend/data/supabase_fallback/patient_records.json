@@ -1,5 +1,957 @@
 [
   {
+    "id": "b42369a0-3a36-4870-9ab4-0756a028a30e",
+    "patient_name": "Test Patient 8b1f12",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T21:24:39.418028+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "ab75694d-a8c2-4a09-bbe1-12bfd52edf4b",
+    "patient_name": "Test Patient 3cb201",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T21:23:36.778802+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "6b2f0f03-ef9a-41fa-b12f-587e99890233",
+    "patient_name": "Test Patient fb9fe6",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T21:16:31.039262+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "3dfcc5b4-3ca6-4d32-949b-3ce85b3a19d5",
+    "patient_name": "Test Patient 0b8af9",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T21:13:59.057628+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "24bc04e2-c3f9-4efb-8df5-c55bf0b4e160",
+    "patient_name": "Test Patient b16699",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T21:08:14.870394+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "a3958ee1-9759-4cc3-8aa4-4fb4090341cd",
+    "patient_name": "Test Patient 49045a",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T21:04:03.615979+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "1abaf045-a0d8-4a44-80d5-1ebd4f0bc75f",
+    "patient_name": "Test Patient fa6f06",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T21:03:35.705728+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "aeaeb53e-6241-4ac9-baa1-4c5970949413",
+    "patient_name": "Test Patient 88bf2a",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T21:02:53.034615+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "4f17d616-2c2b-4a94-be5b-620ce005c176",
+    "patient_name": "Test Patient ee8937",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T20:40:43.968454+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "49d5f833-bfb2-4deb-ab75-49bc2c555161",
+    "patient_name": "Test Patient 17b33d",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T20:13:53.537303+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "d67491a9-8c24-4821-9542-3e13b9078afe",
+    "patient_name": "Test Patient b3ad1c",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T20:12:08.983412+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "5914e92c-8d48-41e5-bfd2-ebec9c9a33b9",
+    "patient_name": "Test Patient 6261d2",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T20:11:21.747186+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "c242c9af-6e30-4c2b-a548-6fbe62775256",
+    "patient_name": "Test Patient 0ff83c",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T20:01:39.553298+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "12375dcb-403a-47e5-b64b-b396a4d4f51c",
+    "patient_name": "Test Patient 5bf38f",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T19:51:48.266783+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "15c22a0a-1eae-4682-883e-ce5ecb850d9f",
+    "patient_name": "Test Patient d1f4c3",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T19:50:25.602992+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "1cd3af86-ac8e-41aa-ac25-70cc90efdd25",
+    "patient_name": "Test Patient 557ae4",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T19:49:22.644264+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "02859070-5cd3-4efa-a7c2-f9c0819422a4",
+    "patient_name": "Test Patient 9ac8fa",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T19:44:45.851180+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "61fe9ad5-5c10-474b-9e8d-ded849d99340",
+    "patient_name": "Test Patient 254fed",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T19:41:17.335076+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "110b9ee6-bb3f-49ef-b3ba-8fa285481c83",
+    "patient_name": "Test Patient 4b2177",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T19:17:16.800753+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "94c3d718-b6b8-4332-98c7-534b55b97a41",
+    "patient_name": "Test Patient 0bcdd5",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T19:14:32.323508+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "8fed376d-a215-4289-9415-4e4ef751dbc3",
+    "patient_name": "Test Patient cde8c0",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T18:32:27.492631+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "75384262-b607-4908-9335-12e553014fe9",
+    "patient_name": "Test Patient 43119b",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T18:04:41.470412+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "78a2041e-e009-4519-b7be-629b0aab8c9e",
+    "patient_name": "Test Patient 1d6ae3",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T16:26:49.185313+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "1d273d87-d4c3-4505-85b3-c4cd1b7d1520",
+    "patient_name": "Test Patient 7fe00a",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T16:15:09.187736+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "e895ed63-ccbe-4259-aa95-91318121d72a",
+    "patient_name": "Test Patient cd74d0",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T02:53:10.214863+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "3202bcc0-a719-4780-87e3-9bccc196d460",
+    "patient_name": "Test Patient e304eb",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T02:42:51.997049+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "de205e5b-400f-4ef1-a6b8-16f6f969c1d6",
+    "patient_name": "Test Patient 305348",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T02:32:37.172062+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "86fa3824-4374-4e6e-8762-0caeec2a0a72",
+    "patient_name": "Test Patient dfaaf3",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T02:25:26.342099+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "a8a87088-68ca-4a73-b53c-b3fa10ec9d88",
+    "patient_name": "Test Patient 04a98c",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T01:29:06.647211+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "e549017b-8e87-4530-89e5-cc904fdff6d7",
+    "patient_name": "Test Patient cf69f6",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T01:21:22.616534+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "93ccf49c-f163-4b0d-ab64-d3717ca05fd9",
+    "patient_name": "Test Patient 2a396d",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T01:07:13.812080+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "97deedb5-4af8-4c98-8e03-481d7e8ff59b",
+    "patient_name": "Test Patient 83af6b",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T00:55:29.914919+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "da9996df-770a-4d1f-add0-129a22b785d6",
+    "patient_name": "Test Patient f97eb7",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T00:53:20.295302+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "461ffdd6-d22c-4f52-b5e8-ff33c7cd02c5",
+    "patient_name": "Test Patient ae4664",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T00:45:51.734989+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "ea6e6fc4-e5fb-42e6-89a1-e1715f239c4e",
+    "patient_name": "Test Patient 8e642b",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T00:37:26.206002+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "5569df0a-eac1-47eb-b87a-371d8e6e88d9",
+    "patient_name": "Test Patient 5cded7",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T00:37:05.130996+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "c654d599-7b70-4097-b824-916a54093ab6",
+    "patient_name": "Test Patient 6a5229",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T00:25:26.096834+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "5b37eab0-b0bb-4264-b396-d60fbb4b5caf",
+    "patient_name": "Test Patient 4d1592",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-04T00:12:55.441547+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "e5a13819-43de-4fa8-8175-ce5b39bf50c2",
+    "patient_name": "Test Patient 65ca3c",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T23:58:12.220218+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "89aea3a5-20d7-4b45-8b12-08027b0b89c6",
+    "patient_name": "Test Patient 80a317",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T23:57:53.611556+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "9eb00cb9-1d28-4e40-bd0e-070e6c7f49a4",
+    "patient_name": "Test Patient c6c994",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T23:40:48.467416+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "467a5a64-895d-43d8-8ce8-9a853120bed8",
+    "patient_name": "Test Patient e61207",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T23:32:07.172928+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "3055f3fa-a777-4ecf-ad59-4f44b906db79",
+    "patient_name": "Test Patient b4fceb",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T23:31:05.676120+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "92f6e825-8f8b-4f8c-b2b6-774165fa56ac",
+    "patient_name": "Test Patient a9ee08",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T23:26:33.732403+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "bb05e3b2-c6cf-451a-983f-93442178c8a7",
+    "patient_name": "Test Patient e4321e",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T23:26:21.062367+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "21e78414-e8dc-4760-92b3-b89e92509320",
+    "patient_name": "Test Patient 2f7f23",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T23:24:16.297950+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "9a2aad17-b72e-496d-b92b-f75c1dbf51ed",
+    "patient_name": "Test Patient 7be6f1",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T23:03:19.752218+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "6435a667-2a11-4312-99d3-d34ab4b71d9e",
+    "patient_name": "Test Patient 3d4326",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T23:00:42.200196+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "5f42571f-396b-4a41-a47a-bb2a68106ee0",
+    "patient_name": "Test Patient 944698",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T22:50:39.781316+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "2eb840a0-550c-4607-8802-d81083871aaf",
+    "patient_name": "Test Patient b93bac",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T22:44:18.440704+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "843ab52f-daa4-4d31-83fa-8ce80908e8a4",
+    "patient_name": "Test Patient c914b7",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T22:38:58.622102+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "162d73f3-b6b0-41a5-bedd-ba5a5939b97d",
+    "patient_name": "Test Patient fa0374",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T22:37:25.438831+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "2ea23867-16f3-4989-b851-1314c2dcb80e",
+    "patient_name": "Test Patient c0acc7",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T22:20:16.585740+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "8c4c54f3-76e4-47e9-82d8-5f15e6359d63",
+    "patient_name": "Test Patient f8f464",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T21:57:01.655079+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "55585acb-32d6-4082-8fe5-10a61b21df4d",
+    "patient_name": "Test Patient 800e2c",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T21:45:46.176506+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "7dc98db5-94d1-4fa2-b14b-8e847d407238",
+    "patient_name": "Test Patient f9f752",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T21:44:51.378238+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "81334f53-4c30-47c1-ac3a-d310663beae7",
+    "patient_name": "Test Patient 016fa8",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T21:37:21.384895+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "e8fafd2d-26c1-47c3-b2a4-c14eaa8e1139",
+    "patient_name": "Test Patient b92618",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T21:29:00.718899+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "0a2caf6d-93d3-4513-a794-4c2bf452efc6",
+    "patient_name": "Test Patient 9b02f3",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T21:22:18.364539+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "b1fa4227-1a8d-4b4b-91bb-268ffa5b9c34",
+    "patient_name": "Test Patient 725a44",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T21:21:54.055956+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "b2a7dbbd-4616-4f18-a637-8e42fe9d448d",
+    "patient_name": "Test Patient e75d42",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T21:13:52.731117+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "d328595c-115b-489b-89d7-da3d73aa5bbe",
+    "patient_name": "Test Patient e355a2",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T21:07:05.895873+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "83d7d236-7b89-41f3-9026-73d10b9e4b3b",
+    "patient_name": "Test Patient 5dc300",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T20:59:24.179944+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "66c03822-f11d-4400-b0a1-3ede7f1d089b",
+    "patient_name": "Test Patient baeefa",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T20:58:00.825849+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "e6d07fcb-5b22-4a6a-a385-153a69dc3631",
+    "patient_name": "Test Patient 2379fb",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T20:57:25.040060+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "9b445d23-79e5-4d4e-9311-0e00554b8e47",
+    "patient_name": "Test Patient 8db481",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T20:53:25.428528+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "b83f3a3a-2b88-4c91-b7b8-37fd001de082",
+    "patient_name": "Test Patient d394f5",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T20:52:58.325525+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
+    "id": "87b4c92b-f230-4b85-9fb7-a732cc669364",
+    "patient_name": "Test Patient b7069e",
+    "visiting_date": "2026-10-02",
+    "local_audio_path": "/private/var/audio/secret_consultation.webm",
+    "prescription_image_path": "/private/var/images/prescription_secret.jpg",
+    "homeopathic_analysis": {
+      "diagnosis": "Allergic Rhinitis",
+      "remedy": "Allium Cepa 30C"
+    },
+    "created_at": "2026-11-03T20:47:20.090299+00:00",
+    "_synced": false,
+    "synced_at": null
+  },
+  {
     "id": "70ad450b-25ce-4693-bd76-7182f512d647",
     "patient_name": "Test Patient dc45a8",
     "visiting_date": "2026-10-02",

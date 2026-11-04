@@ -28,13 +28,16 @@ class Metadata(BaseModel):
 
 
 class DoctorDetails(BaseModel):
-    doctor_id: str = Field(default="DOC-BK-001")
-    name: str = Field(default="Dr. Bramarambha K, MD (Homeopathic Materia Medica), SCPH")
-    clinic_name: str = Field(default="Agastya Homoeopathy Clinic")
+    doctor_id: str = Field(default="DOC-001")
+    name: str = Field(default="")
+    clinic_name: str = Field(default="")
 
 
 class PatientDetails(BaseModel):
     name: str = Field(default="")
+    first_name: str | None = Field(default=None)
+    middle_name: str | None = Field(default=None)
+    last_name: str | None = Field(default=None)
     age: int | None = Field(default=None)
     gender: str | None = Field(default=None)
     place_of_birth: str | None = Field(default=None)

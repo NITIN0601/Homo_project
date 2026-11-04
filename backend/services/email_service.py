@@ -7,6 +7,10 @@ import logging
 import os
 from typing import Any
 
+from core.config import settings
+from services.doctor_service import get_doctor
+from services.hospital_service import get_hospital
+
 try:
     import httpx
     HAS_HTTPX = True
@@ -20,37 +24,51 @@ logger = logging.getLogger("email_service")
 # Official Resend API endpoint
 RESEND_API_URL = "https://api.resend.com/emails"
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
-CLINIC_ADMIN_EMAIL = os.getenv("CLINIC_ADMIN_EMAIL", "vaishnavikshetty@gmail.com")
-RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "Agastya Clinic <onboarding@resend.dev>")
+CLINIC_ADMIN_EMAIL = os.getenv("CLINIC_ADMIN_EMAIL", settings.CLINIC_ADMIN_EMAIL)
+RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", f"{settings.CLINIC_NAME} <onboarding@resend.dev>")
 
 
 async def send_appointment_confirmation(
     customer_email: str,
     customer_name: str,
     appointment_time: str,
-    doctor_name: str = "Dr. Bramarambha K",
-    clinic_location: str = "Malleshwaram, Bengaluru",
-    api_key: str | None = None
+    doctor_name: str | None = None,
+    clinic_location: str | None = None,
+    hospital_id: str | None = None,
+    doctor_id: str | None = None,
+    api_key: str | None = None,
 ) -> dict[str, Any]:
     """
     Sends an appointment confirmation email via the official Resend API (https://api.resend.com/emails).
+    Dynamically resolves hospital branding and attending physician details.
     """
     key = api_key or RESEND_API_KEY or os.getenv("RESEND_API_KEY")
+    hospital = get_hospital(hospital_id)
+    doctor = get_doctor(doctor_id, hospital.get("id"))
 
-    subject = "Appointment Confirmed — Agastya Homoeopathy Clinic"
+    doc_name = doctor_name or doctor.get("name")
+    h_name = hospital.get("name", "Medical Clinic")
+    h_city = hospital.get("contact", {}).get("address", {}).get("city", "Bengaluru")
+    clinic_loc = clinic_location or f"{h_name}, {h_city}"
+    admin_email = CLINIC_ADMIN_EMAIL or hospital.get("contact", {}).get("email")
+    clinic_phone = hospital.get("contact", {}).get("phone") or settings.CLINIC_PHONE
+    addr_dict = hospital.get("contact", {}).get("address", {})
+    addr_str = f"{addr_dict.get('street', '')}, {addr_dict.get('city', '')} – {addr_dict.get('pincode', '')}" if addr_dict else settings.CLINIC_ADDRESS
+
+    subject = f"Appointment Confirmed — {h_name}"
     html_content = f"""
     <!DOCTYPE html>
     <html>
       <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #292524; background: #fafaf9; padding: 24px;">
         <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e7e5e4; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
           <div style="background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%); padding: 24px; text-align: center; color: #ffffff;">
-            <h1 style="margin: 0; font-size: 20px; font-weight: 800;">Agastya Homoeopathy Clinic</h1>
+            <h1 style="margin: 0; font-size: 20px; font-weight: 800;">{h_name}</h1>
             <p style="margin: 4px 0 0 0; font-size: 13px; color: #d8f3dc;">Appointment Confirmation</p>
           </div>
           <div style="padding: 24px;">
             <p style="margin: 0 0 16px 0; font-size: 15px;">Dear <strong>{customer_name}</strong>,</p>
             <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.5; color: #44403c;">
-              Your consultation appointment with <strong>{doctor_name}</strong> has been successfully confirmed.
+              Your consultation appointment with <strong>{doc_name}</strong> has been successfully confirmed.
             </p>
 
             <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
@@ -61,11 +79,11 @@ async def send_appointment_confirmation(
                 </tr>
                 <tr>
                   <td style="color: #166534; font-weight: bold;">Doctor:</td>
-                  <td style="color: #15803d;">{doctor_name}</td>
+                  <td style="color: #15803d;">{doc_name}</td>
                 </tr>
                 <tr>
                   <td style="color: #166534; font-weight: bold;">Clinic Location:</td>
-                  <td style="color: #15803d;">{clinic_location}</td>
+                  <td style="color: #15803d;">{clinic_loc}</td>
                 </tr>
               </table>
             </div>
@@ -74,12 +92,12 @@ async def send_appointment_confirmation(
               • A Google Calendar invitation has been attached to your calendar.
             </p>
             <p style="margin: 0 0 20px 0; font-size: 12px; color: #78716c;">
-              • For any reschedule or urgent queries, contact reception at <strong>+91 70195 76255</strong> or reply to this email.
+              • For any reschedule or urgent queries, contact reception at <strong>{clinic_phone}</strong> or reply to this email.
             </p>
 
             <hr style="border: none; border-top: 1px solid #e7e5e4; margin: 20px 0;" />
             <p style="margin: 0; font-size: 11px; color: #a8a29e; text-align: center;">
-              No. 10/2, 2nd Temple Road, 16th Cross, Malleshwaram, Bengaluru, Karnataka – 560003
+              {addr_str}
             </p>
           </div>
         </div>
@@ -88,9 +106,9 @@ async def send_appointment_confirmation(
     """
 
     payload = {
-        "from": RESEND_FROM_EMAIL,
+        "from": f"{h_name} <onboarding@resend.dev>",
         "to": [customer_email],
-        "cc": [CLINIC_ADMIN_EMAIL],
+        "cc": [admin_email],
         "subject": subject,
         "html": html_content,
     }
@@ -102,7 +120,7 @@ async def send_appointment_confirmation(
             "status": "mock_delivered",
             "message": "Demo mode: Email simulated successfully (set RESEND_API_KEY in .env for live transmission)",
             "customer_email": customer_email,
-            "cc": CLINIC_ADMIN_EMAIL,
+            "cc": admin_email,
         }
 
     headers = {

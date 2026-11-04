@@ -15,12 +15,14 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from core.config import settings
+from core.security import EMAIL_REGEX, verify_access_token
+
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 ACCOUNTS_FILE = DATA_DIR / "clinic_accounts.json"
 
 AUTH_SECRET = os.getenv("JWT_SECRET", "agastya-local-jwt-secret-key-2026-secure-auth").encode("utf-8")
-EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
 
 # In-memory OTP storage for 2FA / Login verification: email -> {"otp": str, "expires_at": float}
 _OTP_CACHE: dict[str, dict[str, Any]] = {}
@@ -88,30 +90,30 @@ def _load_accounts() -> dict[str, Any]:
         admin_hash, admin_salt = hash_password("admin123")
         patient_hash, patient_salt = hash_password("patient123")
         initial_accounts = {
-            "vaishnavikshetty@gmail.com": {
+            settings.CLINIC_ADMIN_EMAIL: {
                 "id": "usr-admin-001",
-                "name": "Dr. Bramarambha K",
-                "email": "vaishnavikshetty@gmail.com",
+                "name": settings.DOCTOR_NAME,
+                "email": settings.CLINIC_ADMIN_EMAIL,
                 "role": "admin",
-                "phone": "+91 70195 76255",
+                "phone": settings.CLINIC_PHONE,
                 "hash": admin_hash,
                 "salt": admin_salt,
                 "created_at": datetime.now(timezone.utc).isoformat()
             },
-            "admin@agastyahomoeo.com": {
+            f"admin@{settings.CLINIC_DOMAIN}": {
                 "id": "usr-admin-001",
-                "name": "Dr. Bramarambha K",
-                "email": "admin@agastyahomoeo.com",
+                "name": settings.DOCTOR_NAME,
+                "email": f"admin@{settings.CLINIC_DOMAIN}",
                 "role": "admin",
-                "phone": "+91 70195 76255",
+                "phone": settings.CLINIC_PHONE,
                 "hash": admin_hash,
                 "salt": admin_salt,
                 "created_at": datetime.now(timezone.utc).isoformat()
             },
-            "john@agastyahomoeo.com": {
+            f"john@{settings.CLINIC_DOMAIN}": {
                 "id": "usr-001",
                 "name": "John Doe",
-                "email": "john@agastyahomoeo.com",
+                "email": f"john@{settings.CLINIC_DOMAIN}",
                 "role": "patient",
                 "phone": "+91 98765 43210",
                 "hash": patient_hash,
@@ -153,32 +155,8 @@ def generate_local_jwt(payload: dict[str, Any], expires_days: int = 7) -> str:
 
 
 def verify_local_jwt(token: str) -> dict[str, Any] | None:
-    """Verifies HMAC signature and expiration of local JWT."""
-    try:
-        parts = token.split(".")
-        if len(parts) != 3:
-            return None
-        h_b64, p_b64, sig = parts
-        sig_raw = f"{h_b64}.{p_b64}".encode()
-
-        expected_sig = base64.urlsafe_b64encode(
-            hmac.new(AUTH_SECRET, sig_raw, hashlib.sha256).digest()
-        ).decode("utf-8").rstrip("=")
-
-        if not hmac.compare_digest(sig, expected_sig):
-            return None
-
-        # Decode payload
-        padding = "=" * (4 - (len(p_b64) % 4))
-        body_bytes = base64.urlsafe_b64decode(p_b64 + padding)
-        payload = json.loads(body_bytes.decode("utf-8"))
-
-        if payload.get("exp", 0) < int(datetime.now(timezone.utc).timestamp()):
-            return None
-
-        return payload
-    except Exception:
-        return None
+    """Verifies HMAC signature and expiration of local JWT using core security SSOT."""
+    return verify_access_token(token)
 
 
 def register_user(
@@ -186,9 +164,12 @@ def register_user(
     email: str,
     password: str,
     role: str = "patient",
-    phone: str | None = None
+    phone: str | None = None,
+    first_name: str | None = None,
+    middle_name: str | None = None,
+    last_name: str | None = None,
 ) -> tuple[dict[str, Any], str]:
-    """Registers a new clinic user with validated email and salted PBKDF2 hash."""
+    """Registers a new clinic user with validated email, split name breakdown, and salted PBKDF2 hash."""
     clean_email = validate_email(email)
     if not name or len(name.strip()) < 2:
         raise ValueError("Name must be at least 2 characters.")
@@ -197,12 +178,31 @@ def register_user(
     if clean_email in accounts:
         raise ValueError("An account with this email already exists.")
 
+    # Split name into first_name, middle_name, last_name if not explicitly provided
+    fn = (first_name or "").strip()
+    mn = (middle_name or "").strip()
+    ln = (last_name or "").strip()
+    if not fn or not ln:
+        parts = [p for p in name.strip().split() if p]
+        if len(parts) == 1:
+            fn = fn or parts[0]
+        elif len(parts) == 2:
+            fn = fn or parts[0]
+            ln = ln or parts[1]
+        elif len(parts) > 2:
+            fn = fn or parts[0]
+            mn = mn or " ".join(parts[1:-1])
+            ln = ln or parts[-1]
+
     pwd_hash, salt = hash_password(password)
     user_id = f"usr-{uuid.uuid4().hex[:8]}"
 
     new_profile = {
         "id": user_id,
         "name": name.strip(),
+        "first_name": fn,
+        "middle_name": mn,
+        "last_name": ln,
         "email": clean_email,
         "role": role if role in ("admin", "patient", "mobile_worker") else "patient",
         "phone": phone or "+91 98765 00000",
@@ -217,6 +217,9 @@ def register_user(
     user_view = {
         "id": user_id,
         "name": new_profile["name"],
+        "first_name": fn,
+        "middle_name": mn,
+        "last_name": ln,
         "email": clean_email,
         "role": new_profile["role"],
         "phone": new_profile["phone"]

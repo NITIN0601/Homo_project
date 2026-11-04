@@ -34,12 +34,19 @@ class TestConcurrentAppointmentBooking(unittest.TestCase):
         self.mock_sb = self.sb_patch.start()
         self.mock_sb.return_value = {"id": "sb-mock-apt", "status": "synced"}
 
+        # Snapshot appointments before test to ensure test isolation
+        from services.data_store import get_all_appointments, save_json, APPOINTMENTS_FILE
+        self._orig_appointments = get_all_appointments()
+        self._test_token = int(datetime.now().timestamp()) % 10000
+
     def tearDown(self):
         self.sb_patch.stop()
+        from services.data_store import save_json, APPOINTMENTS_FILE
+        save_json(APPOINTMENTS_FILE, self._orig_appointments)
 
     def test_concurrent_same_slot_booking_race_condition(self):
         """Simulate two patients submitting the exact same appointment slot concurrently."""
-        booking_day = (datetime.now() + timedelta(days=35)).strftime("%Y-%m-%d")
+        booking_day = (datetime.now() + timedelta(days=40 + (self._test_token % 100))).strftime("%Y-%m-%d")
         slot_time = "11:30"
         start_iso = f"{booking_day}T{slot_time}:00"
         end_iso = f"{booking_day}T12:00:00"
@@ -83,7 +90,7 @@ class TestConcurrentAppointmentBooking(unittest.TestCase):
 
     def test_sequential_duplicate_slot_rejected(self):
         """Verifies that a subsequent booking for an occupied slot is rejected with 409."""
-        booking_day = (datetime.now() + timedelta(days=36)).strftime("%Y-%m-%d")
+        booking_day = (datetime.now() + timedelta(days=50 + (self._test_token % 100))).strftime("%Y-%m-%d")
         slot_time = "14:00"
         start_iso = f"{booking_day}T{slot_time}:00"
         end_iso = f"{booking_day}T14:30:00"
@@ -112,7 +119,7 @@ class TestConcurrentAppointmentBooking(unittest.TestCase):
 
     def test_concurrent_different_slots_both_succeed(self):
         """Simulate two patients booking different available slots concurrently."""
-        booking_day = (datetime.now() + timedelta(days=37)).strftime("%Y-%m-%d")
+        booking_day = (datetime.now() + timedelta(days=60 + (self._test_token % 100))).strftime("%Y-%m-%d")
         start_slot_a = f"{booking_day}T09:00:00"
         start_slot_b = f"{booking_day}T16:00:00"
 

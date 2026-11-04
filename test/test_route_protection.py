@@ -89,6 +89,33 @@ class TestRouteProtection(unittest.TestCase):
         self.assertEqual(data.get("status"), "success")
         self.assertEqual(data.get("view"), "mobile_patient_view")
 
+    def test_patient_can_access_own_visits(self):
+        """Verifies that an authenticated patient can access their own clinical history."""
+        headers = {"Authorization": f"Bearer {self.patient_token}"}
+        res = self.client.get("/api/v1/patients/usr-001/visits", headers=headers)
+        self.assertEqual(res.status_code, 200)
+
+    def test_patient_forbidden_from_other_patient_visits(self):
+        """Verifies HIPAA tenant isolation: Patient usr-001 cannot view Patient usr-002's records."""
+        headers = {"Authorization": f"Bearer {self.patient_token}"}
+        res = self.client.get("/api/v1/patients/usr-002/visits", headers=headers)
+        self.assertEqual(res.status_code, 403)
+        self.assertIn("Access Denied", res.json().get("detail", ""))
+
+    def test_admin_can_access_any_patient_visits(self):
+        """Verifies that a doctor/admin can access any patient's clinical file."""
+        headers = {"Authorization": f"Bearer {self.admin_token}"}
+        res = self.client.get("/api/v1/patients/usr-002/visits", headers=headers)
+        self.assertEqual(res.status_code, 200)
+
+    def test_audit_trace_headers_attached_to_responses(self):
+        """Verifies that AuditTraceMiddleware attaches X-Trace-ID and X-Session-ID to every response."""
+        res = self.client.get("/api/v1/sync/status")
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("X-Trace-ID", res.headers)
+        self.assertIn("X-Session-ID", res.headers)
+        self.assertTrue(res.headers["X-Trace-ID"].startswith("trc-"))
+
 
 if __name__ == "__main__":
     unittest.main()

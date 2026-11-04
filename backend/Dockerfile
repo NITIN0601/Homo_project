@@ -1,9 +1,9 @@
 # ==============================================================================
 # Agastya Classical Homeopathy EHR - FastAPI Backend Dockerfile
-# Production-ready Python 3.11 container with on-prem local persistence
+# Production-ready Python 3.14 container with on-prem local persistence
 # ==============================================================================
 
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 

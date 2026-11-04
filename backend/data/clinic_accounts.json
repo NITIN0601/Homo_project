@@ -22,6 +22,9 @@
   "john@agastyahomoeo.com": {
     "id": "usr-001",
     "name": "John Doe",
+    "first_name": "John",
+    "middle_name": "",
+    "last_name": "Doe",
     "email": "john@agastyahomoeo.com",
     "role": "patient",
     "phone": "+91 98765 43210",

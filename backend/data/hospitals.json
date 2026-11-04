@@ -1,0 +1,101 @@
+[
+  {
+    "id": "agastya",
+    "slug": "agastya",
+    "name": "Agastya Classical Homeopathy Clinic",
+    "shortName": "Agastya Clinic",
+    "tagline": "Root-cause homeopathic healing with clinical precision",
+    "domain": "agastyahomoeo.com",
+    "subdomains": ["agastya", "clinic", "ehr"],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "admin@agastyahomoeo.com",
+      "emergencyPhone": "+91 70195 76255",
+      "address": {
+        "street": "No. 10/2, 2nd Temple Road, 16th Cross",
+        "area": "Malleshwaram",
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "pincode": "560003",
+        "country": "India"
+      },
+      "mapsUrl": "https://maps.google.com/?q=Malleshwaram+Bengaluru",
+      "googleReviewUrl": "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4"
+    },
+    "logistics": {
+      "defaultCourier": "BlueDart Express 🚚",
+      "shippingOrigin": "Agastya Central Pharmacy, Malleshwaram, Bengaluru",
+      "dispatchWindow": "Same Day (before 3 PM)"
+    },
+    "branding": {
+      "primaryColor": "#1b4332",
+      "primaryDarkColor": "#081c15",
+      "accentColor": "#40916c",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png",
+      "bannerUrl": "/assets/banner.jpg"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "apollo",
+    "slug": "apollo",
+    "name": "Apollo TeleHealth & Integrated Clinics",
+    "shortName": "Apollo Clinic",
+    "tagline": "Touched by trust, driven by clinical excellence",
+    "domain": "apollo.telecare.in",
+    "subdomains": ["apollo", "telehealth"],
+    "contact": {
+      "phone": "+91 80 2630 4050",
+      "phoneDisplay": "+91 80 2630 4050",
+      "email": "support@apollo.telecare.in",
+      "emergencyPhone": "+91 80 2630 4000",
+      "address": {
+        "street": "154/11, Bannerghatta Road, Opp IIMB",
+        "area": "Bannerghatta",
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "pincode": "560076",
+        "country": "India"
+      },
+      "mapsUrl": "https://maps.google.com/?q=Apollo+Hospital+Bannerghatta",
+      "googleReviewUrl": "https://search.google.com/local/writereview?placeid=ChIJApolloBannerghatta"
+    },
+    "logistics": {
+      "defaultCourier": "Apollo Pharmacy Express 🛵",
+      "shippingOrigin": "Apollo Central Hub, Bannerghatta Road, Bengaluru",
+      "dispatchWindow": "2-4 Hours Express"
+    },
+    "branding": {
+      "primaryColor": "#0f766e",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#f8fafc",
+      "cardRadius": "1.0rem",
+      "buttonRadius": "0.5rem",
+      "logoUrl": "/logo.png",
+      "bannerUrl": "/assets/banner.jpg"
+    },
+    "features": {
+      "enableECommerce": false,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true
+    },
+    "isActive": true
+  }
+]
+

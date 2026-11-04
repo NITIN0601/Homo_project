@@ -17,12 +17,18 @@ import httpx
 
 # Ensure environment configuration is initialized
 try:
-    from services.config import (
+    from core.config import (
         get_supabase_anon_key,
         get_supabase_rest_url,
         get_supabase_service_key,
+        settings,
     )
 except ImportError:
+    class DummySettings:
+        CLINIC_DOMAIN = "clinic.local"
+        CLINIC_PHONE = "+1234567890"
+        DOCTOR_NAME = "Attending Physician"
+    settings = DummySettings()
     def get_supabase_rest_url() -> str:
         return os.getenv("SUPABASE_REST_URL", "http://127.0.0.1:54321/rest/v1")
     def get_supabase_anon_key() -> str:
@@ -78,6 +84,16 @@ def record_admin_alert(
         logger.info(log_msg)
 
     return alert
+
+
+def add_admin_alert(
+    component: str,
+    message: str,
+    level: str = "ERROR",
+    details: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    """Helper alias for record_admin_alert to support audit and background middleware."""
+    return record_admin_alert(level=level, component=component, message=message, details=details)
 
 
 def get_admin_alerts(limit: int = 50) -> list[dict[str, Any]]:
@@ -384,11 +400,11 @@ async def sync_appointment_to_supabase(appointment: dict[str, Any]) -> dict[str,
     url = f"{get_rest_url()}/appointments"
     payload = {
         "patient_name": appointment.get("patientName", "Patient"),
-        "patient_email": appointment.get("patientEmail", "patient@agastyahomoeo.com"),
-        "patient_phone": appointment.get("patientPhone", "+91 98765 43210"),
+        "patient_email": appointment.get("patientEmail", f"patient@{settings.CLINIC_DOMAIN}"),
+        "patient_phone": appointment.get("patientPhone", settings.CLINIC_PHONE),
         "start_time": appointment.get("createdAt") or datetime.now(timezone.utc).isoformat(),
         "end_time": datetime.now(timezone.utc).isoformat(),
-        "doctor_title": appointment.get("doctorName", "Dr. Bramarambha K, MD (Homoeopathy)"),
+        "doctor_title": appointment.get("doctorName", settings.DOCTOR_NAME),
         "status": appointment.get("status", "Confirmed").lower(),
         "calendar_sync_requested": True,
     }
@@ -446,15 +462,15 @@ def format_supabase_appointment(item: dict[str, Any]) -> dict[str, Any]:
         "id": str(item.get("id")),
         "patientId": item.get("patient_id") or f"usr-{str(item.get('id'))[:6]}",
         "patientName": item.get("patient_name", "Patient"),
-        "patientPhone": item.get("patient_phone", "+91 98765 43210"),
-        "patientEmail": item.get("patient_email", "patient@agastyahomoeo.com"),
+        "patientPhone": item.get("patient_phone", settings.CLINIC_PHONE),
+        "patientEmail": item.get("patient_email", f"patient@{settings.CLINIC_DOMAIN}"),
         "date": item.get("date") or date_val,
         "time": item.get("time") or time_val,
         "slot": item.get("slot") or slot_val,
         "type": item.get("type", "In-Person Clinic Visit"),
         "chiefReason": item.get("chief_reason", "Clinical Consultation"),
         "status": (item.get("status") or "Confirmed").capitalize(),
-        "doctorName": item.get("doctor_title", "Dr. Bramarambha K, MD (Homoeopathy)"),
+        "doctorName": item.get("doctor_title", settings.DOCTOR_NAME),
         "createdAt": item.get("created_at") or st,
     }
 

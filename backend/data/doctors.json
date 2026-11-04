@@ -1,0 +1,73 @@
+[
+  {
+    "id": "doc-001",
+    "hospitalId": "agastya",
+    "name": "Dr. Bramarambha K, MD (Homoeopathy)",
+    "shortName": "Dr. Bramarambha K",
+    "title": "Dr. Bramarambha K, MD (Homeopathic Materia Medica), SCPH",
+    "regNo": "KAR-HOM-2018-0492",
+    "licenseId": "DOC-BK-001",
+    "email": "doctor@agastyahomoeo.com",
+    "phone": "+91 98450 12345",
+    "experienceYears": 6,
+    "qualifications": "BHMS, MD (Homoeopathy), SCPH (Classical Prescribing)",
+    "specialties": [
+      "Classical Homeopathy",
+      "Chronic Pathology",
+      "Paediatric Immunity",
+      "Constitutional Materia Medica"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-bk.jpg",
+    "bio": "Holistic Classical Homeopathy practitioner with clinical specialization in chronic pathologies, constitutional repertorization, and evidence-based patient follow-ups.",
+    "isPrimary": true,
+    "isActive": true
+  },
+  {
+    "id": "doc-002",
+    "hospitalId": "apollo",
+    "name": "Dr. Ananya Rao, MD (Homoeopathy)",
+    "shortName": "Dr. Ananya Rao",
+    "title": "Dr. Ananya Rao, MD (Homoeopathic Repertory & Case Taking)",
+    "regNo": "KAR-HOM-2020-0781",
+    "licenseId": "DOC-AR-002",
+    "email": "dr.ananya@apollo.telecare.in",
+    "phone": "+91 80 2630 4052",
+    "experienceYears": 4,
+    "qualifications": "BHMS, MD (Homoeopathy)",
+    "specialties": [
+      "Allergic Rhinitis",
+      "Dermatological Conditions",
+      "Lifestyle & Gut Health"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-ar.jpg",
+    "bio": "Specialist in pediatric and allergic constitutional assessments using repertorization methodologies.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-003",
+    "hospitalId": "apollo",
+    "name": "Dr. Ramesh Nair, MD (Internal Medicine)",
+    "shortName": "Dr. Ramesh Nair",
+    "title": "Dr. Ramesh Nair, MD, DNB (Internal Medicine)",
+    "regNo": "KMC-MED-2012-1082",
+    "licenseId": "DOC-RN-003",
+    "email": "dr.ramesh@apollo.telecare.in",
+    "phone": "+91 80 2630 4051",
+    "experienceYears": 12,
+    "qualifications": "MBBS, MD (Medicine), DNB",
+    "specialties": [
+      "Internal Medicine",
+      "Tele-Consultation",
+      "Preventive Health"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-rn.jpg",
+    "bio": "Senior Consultant in Internal Medicine with extensive experience in comprehensive multi-disciplinary tele-triage.",
+    "isPrimary": true,
+    "isActive": true
+  }
+]
+

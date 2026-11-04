@@ -9,6 +9,9 @@ import re
 from datetime import datetime
 from typing import Any
 
+from core.config import settings
+from core.security import EMAIL_REGEX
+
 logger = logging.getLogger("google_calendar")
 
 # Primary Clinic Business Timezone (SSOT)
@@ -19,9 +22,6 @@ CREDENTIALS_PATH = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", os.getenv("GOOGLE
 CALENDAR_ID = os.getenv("GOOGLE_CALENDAR_ID", "primary")
 
 SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
-
-# Email validation regex
-EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
 
 
 def validate_email_address(email: str) -> bool:
@@ -75,14 +75,20 @@ async def create_google_calendar_event(
     user_name: str,
     start_time_iso: str,
     end_time_iso: str,
-    summary: str = "Homoeopathy Consultation — Agastya Clinic",
-    description: str = "Clinical consultation with Dr. Bramarambha K.",
-    calendar_id: str | None = None
+    summary: str | None = None,
+    description: str | None = None,
+    calendar_id: str | None = None,
+    doctor_email: str | None = None,
+    doctor_name: str | None = None,
 ) -> dict[str, Any]:
     """
     Inserts an event into Google Calendar with sendUpdates='all'.
     """
     target_cal_id = calendar_id or CALENDAR_ID
+    sum_text = summary or f"Homoeopathy Consultation — {settings.CLINIC_NAME}"
+    doc_display = doctor_name or settings.DOCTOR_SHORT_NAME
+    doc_mail = doctor_email or settings.DOCTOR_EMAIL
+    desc_text = description or f"Clinical consultation with {doc_display}"
 
     # Validation
     if not validate_email_address(user_email):
@@ -102,8 +108,8 @@ async def create_google_calendar_event(
     service = get_calendar_service()
 
     event_body = {
-        "summary": summary,
-        "description": f"{description}\n\nPatient Name: {user_name}\nPatient Email: {user_email}",
+        "summary": sum_text,
+        "description": f"{desc_text}\n\nPatient Name: {user_name}\nPatient Email: {user_email}",
         "start": {
             "dateTime": start_time_iso,
             "timeZone": BUSINESS_TIMEZONE,
@@ -114,7 +120,7 @@ async def create_google_calendar_event(
         },
         "attendees": [
             {"email": user_email, "displayName": user_name},
-            {"email": "vaishnavikshetty@gmail.com", "displayName": "Dr. Bramarambha K", "responseStatus": "accepted"},
+            {"email": doc_mail, "displayName": doc_display, "responseStatus": "accepted"},
         ],
         "reminders": {
             "useDefault": False,

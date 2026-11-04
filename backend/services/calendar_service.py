@@ -2,9 +2,15 @@
 Dynamic Calendar & Indian Holidays Service
 Integrates with Google Calendar Public Holidays in India feed:
 en.indian#holiday@group.v.calendar.google.com
+
+Persists holidays locally to backend/data/holidays_{year}.json so the system
+fetches once per year (e.g. on 1st Jan) and serves instantly from disk storage.
 """
 
+import json
 import logging
+import os
+from pathlib import Path
 import re
 import time
 from typing import Any
@@ -16,6 +22,13 @@ except ImportError:
     HAS_HTTPX = False
     import urllib.request
 
+try:
+    import requests
+    from ics import Calendar as IcsCalendar
+    HAS_ICS_LIB = True
+except ImportError:
+    HAS_ICS_LIB = False
+
 logger = logging.getLogger("calendar_service")
 
 # Google Calendar Public Feed for Holidays in India
@@ -25,72 +38,160 @@ GOOGLE_HOLIDAYS_ICS_URL = (
     "en.indian%23holiday%40group.v.calendar.google.com/public/basic.ics"
 )
 
-# In-memory cache for parsed events with TTL
+# Persistent storage directory
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+
+# In-memory cache for fast lookups
 _HOLIDAYS_CACHE: dict[int, list[dict[str, Any]]] = {}
 _CACHE_TIMESTAMP: dict[int, float] = {}
 CACHE_TTL_SECONDS = 86400  # 24 hours
 
 
+def get_holiday_file_path(year: int) -> Path:
+    """Return persistent local JSON file path for a given year."""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    return DATA_DIR / f"holidays_{year}.json"
+
+
+def load_holidays_from_disk(year: int) -> list[dict[str, Any]] | None:
+    """Load cached holidays for a year from local disk storage."""
+    file_path = get_holiday_file_path(year)
+    if file_path.is_file():
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    logger.debug("Loaded %d holidays from disk: %s", len(data), file_path)
+                    return data
+        except Exception as err:
+            logger.warning("Failed to read holidays from %s: %s", file_path, err)
+    return None
+
+
+def save_holidays_to_disk(year: int, holidays: list[dict[str, Any]]) -> None:
+    """Persist structured holidays for a year to local disk storage."""
+    file_path = get_holiday_file_path(year)
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(holidays, f, indent=2, ensure_ascii=False)
+        logger.info("Successfully persisted %d holidays to disk: %s", len(holidays), file_path)
+    except Exception as err:
+        logger.warning("Failed to write holidays to %s: %s", file_path, err)
+
+
+# ─── Standardized Cultural Emoji Dictionary for Indian Festivals & Holidays ───
+HOLIDAY_EMOJI_DICT: dict[str, str] = {
+    # Harvest & Winter
+    "bhogi": "🔥",
+    "lohri": "🔥",
+    "makar sankranti": "🪁",
+    "pongal": "🪁",
+    "sankranti": "🪁",
+    "vasant panchami": "🛐",
+    "basant panchami": "🛐",
+
+    # National & Gazetted
+    "republic day": "🇮🇳",
+    "independence day": "🇮🇳",
+    "gandhi jayanti": "🕊️",
+    "ambedkar": "📜",
+
+    # Hindu Festivals & Observances
+    "maha shivaratri": "🥛",
+    "shivaratri": "🥛",
+    "holika dahan": "🔥",
+    "chhoti holi": "🔥",
+    "holi": "🎨",
+    "ugadi": "🌿",
+    "gudi padwa": "🌿",
+    "rama navami": "👑",
+    "ram navami": "👑",
+    "buddha purnima": "🪷",
+    "jagannath": "🛕",
+    "ratha yatra": "🛕",
+    "raksha bandhan": "👫",
+    "rakhi": "👫",
+    "krishna janmashtami": "👑",
+    "janmashtami": "👑",
+    "ganesh chaturthi": "🐘",
+    "vinayaka": "🐘",
+    "maha navami": "🔱",
+    "durga puja": "🔱",
+    "dussehra": "🏹",
+    "dasara": "🏹",
+    "vijayadashami": "🏹",
+    "karwa chauth": "🌕",
+    "naraka chaturdashi": "🪔",
+    "diwali": "🪔",
+    "deepavali": "🪔",
+    "govardhan": "👫",
+    "bhai dooj": "👫",
+    "chhath puja": "☀️",
+    "chhath": "☀️",
+
+    # Islamic Holidays
+    "eid al-fitr": "🌙",
+    "ramadan": "🌙",
+    "eid al-adha": "🐑",
+    "bakrid": "🐑",
+    "muharram": "🛐",
+    "ashura": "🛐",
+    "milad un-nabi": "🕌",
+    "id-e-milad": "🕌",
+
+    # Christian Holidays
+    "good friday": "✝️",
+    "easter": "🥚",
+    "christmas": "🎄",
+
+    # Sikh Holidays
+    "guru nanak": "🪯",
+
+    # State Holidays
+    "rajyotsava": "💛",
+}
+
 
 def _map_emoji_for_holiday(name: str) -> str:
-    """Map contextual emoji based on Indian festival/holiday name."""
+    """Map contextual emoji based on Indian festival/holiday name dictionary."""
     name_lower = name.lower()
-    if any(k in name_lower for k in ["republic", "independence"]):
-        return "🇮🇳"
-    if any(k in name_lower for k in ["diwali", "deepavali", "naraka", "lakshmi"]):
-        return "🪔"
-    if any(k in name_lower for k in ["holi", "dahan", "colour"]):
-        return "🎨"
-    if any(k in name_lower for k in ["pongal", "sankranti"]):
-        return "🌾"
-    if any(k in name_lower for k in ["shivaratri", "shiva"]):
-        return "🔱"
-    if any(k in name_lower for k in ["ganesh", "vinayaka"]):
-        return "🐘"
-    if any(k in name_lower for k in ["dussehra", "dasara", "vijayadashami", "ram", "rama"]):
-        return "🏹"
-    if any(k in name_lower for k in ["durga", "navratri", "puja", "ashtami", "navami"]):
-        return "🪷"
-    if any(k in name_lower for k in ["eid", "ramadan", "ramzan", "bakrid", "muharram"]):
-        return "🌙"
-    if any(k in name_lower for k in ["christmas", "xmas"]):
-        return "🎄"
-    if any(k in name_lower for k in ["buddha"]):
-        return "🪷"
-    if any(k in name_lower for k in ["guru", "nanak"]):
-        return "🪔"
-    if any(k in name_lower for k in ["gandhi"]):
-        return "🕊️"
-    if any(k in name_lower for k in ["ambedkar"]):
-        return "📜"
-    if any(k in name_lower for k in ["rajyotsava"]):
-        return "💛"
-    if any(k in name_lower for k in ["ugadi", "gudi padwa", "new year"]):
-        return "🌿"
+    for keyword, emoji in HOLIDAY_EMOJI_DICT.items():
+        if keyword in name_lower:
+            return emoji
     return "✨"
 
 
 def _clean_ics_text(text: str) -> str:
     """Unescape ICS multi-line wrapping and escaped commas/semicolons."""
-    # Remove ICS folding (line break followed by single whitespace)
     unfolded = re.sub(r"\r?\n[ \t]", "", text)
-    # Unescape escaped characters
     unfolded = unfolded.replace(r"\,", ",").replace(r"\;", ";").replace(r"\n", " ").strip()
     return unfolded
 
 
-async def fetch_google_calendar_indian_holidays(year: int) -> list[dict[str, Any]]:
+async def fetch_google_calendar_indian_holidays(year: int, force_refresh: bool = False) -> list[dict[str, Any]]:
     """
-    Fetch and parse the live Google Calendar Indian Holidays public feed for a specific year.
-    Returns structured list of holidays.
+    Fetch and parse Indian Holidays feed for a specific year.
+    1. Reads from local persistent disk storage (holidays_{year}.json) if present.
+    2. If missing or force_refresh is requested (e.g. 1st Jan yearly sync),
+       fetches live from Google Calendar public iCal feed, parses, and saves to disk.
     """
     now = time.time()
-    # Check cache
-    if year in _HOLIDAYS_CACHE and (now - _CACHE_TIMESTAMP.get(year, 0)) < CACHE_TTL_SECONDS:
+
+    # Step 1: Return from memory cache if active and not forced
+    if not force_refresh and year in _HOLIDAYS_CACHE and (now - _CACHE_TIMESTAMP.get(year, 0)) < CACHE_TTL_SECONDS:
         return _HOLIDAYS_CACHE[year]
 
-    logger.info("Fetching real-time Google Calendar Indian Holidays feed for year %d", year)
+    # Step 2: Try loading persistent JSON from disk (avoids network completely)
+    if not force_refresh:
+        disk_holidays = load_holidays_from_disk(year)
+        if disk_holidays:
+            _HOLIDAYS_CACHE[year] = disk_holidays
+            _CACHE_TIMESTAMP[year] = now
+            return disk_holidays
 
+    logger.info("Fetching Google Calendar Indian Holidays feed for year %d (force_refresh=%s)", year, force_refresh)
+
+    ics_content = ""
     try:
         if HAS_HTTPX:
             async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
@@ -108,7 +209,12 @@ async def fetch_google_calendar_indian_holidays(year: int) -> list[dict[str, Any
             with urllib.request.urlopen(req, timeout=10.0) as resp:
                 ics_content = resp.read().decode("utf-8", errors="ignore")
     except Exception as exc:
-        logger.warning("Failed to fetch live ICS from Google Calendar: %s. Using cached if available.", exc)
+        logger.warning("Failed to fetch live ICS from Google Calendar: %s. Using disk or cached if available.", exc)
+        disk_holidays = load_holidays_from_disk(year)
+        if disk_holidays:
+            _HOLIDAYS_CACHE[year] = disk_holidays
+            _CACHE_TIMESTAMP[year] = now
+            return disk_holidays
         if year in _HOLIDAYS_CACHE:
             return _HOLIDAYS_CACHE[year]
         return []
@@ -158,9 +264,8 @@ async def fetch_google_calendar_indian_holidays(year: int) -> list[dict[str, Any
 
         holidays_by_year.setdefault(event_year, []).append(entry)
 
-    # Sort each year's events chronologically and eliminate exact duplicates
+    # Sort each year's events chronologically, eliminate duplicates, and save to disk
     for yr, hols in holidays_by_year.items():
-        # Deduplicate by (date, name)
         seen = set()
         deduped = []
         for h in sorted(hols, key=lambda x: (x["date"], x["name"])):
@@ -170,8 +275,15 @@ async def fetch_google_calendar_indian_holidays(year: int) -> list[dict[str, Any
                 deduped.append(h)
         _HOLIDAYS_CACHE[yr] = deduped
         _CACHE_TIMESTAMP[yr] = now
+        # Persist to local JSON file
+        save_holidays_to_disk(yr, deduped)
 
     return _HOLIDAYS_CACHE.get(year, [])
+
+
+def filter_holidays_by_month(holidays: list[dict[str, Any]], month_1_indexed: int) -> list[dict[str, Any]]:
+    """Filter holidays for a specific month (1=Jan .. 12=Dec)."""
+    return [h for h in holidays if h.get("month") == month_1_indexed]
 
 
 def filter_holidays_by_month(holidays: list[dict[str, Any]], month_1_indexed: int) -> list[dict[str, Any]]:
