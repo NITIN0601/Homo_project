@@ -4,53 +4,58 @@ Provides secure password hashing (PBKDF2-SHA256), email validation,
 and JWT session token management for small business on-premise operations.
 """
 
-import base64
-import hashlib
 import hmac
-import json
-import os
-import re
+import secrets
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from core.config import settings
-from core.security import EMAIL_REGEX, verify_access_token
+from core.security import (
+    EMAIL_REGEX,
+    create_access_token,
+    hash_password,
+    verify_access_token,
+    verify_password,
+)
+from services.data_store import load_json, save_json
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 ACCOUNTS_FILE = DATA_DIR / "clinic_accounts.json"
 
-AUTH_SECRET = os.getenv("JWT_SECRET", "agastya-local-jwt-secret-key-2026-secure-auth").encode("utf-8")
+AUTH_SECRET = settings.JWT_SECRET.encode("utf-8")
 
 # In-memory OTP storage for 2FA / Login verification: email -> {"otp": str, "expires_at": float}
 _OTP_CACHE: dict[str, dict[str, Any]] = {}
 
 
 def generate_otp(email: str) -> str:
-    """Generates and records a 6-digit OTP for email verification (valid 10 mins)."""
+    """Generates and records a cryptographically secure 6-digit OTP (valid 10 mins)."""
     clean_email = validate_email(email)
-    import random
-    otp = f"{random.randint(100000, 999999)}"
+    otp = str(secrets.randbelow(900000) + 100000)  # 100000–999999, CSPRNG
     expires_at = datetime.now(timezone.utc).timestamp() + 600
     _OTP_CACHE[clean_email] = {"otp": otp, "expires_at": expires_at}
     return otp
 
 
 def verify_otp_code(email: str, otp: str) -> bool:
-    """Verifies a 6-digit OTP. Accepts simulated demo code '123456' or live generated OTP."""
+    """Verifies a 6-digit OTP. Demo bypass only allowed in mock/dev mode, never in production."""
     clean_email = validate_email(email)
     code = otp.strip()
-    if code == "123456":
+
+    is_mock = settings.USE_MOCK_DATA or not settings.IS_PRODUCTION
+    if not settings.IS_PRODUCTION and is_mock and code == "123456":
         return True
+
     entry = _OTP_CACHE.get(clean_email)
     if not entry:
         return False
     if datetime.now(timezone.utc).timestamp() > entry.get("expires_at", 0):
         _OTP_CACHE.pop(clean_email, None)
         return False
-    if entry.get("otp") == code:
+    if hmac.compare_digest(entry.get("otp", ""), code):  # timing-safe compare
         _OTP_CACHE.pop(clean_email, None)
         return True
     return False
@@ -64,94 +69,58 @@ def validate_email(email: str) -> str:
     return cleaned
 
 
-def hash_password(password: str, salt: str | None = None) -> tuple[str, str]:
-    """Hashes password with PBKDF2-HMAC-SHA256 and a 16-byte random salt."""
-    if len(password) < 6:
-        raise ValueError("Password must be at least 6 characters.")
-    salt_hex = salt or os.urandom(16).hex()
-    pwd_hash = hashlib.pbkdf2_hmac(
-        "sha256",
-        password.encode("utf-8"),
-        salt_hex.encode("utf-8"),
-        iterations=100000
-    ).hex()
-    return pwd_hash, salt_hex
-
-
-def verify_password(password: str, stored_hash: str, stored_salt: str) -> bool:
-    """Timing-attack safe password verification."""
-    computed_hash, _ = hash_password(password, stored_salt)
-    return hmac.compare_digest(computed_hash, stored_hash)
-
-
 def _load_accounts() -> dict[str, Any]:
-    if not ACCOUNTS_FILE.exists():
-        # Seed default clinic admin and demo patient for first launch
-        admin_hash, admin_salt = hash_password("admin123")
-        patient_hash, patient_salt = hash_password("patient123")
-        initial_accounts = {
-            settings.CLINIC_ADMIN_EMAIL: {
-                "id": "usr-admin-001",
-                "name": settings.DOCTOR_NAME,
-                "email": settings.CLINIC_ADMIN_EMAIL,
-                "role": "admin",
-                "phone": settings.CLINIC_PHONE,
-                "hash": admin_hash,
-                "salt": admin_salt,
-                "created_at": datetime.now(timezone.utc).isoformat()
-            },
-            f"admin@{settings.CLINIC_DOMAIN}": {
-                "id": "usr-admin-001",
-                "name": settings.DOCTOR_NAME,
-                "email": f"admin@{settings.CLINIC_DOMAIN}",
-                "role": "admin",
-                "phone": settings.CLINIC_PHONE,
-                "hash": admin_hash,
-                "salt": admin_salt,
-                "created_at": datetime.now(timezone.utc).isoformat()
-            },
-            f"john@{settings.CLINIC_DOMAIN}": {
-                "id": "usr-001",
-                "name": "John Doe",
-                "email": f"john@{settings.CLINIC_DOMAIN}",
-                "role": "patient",
-                "phone": "+91 98765 43210",
-                "hash": patient_hash,
-                "salt": patient_salt,
-                "created_at": datetime.now(timezone.utc).isoformat()
-            }
-        }
-        with open(ACCOUNTS_FILE, "w", encoding="utf-8") as f:
-            json.dump(initial_accounts, f, indent=2)
-        return initial_accounts
+    accounts = load_json("clinic_accounts.json", default=None)
+    if accounts is not None:
+        return accounts
 
-    try:
-        with open(ACCOUNTS_FILE, encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
+    # Seed default clinic admin and demo patient for first launch
+    admin_hash, admin_salt = hash_password("admin123")
+    patient_hash, patient_salt = hash_password("patient123")
+    initial_accounts = {
+        settings.CLINIC_ADMIN_EMAIL: {
+            "id": "usr-admin-001",
+            "name": settings.DOCTOR_NAME,
+            "email": settings.CLINIC_ADMIN_EMAIL,
+            "role": "admin",
+            "phone": settings.CLINIC_PHONE,
+            "hash": admin_hash,
+            "salt": admin_salt,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        },
+        f"admin@{settings.CLINIC_DOMAIN}": {
+            "id": "usr-admin-001",
+            "name": settings.DOCTOR_NAME,
+            "email": f"admin@{settings.CLINIC_DOMAIN}",
+            "role": "admin",
+            "phone": settings.CLINIC_PHONE,
+            "hash": admin_hash,
+            "salt": admin_salt,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        },
+        f"john@{settings.CLINIC_DOMAIN}": {
+            "id": "usr-001",
+            "name": "John Doe",
+            "email": f"john@{settings.CLINIC_DOMAIN}",
+            "role": "patient",
+            "phone": "+91 98765 43210",
+            "hash": patient_hash,
+            "salt": patient_salt,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+    }
+    save_json("clinic_accounts.json", initial_accounts)
+    return initial_accounts
 
 
 def _save_accounts(accounts: dict[str, Any]) -> None:
-    with open(ACCOUNTS_FILE, "w", encoding="utf-8") as f:
-        json.dump(accounts, f, indent=2)
+    """Atomically persists accounts file using the shared SSOT data store."""
+    save_json("clinic_accounts.json", accounts)
 
 
 def generate_local_jwt(payload: dict[str, Any], expires_days: int = 7) -> str:
-    """Generates an HMAC-SHA256 signed JSON Web Token without external server requirements."""
-    header = {"alg": "HS256", "typ": "JWT"}
-    exp = int((datetime.now(timezone.utc) + timedelta(days=expires_days)).timestamp())
-    body = {**payload, "exp": exp}
-
-    def b64url(data: bytes) -> str:
-        return base64.urlsafe_b64encode(data).decode("utf-8").rstrip("=")
-
-    h_b64 = b64url(json.dumps(header).encode("utf-8"))
-    p_b64 = b64url(json.dumps(body).encode("utf-8"))
-    sig_raw = f"{h_b64}.{p_b64}".encode()
-    sig = b64url(hmac.new(AUTH_SECRET, sig_raw, hashlib.sha256).digest())
-
-    return f"{h_b64}.{p_b64}.{sig}"
+    """Generates an HMAC-SHA256 signed JSON Web Token via core security SSOT."""
+    return create_access_token(payload, expires_days=expires_days)
 
 
 def verify_local_jwt(token: str) -> dict[str, Any] | None:

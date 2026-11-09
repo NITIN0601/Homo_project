@@ -9,10 +9,9 @@ fetches once per year (e.g. on 1st Jan) and serves instantly from disk storage.
 
 import json
 import logging
-import os
-from pathlib import Path
 import re
 import time
+from pathlib import Path
 from typing import Any
 
 try:
@@ -21,13 +20,6 @@ try:
 except ImportError:
     HAS_HTTPX = False
     import urllib.request
-
-try:
-    import requests
-    from ics import Calendar as IcsCalendar
-    HAS_ICS_LIB = True
-except ImportError:
-    HAS_ICS_LIB = False
 
 logger = logging.getLogger("calendar_service")
 
@@ -58,7 +50,7 @@ def load_holidays_from_disk(year: int) -> list[dict[str, Any]] | None:
     file_path = get_holiday_file_path(year)
     if file_path.is_file():
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, list) and len(data) > 0:
                     logger.debug("Loaded %d holidays from disk: %s", len(data), file_path)
@@ -286,6 +278,4 @@ def filter_holidays_by_month(holidays: list[dict[str, Any]], month_1_indexed: in
     return [h for h in holidays if h.get("month") == month_1_indexed]
 
 
-def filter_holidays_by_month(holidays: list[dict[str, Any]], month_1_indexed: int) -> list[dict[str, Any]]:
-    """Filter holidays for a specific month (1=Jan .. 12=Dec)."""
-    return [h for h in holidays if h.get("month") == month_1_indexed]
+

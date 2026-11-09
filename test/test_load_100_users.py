@@ -77,8 +77,6 @@ class Test100UsersParallelInteraction(unittest.TestCase):
         contested_start = f"{base_day}T{contested_time}:00"
         contested_end = f"{base_day}T10:30:00"
 
-        tasks = []
-
         # ── 1. 30 Patients Competing for the Exact Same Slot ─────────────
         def book_contested_slot(idx):
             payload = {

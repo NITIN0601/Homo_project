@@ -4,8 +4,8 @@ Handles remedy catalogue, stock quantities, restock thresholds, and supplier bat
 """
 
 from typing import Any
-from fastapi import APIRouter, HTTPException
 
+from fastapi import APIRouter, HTTPException
 from schemas.dispensary import RestockRequest
 from services.data_store import (
     get_all_inventory,

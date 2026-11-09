@@ -24,7 +24,6 @@ from services.typesafe_jev_service import (
     Noul,
     Score,
     TypeSafeClassifier,
-    classify_clinical_state_with_jev,
 )
 
 
