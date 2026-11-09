@@ -5,10 +5,17 @@ Enables multi-tenant hospital resolution, doctor roster queries, and branding re
 
 from datetime import datetime, timezone
 
-from core.security import require_admin_role
+from core.config import settings
+from core.security import require_admin_role, require_super_admin_role
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
-from services.doctor_service import get_doctor, list_doctors
+from schemas.hospital import (
+    DevModeToggleRequest,
+    DoctorCreateRequest,
+    HospitalCreateRequest,
+)
+from services.doctor_service import create_doctor, get_doctor, list_doctors
 from services.hospital_service import (
+    create_hospital,
     get_hospital,
     list_hospitals,
     resolve_hospital,
@@ -16,6 +23,46 @@ from services.hospital_service import (
 )
 
 router = APIRouter(tags=["Hospital & Doctor Multi-Tenancy"])
+
+
+@router.post("/hospitals", summary="Create a new hospital tenant (Super Admin only)")
+async def create_hospital_endpoint(
+    req: HospitalCreateRequest,
+    user: dict = Depends(require_super_admin_role),
+):
+    """Platform Super Admin: Registers a new hospital tenant with branding and features."""
+    try:
+        new_h = create_hospital(req.model_dump())
+        return {"status": "created", "hospital": new_h}
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+
+
+@router.post("/doctors", summary="Register a new doctor in hospital roster (Admin only)")
+async def create_doctor_endpoint(
+    req: DoctorCreateRequest,
+    user: dict = Depends(require_admin_role),
+):
+    """Admin / Super Admin: Provisions a doctor profile for the designated hospital."""
+    try:
+        new_doc = create_doctor(req.model_dump())
+        return {"status": "created", "doctor": new_doc}
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+
+
+@router.post("/platform/toggle-dev-mode", summary="Toggle Mock Data vs Real Database (Super Admin only)")
+async def toggle_dev_mode_endpoint(
+    req: DevModeToggleRequest,
+    user: dict = Depends(require_super_admin_role),
+):
+    """Platform Super Admin: Dynamically switches backend between Mock Dev Mode and Real DB."""
+    settings.USE_MOCK_DATA = req.use_mock_data
+    return {
+        "status": "updated",
+        "use_mock_data": settings.USE_MOCK_DATA,
+        "mode": "Developer Mock Mode" if settings.USE_MOCK_DATA else "Production Database Mode",
+    }
 
 
 @router.get("/hospitals", summary="List all active hospital tenants")

@@ -122,10 +122,21 @@ async def get_current_user(authorization: str | None = Header(None)) -> dict[str
 async def require_admin_role(authorization: str | None = Header(None)) -> dict[str, Any]:
     user = await get_current_user(authorization)
     role = user.get("role")
-    if role != "admin":
+    if role not in ("admin", "super_admin"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Administrative privileges required for this resource.",
+        )
+    return user
+
+
+async def require_super_admin_role(authorization: str | None = Header(None)) -> dict[str, Any]:
+    user = await get_current_user(authorization)
+    role = user.get("role")
+    if role != "super_admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Super administrator privileges required for platform management.",
         )
     return user
 
@@ -142,7 +153,7 @@ async def require_patient_or_admin(
     user = await get_current_user(authorization)
     role = user.get("role", "patient")
 
-    if role == "admin":
+    if role in ("admin", "super_admin"):
         return user
 
     user_id = user.get("sub") or user.get("id") or user.get("email")
@@ -161,7 +172,7 @@ def scope_items_to_patient_or_admin(
 ) -> list[dict[str, Any]]:
     """
     HIPAA / PHI Isolation SSOT Guard:
-    - If user is admin (or unauthenticated demo/read mode without patient role), returns all items.
+    - If user is super_admin or admin (or unauthenticated demo/read mode without patient role), returns all items.
     - If user has 'patient' role, strictly returns only items whose ID fields match the user's identity.
     """
     if not user or user.get("role") != "patient":

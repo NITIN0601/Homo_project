@@ -35,3 +35,17 @@ class GoogleAuthRequest(BaseModel):
     email: str = Field(..., example="user@example.com")
     name: str = Field(default="Google User", example="Authenticated User")
     portal_intent: str = Field(default="patient", description="'admin' or 'patient'")
+
+
+class InviteUserRequest(BaseModel):
+    name: str = Field(..., example="Dr. Jane Smith")
+    email: str = Field(..., example="doctor@hospital.org")
+    role: str = Field(default="patient", description="'patient', 'admin', or 'doctor'")
+    hospital_id: str = Field(default="agastya", example="agastya")
+    phone: str | None = Field(default=None, example="+1234567890")
+    send_notification: bool = Field(default=True, description="Send automated invite email")
+
+
+class VerifyInviteRequest(BaseModel):
+    token: str = Field(..., example="inv_abc123456")
+    password: str = Field(..., min_length=6, example="NewPassword123!")

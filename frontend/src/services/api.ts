@@ -91,6 +91,25 @@ export const api = {
       return { success: true };
     },
 
+    invite: async (data: { name: string; email: string; role?: string; hospital_id?: string; phone?: string }): Promise<{ status: string; invite_url: string }> => {
+      return apiFetch("/auth/invite", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    acceptInvite: async (token: string, password: string): Promise<{ token: string; profile: UserProfile }> => {
+      const res = await apiFetch<{ status: string; token: string; profile: UserProfile }>("/auth/accept-invite", {
+        method: "POST",
+        body: JSON.stringify({ token, password }),
+      });
+      if (res.token) {
+        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, res.token);
+        localStorage.setItem(STORAGE_KEYS.AUTH_PROFILE, JSON.stringify(res.profile));
+      }
+      return res;
+    },
+
     google: async (payload: { email: string; name: string; portal_intent?: string }): Promise<{ token: string; profile: UserProfile }> => {
       if (USE) {
         const res = await apiFetch<{ status: string; token: string; profile: UserProfile }>("/auth/google", {
@@ -410,6 +429,28 @@ export const api = {
         });
       }
       return { status: "updated", hospital_id: hospitalId, features };
+    },
+  },
+
+  // ── Multi-Tenant Platform & Super Admin Management ────────────────────────────
+  platform: {
+    createHospital: async (data: Record<string, unknown>) => {
+      return apiFetch("/hospitals", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+    createDoctor: async (data: Record<string, unknown>) => {
+      return apiFetch("/doctors", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+    toggleDevMode: async (useMockData: boolean) => {
+      return apiFetch("/platform/toggle-dev-mode", {
+        method: "POST",
+        body: JSON.stringify({ use_mock_data: useMockData }),
+      });
     },
   },
 };

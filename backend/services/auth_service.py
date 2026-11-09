@@ -88,6 +88,16 @@ def _load_accounts() -> dict[str, Any]:
             "salt": admin_salt,
             "created_at": datetime.now(timezone.utc).isoformat()
         },
+        f"superadmin@{settings.CLINIC_DOMAIN}": {
+            "id": "usr-super-001",
+            "name": "Super Administrator",
+            "email": f"superadmin@{settings.CLINIC_DOMAIN}",
+            "role": "super_admin",
+            "phone": settings.CLINIC_PHONE,
+            "hash": admin_hash,
+            "salt": admin_salt,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        },
         f"admin@{settings.CLINIC_DOMAIN}": {
             "id": "usr-admin-001",
             "name": settings.DOCTOR_NAME,
@@ -173,7 +183,7 @@ def register_user(
         "middle_name": mn,
         "last_name": ln,
         "email": clean_email,
-        "role": role if role in ("admin", "patient", "mobile_worker") else "patient",
+        "role": role if role in ("super_admin", "admin", "patient", "mobile_worker") else "patient",
         "phone": phone or "+91 98765 00000",
         "hash": pwd_hash,
         "salt": salt,
@@ -218,3 +228,71 @@ def authenticate_user(email: str, password: str) -> tuple[dict[str, Any], str]:
     }
     token = generate_local_jwt(user_view)
     return user_view, token
+
+
+INVITES_FILE = "user_invites.json"
+
+
+def create_user_invite(
+    email: str,
+    name: str,
+    role: str = "patient",
+    hospital_id: str = "agastya",
+    phone: str | None = None,
+    created_by: str = "admin",
+) -> dict[str, Any]:
+    """Generates a secure onboarding invite token with 7-day expiration."""
+    clean_email = validate_email(email)
+    invites = load_json(INVITES_FILE, default={})
+
+    token = f"inv_{secrets.token_urlsafe(24)}"
+    invite_record = {
+        "token": token,
+        "email": clean_email,
+        "name": name.strip(),
+        "role": role if role in ("super_admin", "admin", "patient", "doctor") else "patient",
+        "hospital_id": hospital_id,
+        "phone": phone or "",
+        "created_by": created_by,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "expires_at": datetime.now(timezone.utc).timestamp() + (7 * 86400),
+        "is_claimed": False,
+    }
+
+    invites[token] = invite_record
+    save_json(INVITES_FILE, invites)
+    return invite_record
+
+
+def accept_user_invite(token: str, password: str) -> tuple[dict[str, Any], str]:
+    """Claims an invite token, provisions the user profile with provided password."""
+    invites = load_json(INVITES_FILE, default={})
+    invite = invites.get(token)
+    if not invite:
+        raise ValueError("Invalid or expired invite token.")
+
+    if invite.get("is_claimed"):
+        raise ValueError("This invite token has already been claimed.")
+
+    if datetime.now(timezone.utc).timestamp() > invite.get("expires_at", 0):
+        raise ValueError("This invite token has expired. Please request a new invite.")
+
+    # Provision user account
+    user_view, jwt_token = register_user(
+        name=invite["name"],
+        email=invite["email"],
+        password=password,
+        role="admin" if invite["role"] in ("admin", "doctor") else invite["role"],
+        phone=invite.get("phone"),
+    )
+
+    invite["is_claimed"] = True
+    invite["claimed_at"] = datetime.now(timezone.utc).isoformat()
+    invites[token] = invite
+    save_json(INVITES_FILE, invites)
+
+    return user_view, jwt_token
+
+
+
+

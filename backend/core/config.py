@@ -47,6 +47,7 @@ class Settings:
     # Multi-Tenant & Domain Entity Pointers (Default SSOT)
     DEFAULT_HOSPITAL_ID: str = os.getenv("DEFAULT_HOSPITAL_ID", "agastya")
     DEFAULT_DOCTOR_ID: str = os.getenv("DEFAULT_DOCTOR_ID", "doc-001")
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
     # Clinic Profile & Identity (Configurable via Environment)
     CLINIC_NAME: str = os.getenv("CLINIC_NAME", "Agastya Classical Homeopathy Clinic")

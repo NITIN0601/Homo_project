@@ -47,9 +47,9 @@ def get_hospital(hospital_id: str | None = None) -> dict[str, Any]:
 
     # Match by domain or subdomains
     for h in hospitals:
-        if h.get("domain", "").lower() == target_id:
+        if (h.get("domain") or "").lower() == target_id:
             return h
-        if target_id in [sub.lower() for sub in h.get("subdomains", [])]:
+        if target_id in [(sub or "").lower() for sub in (h.get("subdomains") or [])]:
             return h
 
     # Fallback to first active hospital or the first available
@@ -63,10 +63,11 @@ def get_hospital_by_domain(domain: str) -> dict[str, Any] | None:
         return None
     clean_domain = domain.strip().lower()
     for h in get_all_hospitals():
-        if h.get("domain", "").lower() == clean_domain:
+        h_domain = (h.get("domain") or "").lower()
+        if h_domain == clean_domain:
             return h
-        for sub in h.get("subdomains", []):
-            if f"{sub}." in clean_domain or clean_domain == sub:
+        for sub in h.get("subdomains") or []:
+            if f"{sub}." in clean_domain or clean_domain == str(sub).lower():
                 return h
     return None
 
@@ -111,6 +112,63 @@ def save_hospital(hospital_data: dict[str, Any]) -> dict[str, Any]:
 
     save_json(HOSPITALS_FILE, hospitals)
     return hospital_data
+
+
+def create_hospital(data: dict[str, Any]) -> dict[str, Any]:
+    """Dynamically creates a new hospital tenant with standardized structure."""
+    h_id = data.get("id", "").strip().lower()
+    if not h_id:
+        raise ValueError("Hospital 'id' slug is required.")
+
+    hospitals = get_all_hospitals()
+    if any(h.get("id", "").lower() == h_id for h in hospitals):
+        raise ValueError(f"Hospital with id '{h_id}' already exists.")
+
+    default_features = {
+        "enableECommerce": True,
+        "enableVoiceStudio": True,
+        "enablePrescriptionScan": True,
+        "enableOnlinePayments": True,
+        "enableTelemedicine": True,
+        "enableGoogleReviews": True,
+        "enableInventoryManagement": True,
+        "enableInvoicing": True,
+        "enableExportAudit": True,
+    }
+
+    record = {
+        "id": h_id,
+        "slug": h_id,
+        "name": data.get("name", "New Healthcare Center"),
+        "shortName": data.get("short_name") or data.get("name", "New Clinic"),
+        "tagline": data.get("tagline", "Quality patient-first healthcare"),
+        "domain": data.get("domain", f"{h_id}.org"),
+        "subdomains": [h_id, "clinic", "ehr"],
+        "contact": {
+            "phone": data.get("phone", "+91 98450 12345"),
+            "phoneDisplay": data.get("phone", "+91 98450 12345"),
+            "email": data.get("email", f"admin@{h_id}.org"),
+            "emergencyPhone": data.get("phone", "+91 98450 12345"),
+            "address": {
+                "street": data.get("street", "123 Healthcare Way"),
+                "city": data.get("city", "Bengaluru"),
+                "state": data.get("state", "Karnataka"),
+                "country": data.get("country", "India"),
+            },
+        },
+        "branding": {
+            "primaryColor": data.get("primary_color", "#0d9488"),
+            "primaryDarkColor": "#115e59",
+            "accentColor": data.get("accent_color", "#14b8a6"),
+            "neutralBg": "#fafaf9",
+            "cardRadius": "1.25rem",
+            "buttonRadius": "0.75rem",
+            "logoUrl": "/logo.png",
+        },
+        "features": {**default_features, **(data.get("features") or {})},
+        "isActive": True,
+    }
+    return save_hospital(record)
 
 
 def _fallback_hospital() -> dict[str, Any]:

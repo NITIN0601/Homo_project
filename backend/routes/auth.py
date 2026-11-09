@@ -4,16 +4,21 @@ Handles user registration, login, JWT token issuance, and OTP verification.
 """
 
 from core.config import settings
-from fastapi import APIRouter, HTTPException, status
+from core.security import require_admin_role
+from fastapi import APIRouter, Depends, HTTPException, status
 from schemas.auth import (
     GoogleAuthRequest,
+    InviteUserRequest,
     LoginRequest,
     RegisterRequest,
     SendOtpRequest,
+    VerifyInviteRequest,
     VerifyOtpRequest,
 )
 from services.auth_service import (
+    accept_user_invite,
     authenticate_user,
+    create_user_invite,
     generate_local_jwt,
     generate_otp,
     register_user,
@@ -46,7 +51,7 @@ async def admin_login_endpoint(req: LoginRequest):
     """
     try:
         profile, token = authenticate_user(req.email, req.password)
-        if profile.get("role") != "admin":
+        if profile.get("role") not in ("admin", "super_admin"):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access Denied: This portal requires verified doctor administrative credentials.",
@@ -100,9 +105,9 @@ async def google_auth_endpoint(req: GoogleAuthRequest):
 async def register_user_endpoint(req: RegisterRequest):
     """
     Registers a new patient account with RFC-compliant email checks and PBKDF2 encryption.
-    STRICT SECURITY: Public registration is strictly forbidden from creating administrative accounts.
+    STRICT SECURITY: Public registration is strictly forbidden from creating administrative or super_admin accounts.
     """
-    if req.role and req.role.strip().lower() == "admin":
+    if req.role and req.role.strip().lower() in ("admin", "super_admin"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Security Violation: Administrative accounts cannot be registered publicly. They must be provisioned internally.",
@@ -153,6 +158,47 @@ async def verify_otp_endpoint(req: VerifyOtpRequest):
     try:
         is_valid = verify_otp_code(req.email, req.otp)
         return {"valid": is_valid}
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+
+
+@router.post("/invite", summary="Generate onboarding invite link (Admin only)")
+async def invite_user_endpoint(
+    req: InviteUserRequest,
+    current_user: dict = Depends(require_admin_role),
+):
+    """Admin / Super Admin: Creates secure onboarding invite token for doctors, staff, or patients."""
+    try:
+        invite = create_user_invite(
+            email=req.email,
+            name=req.name,
+            role=req.role,
+            hospital_id=req.hospital_id,
+            phone=req.phone,
+            created_by=current_user.get("email", "admin"),
+        )
+        invite_url = f"{settings.FRONTEND_URL}/join?token={invite['token']}"
+        return {
+            "status": "success",
+            "message": f"Invite generated for {req.email}",
+            "invite": invite,
+            "invite_url": invite_url,
+        }
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+
+
+@router.post("/accept-invite", summary="Accept invite and establish credentials")
+async def accept_invite_endpoint(req: VerifyInviteRequest):
+    """Claims an invite token, registers user password, and returns authenticated JWT session."""
+    try:
+        profile, token = accept_user_invite(token=req.token, password=req.password)
+        return {
+            "status": "success",
+            "message": "Invite accepted. Welcome to the portal!",
+            "token": token,
+            "profile": profile,
+        }
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
 

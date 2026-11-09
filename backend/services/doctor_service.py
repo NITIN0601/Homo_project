@@ -91,6 +91,36 @@ def save_doctor(doctor_data: dict[str, Any]) -> dict[str, Any]:
     return doctor_data
 
 
+def create_doctor(data: dict[str, Any]) -> dict[str, Any]:
+    """Dynamically creates a new doctor in the roster."""
+    hospital_id = data.get("hospital_id") or data.get("hospitalId")
+    if not hospital_id:
+        raise ValueError("hospital_id is required to create a doctor.")
+
+    import uuid
+    doc_id = data.get("id") or f"doc-{uuid.uuid4().hex[:6]}"
+    record = {
+        "id": doc_id,
+        "hospitalId": hospital_id.strip().lower(),
+        "name": data.get("name", "Dr. Practitioner"),
+        "shortName": data.get("short_name") or data.get("name", "Dr. Practitioner").split(",")[0],
+        "title": data.get("title") or data.get("name", "Doctor of Medicine"),
+        "regNo": data.get("reg_no") or f"REG-{uuid.uuid4().hex[:6].upper()}",
+        "licenseId": data.get("license_id") or f"LIC-{doc_id.upper()}",
+        "email": data.get("email", f"{doc_id}@clinic.org"),
+        "phone": data.get("phone", "+91 98450 12345"),
+        "experienceYears": data.get("experience_years", 5),
+        "qualifications": data.get("qualifications", "BHMS, MD"),
+        "specialties": data.get("specialties") or ["General Practice"],
+        "calendarId": "primary",
+        "avatarUrl": data.get("avatar_url") or "/assets/doctor-placeholder.jpg",
+        "bio": data.get("bio") or "Dedicated medical professional providing personalized healthcare.",
+        "isPrimary": bool(data.get("is_primary", False)),
+        "isActive": True,
+    }
+    return save_doctor(record)
+
+
 def _fallback_doctor() -> dict[str, Any]:
     """Safety fallback doctor entity if store is completely empty."""
     return {
