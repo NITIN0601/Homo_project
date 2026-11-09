@@ -31,9 +31,9 @@ BACKEND_DIR = ROOT_DIR / "backend"
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
+from core.security import create_access_token, verify_access_token
 from fastapi.testclient import TestClient
 from main import app
-from core.security import create_access_token, verify_access_token
 from services.payment_validator import PaymentValidator
 
 
@@ -206,7 +206,8 @@ class TestEndToEndClinicalScenarios(unittest.TestCase):
 
     def test_scenario_07_doctor_appointment_lifecycle(self):
         """Scenario 7: Doctor manages appointment lifecycle (transitions status, creates new, cancels)."""
-        import time, uuid
+        import time
+        import uuid
         t_ms = int(time.time() * 1000)
         suffix = uuid.uuid4().hex[:6]
         apt_id = f"apt-e2e-{t_ms}-{suffix}"

@@ -35,13 +35,13 @@ class TestConcurrentAppointmentBooking(unittest.TestCase):
         self.mock_sb.return_value = {"id": "sb-mock-apt", "status": "synced"}
 
         # Snapshot appointments before test to ensure test isolation
-        from services.data_store import get_all_appointments, save_json, APPOINTMENTS_FILE
+        from services.data_store import get_all_appointments
         self._orig_appointments = get_all_appointments()
         self._test_token = int(datetime.now().timestamp()) % 10000
 
     def tearDown(self):
         self.sb_patch.stop()
-        from services.data_store import save_json, APPOINTMENTS_FILE
+        from services.data_store import APPOINTMENTS_FILE, save_json
         save_json(APPOINTMENTS_FILE, self._orig_appointments)
 
     def test_concurrent_same_slot_booking_race_condition(self):

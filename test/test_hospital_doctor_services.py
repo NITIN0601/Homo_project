@@ -7,14 +7,15 @@ and dynamic scheduling dispatch without hardcoded clinic identities.
 import sys
 import unittest
 from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent / "backend"
 sys.path.insert(0, str(BACKEND_DIR))
 
 from main import app
-from services.hospital_service import get_hospital, list_hospitals, resolve_hospital
-from services.doctor_service import get_doctor, list_doctors, get_primary_doctor
+from services.doctor_service import get_primary_doctor, list_doctors
+from services.hospital_service import get_hospital, list_hospitals
 
 
 class TestHospitalDoctorServices(unittest.TestCase):
@@ -88,6 +89,7 @@ class TestHospitalDoctorServices(unittest.TestCase):
 
     def test_booking_with_custom_hospital_and_doctor(self):
         import time
+
         from services.data_store import update_appointment_status
         unique_min = int(time.time()) % 50 + 10
         start_iso = f"2026-12-25T11:{unique_min:02d}:00"
