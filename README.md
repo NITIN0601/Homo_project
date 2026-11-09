@@ -83,7 +83,22 @@ The platform provides two dedicated, role-tailored web interfaces backed by modu
 - **Billing Ledger & UTR Reconciliation**: Financial invoice ledger, admin UTR payment verification modal, manual status overrides, and Excel/CSV export capabilities.
 - **White-Label Customization Panel**: Granular admin toggles for portal features (e-Commerce, billing, PHR visibility, chatbot, profile editing) with passcode protection and audit logging.
 
-### 🔒 3. Enterprise Security & Concurrency
+### 👑 3. Super Admin & Multi-Hospital Platform Governance
+- **3-Tier Role-Based Access Control (RBAC)**:
+  - `super_admin`: Cross-hospital platform administrator with master tenant creation rights and platform-wide dev mode toggles. Can access hospital admin views but regular admins can never access super admin privileges.
+  - `admin`: Clinic-specific director with full authority over doctor rosters, patient records, inventory, and clinical scheduling.
+  - `patient` / `guest`: Consumer portal with self-service registration scoped strictly to the selected clinic tenant.
+- **Dynamic Hospital & Doctor Onboarding**:
+  - Add new hospitals (`POST /api/v1/hospitals`) on the fly with custom branding, themes, addresses, and domains.
+  - Provision doctors (`POST /api/v1/doctors`) under specific clinics with specialized credentials and consultation fees.
+- **Phase 1 Platform Scaling Quotas**:
+  - Enforced limits: Maximum **5 Super Admins**, **10 Hospital Admins**, and **1,000 Customers per hospital**.
+- **User Invite & Secure Onboarding Flow**:
+  - Send email/secure link invitations (`POST /api/v1/auth/invite`) with cryptographic single-use redemption tokens (`/join?token=...`).
+- **Developer Mode & Live Mock/Real Sync**:
+  - Super Admin toggle (`POST /api/v1/platform/toggle-dev-mode`) and environment flags (`USE_MOCK_DATA`) enabling seamless switching between live Supabase data and mock datastores.
+
+### 🔒 4. Enterprise Security & Concurrency
 - **Atomic Double-Booking Prevention**: Database-level unique constraint on `(start_time, doctor_title)` preventing race conditions across 100+ concurrent users.
 - **HIPAA PHI Privacy Guard**: Sanitized database views (`mobile_patient_view`) preventing internal server file paths from reaching client mobile applications.
 - **Forensic Audit Pipeline**: Automated `X-Trace-ID` and `X-Session-ID` injection on every request, recorded in an append-only audit trace ledger.
@@ -122,8 +137,8 @@ Homo_project/
 │   ├── nginx.conf             # Production Nginx reverse-proxy configuration
 │   └── gateway/               # Kong API Gateway declarative routing rules (kong.yml)
 ├── test/                      # Unified Test Harness
-│   ├── run_tests.sh           # Backend test runner (79 tests)
-│   └── test_*.py              # Modular test suites (security, auth, booking, multi-tenant)
+│   ├── run_tests.sh           # Backend test runner (113 tests)
+│   └── test_*.py              # Modular test suites (security, auth, booking, multi-tenant, platform management)
 ├── doc/                       # System Architecture, HLD/LLD diagrams, and technical reviews
 ├── scripts/                   # Developer utilities and holiday synchronization scripts
 ├── .env.example               # Root monorepo & Docker Compose environment template
@@ -248,19 +263,35 @@ The database container will automatically execute `db/schema.sql` and `db/seeds/
 
 To spin up the entire microservice fleet in Docker (PostgreSQL, PostgREST, GoTrue Auth, Storage, Kong Gateway, Studio GUI, Backend, and Frontend):
 
+1. **Ensure root `.env` is configured**:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Launch all 8 container services in detached mode**:
+   ```bash
+   docker compose -f infra/docker-compose.yml up --build -d
+   ```
+
+#### 🚢 Microservice Fleet Map
+
+| Service | Container Name | Host URL / Port | Internal Architecture Role |
+| :--- | :--- | :--- | :--- |
+| **Frontend UI** | `agastya-ehr-frontend` | `http://localhost:5173` | React 19 SPA, dynamic tenant theme, multi-role portal |
+| **FastAPI Backend** | `agastya-ehr-backend` | `http://localhost:8000` | Asynchronous Python 3.14 core, RBAC, clinical logic, AI scribe |
+| **Kong API Gateway** | `agastya-ehr-gateway` | `http://localhost:54321` | Declarative reverse-proxy routing and rate-limiting |
+| **Supabase Studio GUI** | `agastya-ehr-studio` | `http://localhost:54323` | Visual database manager & schema inspector |
+| **PostgreSQL Database** | `agastya-ehr-db` | `localhost:5432` | Relational SSOT, GIN indexes, RLS, double-booking constraints |
+| **PostgREST REST API** | `agastya-ehr-rest` | `http://localhost:54321/rest/v1` | Direct SQL-to-REST translation layer |
+| **GoTrue Auth Engine** | `agastya-ehr-auth` | `http://localhost:54321/auth/v1` | Local user authentication, JWT issuer & session tokens |
+| **Storage Engine** | `agastya-ehr-storage` | `http://localhost:54321/storage/v1` | Local S3-compatible document, audio & prescription storage |
+
+To view real-time fleet logs:
 ```bash
-docker compose -f infra/docker-compose.yml up --build -d
+docker compose -f infra/docker-compose.yml logs -f
 ```
 
-| Service | Container Name | URL / Port |
-| :--- | :--- | :--- |
-| **Frontend UI** | `agastya-ehr-frontend` | `http://localhost:5173` |
-| **FastAPI Backend** | `agastya-ehr-backend` | `http://localhost:8000` |
-| **Kong API Gateway** | `agastya-ehr-gateway` | `http://localhost:54321` |
-| **Supabase Studio GUI**| `agastya-ehr-studio` | `http://localhost:54323` |
-| **PostgreSQL Database**| `agastya-ehr-db` | `localhost:5432` |
-
-To stop the containers:
+To stop the microservice fleet:
 ```bash
 docker compose -f infra/docker-compose.yml down
 ```
@@ -275,7 +306,7 @@ Run tests and linters across the entire stack from the root directory:
 # Run ALL tests (Backend + Frontend)
 npm run test:all
 
-# Run only Python Backend Tests (79 test cases)
+# Run only Python Backend Tests (113 test cases)
 npm run test:backend
 # Or directly: ./test/run_tests.sh
 

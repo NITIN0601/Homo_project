@@ -69,14 +69,14 @@ npm run dev
 
 ## 4. Testing & Quality Verification Suites
 
-### 1. Run Complete Backend Unit & Security Test Suite (63 Tests)
-Runs all unit tests, route protection, HIPAA PHI tenant isolation, payment validation, and email simulation:
+### 1. Run Complete Backend Unit & Security Test Suite (113 Tests)
+Runs all unit tests, route protection, HIPAA PHI tenant isolation, payment validation, email simulation, 3-tier RBAC, platform management, and scaling quota enforcements:
 ```bash
 bash test/run_tests.sh
 ```
 *Expected Output*:
 ```
-Ran 63 tests in ~1.05s
+Ran 113 tests in ~1.65s
 OK. All tests passed successfully!
 ```
 

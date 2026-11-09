@@ -35,50 +35,62 @@ The Agastya Homoeopathy Clinic EHR is designed around four foundational principl
 ```mermaid
 graph TB
     subgraph ClientLayer["Frontend Client (React 19 + TypeScript + Vite)"]
-        UI_PATIENT["Patient Portal<br/>(Appointments, Remedies, Cart, Billing)"]
-        UI_ADMIN["Doctor Practice Console<br/>(Queue, EHR Scribe, Dispensary, Invoices)"]
+        UI_SUPER["Super Admin Console<br/>(Multi-Hospital Registry, Dev Mode, Scaling Quotas)"]
+        UI_ADMIN["Doctor & Clinic Director Console<br/>(Doctor Roster, EHR Scribe, Dispensary, Invoices)"]
+        UI_PATIENT["Patient Portal & Guest View<br/>(Appointments, Remedies, Cart, Scoped Registration)"]
         APP_CTX["Central State Machine (AppContext.tsx)<br/>15s Adaptive Polling + Focus Sync"]
+        THEME_CTX["ThemeProvider.tsx<br/>Dynamic Hospital Branding & Palette"]
         API_CLIENT["Typed API Client (src/services/api.ts)"]
-        MOCK_FIXTURES["Dedicated Mock Fixtures<br/>(src/data/mocks/*)<br/>Active only when VITE_USE_MOCK_DATA=true"]
+        MOCK_FIXTURES["Dedicated Mock Fixtures<br/>(src/data/mocks/*)<br/>Active when VITE_USE_MOCK_DATA=true"]
     end
 
     subgraph GatewayLayer["FastAPI Gateway & Security Layer (Port 8000)"]
-        AUDIT_MID["AuditTraceMiddleware<br/>(Trace-ID, Session-ID, Audit Log)"]
-        RBAC_GUARD["RBAC & Tenant Isolation Guard<br/>(PBKDF2, JWT HS256, PHI Wall)"]
+        AUDIT_MID["AuditTraceMiddleware<br/>(X-Trace-ID, X-Session-ID, X-Hospital-ID)"]
+        RBAC_GUARD["3-Tier RBAC Guard<br/>(super_admin, admin, patient/guest)"]
+        QUOTA_GUARD["Phase 1 Quota Limiter<br/>(Max 5 Super Admin, 10 Admin, 1000 Patients/Clinic)"]
     end
 
-    subgraph VerticalSlices["Backend Domain Slices (backend/slices/)"]
-        S_AUTH["slices/auth<br/>Login, OTP, JWT, Profiles"]
-        S_SCHED["slices/scheduling<br/>Booking, Slot Locking, Calendar Sync"]
-        S_CLIN["slices/clinical_records<br/>EHR, Audio Watermarking, AI Scribe, JEV"]
-        S_DISP["slices/dispensary<br/>Inventory, Restock, Batch Orders"]
-        S_BILL["slices/billing<br/>Consultation Invoices, Payments, Logistics"]
-        S_COMM["slices/communications<br/>WhatsApp Cloud, Resend Email"]
+    subgraph BackendModules["Modular Backend (backend/routes/ & backend/services/)"]
+        M_HOSP["routes/hospital.py<br/>Hospital & Doctor Provisioning, Dev Mode Toggle"]
+        M_AUTH["routes/auth.py & services/auth_service.py<br/>Login, OTP, JWT, User Invites (/join?token=)"]
+        M_SCHED["routes/appointments.py & services/calendar_service.py<br/>Atomic Booking, Slot Locking, GCal Sync"]
+        M_CLIN["routes/clinical.py & services/typesafe_jev_service.py<br/>EHR, Audio Watermarking, AI Scribe, JEV"]
+        M_DISP["routes/dispensary.py<br/>Inventory, Restock, Batch Orders"]
+        M_BILL["routes/billing.py<br/>Invoices, UTR Ledger, Logistics"]
+        M_COMM["services/notification_service.py<br/>WhatsApp Cloud API & Resend Email"]
     end
 
     subgraph DataLayer["Canonical SSOT & Local Fallback Store"]
-        DB_POSTGRES[("PostgreSQL / Supabase (Port 54321)<br/>appointments, clinic_users, invoices, records")]
+        DB_POSTGRES[("PostgreSQL / Supabase (Port 54321 / 5432)<br/>appointments, clinic_users, invoices, records")]
+        TENANT_REG[("Dynamic Tenant Datastores (backend/data/)<br/>hospitals.json, doctors.json, user_invites.json")]
         DISK_FALLBACK[("Atomic Disk Fallback<br/>(fcntl.flock + Tempfile Rename)")]
-        AUDIT_STORE[("backend/data/audit_traces.jsonl<br/>Immutable HIPAA Audit Trail")]
+        AUDIT_STORE[("backend/data/audit_traces.jsonl<br/>30-Day Rotating Immutable Audit Trail")]
     end
 
-    UI_PATIENT --> APP_CTX
+    UI_SUPER --> APP_CTX
     UI_ADMIN --> APP_CTX
+    UI_PATIENT --> APP_CTX
+    APP_CTX --> THEME_CTX
     APP_CTX --> API_CLIENT
     APP_CTX -.->|If VITE_USE_MOCK_DATA=true| MOCK_FIXTURES
     API_CLIENT -->|HTTP / JSON with X-Trace-ID| AUDIT_MID
     AUDIT_MID --> RBAC_GUARD
-    RBAC_GUARD --> S_AUTH
-    RBAC_GUARD --> S_SCHED
-    RBAC_GUARD --> S_CLIN
-    RBAC_GUARD --> S_DISP
-    RBAC_GUARD --> S_BILL
-    RBAC_GUARD --> S_COMM
+    RBAC_GUARD --> QUOTA_GUARD
+    QUOTA_GUARD --> M_HOSP
+    QUOTA_GUARD --> M_AUTH
+    QUOTA_GUARD --> M_SCHED
+    QUOTA_GUARD --> M_CLIN
+    QUOTA_GUARD --> M_DISP
+    QUOTA_GUARD --> M_BILL
+    QUOTA_GUARD --> M_COMM
 
-    S_SCHED --> DB_POSTGRES
-    S_CLIN --> DB_POSTGRES
-    S_DISP --> DB_POSTGRES
-    S_BILL --> DB_POSTGRES
+    M_HOSP --> TENANT_REG
+    M_AUTH --> TENANT_REG
+    M_AUTH --> DB_POSTGRES
+    M_SCHED --> DB_POSTGRES
+    M_CLIN --> DB_POSTGRES
+    M_DISP --> DB_POSTGRES
+    M_BILL --> DB_POSTGRES
     DB_POSTGRES -.->|On DB Offline| DISK_FALLBACK
     AUDIT_MID --> AUDIT_STORE
 ```
@@ -113,9 +125,20 @@ In traditional SQLite or raw file-based JSON backends, 100 simultaneous users wr
 
 ## 4. Security & HIPAA PHI Isolation
 
-### Role-Based Access Control (RBAC)
-- **Roles**: `admin` (Doctor / Clinic Staff) and `patient`.
-- **Admin-Only Endpoints**:
+### 3-Tier Role-Based Access Control (RBAC) & Governance
+- **Roles**:
+  - `super_admin`: Cross-hospital platform administrator. Can create new hospitals (`POST /api/v1/hospitals`), switch live dev mode (`POST /api/v1/platform/toggle-dev-mode`), and manage quotas. Can view hospital admin screens, but hospital admins can never access super admin operations.
+  - `admin`: Clinic Director / Doctor. Full practice control over doctor provisioning (`POST /api/v1/doctors`), patient records, inventory, and clinical scheduling.
+  - `patient` / `guest`: Consumer portal. Patients can self-register or join via invite links (`/join?token=...`) scoped strictly to their assigned clinic tenant.
+- **Phase 1 Scaling Limits**:
+  - `MAX_SUPER_ADMINS = 5`
+  - `MAX_ADMINS = 10`
+  - `MAX_CUSTOMERS_PER_HOSPITAL = 1000`
+- **Admin & Super-Admin Endpoints**:
+  - `POST /api/v1/hospitals` (Super Admin only: provisions new medical center)
+  - `POST /api/v1/platform/toggle-dev-mode` (Super Admin only: switches mock vs live database)
+  - `POST /api/v1/doctors` (Admin / Super Admin: provisions doctor under clinic)
+  - `POST /api/v1/auth/invite` (Admin: generates secure email/link invite)
   - `GET /api/v1/patient-records?view=admin` (full homeopathic case files, miasmatic analysis, mental generals).
   - `POST /api/v1/inventory/{id}/restock`
   - `POST /api/v1/sync/reconcile`
@@ -124,11 +147,12 @@ In traditional SQLite or raw file-based JSON backends, 100 simultaneous users wr
   - `GET /api/v1/patient-records?view=mobile` redacts sensitive internal clinician notes and returns only patient-facing instructions.
 
 ### Tenant Isolation Wall
-- In [`backend/slices/clinical_records/router.py`](file:///Users/nitin/Desktop/Project_Suspense/backend/slices/clinical_records/router.py), every patient endpoint checks the caller's identity against the requested record:
+- In [`backend/core/security.py`](file:///Users/nitin/Desktop/Project_Suspense/backend/core/security.py), `scope_items_to_patient_or_admin` checks caller identity:
   ```python
-  def check_phi_access_permission(target_patient_id: str, authorization: str | None) -> None:
-      # If caller has role 'patient', target_patient_id MUST match their token ID.
-      # If attempting to access another patient's records, raises 403 Forbidden.
+  def scope_items_to_patient_or_admin(items: list[dict], current_user: dict | None, patient_key: str = "patient_id") -> list[dict]:
+      # Patients only receive items where patient_id matches their token subject.
+      # Super admins and clinic admins can inspect all records within authorized tenant scope.
+      # Cross-patient or cross-tenant PHI access raises 403 Forbidden.
   ```
 - Any unauthorized access attempt triggers an automated audit entry and real-time administrator alert.
 

@@ -31,5 +31,7 @@ Welcome to the technical documentation for **[Homo_project](https://github.com/N
 - **Frontend**: React 19 + TypeScript + Tailwind CSS v4 in `frontend/`. Uses centralized reactive state (`AppContext.tsx`) with dynamic tenant provider (`ThemeProvider.tsx`).
 - **Backend**: FastAPI (Python 3.14) decomposed into modular routers in `backend/routes/` and business services in `backend/services/`.
 - **Database (SSOT)**: PostgreSQL 15+ / Supabase managed via `db/schema.sql` and `db/migrations/`, featuring GIN indexes for JSONB repertory analysis and database-level double-booking prevention.
+- **3-Tier Governance & RBAC**: `super_admin` (cross-hospital platform manager), `admin` (clinic director/doctor), and `patient`/`guest`. Phase 1 limits: 5 super admins, 10 admins, 1000 customers per clinic.
 - **Security & Privacy**: PBKDF2 password hashing, HMAC-SHA256 JWT tokens, role-based access control, and HIPAA-compliant `mobile_patient_view`.
-- **Traceability**: `AuditTraceMiddleware` attaching forensic `X-Trace-ID` and `X-Session-ID` to all requests, with real-time audit logging.
+- **Traceability**: `AuditTraceMiddleware` attaching forensic `X-Trace-ID`, `X-Session-ID`, and `X-Hospital-ID` to all requests, with real-time audit logging.
+- **Automated Verification**: Comprehensive 113-test backend test suite (`./test/run_tests.sh`) and Vitest client suite.
