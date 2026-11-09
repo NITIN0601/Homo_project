@@ -38,7 +38,7 @@ def get_hospital(hospital_id: str | None = None) -> dict[str, Any]:
     if not hospitals:
         return _fallback_hospital()
 
-    target_id = (hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "agastya")).strip().lower()
+    target_id = (hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "default")).strip().lower()
 
     # Match by exact id or slug
     for h in hospitals:
@@ -94,7 +94,7 @@ def resolve_hospital(hospital_id: str | None = None, headers: dict[str, Any] | N
             if matched:
                 return matched
 
-    return get_hospital(getattr(settings, "DEFAULT_HOSPITAL_ID", "agastya"))
+    return get_hospital(getattr(settings, "DEFAULT_HOSPITAL_ID", "default"))
 
 
 def save_hospital(hospital_data: dict[str, Any]) -> dict[str, Any]:
@@ -174,21 +174,21 @@ def create_hospital(data: dict[str, Any]) -> dict[str, Any]:
 def _fallback_hospital() -> dict[str, Any]:
     """Safety fallback hospital entity if store is completely empty."""
     return {
-        "id": "agastya",
-        "slug": "agastya",
-        "name": getattr(settings, "CLINIC_NAME", "Agastya Classical Homeopathy Clinic"),
-        "shortName": getattr(settings, "CLINIC_NAME", "Agastya Clinic"),
+        "id": "default",
+        "slug": "default",
+        "name": getattr(settings, "CLINIC_NAME", "General Healthcare Clinic"),
+        "shortName": getattr(settings, "CLINIC_NAME", "General Clinic"),
         "contact": {
-            "phone": getattr(settings, "CLINIC_PHONE", "+91 98450 12345"),
-            "email": getattr(settings, "CLINIC_ADMIN_EMAIL", "admin@agastyahomoeo.com"),
+            "phone": getattr(settings, "CLINIC_PHONE", "+1 555-0100"),
+            "email": getattr(settings, "CLINIC_ADMIN_EMAIL", "admin@example.com"),
             "address": {
-                "street": getattr(settings, "CLINIC_ADDRESS", "Malleshwaram"),
-                "city": "Bengaluru",
-                "country": "India",
+                "street": getattr(settings, "CLINIC_ADDRESS", "100 Medical Center Way"),
+                "city": "Metropolis",
+                "country": "Country",
             },
         },
         "logistics": {
-            "defaultCourier": getattr(settings, "DEFAULT_COURIER_PARTNER", "BlueDart Express 🚚"),
+            "defaultCourier": getattr(settings, "DEFAULT_COURIER_PARTNER", "Standard Express 🚚"),
         },
         "branding": {
             "primaryColor": "#1b4332",

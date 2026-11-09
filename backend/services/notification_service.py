@@ -1,5 +1,5 @@
 """
-Unified Notification Service for Agastya Homoeopathy Clinic.
+Unified Notification Service for Multi-Tenant EHR Healthcare Platform.
 Orchestrates Resend transactional emails and WhatsApp Business notifications
 for appointment booking confirmations, post-consultation follow-ups, and patient feedback.
 """

@@ -98,7 +98,10 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({
     try {
       const res = await fetch(`/api/calendar/holidays/sync?year=${viewYear}&force=true`, { method: "POST" });
       if (res.ok) {
-        try { localStorage.removeItem(`agastya_dynamic_holidays_v5_${viewYear}`); } catch {}
+        try {
+          localStorage.removeItem(`ehr_dynamic_holidays_v5_${viewYear}`);
+          localStorage.removeItem(`agastya_dynamic_holidays_v5_${viewYear}`);
+        } catch {}
         const freshHols = await fetchIndianHolidays(viewYear);
         setDynamicHolidays(freshHols);
         setSyncFeedbackMsg(`✓ Updated ${freshHols.length} holidays for ${viewYear}!`);

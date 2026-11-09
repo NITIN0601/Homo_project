@@ -189,14 +189,14 @@ async def fetch_google_calendar_indian_holidays(year: int, force_refresh: bool =
             async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
                 resp = await client.get(
                     GOOGLE_HOLIDAYS_ICS_URL,
-                    headers={"User-Agent": "AgastyaClinic-AppointmentEngine/1.0"}
+                    headers={"User-Agent": "EHR-AppointmentEngine/1.0"}
                 )
                 resp.raise_for_status()
                 ics_content = resp.text
         else:
             req = urllib.request.Request(
                 GOOGLE_HOLIDAYS_ICS_URL,
-                headers={"User-Agent": "AgastyaClinic-AppointmentEngine/1.0"}
+                headers={"User-Agent": "EHR-AppointmentEngine/1.0"}
             )
             with urllib.request.urlopen(req, timeout=10.0) as resp:
                 ics_content = resp.read().decode("utf-8", errors="ignore")

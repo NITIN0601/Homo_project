@@ -147,7 +147,7 @@ def register_user(
     first_name: str | None = None,
     middle_name: str | None = None,
     last_name: str | None = None,
-    hospital_id: str = "agastya",
+    hospital_id: str | None = None,
 ) -> tuple[dict[str, Any], str]:
     """Registers a new clinic user with quota enforcement, validated email, split name breakdown, and salted PBKDF2 hash."""
     clean_email = validate_email(email)
@@ -159,7 +159,7 @@ def register_user(
         raise ValueError("An account with this email already exists.")
 
     assigned_role = role if role in ("super_admin", "admin", "patient", "mobile_worker") else "patient"
-    assigned_hospital = (hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "agastya")).strip().lower()
+    assigned_hospital = (hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "default")).strip().lower()
 
     # Enforce Phase 1 System Quotas
     if assigned_role == "super_admin":
@@ -262,7 +262,7 @@ def create_user_invite(
     email: str,
     name: str,
     role: str = "patient",
-    hospital_id: str = "agastya",
+    hospital_id: str | None = None,
     phone: str | None = None,
     created_by: str = "admin",
 ) -> dict[str, Any]:
@@ -276,7 +276,7 @@ def create_user_invite(
         "email": clean_email,
         "name": name.strip(),
         "role": role if role in ("super_admin", "admin", "patient", "doctor") else "patient",
-        "hospital_id": hospital_id,
+        "hospital_id": (hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "default")).strip().lower(),
         "phone": phone or "",
         "created_by": created_by,
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -309,7 +309,7 @@ def accept_user_invite(token: str, password: str) -> tuple[dict[str, Any], str]:
         password=password,
         role="admin" if invite["role"] in ("admin", "doctor") else invite["role"],
         phone=invite.get("phone"),
-        hospital_id=invite.get("hospital_id", "agastya"),
+        hospital_id=invite.get("hospital_id", getattr(settings, "DEFAULT_HOSPITAL_ID", "default")),
     )
 
     invite["is_claimed"] = True

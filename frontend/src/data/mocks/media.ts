@@ -90,7 +90,7 @@ export const MOCK_PHARMACY_ORDERS: PharmacyPurchaseOrder[] = [
       { title: "PO Dispatched & Acknowledged by Pharmacy", location: LOGISTICS_HUBS.CLINIC_HUB, time: "Sep 30, 10:15 AM", completed: true },
       { title: "Packed & Handed to BlueDart Cargo", location: LOGISTICS_HUBS.BLUEDART_BENGALURU, time: "Sep 30, 11:45 AM", completed: true },
       { title: "In Transit across State Logistics Sort Facility", location: LOGISTICS_HUBS.SORT_YESHWANTHPUR, time: "Sep 30, 01:20 PM", completed: true, current: true },
-      { title: "Out for Delivery to Agastya Clinic", location: LOGISTICS_HUBS.SUB_STATION, time: "Expected 03:45 PM", completed: false },
+      { title: "Out for Delivery to Clinic", location: LOGISTICS_HUBS.SUB_STATION, time: "Expected 03:45 PM", completed: false },
       { title: "Package Received & Added to Inventory Stock", location: LOGISTICS_HUBS.CLINIC_INVENTORY, time: "Pending", completed: false },
     ],
   },

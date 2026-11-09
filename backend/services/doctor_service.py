@@ -124,14 +124,14 @@ def create_doctor(data: dict[str, Any]) -> dict[str, Any]:
 def _fallback_doctor() -> dict[str, Any]:
     """Safety fallback doctor entity if store is completely empty."""
     return {
-        "id": getattr(settings, "DEFAULT_DOCTOR_ID", "doc-001"),
-        "hospitalId": getattr(settings, "DEFAULT_HOSPITAL_ID", "agastya"),
-        "name": getattr(settings, "DOCTOR_NAME", "Dr. Bramarambha K, MD (Homoeopathy)"),
-        "shortName": getattr(settings, "DOCTOR_SHORT_NAME", "Dr. Bramarambha K"),
-        "title": getattr(settings, "DOCTOR_NAME", "Dr. Bramarambha K, MD (Homoeopathy)"),
-        "email": getattr(settings, "DOCTOR_EMAIL", "doctor@agastyahomoeo.com"),
-        "phone": getattr(settings, "CLINIC_PHONE", "+91 98450 12345"),
-        "specialties": ["Classical Homeopathy", "Chronic Pathology"],
+        "id": getattr(settings, "DEFAULT_DOCTOR_ID", "doc-default"),
+        "hospitalId": getattr(settings, "DEFAULT_HOSPITAL_ID", "default"),
+        "name": getattr(settings, "DOCTOR_NAME", "Dr. Primary Physician, MD"),
+        "shortName": getattr(settings, "DOCTOR_SHORT_NAME", "Dr. Primary"),
+        "title": getattr(settings, "DOCTOR_NAME", "Dr. Primary Physician, MD"),
+        "email": getattr(settings, "DOCTOR_EMAIL", "doctor@example.com"),
+        "phone": getattr(settings, "CLINIC_PHONE", "+1 555-0100"),
+        "specialties": ["General Medicine", "Holistic Health"],
         "calendarId": "primary",
         "isPrimary": True,
         "isActive": True,

@@ -31,7 +31,7 @@ class Settings:
     USE_MOCK_DATA: bool = os.getenv("USE_MOCK_DATA", "false").lower() in ("true", "1", "yes")
     IS_PRODUCTION: bool = APP_ENV.lower() == "production"
 
-    PROJECT_NAME: str = "Agastya Classical Homeopathy Clinic Engine"
+    PROJECT_NAME: str = "EHR Microservice Healthcare Platform Engine"
     API_V1_STR: str = "/api/v1"
 
     # Supabase / PostgreSQL Configuration
@@ -40,13 +40,13 @@ class Settings:
     SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy_service")
 
     # Authentication & Security
-    JWT_SECRET: str = os.getenv("JWT_SECRET", "agastya-local-jwt-secret-key-2026-secure-auth")
+    JWT_SECRET: str = os.getenv("JWT_SECRET", "ehr-platform-jwt-secret-key-2026-secure-auth")
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_DAYS: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_DAYS", "7"))
 
     # Multi-Tenant & Domain Entity Pointers (Default SSOT)
-    DEFAULT_HOSPITAL_ID: str = os.getenv("DEFAULT_HOSPITAL_ID", "agastya")
-    DEFAULT_DOCTOR_ID: str = os.getenv("DEFAULT_DOCTOR_ID", "doc-001")
+    DEFAULT_HOSPITAL_ID: str = os.getenv("DEFAULT_HOSPITAL_ID", "default")
+    DEFAULT_DOCTOR_ID: str = os.getenv("DEFAULT_DOCTOR_ID", "doc-default")
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
     # Phase 1 Platform Scaling Quotas
@@ -54,24 +54,24 @@ class Settings:
     MAX_ADMINS: int = int(os.getenv("MAX_ADMINS", "10"))
     MAX_CUSTOMERS_PER_HOSPITAL: int = int(os.getenv("MAX_CUSTOMERS_PER_HOSPITAL", "1000"))
 
-    # Clinic Profile & Identity (Configurable via Environment)
-    CLINIC_NAME: str = os.getenv("CLINIC_NAME", "Agastya Classical Homeopathy Clinic")
-    CLINIC_DOMAIN: str = os.getenv("CLINIC_DOMAIN", "agastyahomoeo.com")
-    CLINIC_LOCATION: str = os.getenv("CLINIC_LOCATION", "Bengaluru, India")
-    CLINIC_ADDRESS: str = os.getenv("CLINIC_ADDRESS", "No. 10/2, 2nd Temple Road, 16th Cross, Malleshwaram, Bengaluru – 560003")
-    CLINIC_PHONE: str = os.getenv("CLINIC_PHONE", "+91 98450 12345")
-    CLINIC_ADMIN_EMAIL: str = os.getenv("CLINIC_ADMIN_EMAIL", "admin@agastyahomoeo.com")
-    DOCTOR_NAME: str = os.getenv("DOCTOR_NAME", "Dr. Bramarambha K, MD (Homoeopathy)")
-    DOCTOR_SHORT_NAME: str = os.getenv("DOCTOR_SHORT_NAME", "Dr. Bramarambha K")
-    DOCTOR_EMAIL: str = os.getenv("DOCTOR_EMAIL", "doctor@agastyahomoeo.com")
-    DEFAULT_COURIER_PARTNER: str = os.getenv("DEFAULT_COURIER_PARTNER", "BlueDart Express 🚚")
+    # Clinic Profile & Identity (Configurable via Environment or Tenant Registry)
+    CLINIC_NAME: str = os.getenv("CLINIC_NAME", "General Healthcare Clinic")
+    CLINIC_DOMAIN: str = os.getenv("CLINIC_DOMAIN", "example.com")
+    CLINIC_LOCATION: str = os.getenv("CLINIC_LOCATION", "Global")
+    CLINIC_ADDRESS: str = os.getenv("CLINIC_ADDRESS", "100 Medical Center Way")
+    CLINIC_PHONE: str = os.getenv("CLINIC_PHONE", "+1 555-0100")
+    CLINIC_ADMIN_EMAIL: str = os.getenv("CLINIC_ADMIN_EMAIL", "admin@example.com")
+    DOCTOR_NAME: str = os.getenv("DOCTOR_NAME", "Dr. Primary Physician, MD")
+    DOCTOR_SHORT_NAME: str = os.getenv("DOCTOR_SHORT_NAME", "Dr. Physician")
+    DOCTOR_EMAIL: str = os.getenv("DOCTOR_EMAIL", "doctor@example.com")
+    DEFAULT_COURIER_PARTNER: str = os.getenv("DEFAULT_COURIER_PARTNER", "Standard Express 🚚")
 
     # Authorized Admin Emails (Comma-separated in env, converted to list of lowercase strings)
     AUTHORIZED_ADMIN_EMAILS: list[str] = [
         email.strip().lower()
         for email in os.getenv(
             "AUTHORIZED_ADMIN_EMAILS",
-            "admin@agastyahomoeo.com,doctor@agastyahomoeo.com,drbramarambha@agastyahomoeo.com",
+            "superadmin@example.com,admin@example.com,admin@agastyahomoeo.com,doctor@agastyahomoeo.com",
         ).split(",")
         if email.strip()
     ]
@@ -93,7 +93,7 @@ class Settings:
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
     OLLAMA_ENDPOINT: str = os.getenv("OLLAMA_ENDPOINT", "http://127.0.0.1:11434")
     RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")
-    RESEND_FROM_EMAIL: str = os.getenv("RESEND_FROM_EMAIL", "Agastya Clinic <onboarding@resend.dev>")
+    RESEND_FROM_EMAIL: str = os.getenv("RESEND_FROM_EMAIL", "Healthcare Clinic <onboarding@resend.dev>")
     GOOGLE_CALENDAR_ID: str = os.getenv("GOOGLE_CALENDAR_ID", "en.indian#holiday@group.v.calendar.google.com")
     GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "backend/credentials.json")
     TYPESAFE_API_KEY: str = os.getenv("TYPESAFE_API_KEY", "")

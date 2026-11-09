@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from core.config import settings
 from services.supabase_service import add_admin_alert
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -27,7 +28,7 @@ AUDIT_LOG_FILE = AUDIT_DIR / "audit_traces.jsonl"
 
 _AUDIT_WRITE_LOCK = threading.Lock()   # in-process guard
 
-_audit_logger = logging.getLogger("agastya.audit")
+_audit_logger = logging.getLogger("ehr.audit")
 _audit_logger.setLevel(logging.INFO)
 if not _audit_logger.handlers:
     _audit_handler = logging.handlers.TimedRotatingFileHandler(
@@ -55,7 +56,7 @@ class AuditTraceMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         trace_id = request.headers.get("X-Trace-ID") or f"trc-{uuid.uuid4().hex[:12]}"
         session_id = request.headers.get("X-Session-ID") or request.headers.get("X-Conversation-ID") or "sess-anonymous"
-        hospital_id = request.headers.get("X-Hospital-ID") or "agastya"
+        hospital_id = request.headers.get("X-Hospital-ID") or getattr(settings, "DEFAULT_HOSPITAL_ID", "default")
         request.state.hospital_id = hospital_id
         start_time = time.perf_counter()
 

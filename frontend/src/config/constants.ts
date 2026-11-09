@@ -1,5 +1,5 @@
 /**
- * ─── Agastya Homoeopathy Clinic — Central Configuration (SSOT) ─────────────────
+ * ─── EHR Platform — Central Configuration (SSOT) ─────────────────
  *
  * Modular SSOT Architecture & Propagation Map:
  *   • clinic.ts   → Doctor credentials, clinic branding, addresses, office hours, appointment slots

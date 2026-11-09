@@ -47,7 +47,7 @@ _startup_complete = False
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global _startup_complete
-    logger.info("Initializing Agastya Clinic Classical Homeopathy Engine...")
+    logger.info("Initializing Multi-Tenant EHR Healthcare Platform Engine...")
     settings.validate_production()
     await get_client()
     logger.info("Database URL: %s", settings.SUPABASE_REST_URL)
@@ -60,7 +60,7 @@ async def lifespan(app: FastAPI):
     _startup_complete = True
     yield
     await close_client()
-    logger.info("Shutting down Agastya Clinic Engine cleanly.")
+    logger.info("Shutting down EHR Platform Engine cleanly.")
 
 
 app = FastAPI(

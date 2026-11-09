@@ -219,7 +219,7 @@ export const DoctorPrescriptionUploadModal: React.FC<DoctorPrescriptionUploadMod
                       setPrescriptionFile(
                         "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&auto=format&fit=crop&q=80"
                       );
-                      setFileName("Official_Agastya_Doctor_Prescription.png");
+                      setFileName("Official_Clinic_Doctor_Prescription.png");
                     }}
                     className="px-3 py-2 rounded-xl bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 font-bold text-xs cursor-pointer"
                   >

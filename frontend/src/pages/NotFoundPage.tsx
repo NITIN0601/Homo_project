@@ -51,7 +51,7 @@ export const NotFoundPage: React.FC = () => {
         onClick={() => navigateTo("home")}
         className="px-6 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs shadow-lg transition-all active:scale-95 cursor-pointer"
       >
-        ← Return to Agastya Homoeopathy Homepage
+        ← Return to Homepage
       </button>
     </div>
   );

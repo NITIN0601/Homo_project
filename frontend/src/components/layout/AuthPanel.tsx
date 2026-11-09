@@ -537,7 +537,7 @@ const AuthPanel: React.FC = () => {
                       required
                       value={email}
                       onChange={(e) => { setEmail(e.target.value); setError(null); }}
-                      placeholder="you@agastyahomoeo.com"
+                      placeholder="you@example.com"
                       className="w-full mt-1 rounded-xl border border-stone-200 px-3 py-2 text-xs bg-stone-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none"
                     />
                   </div>

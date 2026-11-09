@@ -266,7 +266,7 @@ const NavBar: React.FC = () => {
             onClick={() => api.whatsapp.openChat(undefined, authUser)}
             style={{ background: THEME_COLORS.WHATSAPP_GREEN }}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-extrabold text-white hover:opacity-90 shadow-xs transition-all active:scale-95 cursor-pointer"
-            title="Chat with Agastya Clinic on WhatsApp"
+            title={`Chat with ${tenant.shortName || tenant.name} on WhatsApp`}
             aria-label="Connect on WhatsApp"
           >
             <span>📱</span>

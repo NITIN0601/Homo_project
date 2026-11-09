@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useApp } from "../../context/AppContext";
+import { useTenant } from "../../context/ThemeProvider";
+import type { HospitalTenantConfig } from "../../types/tenant";
 import {
   CLINIC,
   DOCTOR,
@@ -55,16 +57,30 @@ function parseChatMessageContent(text: string): ParsedChatMessage {
   return { preview: text, details: "", hasMore: false };
 }
 
-function getBotResponse(input: string, patientName: string, userTz?: string): BotResponse {
+function getBotResponse(
+  input: string,
+  patientName: string,
+  userTz?: string,
+  tenant?: HospitalTenantConfig
+): BotResponse {
   const q = input.toLowerCase().trim();
   const sessionHours = getMappedSessionHours(undefined, userTz);
+  const botName = tenant?.shortName ? `${tenant.shortName}Bot` : "ClinicBot";
+  const clinicName = tenant?.name || CLINIC.NAME;
+  const doctorTitle = tenant?.doctor?.title || DOCTOR.TITLE;
+  const doctorName = tenant?.doctor?.name || DOCTOR.NAME;
+  const clinicAddress = tenant?.contact?.address?.street
+    ? `${tenant.contact.address.street}, ${tenant.contact.address.city}, ${tenant.contact.address.state} – ${tenant.contact.address.pincode}`
+    : CLINIC.ADDRESS.FULL;
+  const clinicPhone = tenant?.contact?.phoneDisplay || CLINIC.PHONE_DISPLAY;
+  const clinicEmail = tenant?.contact?.email || CLINIC.SUPPORT_EMAIL;
 
   // ── 1. Greetings ──
   if (/^(hi|hello|hey|namaste|good\s*(morning|evening|afternoon))/.test(q)) {
     return {
       text:
-        `Hello${patientName !== "Patient" ? `, ${patientName}` : ""}! 👋 I'm **AgastyaBot**, your ${CLINIC.NAME} AI assistant.\n\n` +
-        `• **Classical Healing:** Personalized constitutional consultations with ${DOCTOR.TITLE}.\n` +
+        `Hello${patientName !== "Patient" ? `, ${patientName}` : ""}! 👋 I'm **${botName}**, your ${clinicName} AI assistant.\n\n` +
+        `• **Care & Consultations:** Personalized clinical consultations with ${doctorTitle}.\n` +
         `• **Patient Services:** In-clinic consultations, online tele-care, and direct remedy dispensing.\n` +
         `• **Quick Navigation:** Instant booking, clinic schedules, and verified visit summaries.\n\n` +
         `How can I assist you with your health today?`,
@@ -80,7 +96,7 @@ function getBotResponse(input: string, patientName: string, userTz?: string): Bo
   // ── 2. Office Hours & Timings ──
   if (/hour|timing|time|open|close|when|schedule\b/.test(q)) {
     const hoursText =
-      `🕐 *${CLINIC.FULL_NAME} Consultation Hours:*\n\n` +
+      `🕐 *${tenant?.name || CLINIC.FULL_NAME} Consultation Hours:*\n\n` +
       `• *${sessionHours.morning.fullSessionName}:* ${sessionHours.morning.display} (${OFFICE_HOURS.MORNING.mode})\n` +
       `• *${sessionHours.evening.fullSessionName}:* ${sessionHours.evening.display} (${OFFICE_HOURS.EVENING.mode})\n` +
       `• *Sunday:* ${OFFICE_HOURS.SUNDAY.hours}\n\n` +
@@ -102,8 +118,8 @@ function getBotResponse(input: string, patientName: string, userTz?: string): Bo
 
     return {
       text:
-        `🚶‍♂️ *Walk-in Consultations at ${CLINIC.FULL_NAME}:*\n\n` +
-        `• *Walk-ins Welcome:* ${OFFICE_HOURS.EVENING.days} during ${sessionHours.evening.fullSessionName} (*${walkinHours}*) at ${CLINIC.ADDRESS.SHORT}.\n` +
+        `🚶‍♂️ *Walk-in Consultations at ${tenant?.name || CLINIC.FULL_NAME}:*\n\n` +
+        `• *Walk-ins Welcome:* ${OFFICE_HOURS.EVENING.days} during ${sessionHours.evening.fullSessionName} (*${walkinHours}*) at ${tenant?.contact?.address?.city || CLINIC.ADDRESS.SHORT}.\n` +
         `• *Morning & Sunday Sessions:* Conducted strictly by prior appointment for detailed case-taking.\n` +
         `• *Queue Tokens:* Issued on a first-come, first-served basis at the clinic reception desk upon arrival.\n\n` +
         `We recommend booking your slot online to ensure minimal waiting time!`,
@@ -119,15 +135,14 @@ function getBotResponse(input: string, patientName: string, userTz?: string): Bo
   if (/location|address|map|where|directions|reach|hub|malleshwaram|bengaluru/.test(q)) {
     return {
       text:
-        `📍 *${CLINIC.FULL_NAME} Address & Contact:*\n\n` +
-        `• *Address:* ${CLINIC.ADDRESS.FULL}\n` +
-        `• *Accessibility:* Conveniently situated in ${CLINIC.ADDRESS.AREA} with easy access from major roads.\n` +
-        `• *Direct Contact:* 📞 ${CLINIC.PHONE_DISPLAY} | 📧 ${CLINIC.SUPPORT_EMAIL}\n\n` +
+        `📍 *${tenant?.name || CLINIC.FULL_NAME} Address & Contact:*\n\n` +
+        `• *Address:* ${clinicAddress}\n` +
+        `• *Direct Contact:* 📞 ${clinicPhone} | 📧 ${clinicEmail}\n\n` +
         `Click below to view the address and interactive map on the clinic page.`,
       actions: [
         { label: "📍 View Map & Address on Page", page: "about", scrollTo: "clinic-location" },
         { label: "📅 Book Clinic Visit",          page: "appointments" },
-        { label: "👩‍⚕️ About Dr. Bramarambha",     page: "about", scrollTo: "doctor-profile" },
+        { label: `👩‍⚕️ About ${doctorName}`,        page: "about", scrollTo: "doctor-profile" },
       ],
     };
   }
@@ -373,8 +388,12 @@ const now = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "
 // ─── ChatbotWidget ────────────────────────────────────────────────────────────
 export const ChatbotWidget: React.FC = () => {
   const { state, navigateTo, userTimezone } = useApp();
+  const { tenant } = useTenant();
   const { authUser } = state;
   const patientName = authUser?.name ?? "Patient";
+  const botName = tenant?.shortName ? `${tenant.shortName}Bot` : "ClinicBot";
+  const clinicName = tenant?.name || CLINIC.NAME;
+  const doctorTitle = tenant?.doctor?.title || DOCTOR.TITLE;
 
   const [isOpen,      setIsOpen]      = useState(false);
   const [inputValue,  setInputValue]  = useState("");
@@ -414,8 +433,8 @@ export const ChatbotWidget: React.FC = () => {
     id:     "msg-welcome",
     sender: "bot",
     text:
-      `Hello${authUser ? `, ${authUser.name.split(" ")[0]}` : ""}! 👋 I'm **AgastyaBot**, your ${CLINIC.NAME} AI assistant.\n\n` +
-      `• **Classical Homeopathy:** Individualized holistic care with ${DOCTOR.TITLE}.\n` +
+      `Hello${authUser ? `, ${authUser.name.split(" ")[0]}` : ""}! 👋 I'm **${botName}**, your ${clinicName} AI assistant.\n\n` +
+      `• **Care & Consultations:** Individualized holistic care with ${doctorTitle}.\n` +
       `• **Portal Navigation:** Book appointments, ${authUser ? "view your clinical summary, " : ""}explore specialisations, or connect with our clinic.\n\n` +
       `How can I help you today? Tap an option below or type your question:`,
     time:   now(),
@@ -507,7 +526,7 @@ export const ChatbotWidget: React.FC = () => {
     setIsTyping(true);
 
     setTimeout(() => {
-      const response = getBotResponse(text, patientName, userTimezone);
+      const response = getBotResponse(text, patientName, userTimezone, tenant);
       const botMsg: ChatMessage = {
         id:      `bot-${Date.now()}`,
         sender:  "bot",
@@ -560,10 +579,10 @@ export const ChatbotWidget: React.FC = () => {
                   <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-emerald-900" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-sm leading-tight">AgastyaBot AI Assistant</h3>
+                  <h3 className="font-extrabold text-sm leading-tight">{botName} AI Assistant</h3>
                   <p className="text-[10px] text-emerald-200 flex items-center gap-1 mt-0.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Online · {CLINIC.FULL_NAME}
+                    Online · {tenant?.name || CLINIC.FULL_NAME}
                   </p>
                 </div>
               </div>
@@ -579,7 +598,7 @@ export const ChatbotWidget: React.FC = () => {
                 <button
                   onClick={() => setIsOpen(false)}
                   className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs flex items-center justify-center transition-colors font-bold"
-                  aria-label="Close AgastyaBot"
+                  aria-label={`Close ${botName}`}
                 >✕</button>
               </div>
             </div>
@@ -688,9 +707,9 @@ export const ChatbotWidget: React.FC = () => {
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask AgastyaBot anything…"
+                placeholder={`Ask ${botName} anything…`}
                 className="flex-1 rounded-xl border border-stone-200 px-3 py-2 text-xs bg-stone-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                aria-label="Message AgastyaBot"
+                aria-label={`Message ${botName}`}
               />
               <button
                 type="submit"
@@ -704,10 +723,10 @@ export const ChatbotWidget: React.FC = () => {
           </div>
         )}
 
-        {/* ── Floating AgastyaBot AI Toggle Button ────────────────────────── */}
+        {/* ── Floating AI Assistant Toggle Button ────────────────────────── */}
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          aria-label={isOpen ? "Close AgastyaBot chat" : "Open AgastyaBot AI assistant"}
+          aria-label={isOpen ? `Close ${botName} chat` : `Open ${botName} AI assistant`}
           className="relative flex items-center gap-2 px-4 py-3 rounded-full text-white font-extrabold text-xs transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xl border border-emerald-400/30"
           style={{ background: THEME_GRADIENTS.PRIMARY }}
         >
@@ -715,7 +734,7 @@ export const ChatbotWidget: React.FC = () => {
             {isOpen ? "✕" : "🌿"}
           </span>
           <span className="inline font-bold">
-            {isOpen ? "Close" : "AgastyaBot"}
+            {isOpen ? "Close" : botName}
           </span>
           {!isOpen && (
             <span className="relative flex h-2.5 w-2.5">

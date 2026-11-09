@@ -1,5 +1,59 @@
 [
   {
+    "id": "default",
+    "slug": "default",
+    "name": "General Healthcare Clinic",
+    "shortName": "General Clinic",
+    "tagline": "Patient-centered healthcare with clinical precision",
+    "domain": "localhost",
+    "subdomains": [
+      "default",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+1 555-0100",
+      "phoneDisplay": "+1 555-0100",
+      "email": "admin@example.com",
+      "emergencyPhone": "+1 555-0199",
+      "address": {
+        "street": "100 Medical Center Way",
+        "area": "Downtown",
+        "city": "Metropolis",
+        "state": "State",
+        "pincode": "10001",
+        "country": "Country"
+      },
+      "mapsUrl": "https://maps.google.com/?q=Medical+Center",
+      "googleReviewUrl": ""
+    },
+    "logistics": {
+      "defaultCourier": "Standard Express \ud83d\ude9a",
+      "shippingOrigin": "Central Pharmacy Depot",
+      "dispatchWindow": "Same Day (before 3 PM)"
+    },
+    "branding": {
+      "primaryColor": "#1b4332",
+      "primaryDarkColor": "#081c15",
+      "accentColor": "#40916c",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png",
+      "bannerUrl": "/assets/banner.jpg"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": false
+    },
+    "isActive": true,
+    "updatedAt": "2026-11-09T22:00:00.000000+00:00"
+  },
+  {
     "id": "agastya",
     "slug": "agastya",
     "name": "Agastya Classical Homeopathy Clinic",
@@ -51,7 +105,7 @@
       "enableGoogleReviews": true
     },
     "isActive": true,
-    "updatedAt": "2026-11-09T21:40:25.417700+00:00"
+    "updatedAt": "2026-11-09T22:47:52.617530+00:00"
   },
   {
     "id": "apollo",

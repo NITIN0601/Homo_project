@@ -13,7 +13,7 @@ export interface TenantResolutionContext {
  * 0. Query Parameter: ?tenant=... or ?hospital=...
  * 1. Option B: Active User Context (if logged in and authorized)
  * 2. Option A: Domain / Subdomain matching from hostname
- * 3. Fallback: Default clinic tenant (Agastya)
+ * 3. Fallback: Default vanilla clinic tenant (General Healthcare Clinic)
  */
 export function resolveActiveHospitalTenant(ctx?: TenantResolutionContext): HospitalTenantConfig {
   // ── 0. Query Parameter Override (?tenant=... or ?hospital=...) ───────────────

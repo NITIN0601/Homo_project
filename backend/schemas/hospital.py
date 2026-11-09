@@ -26,7 +26,7 @@ class HospitalCreateRequest(BaseModel):
 
 
 class DoctorCreateRequest(BaseModel):
-    hospital_id: str = Field(..., example="agastya", description="Hospital tenant this practitioner belongs to")
+    hospital_id: str = Field(..., example="default", description="Hospital tenant this practitioner belongs to")
     name: str = Field(..., example="Dr. Jane Doe, MD")
     short_name: str | None = Field(default=None, example="Dr. Jane Doe")
     title: str | None = Field(default=None, example="Senior Consultant Physician")

@@ -73,7 +73,7 @@ export const CustomPOModal: React.FC<CustomPOModalProps> = ({
           completed: false,
         },
         {
-          title: "Out for Delivery to Agastya Clinic",
+          title: "Out for Delivery to Clinic",
           location: LOGISTICS_HUBS.SUB_STATION,
           time: "Pending",
           completed: false,

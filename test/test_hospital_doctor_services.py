@@ -48,7 +48,7 @@ class TestHospitalDoctorServices(unittest.TestCase):
 
         # Fallback for unknown ID returns default
         unknown = get_hospital("non-existent-clinic-99")
-        self.assertEqual(unknown["id"], "agastya")
+        self.assertEqual(unknown["id"], "default")
 
     def test_resolve_hospital_via_header(self):
         # Header resolution for Apollo
@@ -57,10 +57,10 @@ class TestHospitalDoctorServices(unittest.TestCase):
         data = res.json()
         self.assertEqual(data["id"], "apollo")
 
-        # Default header resolution
+        # Default header resolution returns neutral default tenant
         res_default = self.client.get("/api/v1/hospitals/active")
         self.assertEqual(res_default.status_code, 200)
-        self.assertEqual(res_default.json()["id"], "agastya")
+        self.assertEqual(res_default.json()["id"], "default")
 
     def test_doctor_roster_scoping(self):
         # Doctor roster for Agastya (strictly 1 doctor: Dr. Bramarambha K)

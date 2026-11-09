@@ -1148,9 +1148,9 @@ export const VisitSummaryPage: React.FC = () => {
                     googleReviewSyncUrl: tenant.contact.googleReviewUrl,
                   };
                   try {
-                    const existingRaw = localStorage.getItem("agastya_customer_feedbacks");
+                    const existingRaw = localStorage.getItem("ehr_customer_feedbacks") || localStorage.getItem("agastya_customer_feedbacks");
                     const existingList: CustomerFeedback[] = existingRaw ? JSON.parse(existingRaw) : INITIAL_CUSTOMER_FEEDBACKS;
-                    localStorage.setItem("agastya_customer_feedbacks", JSON.stringify([newFeedback, ...existingList]));
+                    localStorage.setItem("ehr_customer_feedbacks", JSON.stringify([newFeedback, ...existingList]));
                   } catch { }
 
                   setTimeout(() => {

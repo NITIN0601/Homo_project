@@ -197,7 +197,7 @@ const CartPage: React.FC = () => {
   const [middleName, setMiddleName]   = useState(initialNames.middleName);
   const [lastName, setLastName]       = useState(initialNames.lastName);
   const [name, setName]               = useState(authUser?.name || "Guest Patient");
-  const [email, _setEmail]             = useState(authUser?.email || "guest@agastyahomoeo.com");
+  const [email, _setEmail]             = useState(authUser?.email || "guest@example.com");
   const [phone, setPhone]             = useState(authUser?.phone || "+91 98765 43210");
   const [street, setStreet]           = useState(authUser?.address?.street || "12 Gandhi Marg");
   const [city, setCity]               = useState(authUser?.address?.city || CLINIC.ADDRESS.CITY);

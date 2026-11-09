@@ -25,40 +25,40 @@ export const DEV_PORTS = {
 // ─── App Storage Keys (localStorage / sessionStorage) ────────────────────────
 export const STORAGE_KEYS = {
   // Client Authentication & Session
-  COOKIE_CONSENT:  "agastya_cookie_consent",
-  AUTH_TOKEN:      "agastya_auth_token",
-  AUTH_PROFILE:    "agastya_auth_profile",
-  EXPLICIT_LOGOUT: "agastya_explicit_logout",
+  COOKIE_CONSENT:  "ehr_cookie_consent",
+  AUTH_TOKEN:      "ehr_auth_token",
+  AUTH_PROFILE:    "ehr_auth_profile",
+  EXPLICIT_LOGOUT: "ehr_explicit_logout",
 
   // Patient Cart & Orders
-  CART: "agastya_cart",
+  CART: "ehr_cart",
 
   // Calendar & Appointment Management
-  BLOCKED_DATES: "agastya_blocked_calendar_dates",
-  APPOINTMENTS:  "agastya_booked_appointments",
-  USER_TIMEZONE: "agastya_user_timezone",
+  BLOCKED_DATES: "ehr_blocked_calendar_dates",
+  APPOINTMENTS:  "ehr_booked_appointments",
+  USER_TIMEZONE: "ehr_user_timezone",
 
   // Clinical Invoices & Consultation Fees
-  CONSULTATION_INVOICES: "agastya_consultation_invoices",
+  CONSULTATION_INVOICES: "ehr_consultation_invoices",
 
   // LLM & Model Studio Configuration
-  ACTIVE_LLM_PROVIDER:   "agastya_active_llm_provider",
-  ACTIVE_LLM_MODELS:     "agastya_active_llm_models",
-  CUSTOM_MODELS_PREFIX:  "agastya_custom_models_",
-  DYNAMIC_MODELS_PREFIX: "agastya_dynamic_models_",
-  LLM_KEY_GEMINI:        "agastya_llm_key_gemini",
-  LLM_KEY_GROQ:          "agastya_llm_key_groq",
-  LLM_KEY_OPENAI:        "agastya_llm_key_openai",
-  LLM_KEY_ANTHROPIC:     "agastya_llm_key_anthropic",
-  LLM_ENDPOINT_OLLAMA:   "agastya_llm_endpoint_ollama",
+  ACTIVE_LLM_PROVIDER:   "ehr_active_llm_provider",
+  ACTIVE_LLM_MODELS:     "ehr_active_llm_models",
+  CUSTOM_MODELS_PREFIX:  "ehr_custom_models_",
+  DYNAMIC_MODELS_PREFIX: "ehr_dynamic_models_",
+  LLM_KEY_GEMINI:        "ehr_llm_key_gemini",
+  LLM_KEY_GROQ:          "ehr_llm_key_groq",
+  LLM_KEY_OPENAI:        "ehr_llm_key_openai",
+  LLM_KEY_ANTHROPIC:     "ehr_llm_key_anthropic",
+  LLM_ENDPOINT_OLLAMA:   "ehr_llm_endpoint_ollama",
 } as const;
 
 // ─── Demo / Mock Credentials (DEV only — never ship to production) ────────────
 export const DEMO_CREDENTIALS = {
   ADMIN:    { email: DOCTOR.EMAIL,                  password: "admin123",   name: DOCTOR.NAME },
-  PATIENT:  { email: "john@agastyahomoeo.com",      password: "patient123", name: "John Doe", id: "usr-001" },
-  PATIENT2: { email: "priya@agastyahomoeo.com",     password: "patient456", name: "Priya Sharma", id: "usr-002" },
-  HINT:     "admin@agastyahomoeo.com · john@agastyahomoeo.com",
+  PATIENT:  { email: "john@example.com",            password: "patient123", name: "John Doe", id: "usr-001" },
+  PATIENT2: { email: "priya@example.com",           password: "patient456", name: "Priya Sharma", id: "usr-002" },
+  HINT:     "admin@example.com · john@example.com",
 } as const;
 
 // ─── Phase 1 vs Phase 2 Feature Flags (SSOT) ──────────────────────────────────

@@ -16,7 +16,7 @@ export interface DynamicHoliday {
 }
 
 export const GOOGLE_CALENDAR_ID = "en.indian#holiday@group.v.calendar.google.com";
-const CACHE_PREFIX = "agastya_dynamic_holidays_v5_";
+const CACHE_PREFIX = "ehr_dynamic_holidays_v5_";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // In-memory cache

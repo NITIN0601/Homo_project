@@ -1,5 +1,28 @@
 [
   {
+    "id": "doc-default",
+    "hospitalId": "default",
+    "name": "Dr. Primary Physician, MD",
+    "shortName": "Dr. Primary",
+    "title": "Primary Consulting Physician, MD",
+    "regNo": "MED-GEN-2020-001",
+    "licenseId": "DOC-DEF-001",
+    "email": "doctor@example.com",
+    "phone": "+1 555-0100",
+    "experienceYears": 10,
+    "qualifications": "MD, MBBS",
+    "specialties": [
+      "General Medicine",
+      "Holistic Health",
+      "Preventive Care"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-default.jpg",
+    "bio": "Holistic clinical physician dedicated to evidence-based healthcare and patient-centered clinical care.",
+    "isPrimary": true,
+    "isActive": true
+  },
+  {
     "id": "doc-001",
     "hospitalId": "agastya",
     "name": "Dr. Bramarambha K, MD (Homoeopathy)",
@@ -70,4 +93,3 @@
     "isActive": true
   }
 ]
-

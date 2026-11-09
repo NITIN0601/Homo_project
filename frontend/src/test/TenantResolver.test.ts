@@ -24,11 +24,13 @@ describe("Phase 2: Multi-Hospital Tenant Resolution & Isolation", () => {
       expect(tenant.name).toContain("Apollo");
     });
 
-    it("falls back to default agastya tenant for localhost or unknown domain", () => {
+    it("falls back to default neutral tenant for localhost or unknown domain", () => {
       const tenant = resolveActiveHospitalTenant({ hostname: "localhost" });
+      expect(tenant.id).toBe("default");
       expect(tenant.id).toBe(DEFAULT_HOSPITAL_TENANT.id);
 
       const unknown = resolveActiveHospitalTenant({ hostname: "random-health.org" });
+      expect(unknown.id).toBe("default");
       expect(unknown.id).toBe(DEFAULT_HOSPITAL_TENANT.id);
     });
   });
@@ -50,7 +52,7 @@ describe("Phase 2: Multi-Hospital Tenant Resolution & Isolation", () => {
         userAuthorizedHospitals: ["agastya"], // Only authorized for agastya
       });
       // Falls back to domain / default
-      expect(tenant.id).toBe("agastya");
+      expect(tenant.id).toBe("default");
     });
   });
 
@@ -68,8 +70,9 @@ describe("Phase 2: Multi-Hospital Tenant Resolution & Isolation", () => {
 
     it("retrieves tenant by ID with safe fallback", () => {
       expect(getHospitalTenantById("apollo").id).toBe("apollo");
-      expect(getHospitalTenantById("non-existent-id").id).toBe("agastya");
-      expect(getHospitalTenantById(null).id).toBe("agastya");
+      expect(getHospitalTenantById("agastya").id).toBe("agastya");
+      expect(getHospitalTenantById("non-existent-id").id).toBe("default");
+      expect(getHospitalTenantById(null).id).toBe("default");
     });
   });
 });

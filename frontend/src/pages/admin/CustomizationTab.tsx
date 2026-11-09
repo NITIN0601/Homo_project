@@ -8,8 +8,8 @@ import { type CustomerFeedback, INITIAL_CUSTOMER_FEEDBACKS } from "../../types/f
 import { formatDateTime } from "../../utils/format";
 import { api } from "../../services/api";
 
-const PASSCODES_STORAGE_KEY = "agastya_admin_security_passcodes";
-const AUDIT_LOG_STORAGE_KEY = "agastya_customization_audit_log";
+const PASSCODES_STORAGE_KEY = "ehr_admin_security_passcodes";
+const AUDIT_LOG_STORAGE_KEY = "ehr_customization_audit_log";
 
 const DEFAULT_PASSCODES: AdminPasscode[] = [
   {
@@ -25,7 +25,7 @@ const INITIAL_AUDIT_LOGS: CustomizationAuditLogEntry[] = [
   {
     id: "audit-init-1",
     timestamp: "2026-11-03T09:30:00Z",
-    adminName: "Dr. Agastya (Super Admin)",
+    adminName: "Super Admin",
     adminId: "adm-001",
     action: "ADD_PASSCODE",
     details: "Initialized primary administrative security passcode (8899)",
@@ -36,7 +36,7 @@ export const CustomizationTab: React.FC = () => {
   const { tenant, setTenantId, updateTenant, resetTenantToDefaults } = useTenant();
   const { state: appState } = useApp();
 
-  const currentAdminName = appState.authUser?.name || "Dr. Agastya (Super Admin)";
+  const currentAdminName = appState.authUser?.name || "Super Admin";
   const currentAdminId = appState.authUser?.id || "adm-001";
 
   // Local form state initialized from active tenant
@@ -88,7 +88,7 @@ export const CustomizationTab: React.FC = () => {
   const [feedbackList, setFeedbackList] = useState<CustomerFeedback[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const raw = localStorage.getItem("agastya_customer_feedbacks");
+        const raw = localStorage.getItem("ehr_customer_feedbacks") || localStorage.getItem("agastya_customer_feedbacks");
         if (raw) return JSON.parse(raw);
       } catch {}
     }
@@ -356,7 +356,7 @@ export const CustomizationTab: React.FC = () => {
   const handleApproveFeedback = (id: string) => {
     setFeedbackList((prev) => {
       const next = prev.map((f) => (f.id === id ? { ...f, status: "approved" as const } : f));
-      try { localStorage.setItem("agastya_customer_feedbacks", JSON.stringify(next)); } catch {}
+      try { localStorage.setItem("ehr_customer_feedbacks", JSON.stringify(next)); } catch {}
       return next;
     });
     setSaveSuccessMsg("✓ Feedback approved and featured on clinic public showcase!");
@@ -366,7 +366,7 @@ export const CustomizationTab: React.FC = () => {
   const handleHideFeedback = (id: string) => {
     setFeedbackList((prev) => {
       const next = prev.map((f) => (f.id === id ? { ...f, status: "hidden" as const } : f));
-      try { localStorage.setItem("agastya_customer_feedbacks", JSON.stringify(next)); } catch {}
+      try { localStorage.setItem("ehr_customer_feedbacks", JSON.stringify(next)); } catch {}
       return next;
     });
     setSaveSuccessMsg("✓ Feedback hidden from public listing.");
@@ -376,7 +376,7 @@ export const CustomizationTab: React.FC = () => {
   const handleDeleteFeedback = (id: string) => {
     setFeedbackList((prev) => {
       const next = prev.filter((f) => f.id !== id);
-      try { localStorage.setItem("agastya_customer_feedbacks", JSON.stringify(next)); } catch {}
+      try { localStorage.setItem("ehr_customer_feedbacks", JSON.stringify(next)); } catch {}
       return next;
     });
     setSaveSuccessMsg("✓ Feedback permanently deleted.");
@@ -395,7 +395,7 @@ export const CustomizationTab: React.FC = () => {
       const next = prev.map((f) =>
         f.id === feedback.id ? { ...f, publishedToGoogle: true, status: "approved" as const } : f
       );
-      try { localStorage.setItem("agastya_customer_feedbacks", JSON.stringify(next)); } catch {}
+      try { localStorage.setItem("ehr_customer_feedbacks", JSON.stringify(next)); } catch {}
       return next;
     });
 
@@ -517,7 +517,7 @@ export const CustomizationTab: React.FC = () => {
               />
             </div>
 
-            {/* Toggle: AgastyaBot AI Assistant */}
+            {/* Toggle: AI Assistant Bot */}
             <div
               onClick={() => toggleCustomerViewFeature("enableAgastyaBot")}
               className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
@@ -529,7 +529,7 @@ export const CustomizationTab: React.FC = () => {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">🤖</span>
-                  <span className="font-bold text-sm text-stone-900">AgastyaBot</span>
+                  <span className="font-bold text-sm text-stone-900">{formData.shortName || "Clinic"}Bot AI Assistant</span>
                   {formData.features.enableAgastyaBot !== false ? (
                     <Badge variant="success" size="micro">Active (Visible)</Badge>
                   ) : (
@@ -1114,14 +1114,14 @@ export const CustomizationTab: React.FC = () => {
               label="Official Hospital / Clinic Name"
               value={formData.name}
               onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-              placeholder="e.g. Agastya Homoeopathy Clinic"
+              placeholder="e.g. Metro Health Clinic"
               required
             />
             <Input
               label="Short Display Name"
               value={formData.shortName}
               onChange={(e) => setFormData((p) => ({ ...p, shortName: e.target.value }))}
-              placeholder="e.g. Agastya Clinic"
+              placeholder="e.g. Metro Clinic"
               required
             />
             <Input
@@ -1632,7 +1632,7 @@ export const CustomizationTab: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between bg-white/80 p-2 rounded-xl border border-emerald-200">
-                  <span>🤖 AgastyaBot AI:</span>
+                  <span>🤖 AI Assistant Bot:</span>
                   <span className={formData.features.enableAgastyaBot !== false ? "text-emerald-700 font-bold" : "text-stone-500 font-bold"}>
                     {formData.features.enableAgastyaBot !== false ? "Active" : "Disabled"}
                   </span>

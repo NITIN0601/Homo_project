@@ -108,7 +108,7 @@ export const AdminDashboard: React.FC = () => {
           id: pid,
           name: file.patientName,
           initials: file.patientName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2),
-          email: `${pid}@agastyahomoeo.com`,
+          email: `${pid}@example.com`,
           role: "patient",
           phone: "+91 98123 45678",
           address: { street: "", city: "", state: "", pincode: "" },

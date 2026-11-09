@@ -121,6 +121,7 @@ const TimeSlotGrid: React.FC<{
   error?: string;
 }> = ({ selectedDate, selectedSlot, onSelectSlot, error }) => {
   const { state, isSlotBooked, isSlotBlocked, userTzInfo, clinicTimeInfo } = useApp();
+  const { tenant } = useTenant();
   const clinicTime = clinicTimeInfo;
   const sessionHours = useMemo(
     () => getMappedSessionHours(selectedDate, userTzInfo.timeZone),
@@ -160,7 +161,7 @@ const TimeSlotGrid: React.FC<{
         <span className="text-3xl block mb-2" aria-hidden="true">🏖️</span>
         <h3 className="text-rose-900 font-bold text-base mb-1">Doctor Out of Office / Unavailable All Day</h3>
         <p className="text-rose-700 text-xs font-medium mb-3">
-          {CLINIC.DOCTOR_NAME} is unavailable on{" "}
+          {tenant.doctor?.name || CLINIC.DOCTOR_NAME} is unavailable on{" "}
           <strong className="font-bold underline">
             {formatDateFull(selectedDate + "T00:00:00")}
           </strong>
@@ -206,7 +207,7 @@ const TimeSlotGrid: React.FC<{
           <div>
             <p className="font-extrabold text-amber-950">Doctor Availability Notice (Partial Day Blocked)</p>
             <p className="text-amber-800 text-[11px] mt-0.5 leading-relaxed">
-              Dr. Agastya is unavailable for specific hours:{" "}
+              {tenant.doctor?.name || "The doctor"} is unavailable for specific hours:{" "}
               {partialBlocks.map((b) => `${b.startTime || "Custom"}–${b.endTime || "Custom"} (${b.reason})`).join("; ")}.
               Remaining consultation slots are open for appointment booking.
             </p>

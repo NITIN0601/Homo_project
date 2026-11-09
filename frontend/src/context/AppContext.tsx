@@ -69,24 +69,24 @@ export interface ParsedRoute {
 }
 
 export const ROUTE_TITLE_MAP: Record<string, string> = {
-  "/": "Agastya Homoeopathy Clinic — Gentle Healing, Lasting Wellness",
-  "/about": "About Us — Agastya Homoeopathy Clinic",
-  "/appointments": "Book Consultation — Agastya Homoeopathy Clinic",
-  "/cart": "Prescription & Medicine Cart — Agastya Homoeopathy Clinic",
-  "/order-medicine": "Order Medicines & Dispensary — Agastya Homoeopathy Clinic",
-  "/visit-summary": "My Clinical Records & Invoices — Agastya Homoeopathy Clinic",
-  "/visit-summary/records": "My Medical Records & Clinical History — Agastya Homoeopathy Clinic",
-  "/visit-summary/payments": "My Consultation Billing & Payment History — Agastya Homoeopathy Clinic",
-  "/billing": "My Consultation Billing & Invoices — Agastya Homoeopathy Clinic",
-  "/mobile-worker": "Field Care Worker Portal — Agastya Homoeopathy Clinic",
-  "/privacy-policy": "Privacy Policy — Agastya Homoeopathy Clinic",
-  "/terms": "Terms & Conditions — Agastya Homoeopathy Clinic",
-  "/admin/dashboard": "Doctor Practice Console — Agastya Homoeopathy Clinic",
-  "/admin/appointments": "Consultations & Schedule Queue — Agastya Homoeopathy Clinic",
-  "/admin/patients": "Patient Medical Records & Case Files — Agastya Homoeopathy Clinic",
-  "/admin/supplies": "Dispensary Stock & Medical Supplies — Agastya Homoeopathy Clinic",
-  "/admin/dispatches": "Logistics & PO Dispatches — Agastya Homoeopathy Clinic",
-  "/admin/calendar": "Doctor Blocked Days & OOO Calendar — Agastya Homoeopathy Clinic",
+  "/": "Gentle Healing, Lasting Wellness",
+  "/about": "About Us",
+  "/appointments": "Book Consultation",
+  "/cart": "Prescription & Medicine Cart",
+  "/order-medicine": "Order Medicines & Dispensary",
+  "/visit-summary": "My Clinical Records & Invoices",
+  "/visit-summary/records": "My Medical Records & Clinical History",
+  "/visit-summary/payments": "My Consultation Billing & Payment History",
+  "/billing": "My Consultation Billing & Invoices",
+  "/mobile-worker": "Field Care Worker Portal",
+  "/privacy-policy": "Privacy Policy",
+  "/terms": "Terms & Conditions",
+  "/admin/dashboard": "Doctor Practice Console",
+  "/admin/appointments": "Consultations & Schedule Queue",
+  "/admin/patients": "Patient Medical Records & Case Files",
+  "/admin/supplies": "Dispensary Stock & Medical Supplies",
+  "/admin/dispatches": "Logistics & PO Dispatches",
+  "/admin/calendar": "Doctor Blocked Days & OOO Calendar",
 };
 
 export function parseRouteFromLocation(): ParsedRoute {
@@ -198,8 +198,11 @@ export function syncUrlWithState(page: Page, adminTab?: AdminTab, replace: boole
     }
   }
 
-  const title = ROUTE_TITLE_MAP[targetUrl] || "Agastya Homoeopathy Clinic";
-  document.title = title;
+  const pageSubtitle = ROUTE_TITLE_MAP[targetUrl] || "Clinical Portal";
+  const existingClinic = typeof document !== "undefined" && document.title.includes(" — ")
+    ? document.title.split(" — ")[0]
+    : "Healthcare Portal";
+  document.title = `${existingClinic} — ${pageSubtitle}`;
 }
 
 // ─── Initial state — rehydrates from storage or auto-configures role by port/param ──
@@ -324,7 +327,7 @@ function getInitialVisitSummaries(): Record<string, PatientMedicalFile> {
   const fallback = USE_MOCK_DATA ? DEMO_VISIT_SUMMARIES : {};
   if (typeof window === "undefined") return fallback;
   try {
-    const raw = localStorage.getItem("agastya_visit_summaries");
+    const raw = localStorage.getItem("ehr_visit_summaries") || localStorage.getItem("agastya_visit_summaries");
     if (raw) {
       const parsed = JSON.parse(raw);
       return { ...fallback, ...parsed };
@@ -619,7 +622,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         },
       };
       try {
-        localStorage.setItem("agastya_visit_summaries", JSON.stringify(updatedVisits));
+        localStorage.setItem("ehr_visit_summaries", JSON.stringify(updatedVisits));
       } catch {}
       return {
         ...state,
@@ -642,7 +645,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const updatedFile = { ...existing, ...updates };
       const updatedMap = { ...state.visitSummaries, [patientId]: updatedFile };
       try {
-        localStorage.setItem("agastya_visit_summaries", JSON.stringify(updatedMap));
+        localStorage.setItem("ehr_visit_summaries", JSON.stringify(updatedMap));
       } catch {}
       return {
         ...state,
@@ -652,7 +655,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
     case "SET_VISIT_SUMMARIES": {
       try {
-        localStorage.setItem("agastya_visit_summaries", JSON.stringify(action.payload));
+        localStorage.setItem("ehr_visit_summaries", JSON.stringify(action.payload));
       } catch {}
       return {
         ...state,
@@ -1180,7 +1183,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           }
         } catch {}
       }
-      if (e.key === "agastya_visit_summaries" && e.newValue) {
+      if ((e.key === "ehr_visit_summaries" || e.key === "agastya_visit_summaries") && e.newValue) {
         try {
           const parsed = JSON.parse(e.newValue);
           dispatch({ type: "SET_VISIT_SUMMARIES", payload: parsed });

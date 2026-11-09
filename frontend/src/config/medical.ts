@@ -125,9 +125,9 @@ export const PHARMACY_SUPPLIERS = {
 
 // ─── Standard Logistics Checkpoints & Hubs (SSOT) ─────────────────────────────
 export const LOGISTICS_HUBS = {
-  CLINIC_HUB:           "Agastya Clinic Hub, Malleshwaram",
+  CLINIC_HUB:           "Central Clinic Hub, Malleshwaram",
   SUB_STATION:          "Malleshwaram Delivery Sub-Station",
-  CLINIC_INVENTORY:     "Agastya Clinic, Malleshwaram",
+  CLINIC_INVENTORY:     "Central Clinic Dispensary, Malleshwaram",
   MEMBER_STATION:       "Malleshwaram Station",
   BLUEDART_BENGALURU:   "BlueDart Logistics Hub, Bengaluru",
   SORT_YESHWANTHPUR:    "Sort Facility, Yeshwanthpur",

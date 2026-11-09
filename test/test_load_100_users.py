@@ -55,7 +55,7 @@ class Test100UsersParallelInteraction(unittest.TestCase):
         self._orig_inventory = get_all_inventory()
 
         # Admin JWT token
-        self.admin_token = generate_local_jwt({"sub": "admin-test", "email": "doctor@agastyaclinic.com", "role": "admin"})
+        self.admin_token = generate_local_jwt({"sub": "admin-test", "email": "doctor@example.com", "role": "admin"})
         self.admin_headers = {"Authorization": f"Bearer {self.admin_token}"}
 
     def tearDown(self):

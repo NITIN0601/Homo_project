@@ -14,7 +14,7 @@ interface RootErrorBoundaryState {
 }
 
 /**
- * Root Error Boundary for Agastya Clinic Web Platform.
+ * Root Error Boundary for EHR Web Platform.
  * Catches unhandled JavaScript runtime exceptions across all pages (HomePage,
  * AppointmentsPage, VisitSummaryPage, AdminDashboard, etc.) and presents a reassuring,
  * HIPAA/DPDP-conscious clinical recovery screen instead of a blank white screen crash.
@@ -91,7 +91,7 @@ export class RootErrorBoundary extends Component<
                   Clinical Safety Boundary
                 </span>
               </div>
-              <span className="text-xs text-stone-400 font-mono">Agastya System Recovery</span>
+              <span className="text-xs text-stone-400 font-mono">System Recovery</span>
             </div>
 
             {/* Error Message */}

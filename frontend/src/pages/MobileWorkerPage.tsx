@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useApp } from "../context/AppContext";
+import { useTenant } from "../context/ThemeProvider";
 import { BACKEND, USE_MOCK_DATA, CLINIC } from "../config";
 import { formatDateISO, splitFullName, combineFullName } from "../utils/format";
 import {
@@ -12,6 +13,7 @@ import ProviderSelector from "../components/common/ProviderSelector";
 
 export const MobileWorkerPage: React.FC = () => {
   const { navigateTo } = useApp();
+  const { tenant } = useTenant();
 
   const [activeTab, setActiveTab] = useState<"camera" | "ai-scribe" | "records">("camera");
 
@@ -208,7 +210,7 @@ export const MobileWorkerPage: React.FC = () => {
         <div className="flex items-center gap-2.5">
           <span className="text-xl">📱</span>
           <div>
-            <h1 className="text-sm font-extrabold tracking-wide uppercase">Agastya Mobile Clinic</h1>
+            <h1 className="text-sm font-extrabold tracking-wide uppercase">{tenant.shortName || tenant.name} Mobile Clinic</h1>
             <p className="text-[11px] text-emerald-200 flex items-center gap-1 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               Local Wi-Fi · {CLINIC.BRANCHES.TELE}

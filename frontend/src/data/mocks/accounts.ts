@@ -30,6 +30,37 @@ export const MOCK_ACCOUNTS: Record<string, { password: string; profile: UserProf
       ],
     },
   },
+  [DEMO_CREDENTIALS.PATIENT.email]: {
+    password: DEMO_CREDENTIALS.PATIENT.password,
+    profile: {
+      id:       "usr-001",
+      name:     "John Doe",
+      firstName: "John",
+      middleName: "",
+      lastName:  "Doe",
+      initials: "JD",
+      email:    DEMO_CREDENTIALS.PATIENT.email,
+      role:     "patient",
+      phone:    "+1 555-0155",
+      address: {
+        street: "42 Park Avenue",
+        city: "Metropolis",
+        state: "State",
+        pincode: "10001",
+      },
+      savedUpiId: "john.doe@okicici",
+      savedCards: [
+        {
+          id: "card-jd-1",
+          cardHolder: "John Doe",
+          cardNumber: "**** **** **** 4242",
+          brand: "Visa",
+          expiry: "12/28",
+          isDefault: true,
+        },
+      ],
+    },
+  },
   "admin@agastyahomoeo.com": {
     password: "admin123",
     profile: {
