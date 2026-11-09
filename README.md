@@ -99,6 +99,7 @@ Homo_project/
 │   ├── src/                   # Components, contexts, pages, hooks, services, types
 │   ├── public/                # Static assets, branding logos, banners
 │   ├── vite.config.ts         # Vite build configuration & local API reverse proxy
+│   ├── .env.example           # Frontend Vite client environment template
 │   └── package.json           # Frontend dependency manifest
 ├── backend/                   # FastAPI Asynchronous Core Engine (Python 3.14)
 │   ├── routes/                # Modular REST endpoints (/api/v1/...)
@@ -108,6 +109,7 @@ Homo_project/
 │   ├── main.py                # FastAPI app bootstrap & middleware pipeline
 │   ├── Dockerfile             # Python 3.14-slim production container
 │   ├── requirements.txt       # Pinned Python dependencies
+│   ├── .env.example           # Backend FastAPI server environment template
 │   └── venv/                  # Python 3.14 virtual environment
 ├── db/                        # Database Schemas, Migrations & Seed Data
 │   ├── schema.sql             # Consolidated PostgreSQL / Supabase DDL
@@ -124,7 +126,7 @@ Homo_project/
 │   └── test_*.py              # Modular test suites (security, auth, booking, multi-tenant)
 ├── doc/                       # System Architecture, HLD/LLD diagrams, and technical reviews
 ├── scripts/                   # Developer utilities and holiday synchronization scripts
-├── .env.example               # Clean client environment template (zero PII)
+├── .env.example               # Root monorepo & Docker Compose environment template
 ├── package.json               # Root npm workspace manifest delegating monorepo tasks
 └── README.md                  # Project documentation (this file)
 ```
@@ -151,9 +153,15 @@ Before launching locally, ensure you have the following installed:
 git clone https://github.com/NITIN0601/Homo_project.git Homo_project
 cd Homo_project
 
-# Copy the example environment variables
-cp .env.example .env
+# Configure environment variables for frontend and backend:
+# 1. Frontend client configuration
+cp frontend/.env.example frontend/.env
+
+# 2. Backend server configuration
 cp backend/.env.example backend/.env
+
+# 3. (Optional) Root / Docker Compose orchestration configuration
+cp .env.example .env
 ```
 
 The system operates out-of-the-box in local development mode without requiring external API keys.
