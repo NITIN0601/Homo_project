@@ -3,14 +3,16 @@ Hospital & Doctor Metadata Route Handlers.
 Enables multi-tenant hospital resolution, doctor roster queries, and branding retrieval.
 """
 
-from typing import Any
-from fastapi import APIRouter, Header, HTTPException, Query
+from datetime import datetime, timezone
 
+from core.security import require_admin_role
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from services.doctor_service import get_doctor, list_doctors
 from services.hospital_service import (
     get_hospital,
     list_hospitals,
     resolve_hospital,
+    save_hospital,
 )
 
 router = APIRouter(tags=["Hospital & Doctor Multi-Tenancy"])
@@ -69,4 +71,35 @@ async def get_doctor_endpoint(doctor_id: str):
     if not d:
         raise HTTPException(status_code=404, detail=f"Doctor '{doctor_id}' not found")
     return d
+
+
+@router.get("/hospitals/{hospital_id}/features", summary="Get active feature flags for hospital")
+async def get_hospital_features(hospital_id: str):
+    """Returns live feature flag state for the hospital tenant."""
+    hospital = get_hospital(hospital_id)
+    return {
+        "hospital_id": hospital_id,
+        "features": hospital.get("features", {}),
+        "updated_at": hospital.get("updatedAt"),
+    }
+
+
+@router.patch("/hospitals/{hospital_id}/features", summary="Update feature flags (admin only)")
+async def update_hospital_features(
+    hospital_id: str,
+    features: dict[str, bool],
+    user: dict = Depends(require_admin_role),
+):
+    """Admin-only: Atomically updates feature flags and persists to hospital tenant config."""
+    hospital = get_hospital(hospital_id)
+    current_features = hospital.get("features", {})
+    updated_features = {**current_features, **features}
+    updated_record = {
+        **hospital,
+        "features": updated_features,
+        "updatedAt": datetime.now(timezone.utc).isoformat(),
+    }
+    save_hospital(updated_record)
+    return {"status": "updated", "hospital_id": hospital_id, "features": updated_features}
+
 

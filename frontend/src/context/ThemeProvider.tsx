@@ -34,14 +34,8 @@ function getSavedTenantOverride(base: HospitalTenantConfig): HospitalTenantConfi
         },
         branding: { ...base.branding, ...(parsed.branding || {}) },
         features: {
-          displayDoctorDetails: true,
-          enablePatientMedicalRecords: true,
-          enableBillingHistory: true,
-          enableFollowupFeedback: true,
-          enableAgastyaBot: true,
-          enablePatientProfileEdit: true,
           ...base.features,
-          ...(parsed.features || {}),
+          ...(parsed.features ?? {}),
         },
       };
     }
@@ -84,6 +78,7 @@ export const ThemeProvider: React.FC<{
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem(`${STORAGE_CUSTOM_PREFIX}${merged.id}`, JSON.stringify(merged));
+          window.dispatchEvent(new Event("tenant_features_changed"));
         } catch {}
       }
       return merged;
@@ -102,11 +97,26 @@ export const ThemeProvider: React.FC<{
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem(`${STORAGE_CUSTOM_PREFIX}${tenant.id}`);
+        window.dispatchEvent(new Event("tenant_features_changed"));
       } catch {}
     }
     const cleanBase = getHospitalTenantById(tenant.id);
     setTenant(cleanBase);
   }, [tenant.id]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleSync = () => {
+      const base = initialTenantId ? getHospitalTenantById(initialTenantId) : resolveActiveHospitalTenant();
+      setTenant(getSavedTenantOverride(base));
+    };
+    window.addEventListener("storage", handleSync);
+    window.addEventListener("tenant_features_changed", handleSync);
+    return () => {
+      window.removeEventListener("storage", handleSync);
+      window.removeEventListener("tenant_features_changed", handleSync);
+    };
+  }, [initialTenantId]);
 
   const isFeatureEnabled = useCallback((featureKey: keyof HospitalFeatures): boolean => {
     return Boolean(tenant.features[featureKey]);

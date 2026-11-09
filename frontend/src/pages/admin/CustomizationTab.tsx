@@ -6,6 +6,7 @@ import { HOSPITAL_TENANTS } from "../../config/tenants";
 import type { HospitalTenantConfig, AdminPasscode, CustomizationAuditLogEntry } from "../../types/tenant";
 import { type CustomerFeedback, INITIAL_CUSTOMER_FEEDBACKS } from "../../types/feedback";
 import { formatDateTime } from "../../utils/format";
+import { api } from "../../services/api";
 
 const PASSCODES_STORAGE_KEY = "agastya_admin_security_passcodes";
 const AUDIT_LOG_STORAGE_KEY = "agastya_customization_audit_log";
@@ -164,6 +165,10 @@ export const CustomizationTab: React.FC = () => {
 
     updateTenant({
       features: updatedFeatures,
+    });
+
+    api.hospitals.updateFeatures(tenant.id, updatedFeatures as Record<string, boolean>).catch((err) => {
+      console.warn("Feature flag backend sync failed — changes saved locally only:", err);
     });
 
     appendAuditLog(
