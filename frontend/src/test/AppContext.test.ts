@@ -162,7 +162,7 @@ describe("AppContext State Machine & Reducer Regression Suite", () => {
         initials: "BK",
         email: "admin@agastyahomoeo.com",
         role: "admin",
-        phone: "+91 70195 76255",
+        phone: "+91 98450 12345",
       };
 
       const nextState = appReducer(
@@ -224,7 +224,7 @@ describe("AppContext State Machine & Reducer Regression Suite", () => {
           initials: "BK",
           email: "admin@agastyahomoeo.com",
           role: "admin",
-          phone: "+91 70195 76255",
+          phone: "+91 98450 12345",
         },
         activePage: "admin-dashboard",
         cart: [{ medicine: MEDICINE_CATALOGUE[0], quantity: 2 }],

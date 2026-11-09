@@ -65,7 +65,7 @@ class Settings:
         email.strip().lower()
         for email in os.getenv(
             "AUTHORIZED_ADMIN_EMAILS",
-            "admin@agastyahomoeo.com,doctor@agastyahomoeo.com,drbramarambha@agastyahomoeo.com,vaishnavikshetty@gmail.com",
+            "admin@agastyahomoeo.com,doctor@agastyahomoeo.com,drbramarambha@agastyahomoeo.com",
         ).split(",")
         if email.strip()
     ]

@@ -83,7 +83,7 @@ class TestPhase1ApiEndpoints(unittest.TestCase):
         # 1. Register Admin WhatsApp settings
         res_reg = self.client.post("/api/v1/whatsapp/register-admin", json={
             "doctorName": "Dr. Bramarambha K",
-            "whatsappNumber": "+91 70195 76255",
+            "whatsappNumber": "+91 98450 12345",
             "autoNotifyRegistration": True,
             "autoNotifyPrescriptions": True
         })

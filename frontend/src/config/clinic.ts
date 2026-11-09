@@ -14,7 +14,7 @@ export const DOCTOR = {
   CERTIFICATION:   "SCPH-Certified",
   EXPERIENCE_YEARS: "6 Years",
   EXPERIENCE_DESC: "6 years of dedicated clinical experience providing individualised homoeopathic care",
-  EMAIL:           "vaishnavikshetty@gmail.com",
+  EMAIL:           "doctor@agastyahomoeo.com",
   UPI_ID:          "bramarambha.k@okicici",
 
   BIO_SUMMARY:
@@ -76,9 +76,9 @@ export const CLINIC = {
   DOCTOR_UPI_ID:          DOCTOR.UPI_ID,
 
   // Contact
-  PHONE_DISPLAY:   "+91 70195 76255",
-  PHONE_TEL:       "+917019576255",
-  SUPPORT_EMAIL:   "vaishnavikshetty@gmail.com",
+  PHONE_DISPLAY:   "+91 98450 12345",
+  PHONE_TEL:       "+919845012345",
+  SUPPORT_EMAIL:   "admin@agastyahomoeo.com",
   PHARMACY_EMAIL:  "pharmacy@agastyahomoeopathy.com",
 
   // Assets
@@ -146,7 +146,7 @@ export const OFFICE_HOURS = {
   SATURDAY:  { label: "Saturday",  hours: "10:00 AM – 1:00 PM (Prior Appt) & 5:30 PM – 8:00 PM (Walk-ins Welcome)" },
   SUMMARY:   "Mon – Sat: 10:00 AM – 1:00 PM (Prior Appt) & 5:30 PM – 8:00 PM (Walk-ins & Appointments) · Sunday: By prior appt only",
   WALKIN_POLICY: "Walk-ins are welcomed Monday through Saturday during Evening OPD (5:30 PM – 8:00 PM). Morning sessions (10:00 AM – 1:00 PM) and Sundays are strictly by prior appointment.",
-  EMERGENCY: "For appointments, walk-in inquiries and queries, call or WhatsApp +91 7019576255.",
+  EMERGENCY: "For appointments, walk-in inquiries and queries, call or WhatsApp +91 98450 12345.",
 } as const;
 
 // ─── Consultation Appointment Time Slots (SSOT) ──────────────────────────────

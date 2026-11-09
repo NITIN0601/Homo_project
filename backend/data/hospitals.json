@@ -6,12 +6,16 @@
     "shortName": "Agastya Clinic",
     "tagline": "Root-cause homeopathic healing with clinical precision",
     "domain": "agastyahomoeo.com",
-    "subdomains": ["agastya", "clinic", "ehr"],
+    "subdomains": [
+      "agastya",
+      "clinic",
+      "ehr"
+    ],
     "contact": {
       "phone": "+91 98450 12345",
       "phoneDisplay": "+91 98450 12345",
       "email": "admin@agastyahomoeo.com",
-      "emergencyPhone": "+91 70195 76255",
+      "emergencyPhone": "+91 98450 12345",
       "address": {
         "street": "No. 10/2, 2nd Temple Road, 16th Cross",
         "area": "Malleshwaram",
@@ -24,7 +28,7 @@
       "googleReviewUrl": "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4"
     },
     "logistics": {
-      "defaultCourier": "BlueDart Express 🚚",
+      "defaultCourier": "BlueDart Express \ud83d\ude9a",
       "shippingOrigin": "Agastya Central Pharmacy, Malleshwaram, Bengaluru",
       "dispatchWindow": "Same Day (before 3 PM)"
     },
@@ -46,7 +50,8 @@
       "enableTelemedicine": true,
       "enableGoogleReviews": true
     },
-    "isActive": true
+    "isActive": true,
+    "updatedAt": "2026-11-09T21:40:25.417700+00:00"
   },
   {
     "id": "apollo",
@@ -55,7 +60,10 @@
     "shortName": "Apollo Clinic",
     "tagline": "Touched by trust, driven by clinical excellence",
     "domain": "apollo.telecare.in",
-    "subdomains": ["apollo", "telehealth"],
+    "subdomains": [
+      "apollo",
+      "telehealth"
+    ],
     "contact": {
       "phone": "+91 80 2630 4050",
       "phoneDisplay": "+91 80 2630 4050",
@@ -73,7 +81,7 @@
       "googleReviewUrl": "https://search.google.com/local/writereview?placeid=ChIJApolloBannerghatta"
     },
     "logistics": {
-      "defaultCourier": "Apollo Pharmacy Express 🛵",
+      "defaultCourier": "Apollo Pharmacy Express \ud83d\udef5",
       "shippingOrigin": "Apollo Central Hub, Bannerghatta Road, Bengaluru",
       "dispatchWindow": "2-4 Hours Express"
     },
@@ -98,4 +106,3 @@
     "isActive": true
   }
 ]
-

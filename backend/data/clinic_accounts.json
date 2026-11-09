@@ -1,10 +1,10 @@
 {
-  "vaishnavikshetty@gmail.com": {
-    "id": "usr-admin-001",
+  "doctor@agastyahomoeo.com": {
+    "id": "usr-admin-002",
     "name": "Dr. Bramarambha K",
-    "email": "vaishnavikshetty@gmail.com",
+    "email": "doctor@agastyahomoeo.com",
     "role": "admin",
-    "phone": "+91 70195 76255",
+    "phone": "+91 98450 12345",
     "hash": "559be0013f0a6d362c19eeff7bfc5e10d7ae9b3c5c81b086558ede8b40a540c1",
     "salt": "f4bc15a028f9712d8bc2525dfe9dce4c",
     "created_at": "2026-10-01T00:47:15.775069"
@@ -14,7 +14,7 @@
     "name": "Dr. Bramarambha K",
     "email": "admin@agastyahomoeo.com",
     "role": "admin",
-    "phone": "+91 70195 76255",
+    "phone": "+91 98450 12345",
     "hash": "559be0013f0a6d362c19eeff7bfc5e10d7ae9b3c5c81b086558ede8b40a540c1",
     "salt": "f4bc15a028f9712d8bc2525dfe9dce4c",
     "created_at": "2026-10-01T00:47:15.775069"

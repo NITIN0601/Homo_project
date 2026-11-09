@@ -18,9 +18,9 @@ export const CONTACT_INFO = {
 
 // ─── WhatsApp Business (SSOT) ────────────────────────────────────────────────
 export const WHATSAPP = {
-  NUMBER:           "+917019576255",
-  NUMBER_CLEAN:     "917019576255",
-  ACCOUNT_ID:       "WABA-7019576255",
+  NUMBER:           "+919845012345",
+  NUMBER_CLEAN:     "919845012345",
+  ACCOUNT_ID:       "WABA-9845012345",
   DEFAULT_MESSAGE:  `Hello ${CLINIC.FULL_NAME}! 👋 I would like to schedule a consultation with ${DOCTOR.NAME}.`,
 
   TEMPLATES: {

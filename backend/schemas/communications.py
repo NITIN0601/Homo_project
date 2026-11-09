@@ -16,7 +16,7 @@ class WhatsAppRegisterRequest(BaseModel):
     phoneNumberId: str | None = Field(default=None, example="100609346426085")
     businessAccountId: str | None = Field(default=None, example="100609346426084")
     accessToken: str | None = Field(default=None, example="EAAB...")
-    whatsappNumber: str | None = Field(default=None, example="+91 70195 76255")
+    whatsappNumber: str | None = Field(default=None, example="+91 98450 12345")
     autoNotifyRegistration: bool | None = Field(default=True)
     autoNotifyPrescriptions: bool | None = Field(default=True)
 
