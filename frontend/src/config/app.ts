@@ -4,13 +4,15 @@
  * phase feature flags, backend endpoints, and inventory defaults.
  */
 import { CLINIC, DOCTOR } from "./clinic";
+import { ENV } from "./env";
 
 // ─── Environment & Mock Data SSOT Toggle ──────────────────────────────────────
-/**
- * When VITE_USE_MOCK_DATA="true", application displays mock accounts, visits & inventory.
- * When VITE_USE_MOCK_DATA="false", application connects to the live local FastAPI & Supabase EHR.
- */
-export const USE_MOCK_DATA = (import.meta.env.VITE_USE_MOCK_DATA ?? "true").toLowerCase() === "true";
+export const USE_MOCK_DATA = ENV.USE_MOCK_DATA;
+
+export const MOCK_TOKENS = {
+  DEMO_JWT:   "demo-jwt-token-mock",
+  DEMO_ADMIN: "demo-admin-token-mock",
+} as const;
 
 // ─── Development & Production Ports ───────────────────────────────────────────
 export const DEV_PORTS = {
@@ -80,20 +82,20 @@ export const PHASE_CONFIG = {
 // ─── Backend (Python FastAPI) ─────────────────────────────────────────────────
 export const BACKEND = {
   /** Enabled automatically unless mock mode explicitly requested without backend override */
-  ENABLED:  !USE_MOCK_DATA || import.meta.env.VITE_ENABLE_PYTHON_BACKEND === "true",
-  BASE_URL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1",
+  ENABLED:  !ENV.USE_MOCK_DATA,
+  BASE_URL: ENV.BACKEND_URL,
 } as const;
 
 // ─── Self-Hosted Supabase (Docker on Admin PC) ───────────────────────────────
 export const SUPABASE_CONFIG = {
-  URL: import.meta.env.VITE_SUPABASE_URL ?? "http://localhost:54321",
-  ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy",
+  URL: ENV.SUPABASE_URL,
+  ANON_KEY: ENV.SUPABASE_ANON_KEY,
 } as const;
 
 // ─── VoiceStudio (debpalash/VoiceStudio) Integration ───────────────────────────
 export const VOICE_STUDIO = {
   ENABLED: true,
-  HTTP_BASE_URL: import.meta.env.VITE_VOICESTUDIO_URL ?? "http://127.0.0.1:3900",
+  HTTP_BASE_URL: ENV.VOICESTUDIO_URL,
   TRANSCRIPTION_ENDPOINT: "/v1/audio/transcriptions",
   SUPPORTED_LANGUAGES: [
     { code: "auto", label: "🌐 Auto-Detect Language (Default)" },

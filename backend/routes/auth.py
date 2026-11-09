@@ -3,9 +3,8 @@ Authentication Route Handlers.
 Handles user registration, login, JWT token issuance, and OTP verification.
 """
 
-from fastapi import APIRouter, HTTPException, status
-
 from core.config import settings
+from fastapi import APIRouter, HTTPException, status
 from schemas.auth import (
     GoogleAuthRequest,
     LoginRequest,

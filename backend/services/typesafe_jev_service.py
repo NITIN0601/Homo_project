@@ -5,12 +5,13 @@ Connects with TypeSafe AI API (via TYPESAFE_API_KEY) with a robust, calibrated
 on-premise local fallback for offline clinic operations.
 """
 
-import os
-import re
 import logging
+import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
-from pydantic import BaseModel, Field
+from typing import Any
+
+from core.config import settings
+from pydantic import BaseModel
 
 logger = logging.getLogger("typesafe_jev")
 
@@ -25,7 +26,7 @@ class Noul:
 class Choice:
     """Multi-category selection returning chosen key, probability, and distribution."""
     instructions: str
-    criteria: Dict[str, str] = field(default_factory=dict)
+    criteria: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -44,7 +45,7 @@ class NoulResult(BaseModel):
 class ChoiceResult(BaseModel):
     choice: str
     probability: float
-    distribution: Dict[str, float]
+    distribution: dict[str, float]
 
 
 class ScoreResult(BaseModel):
@@ -58,16 +59,16 @@ class TypeSafeClassifier:
     Executes fast, typed, and calibrated probabilistic evaluations over text state.
     """
 
-    def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.getenv("TYPESAFE_API_KEY")
+    def __init__(self, api_key: str | None = None):
+        self.api_key = api_key or settings.TYPESAFE_API_KEY
 
-    def invoke(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def invoke(self, input_data: dict[str, Any]) -> dict[str, Any]:
         """
         Evaluates input state against the defined question schema using Jev model.
         """
         state = input_data.get("state", "")
         questions = input_data.get("questions", {})
-        results: Dict[str, Any] = {}
+        results: dict[str, Any] = {}
 
         # If live TypeSafe API key is configured, call TypeSafe Cloud endpoint
         if self.api_key and not self.api_key.startswith("dummy"):
@@ -124,7 +125,7 @@ class TypeSafeClassifier:
 
             elif isinstance(q, Choice):
                 # Distribution across candidate categories
-                scores: Dict[str, float] = {}
+                scores: dict[str, float] = {}
                 for choice_key, crit in q.criteria.items():
                     crit_tokens = re.findall(r"\w+", crit.lower())
                     overlap = sum(1 for t in crit_tokens if t in text_lower and len(t) > 3)
@@ -158,8 +159,8 @@ class TypeSafeClassifier:
 
 def classify_clinical_state_with_jev(
     state_description: str,
-    questions_schema: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    questions_schema: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Evaluates patient complaint or dictation using TypeSafe AI's Jev model.
     """

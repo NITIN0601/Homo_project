@@ -5,7 +5,6 @@ Creates calendar events on Google Workspace Business Calendar with sendUpdates='
 
 import logging
 import os
-import re
 from datetime import datetime
 from typing import Any
 
@@ -18,8 +17,8 @@ logger = logging.getLogger("google_calendar")
 BUSINESS_TIMEZONE = "Asia/Kolkata"
 
 # Path to Service Account JSON
-CREDENTIALS_PATH = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", os.getenv("GOOGLE_CALENDAR_CREDENTIALS_PATH", "backend/credentials.json"))
-CALENDAR_ID = os.getenv("GOOGLE_CALENDAR_ID", "primary")
+CREDENTIALS_PATH = settings.GOOGLE_APPLICATION_CREDENTIALS
+CALENDAR_ID = settings.GOOGLE_CALENDAR_ID
 
 SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
 

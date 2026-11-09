@@ -4,10 +4,7 @@ Manages multi-doctor roster, qualifications, credentials, and schedule ownership
 Supports 1 to N doctors per hospital with dynamic practitioner resolution.
 """
 
-import json
 import logging
-import os
-from pathlib import Path
 from typing import Any
 
 from core.config import settings

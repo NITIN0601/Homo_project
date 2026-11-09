@@ -13,6 +13,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from fastapi import Header, HTTPException, status
+
 from core.config import settings
 
 logger = logging.getLogger("security")
@@ -31,6 +32,8 @@ def b64url_decode(s: str) -> bytes:
 
 
 def hash_password(password: str, salt: str | None = None) -> tuple[str, str]:
+    if len(password) < 6:
+        raise ValueError("Password must be at least 6 characters.")
     if salt is None:
         import os
         salt = os.urandom(16).hex()
@@ -52,7 +55,7 @@ def create_access_token(payload: dict[str, Any], expires_days: int = settings.AC
 
     h_b64 = b64url_encode(json.dumps(header).encode("utf-8"))
     p_b64 = b64url_encode(json.dumps(body).encode("utf-8"))
-    sig_input = f"{h_b64}.{p_b64}".encode("utf-8")
+    sig_input = f"{h_b64}.{p_b64}".encode()
     secret_bytes = settings.JWT_SECRET.encode("utf-8")
 
     sig = hmac.new(secret_bytes, sig_input, hashlib.sha256).digest()
@@ -66,7 +69,7 @@ def verify_access_token(token: str) -> dict[str, Any] | None:
         if len(parts) != 3:
             return None
         h_b64, p_b64, sig_b64 = parts
-        sig_input = f"{h_b64}.{p_b64}".encode("utf-8")
+        sig_input = f"{h_b64}.{p_b64}".encode()
         secret_bytes = settings.JWT_SECRET.encode("utf-8")
 
         expected_sig = hmac.new(secret_bytes, sig_input, hashlib.sha256).digest()

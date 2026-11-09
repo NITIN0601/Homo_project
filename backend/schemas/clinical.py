@@ -4,6 +4,7 @@ Clinical Records, AI Scribe & Repertorization Request Schemas.
 
 from datetime import datetime
 from typing import Any
+
 from pydantic import BaseModel, Field
 
 from schemas.case_record import HomeopathicCaseRecord

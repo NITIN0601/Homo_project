@@ -29,16 +29,16 @@ import type {
   ConsultationInvoice,
   BlockedCalendarDate,
 } from "../types";
-import { BACKEND, CLINIC, WHATSAPP, STORAGE_KEYS } from "../config";
+import { BACKEND, CLINIC, WHATSAPP, STORAGE_KEYS, MOCK_TOKENS } from "../config";
 import { formatDateShort } from "../utils/format";
 
 const BASE = BACKEND.BASE_URL;
 const USE  = BACKEND.ENABLED;
 
-// ─── Shared fetch helper for local endpoints (Vite proxy / FastAPI backend) ──
-async function serverFetch<T>(path: string, options?: RequestInit): Promise<T> {
+// ─── Unified fetch helper (adds auth header when token exists) ───────────────
+async function coreFetch<T>(base: string, path: string, options?: RequestInit): Promise<T> {
   const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-  const res = await fetch(path, {
+  const res = await fetch(`${base}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -46,24 +46,12 @@ async function serverFetch<T>(path: string, options?: RequestInit): Promise<T> {
       ...options?.headers,
     },
   });
-  if (!res.ok) throw new Error(`API ${path} failed: ${res.status}`);
+  if (!res.ok) throw new Error(`API ${path} failed: ${res.status} ${res.statusText}`);
   return res.json() as Promise<T>;
 }
 
-// ─── Shared fetch helper (adds auth header when token exists) ──────────────────
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-  const res = await fetch(`${BASE}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options?.headers,
-    },
-  });
-  if (!res.ok) throw new Error(`API ${path} failed: ${res.status}`);
-  return res.json() as Promise<T>;
-}
+const serverFetch = <T>(path: string, opts?: RequestInit) => coreFetch<T>("", path, opts);
+const apiFetch    = <T>(path: string, opts?: RequestInit) => coreFetch<T>(BASE, path, opts);
 
 export const api = {
   // ── Authentication ───────────────────────────────────────────────────────────
@@ -80,7 +68,7 @@ export const api = {
         }
         return res;
       }
-      return { token: "demo-jwt-token-xyz", profile: {} as UserProfile };
+      return { token: MOCK_TOKENS.DEMO_JWT, profile: {} as UserProfile };
     },
 
     register: async (userData: { name: string; first_name?: string; middle_name?: string; last_name?: string; email: string; password: string; role?: string; phone?: string }): Promise<{ token: string; profile: UserProfile }> => {
@@ -95,7 +83,7 @@ export const api = {
         }
         return res;
       }
-      return { token: "demo-token", profile: userData as unknown as UserProfile };
+      return { token: MOCK_TOKENS.DEMO_JWT, profile: userData as unknown as UserProfile };
     },
 
     sendOtp: async (email: string): Promise<{ success: boolean }> => {
@@ -116,7 +104,7 @@ export const api = {
         return res;
       }
       return {
-        token: "demo-google-jwt-token",
+        token: MOCK_TOKENS.DEMO_JWT,
         profile: {
           id: "usr-google-01",
           name: payload.name,
@@ -407,6 +395,21 @@ export const api = {
       } catch {
         return null;
       }
+    },
+  },
+  hospitals: {
+    getFeatures: async (hospitalId: string) => {
+      if (USE) return apiFetch<{ hospital_id: string; features: Record<string, boolean>; updated_at?: string }>(`/hospitals/${hospitalId}/features`);
+      return { hospital_id: hospitalId, features: {} };
+    },
+    updateFeatures: async (hospitalId: string, features: Record<string, boolean>) => {
+      if (USE) {
+        return apiFetch<{ status: string; hospital_id: string; features: Record<string, boolean> }>(`/hospitals/${hospitalId}/features`, {
+          method: "PATCH",
+          body: JSON.stringify(features),
+        });
+      }
+      return { status: "updated", hospital_id: hospitalId, features };
     },
   },
 };

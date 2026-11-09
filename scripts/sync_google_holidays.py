@@ -14,11 +14,11 @@ Usage:
 """
 
 import argparse
-from datetime import datetime
 import json
-from pathlib import Path
 import re
 import sys
+from datetime import datetime
+from pathlib import Path
 
 # Try standard libraries
 try:

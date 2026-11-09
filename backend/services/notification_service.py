@@ -4,25 +4,23 @@ Orchestrates Resend transactional emails and WhatsApp Business notifications
 for appointment booking confirmations, post-consultation follow-ups, and patient feedback.
 """
 
-import json
 import logging
-import os
 from datetime import datetime, timezone
 from typing import Any
 
 from core.config import settings
 from services.doctor_service import get_doctor
-from services.email_service import send_appointment_confirmation
+from services.email_service import send_appointment_confirmation as send_appointment_confirmation
 from services.hospital_service import get_hospital
 
 logger = logging.getLogger("notification_service")
 
 RESEND_API_URL = "https://api.resend.com/emails"
-RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
-CLINIC_ADMIN_EMAIL = os.getenv("CLINIC_ADMIN_EMAIL", settings.CLINIC_ADMIN_EMAIL)
-RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", f"{settings.CLINIC_NAME} <onboarding@resend.dev>")
-WHATSAPP_API_TOKEN = os.getenv("WHATSAPP_API_TOKEN", "")
-WHATSAPP_PHONE_ID = os.getenv("WHATSAPP_PHONE_ID", "100609346426085")
+RESEND_API_KEY = settings.RESEND_API_KEY
+CLINIC_ADMIN_EMAIL = settings.CLINIC_ADMIN_EMAIL
+RESEND_FROM_EMAIL = settings.RESEND_FROM_EMAIL
+WHATSAPP_API_TOKEN = settings.WHATSAPP_API_TOKEN
+WHATSAPP_PHONE_ID = settings.WHATSAPP_PHONE_ID
 
 
 async def send_appointment_whatsapp_notification(

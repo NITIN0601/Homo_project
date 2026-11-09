@@ -10,6 +10,7 @@
  *   • ./app      → Storage keys, ports, mock credentials, feature flags, backend & inventory
  */
 
+export * from "./env";
 export * from "./clinic";
 export * from "./contact";
 export * from "./medical";

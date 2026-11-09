@@ -7,39 +7,21 @@ and offline Luhn/UPI payment validation.
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
-
 from core.config import settings
 from core.security import get_current_user_optional, scope_items_to_patient_or_admin
+from fastapi import APIRouter, Depends, HTTPException
 from schemas.billing import PaymentValidateRequest
-from services.hospital_service import get_hospital
 from services.data_store import (
     get_all_invoices,
-    load_json,
+    get_all_orders,
     save_invoice,
-    save_json,
+    save_order,
     update_invoice,
 )
+from services.hospital_service import get_hospital
 from services.payment_validator import PaymentValidator
 
 router = APIRouter(tags=["Billing & Payments"])
-
-ORDERS_FILE = "orders_sync.json"
-
-
-def get_all_orders() -> list[dict[str, Any]]:
-    return load_json(ORDERS_FILE, default=[])
-
-
-def save_order(order: dict[str, Any]) -> list[dict[str, Any]]:
-    current = get_all_orders()
-    idx = next((i for i, o in enumerate(current) if o.get("id") == order.get("id")), -1)
-    if idx >= 0:
-        current[idx] = {**current[idx], **order}
-    else:
-        current.insert(0, order)
-    save_json(ORDERS_FILE, current)
-    return current
 
 
 @router.get("/consultation-invoices", summary="List all consultation invoices")

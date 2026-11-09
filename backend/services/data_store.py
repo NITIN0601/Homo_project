@@ -36,7 +36,7 @@ def load_json(filename: str, default: Any = None) -> Any:
 
     if primary_path.exists():
         try:
-            with open(primary_path, "r", encoding="utf-8") as f:
+            with open(primary_path, encoding="utf-8") as f:
                 try:
                     fcntl.flock(f.fileno(), fcntl.LOCK_SH)
                     return json.load(f)
@@ -263,4 +263,26 @@ def get_whatsapp_config() -> dict[str, Any]:
 def save_whatsapp_config(config: dict[str, Any]) -> dict[str, Any]:
     save_json(WHATSAPP_CONFIG_FILE, config)
     return config
+
+
+# ─── Orders Store ─────────────────────────────────────────────────────────────
+
+ORDERS_FILE = "orders_sync.json"
+
+
+def get_all_orders() -> list[dict[str, Any]]:
+    return load_json(ORDERS_FILE, default=[])
+
+
+def save_order(order: dict[str, Any]) -> list[dict[str, Any]]:
+    """Generic atomic upsert for orders — reuses the atomic write pattern."""
+    current = get_all_orders()
+    idx = next((i for i, o in enumerate(current) if o.get("id") == order.get("id")), -1)
+    if idx >= 0:
+        current[idx] = {**current[idx], **order}
+    else:
+        current.insert(0, order)
+    save_json(ORDERS_FILE, current)
+    return current
+
 

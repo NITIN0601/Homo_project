@@ -19,9 +19,8 @@ from pathlib import Path
 from typing import Any
 
 import aiofiles
-from fastapi import UploadFile
-
 from core.config import settings
+from fastapi import UploadFile
 
 # Local immutable directories
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -32,10 +31,7 @@ RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
 WATERMARKS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Secret salt for cryptographic watermarking (in production, loaded from env)
-WATERMARK_SECRET_KEY = os.getenv(
-    "CLINICAL_WATERMARK_SECRET",
-    "AGASTYA_CLINICAL_HOMOEOPATHY_WATERMARK_SECRET_2026_DISHA_HIPAA"
-).encode("utf-8")
+WATERMARK_SECRET_KEY = settings.CLINICAL_WATERMARK_SECRET.encode("utf-8")
 
 
 def generate_clinical_watermark(

@@ -4,7 +4,6 @@ Sends transactional appointment booking confirmations to patients and CCs clinic
 """
 
 import logging
-import os
 from typing import Any
 
 from core.config import settings
@@ -23,9 +22,9 @@ logger = logging.getLogger("email_service")
 
 # Official Resend API endpoint
 RESEND_API_URL = "https://api.resend.com/emails"
-RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
-CLINIC_ADMIN_EMAIL = os.getenv("CLINIC_ADMIN_EMAIL", settings.CLINIC_ADMIN_EMAIL)
-RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", f"{settings.CLINIC_NAME} <onboarding@resend.dev>")
+RESEND_API_KEY = settings.RESEND_API_KEY
+CLINIC_ADMIN_EMAIL = settings.CLINIC_ADMIN_EMAIL
+RESEND_FROM_EMAIL = settings.RESEND_FROM_EMAIL
 
 
 async def send_appointment_confirmation(
@@ -42,7 +41,7 @@ async def send_appointment_confirmation(
     Sends an appointment confirmation email via the official Resend API (https://api.resend.com/emails).
     Dynamically resolves hospital branding and attending physician details.
     """
-    key = api_key or RESEND_API_KEY or os.getenv("RESEND_API_KEY")
+    key = api_key or RESEND_API_KEY
     hospital = get_hospital(hospital_id)
     doctor = get_doctor(doctor_id, hospital.get("id"))
 

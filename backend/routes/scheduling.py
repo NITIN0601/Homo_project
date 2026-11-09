@@ -9,10 +9,9 @@ import threading
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-
 from core.config import settings
 from core.security import get_current_user_optional, scope_items_to_patient_or_admin
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from schemas.scheduling import BookAppointmentRequest
 from services.calendar_service import (
     GOOGLE_CALENDAR_ID,
@@ -27,12 +26,12 @@ from services.data_store import (
     update_appointment_status,
 )
 from services.doctor_service import get_doctor
-from services.hospital_service import get_hospital
 from services.google_calendar import (
     create_google_calendar_event,
     validate_email_address,
     validate_future_date,
 )
+from services.hospital_service import get_hospital
 from services.notification_service import (
     send_appointment_confirmation,
     send_appointment_whatsapp_notification,

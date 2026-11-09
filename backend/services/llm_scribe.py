@@ -7,11 +7,11 @@ Features:
   • Multi-provider support (Gemini, Groq, OpenAI, Anthropic, Ollama, Heuristic)
 """
 
-import os
 import re
 from typing import Any
 
 import httpx
+from core.config import settings
 from schemas.case_record import (
     ChiefComplaintItem,
     HomeopathicCaseRecord,
@@ -38,7 +38,11 @@ def sanitize_patient_context(transcript: str, patient_name: str | None) -> str:
     so patient PII is never transmitted to third-party model providers.
     """
     clean = transcript
-    # Redact 10-digit phone numbers
+    if patient_name and patient_name.strip():
+        clean = re.sub(re.escape(patient_name.strip()), "[REDACTED_NAME]", clean, flags=re.IGNORECASE)
+    # Redact phone numbers (with optional country codes, spaces, or hyphens)
+    clean = re.sub(r"\+?\d{1,3}[-.\s]?\(?\d{2,5}\)?[-.\s]?\d{3,5}[-.\s]?\d{3,5}", "[REDACTED_PHONE]", clean)
+    # Redact standard 10-digit phone numbers
     clean = re.sub(r"\b[6-9]\d{9}\b", "[REDACTED_PHONE]", clean)
     # Redact email addresses
     clean = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", "[REDACTED_EMAIL]", clean)
@@ -224,35 +228,35 @@ async def execute_scribe_pipeline(
 
     try:
         if provider == "groq":
-            key = os.getenv("GROQ_API_KEY")
+            key = settings.GROQ_API_KEY
             if not key:
                 raise ValueError("GROQ_API_KEY is not configured on the local server.")
             raw_json_str = await structure_with_groq(
                 safe_transcript, key, model or "llama-3.3-70b-versatile"
             )
         elif provider == "gemini":
-            key = os.getenv("GEMINI_API_KEY")
+            key = settings.GEMINI_API_KEY
             if not key:
                 raise ValueError("GEMINI_API_KEY is not configured on the local server.")
             raw_json_str = await structure_with_gemini(
                 safe_transcript, key, model or "gemini-2.5-flash"
             )
         elif provider == "openai":
-            key = os.getenv("OPENAI_API_KEY")
+            key = settings.OPENAI_API_KEY
             if not key:
                 raise ValueError("OPENAI_API_KEY is not configured on the local server.")
             raw_json_str = await structure_with_openai(
                 safe_transcript, key, model or "gpt-4o"
             )
         elif provider == "anthropic":
-            key = os.getenv("ANTHROPIC_API_KEY")
+            key = settings.ANTHROPIC_API_KEY
             if not key:
                 raise ValueError("ANTHROPIC_API_KEY is not configured on the local server.")
             raw_json_str = await structure_with_anthropic(
                 safe_transcript, key, model or "claude-3-5-sonnet-20241022"
             )
         elif provider == "ollama":
-            endpoint = os.getenv("OLLAMA_ENDPOINT", "http://127.0.0.1:11434")
+            endpoint = settings.OLLAMA_ENDPOINT or "http://127.0.0.1:11434"
             raw_json_str = await structure_with_ollama(
                 safe_transcript, endpoint, model or "llama3.3"
             )
@@ -266,7 +270,7 @@ async def execute_scribe_pipeline(
         return validated, provider_used, latency
 
     except Exception as e:
-        use_mock = os.getenv("USE_MOCK_DATA", "false").lower() in ("true", "1", "yes")
+        use_mock = settings.USE_MOCK_DATA
         if use_mock:
             # Only in explicit mock demonstration mode do we provide demo data
             record = get_heuristic_case_record(transcript, language)
@@ -287,35 +291,36 @@ async def parse_clinical_text_to_case_analysis(
     Converts clinical text / audio dictation directly into homeopathic_analysis JSON.
     Supports Gemini, Groq, OpenAI, Anthropic, and local Ollama.
     """
-    use_mock = os.getenv("USE_MOCK_DATA", "false").lower() in ("true", "1", "yes")
+    use_mock = settings.USE_MOCK_DATA
     prov = (provider or "gemini").lower()
 
-    if use_mock and not (api_key or os.getenv(f"{prov.upper()}_API_KEY")):
+    configured_key = getattr(settings, f"{prov.upper()}_API_KEY", "")
+    if use_mock and not (api_key or configured_key):
         return get_heuristic_case_record(text, "en").model_dump()
 
     raw_json = ""
     if prov == "gemini":
-        key = api_key or os.getenv("GEMINI_API_KEY", "")
+        key = api_key or settings.GEMINI_API_KEY
         if not key:
             raise ValueError("GEMINI_API_KEY is not configured on the local server.")
         raw_json = await structure_with_gemini(transcript=text, api_key=key, model=model or "gemini-2.5-flash")
     elif prov == "groq":
-        key = api_key or os.getenv("GROQ_API_KEY", "")
+        key = api_key or settings.GROQ_API_KEY
         if not key:
             raise ValueError("GROQ_API_KEY is not configured on the local server.")
         raw_json = await structure_with_groq(transcript=text, api_key=key, model=model or "llama-3.3-70b-versatile")
     elif prov == "openai":
-        key = api_key or os.getenv("OPENAI_API_KEY", "")
+        key = api_key or settings.OPENAI_API_KEY
         if not key:
             raise ValueError("OPENAI_API_KEY is not configured on the local server.")
         raw_json = await structure_with_openai(transcript=text, api_key=key, model=model or "gpt-4o")
     elif prov == "anthropic":
-        key = api_key or os.getenv("ANTHROPIC_API_KEY", "")
+        key = api_key or settings.ANTHROPIC_API_KEY
         if not key:
             raise ValueError("ANTHROPIC_API_KEY is not configured on the local server.")
         raw_json = await structure_with_anthropic(transcript=text, api_key=key, model=model or "claude-3-5-sonnet-20241022")
     elif prov == "ollama":
-        endpoint = os.getenv("OLLAMA_ENDPOINT", "http://127.0.0.1:11434")
+        endpoint = settings.OLLAMA_ENDPOINT or "http://127.0.0.1:11434"
         raw_json = await structure_with_ollama(transcript=text, endpoint=endpoint, model=model or "llama3.3")
     else:
         raise ValueError(f"Unknown provider '{provider}'. Choose gemini, groq, openai, anthropic, or ollama.")

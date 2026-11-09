@@ -4,8 +4,8 @@ Handles Resend email notifications and WhatsApp Business message dispatch.
 """
 
 from datetime import datetime, timezone
-from fastapi import APIRouter
 
+from fastapi import APIRouter
 from schemas.communications import (
     EmailNotificationRequest,
     WhatsAppMessageRequest,

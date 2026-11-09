@@ -7,34 +7,18 @@ and active administrator alerting on network connection drops and malformed quer
 
 import json
 import logging
-import os
 import uuid
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import httpx
-
-# Ensure environment configuration is initialized
-try:
-    from core.config import (
-        get_supabase_anon_key,
-        get_supabase_rest_url,
-        get_supabase_service_key,
-        settings,
-    )
-except ImportError:
-    class DummySettings:
-        CLINIC_DOMAIN = "clinic.local"
-        CLINIC_PHONE = "+1234567890"
-        DOCTOR_NAME = "Attending Physician"
-    settings = DummySettings()
-    def get_supabase_rest_url() -> str:
-        return os.getenv("SUPABASE_REST_URL", "http://127.0.0.1:54321/rest/v1")
-    def get_supabase_anon_key() -> str:
-        return os.getenv("SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy")
-    def get_supabase_service_key() -> str:
-        return os.getenv("SUPABASE_SERVICE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy_service")
+from core.config import (
+    get_supabase_anon_key,
+    get_supabase_rest_url,
+    get_supabase_service_key,
+    settings,
+)
 
 logger = logging.getLogger("supabase_service")
 

@@ -6,7 +6,6 @@ Ensures parity, eliminates duplicates, and prepares the system for 100+ concurre
 
 import json
 import logging
-import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -16,8 +15,8 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-import httpx
-from core.config import get_supabase_rest_url, get_supabase_service_key
+import httpx  # noqa: E402
+from core.config import get_supabase_rest_url, get_supabase_service_key  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("migration")
