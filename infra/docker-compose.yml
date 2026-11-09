@@ -15,6 +15,10 @@ volumes:
     driver: local
   storage_data:
     driver: local
+  recordings_data:
+    driver: local
+  watermarks_data:
+    driver: local
 
 services:
   # ─── 1. PostgreSQL Database with GIN & JSONB Support ────────────────────────
@@ -164,6 +168,14 @@ services:
       JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-for-local-agastya-clinic-token-auth-2026}
     volumes:
       - ../backend/data:/app/data
+      - recordings_data:/app/data/recordings
+      - watermarks_data:/app/data/watermarks
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/api/v1/health/ready\")' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     networks:
       - clinic-network
 

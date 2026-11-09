@@ -6,18 +6,18 @@ Assigns unique Trace IDs and Conversation/Session IDs for forensic traceability.
 
 import json
 import logging
-import os
+import logging.handlers
+import threading
 import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from services.supabase_service import add_admin_alert
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
-
-from services.supabase_service import add_admin_alert
 
 logger = logging.getLogger("audit")
 
@@ -25,13 +25,28 @@ AUDIT_DIR = Path(__file__).resolve().parent.parent / "data"
 AUDIT_DIR.mkdir(parents=True, exist_ok=True)
 AUDIT_LOG_FILE = AUDIT_DIR / "audit_traces.jsonl"
 
+_AUDIT_WRITE_LOCK = threading.Lock()   # in-process guard
+
+_audit_logger = logging.getLogger("agastya.audit")
+_audit_logger.setLevel(logging.INFO)
+if not _audit_logger.handlers:
+    _audit_handler = logging.handlers.TimedRotatingFileHandler(
+        filename=str(AUDIT_LOG_FILE),
+        when="midnight",
+        backupCount=30,          # 30-day local retention
+        encoding="utf-8",
+        utc=True,
+    )
+    _audit_handler.setFormatter(logging.Formatter("%(message)s"))
+    _audit_logger.addHandler(_audit_handler)
+
 
 def record_audit_entry(entry: dict[str, Any]) -> None:
-    """Appends an immutable audit trace entry to audit_traces.jsonl."""
+    """Thread-safe, rotation-aware audit entry writer."""
     try:
         line = json.dumps(entry, default=str)
-        with open(AUDIT_LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(line + "\n")
+        with _AUDIT_WRITE_LOCK:
+            _audit_logger.info(line)
     except Exception as exc:
         logger.error(f"Failed writing audit entry: {exc}")
 
@@ -62,7 +77,7 @@ class AuditTraceMiddleware(BaseHTTPMiddleware):
         try:
             response = await call_next(request)
             duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
-            
+
             # Record audit trace
             entry = {
                 "trace_id": trace_id,

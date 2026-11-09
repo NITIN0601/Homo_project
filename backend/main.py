@@ -11,42 +11,45 @@ Features:
 """
 
 import logging
-import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, FastAPI, Query
-from fastapi.middleware.cors import CORSMiddleware
-
-from core.config import settings, get_supabase_rest_url, is_mock_enabled
 from core.audit import AuditTraceMiddleware
+from core.config import get_supabase_rest_url, is_mock_enabled, settings
+from core.dependencies import RateLimitExceeded, limiter, rate_limit_handler
+from fastapi import APIRouter, FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from services.supabase_service import (
     check_supabase_health,
     clear_admin_alerts,
     get_admin_alerts,
     get_sync_status,
     reconcile_offline_data,
-    sync_appointment_to_supabase,  # Exported for test patching parity
 )
-
-# API Route Handlers
-from routes import (
-    auth_router,
-    billing_router,
-    clinical_router,
-    communications_router,
-    dispensary_router,
-    hospital_router,
-    scheduling_router,
+from services.supabase_service import (
+    sync_appointment_to_supabase as sync_appointment_to_supabase,  # Exported for test patching parity
 )
+from shared.http_pool import close_client, get_client
+from slices.auth.router import router as auth_router
+from slices.billing.router import router as billing_router
+from slices.clinical.router import router as clinical_router
+from slices.communications.router import router as communications_router
+from slices.dispensary.router import router as dispensary_router
+from slices.hospital.router import router as hospital_router
+from slices.scheduling.router import router as scheduling_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("main")
 
+_startup_complete = False
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global _startup_complete
     logger.info("Initializing Agastya Clinic Classical Homeopathy Engine...")
+    settings.validate_production()
+    await get_client()
     logger.info("Database URL: %s", settings.SUPABASE_REST_URL)
     logger.info("Mock Mode: %s", is_mock_enabled())
     try:
@@ -54,7 +57,9 @@ async def lifespan(app: FastAPI):
         logger.info("Startup offline data reconciliation: %s", reconcile_res)
     except Exception as exc:
         logger.warning("Supabase reconciliation deferred: %s", exc)
+    _startup_complete = True
     yield
+    await close_client()
     logger.info("Shutting down Agastya Clinic Engine cleanly.")
 
 
@@ -64,6 +69,9 @@ app = FastAPI(
     version="2.0.0",
     lifespan=lifespan,
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 
 # CORS Middleware
 app.add_middleware(
@@ -81,9 +89,16 @@ app.add_middleware(AuditTraceMiddleware)
 system_router = APIRouter(tags=["System Health & Sync"])
 
 
+@system_router.get("/health/ready", summary="Readiness probe — returns 200 only after reconciliation")
+async def readiness_probe():
+    if not _startup_complete:
+        raise HTTPException(status_code=503, detail="Server is initializing")
+    return {"status": "ready"}
+
+
 @system_router.get("/health")
 async def health_check():
-    gemini_ready = bool(os.getenv("GEMINI_API_KEY"))
+    gemini_ready = bool(settings.GEMINI_API_KEY)
     return {
         "status": "healthy",
         "service": "Classical Homeopathy Voice & EHR Engine",
@@ -101,12 +116,12 @@ async def health_check():
 async def get_config_status():
     return {
         "use_mock_data": is_mock_enabled(),
-        "gemini_api_key_configured": bool(os.getenv("GEMINI_API_KEY")),
-        "groq_api_key_configured": bool(os.getenv("GROQ_API_KEY")),
-        "openai_api_key_configured": bool(os.getenv("OPENAI_API_KEY")),
-        "anthropic_api_key_configured": bool(os.getenv("ANTHROPIC_API_KEY")),
+        "gemini_api_key_configured": bool(settings.GEMINI_API_KEY),
+        "groq_api_key_configured": bool(settings.GROQ_API_KEY),
+        "openai_api_key_configured": bool(settings.OPENAI_API_KEY),
+        "anthropic_api_key_configured": bool(settings.ANTHROPIC_API_KEY),
         "supabase_rest_url": get_supabase_rest_url(),
-        "voicestudio_url": os.getenv("VOICESTUDIO_URL", "http://127.0.0.1:3900/v1/audio/transcriptions"),
+        "voicestudio_url": settings.VOICESTUDIO_URL,
     }
 
 
