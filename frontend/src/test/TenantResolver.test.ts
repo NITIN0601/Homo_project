@@ -18,6 +18,12 @@ describe("Phase 2: Multi-Hospital Tenant Resolution & Isolation", () => {
       expect(tenant.features.enableECommerce).toBe(false); // Telemedicine only
     });
 
+    it("resolves tenant from URL query parameter when present", () => {
+      const tenant = resolveActiveHospitalTenant({ queryParamTenant: "apollo", hostname: "localhost" });
+      expect(tenant.id).toBe("apollo");
+      expect(tenant.name).toContain("Apollo");
+    });
+
     it("falls back to default agastya tenant for localhost or unknown domain", () => {
       const tenant = resolveActiveHospitalTenant({ hostname: "localhost" });
       expect(tenant.id).toBe(DEFAULT_HOSPITAL_TENANT.id);

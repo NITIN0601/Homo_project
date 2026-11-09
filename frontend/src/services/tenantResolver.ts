@@ -3,17 +3,30 @@ import { HOSPITAL_TENANTS, DEFAULT_HOSPITAL_TENANT } from "../config/tenants";
 
 export interface TenantResolutionContext {
   hostname?: string;
+  queryParamTenant?: string;
   userActiveHospitalId?: string | null;
   userAuthorizedHospitals?: string[];
 }
 
 /**
  * Resolves active hospital tenant according to dual-resolution rules:
+ * 0. Query Parameter: ?tenant=... or ?hospital=...
  * 1. Option B: Active User Context (if logged in and authorized)
  * 2. Option A: Domain / Subdomain matching from hostname
  * 3. Fallback: Default clinic tenant (Agastya)
  */
 export function resolveActiveHospitalTenant(ctx?: TenantResolutionContext): HospitalTenantConfig {
+  // ── 0. Query Parameter Override (?tenant=... or ?hospital=...) ───────────────
+  const queryTenant =
+    ctx?.queryParamTenant ||
+    (typeof window !== "undefined" && window.location?.search
+      ? new URLSearchParams(window.location.search).get("tenant") ||
+        new URLSearchParams(window.location.search).get("hospital")
+      : null);
+  if (queryTenant && HOSPITAL_TENANTS[queryTenant.toLowerCase()]) {
+    return HOSPITAL_TENANTS[queryTenant.toLowerCase()];
+  }
+
   if (!ctx) {
     if (typeof window !== "undefined") {
       ctx = { hostname: window.location.hostname };
