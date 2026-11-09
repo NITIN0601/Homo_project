@@ -82,6 +82,7 @@ async def google_auth_endpoint(req: GoogleAuthRequest):
         )
 
     assigned_role = "admin" if is_authorized_admin else "patient"
+    assigned_hospital = (req.hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "agastya")).strip().lower()
 
     profile = {
         "id": "usr-admin-001" if assigned_role == "admin" else f"usr-g-{int(hash(req.email) % 100000)}",
@@ -89,6 +90,7 @@ async def google_auth_endpoint(req: GoogleAuthRequest):
         "initials": "".join([n[0] for n in req.name.split()[:2]]).upper() or "GU",
         "email": req.email.strip().lower(),
         "role": assigned_role,
+        "hospital_id": assigned_hospital,
         "phone": settings.CLINIC_PHONE if assigned_role == "admin" else "",
         "provider": "google",
     }
@@ -123,6 +125,7 @@ async def register_user_endpoint(req: RegisterRequest):
             password=req.password,
             role="patient",
             phone=req.phone,
+            hospital_id=req.hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "agastya"),
         )
         return {
             "status": "success",

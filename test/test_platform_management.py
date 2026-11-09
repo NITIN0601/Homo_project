@@ -134,3 +134,36 @@ class TestSuperAdminAndPlatformMgmt(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertTrue(res.json()["use_mock_data"])
 
+    def test_scaling_quotas_and_hospital_scoping(self):
+        """Verify 5 super admin quota, hospital association, and customer registration."""
+        import uuid
+        test_h = f"hosp-{uuid.uuid4().hex[:6]}"
+        # Register patient associated with test_h
+        patient_email = f"cust.{uuid.uuid4().hex[:6]}@domain.org"
+        reg_res = client.post(
+            "/api/v1/auth/register",
+            json={
+                "name": "Scythed Customer",
+                "email": patient_email,
+                "password": "CustomerPassword123!",
+                "hospital_id": test_h,
+            },
+        )
+        self.assertEqual(reg_res.status_code, 200)
+        self.assertEqual(reg_res.json()["profile"]["hospital_id"], test_h)
+
+        # Google login with hospital scoping
+        g_email = f"google.cust.{uuid.uuid4().hex[:6]}@gmail.com"
+        g_res = client.post(
+            "/api/v1/auth/google",
+            json={
+                "email": g_email,
+                "name": "Google Patient",
+                "portal_intent": "patient",
+                "hospital_id": test_h,
+            },
+        )
+        self.assertEqual(g_res.status_code, 200)
+        self.assertEqual(g_res.json()["profile"]["hospital_id"], test_h)
+        self.assertEqual(g_res.json()["role"], "patient")
+

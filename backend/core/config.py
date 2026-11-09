@@ -49,6 +49,11 @@ class Settings:
     DEFAULT_DOCTOR_ID: str = os.getenv("DEFAULT_DOCTOR_ID", "doc-001")
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
+    # Phase 1 Platform Scaling Quotas
+    MAX_SUPER_ADMINS: int = int(os.getenv("MAX_SUPER_ADMINS", "5"))
+    MAX_ADMINS: int = int(os.getenv("MAX_ADMINS", "10"))
+    MAX_CUSTOMERS_PER_HOSPITAL: int = int(os.getenv("MAX_CUSTOMERS_PER_HOSPITAL", "1000"))
+
     # Clinic Profile & Identity (Configurable via Environment)
     CLINIC_NAME: str = os.getenv("CLINIC_NAME", "Agastya Classical Homeopathy Clinic")
     CLINIC_DOMAIN: str = os.getenv("CLINIC_DOMAIN", "agastyahomoeo.com")

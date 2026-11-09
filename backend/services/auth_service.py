@@ -147,8 +147,9 @@ def register_user(
     first_name: str | None = None,
     middle_name: str | None = None,
     last_name: str | None = None,
+    hospital_id: str = "agastya",
 ) -> tuple[dict[str, Any], str]:
-    """Registers a new clinic user with validated email, split name breakdown, and salted PBKDF2 hash."""
+    """Registers a new clinic user with quota enforcement, validated email, split name breakdown, and salted PBKDF2 hash."""
     clean_email = validate_email(email)
     if not name or len(name.strip()) < 2:
         raise ValueError("Name must be at least 2 characters.")
@@ -156,6 +157,28 @@ def register_user(
     accounts = _load_accounts()
     if clean_email in accounts:
         raise ValueError("An account with this email already exists.")
+
+    assigned_role = role if role in ("super_admin", "admin", "patient", "mobile_worker") else "patient"
+    assigned_hospital = (hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "agastya")).strip().lower()
+
+    # Enforce Phase 1 System Quotas
+    if assigned_role == "super_admin":
+        current_super_admins = sum(1 for a in accounts.values() if a.get("role") == "super_admin")
+        if current_super_admins >= settings.MAX_SUPER_ADMINS:
+            raise ValueError(f"Platform limit reached: Maximum {settings.MAX_SUPER_ADMINS} Super Admins allowed.")
+    elif assigned_role == "admin":
+        current_admins = sum(1 for a in accounts.values() if a.get("role") == "admin")
+        if current_admins >= settings.MAX_ADMINS:
+            raise ValueError(f"Platform limit reached: Maximum {settings.MAX_ADMINS} Admins allowed.")
+    elif assigned_role == "patient":
+        current_patients = sum(
+            1 for a in accounts.values()
+            if a.get("role") == "patient" and a.get("hospital_id", "").lower() == assigned_hospital
+        )
+        if current_patients >= settings.MAX_CUSTOMERS_PER_HOSPITAL:
+            raise ValueError(
+                f"Hospital quota reached: Maximum {settings.MAX_CUSTOMERS_PER_HOSPITAL} patients reached for '{assigned_hospital}'."
+            )
 
     # Split name into first_name, middle_name, last_name if not explicitly provided
     fn = (first_name or "").strip()
@@ -183,7 +206,8 @@ def register_user(
         "middle_name": mn,
         "last_name": ln,
         "email": clean_email,
-        "role": role if role in ("super_admin", "admin", "patient", "mobile_worker") else "patient",
+        "role": assigned_role,
+        "hospital_id": assigned_hospital,
         "phone": phone or "+91 98765 00000",
         "hash": pwd_hash,
         "salt": salt,
@@ -201,6 +225,7 @@ def register_user(
         "last_name": ln,
         "email": clean_email,
         "role": new_profile["role"],
+        "hospital_id": assigned_hospital,
         "phone": new_profile["phone"]
     }
     token = generate_local_jwt(user_view)
@@ -284,6 +309,7 @@ def accept_user_invite(token: str, password: str) -> tuple[dict[str, Any], str]:
         password=password,
         role="admin" if invite["role"] in ("admin", "doctor") else invite["role"],
         phone=invite.get("phone"),
+        hospital_id=invite.get("hospital_id", "agastya"),
     )
 
     invite["is_claimed"] = True

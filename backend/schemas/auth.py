@@ -19,6 +19,7 @@ class RegisterRequest(BaseModel):
     password: str = Field(..., min_length=6, example="Secret123!")
     role: str | None = Field(default="patient", example="patient")
     phone: str | None = Field(default=None, example="+1234567890")
+    hospital_id: str | None = Field(default="agastya", example="agastya")
 
 
 class SendOtpRequest(BaseModel):
@@ -35,6 +36,7 @@ class GoogleAuthRequest(BaseModel):
     email: str = Field(..., example="user@example.com")
     name: str = Field(default="Google User", example="Authenticated User")
     portal_intent: str = Field(default="patient", description="'admin' or 'patient'")
+    hospital_id: str | None = Field(default="agastya", example="agastya")
 
 
 class InviteUserRequest(BaseModel):
