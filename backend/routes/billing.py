@@ -60,8 +60,13 @@ async def validate_payment_endpoint(payload: PaymentValidateRequest):
 # ─── Orders & 3rd Party Logistics API ─────────────────────────────────────────
 
 @router.get("/orders", summary="List all orders")
-async def list_orders_endpoint():
-    return get_all_orders()
+async def list_orders_endpoint(user: dict[str, Any] | None = Depends(get_current_user_optional)):
+    all_orders = get_all_orders()
+    return scope_items_to_patient_or_admin(
+        all_orders,
+        user,
+        id_fields=("customerEmail", "patientEmail", "userId"),
+    )
 
 
 @router.post("/orders/create", summary="Place medicine order")

@@ -54,3 +54,8 @@ env/
 node_modules/.cache/
 node_modules/.tmp/
 node_modules/.vite/
+
+# Runtime locks & rotated audit logs
+backend/data/*.lock
+backend/data/audit_traces.jsonl.*
+

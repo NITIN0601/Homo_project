@@ -20,8 +20,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application source
 COPY . .
 
-# Ensure data directories exist
-RUN mkdir -p /app/data/supabase_fallback
+# Ensure data directories exist and set non-root ownership
+RUN mkdir -p /app/data/supabase_fallback /app/data/recordings /app/data/watermarks \
+    && groupadd -r appuser && useradd -r -g appuser -d /app appuser \
+    && chown -R appuser:appuser /app
+
+USER appuser
 
 EXPOSE 8000
 
@@ -29,4 +33,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=5s --retries=3 --start-period=5s \
     CMD python3 -c "import urllib.request; sys_exit = 0 if urllib.request.urlopen('http://localhost:8000/api/v1/health').getcode() == 200 else 1; exit(sys_exit)"
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Support multi-worker concurrency scaling via WEB_CONCURRENCY env var (default 2 workers)
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000 --workers ${WEB_CONCURRENCY:-2}"]

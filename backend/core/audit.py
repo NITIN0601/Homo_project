@@ -14,11 +14,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from core.config import settings
 from services.supabase_service import add_admin_alert
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
+
+from core.config import settings
 
 logger = logging.getLogger("audit")
 

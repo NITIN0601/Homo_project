@@ -148,13 +148,8 @@ async def get_patient_records(
     authorization: str | None = Header(None),
 ):
     is_mobile = (view.lower() == "mobile")
-    if not is_mobile:
-        if not authorization:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Missing Authorization header. Admin privileges required.",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+    user = None
+    if authorization:
         parts = authorization.split()
         if len(parts) != 2 or parts[0].lower() != "bearer":
             raise HTTPException(
@@ -162,22 +157,46 @@ async def get_patient_records(
                 detail="Invalid Authorization header format. Expected 'Bearer <token>'.",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        token = parts[1]
-        payload = verify_local_jwt(token)
-        if not payload:
+        user = verify_local_jwt(parts[1])
+
+    if not is_mobile:
+        if not authorization:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Missing Authorization header. Admin privileges required.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid or expired authentication token.",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        if payload.get("role") != "admin":
+        if user.get("role") not in ("admin", "super_admin"):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access denied: Admin role required to access full records.",
             )
+    else:
+        # Strict HIPAA guard: In production, unauthenticated PHI queries are strictly prohibited
+        if settings.IS_PRODUCTION and not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required to access patient clinical records.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
     try:
         records = await fetch_patient_records(is_mobile_view=is_mobile)
+        if is_mobile and user and user.get("role") == "patient":
+            user_id = user.get("sub") or user.get("id") or user.get("email")
+            user_name = (user.get("name") or "").lower()
+            records = [
+                r for r in records
+                if (r.get("patient_name") or "").lower() == user_name
+                or r.get("patient_id") == user_id
+                or r.get("id") == user_id
+            ]
         return {
             "status": "success",
             "view": "mobile_patient_view" if is_mobile else "patient_records_full",

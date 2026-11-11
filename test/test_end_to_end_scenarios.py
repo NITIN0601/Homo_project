@@ -119,11 +119,12 @@ class TestEndToEndClinicalScenarios(unittest.TestCase):
     def test_scenario_03_appointment_booking_and_concurrency_guard(self):
         """Scenario 3: Patient can reserve an available consultation slot, with double-booking prevention."""
         import time
-        unique_sec = int(time.time() * 1000) % 80000 + 1000
-        slot_day = f"2029-{(unique_sec % 11) + 1:02d}-{(unique_sec % 25) + 1:02d}"
-        hour = (unique_sec % 7) + 10
-        slot_time = f"{slot_day}T{hour:02d}:00:00"
-        end_time = f"{slot_day}T{hour:02d}:30:00"
+        from datetime import datetime, timedelta
+        unique_ts = int(time.time() * 1000000)
+        day_offset = (unique_ts % 500) + 120
+        slot_day = (datetime.now() + timedelta(days=day_offset)).strftime("%Y-%m-%d")
+        slot_time = f"{slot_day}T11:15:00"
+        end_time = f"{slot_day}T11:45:00"
 
         # First booking succeeds
         res1 = self.client.post("/api/v1/book-appointment", json={

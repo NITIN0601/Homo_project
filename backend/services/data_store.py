@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import tempfile
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,39 @@ BACKEND_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 # Ensure primary persistent data directory exists
 BACKEND_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+
+class InterProcessLock:
+    """
+    Dual-layer concurrency lock combining threading.Lock (intra-process threads)
+    and fcntl.flock (inter-process OS kernel locks for multi-worker scaling).
+    """
+    def __init__(self, lock_file: str = "booking.lock"):
+        self.lock_path = BACKEND_DATA_DIR / lock_file
+        self._thread_lock = threading.Lock()
+        self._fd = None
+
+    def __enter__(self):
+        self._thread_lock.acquire()
+        try:
+            self._fd = open(self.lock_path, "w")
+            fcntl.flock(self._fd.fileno(), fcntl.LOCK_EX)
+            return self
+        except Exception:
+            self._thread_lock.release()
+            raise
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            if self._fd:
+                try:
+                    fcntl.flock(self._fd.fileno(), fcntl.LOCK_UN)
+                except OSError:
+                    pass
+                self._fd.close()
+                self._fd = None
+        finally:
+            self._thread_lock.release()
 
 
 def _get_primary_path(filename: str) -> Path:

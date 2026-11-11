@@ -172,10 +172,15 @@ def scope_items_to_patient_or_admin(
 ) -> list[dict[str, Any]]:
     """
     HIPAA / PHI Isolation SSOT Guard:
-    - If user is super_admin or admin (or unauthenticated demo/read mode without patient role), returns all items.
+    - If user is super_admin or admin, returns all items.
     - If user has 'patient' role, strictly returns only items whose ID fields match the user's identity.
+    - If user is None (unauthenticated), returns an empty list to prevent data leakage.
     """
-    if not user or user.get("role") != "patient":
+    if not user:
+        return []
+
+    role = user.get("role")
+    if role in ("admin", "super_admin"):
         return items
 
     patient_ids = {

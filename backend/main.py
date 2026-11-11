@@ -19,6 +19,13 @@ from core.config import get_supabase_rest_url, is_mock_enabled, settings
 from core.dependencies import RateLimitExceeded, limiter, rate_limit_handler
 from fastapi import APIRouter, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from routes.auth import router as auth_router
+from routes.billing import router as billing_router
+from routes.clinical_records import router as clinical_router
+from routes.communications import router as communications_router
+from routes.dispensary import router as dispensary_router
+from routes.hospital import router as hospital_router
+from routes.scheduling import router as scheduling_router
 from services.supabase_service import (
     check_supabase_health,
     clear_admin_alerts,
@@ -30,13 +37,6 @@ from services.supabase_service import (
     sync_appointment_to_supabase as sync_appointment_to_supabase,  # Exported for test patching parity
 )
 from shared.http_pool import close_client, get_client
-from slices.auth.router import router as auth_router
-from slices.billing.router import router as billing_router
-from slices.clinical.router import router as clinical_router
-from slices.communications.router import router as communications_router
-from slices.dispensary.router import router as dispensary_router
-from slices.hospital.router import router as hospital_router
-from slices.scheduling.router import router as scheduling_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("main")

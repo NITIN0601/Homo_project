@@ -19,6 +19,7 @@ from core.config import (
     get_supabase_service_key,
     settings,
 )
+from shared.http_pool import get_client
 
 logger = logging.getLogger("supabase_service")
 
@@ -137,14 +138,14 @@ async def check_supabase_health() -> dict[str, Any]:
     """Probes Supabase PostgREST endpoint to detect online/offline status."""
     url = f"{get_rest_url()}/"
     try:
-        async with httpx.AsyncClient(timeout=2.0) as client:
-            res = await client.get(url, headers=get_headers())
-            is_online = res.status_code in (200, 404, 301, 302)
-            return {
-                "online": is_online,
-                "status_code": res.status_code,
-                "endpoint": get_rest_url()
-            }
+        client = await get_client()
+        res = await client.get(url, headers=get_headers(), timeout=2.0)
+        is_online = res.status_code in (200, 404, 301, 302)
+        return {
+            "online": is_online,
+            "status_code": res.status_code,
+            "endpoint": get_rest_url()
+        }
     except Exception as exc:
         return {
             "online": False,
@@ -176,24 +177,24 @@ async def check_and_insert_file_hash(
 
     synced_to_supabase = False
     try:
-        async with httpx.AsyncClient(timeout=4.0) as client:
-            res = await client.post(url, json=payload, headers=get_headers())
-            if res.status_code in (200, 201):
-                records = res.json()
-                synced_to_supabase = True
-                result = records[0] if isinstance(records, list) and records else payload
-                # Also record locally with _synced=True
-                _record_hash_locally(result, synced=True)
-                return result
-            elif res.status_code == 409 or "23505" in res.text or "duplicate" in res.text.lower():
-                raise ValueError("DUPLICATE_HASH: This identical image has already been uploaded.")
-            else:
-                record_admin_alert(
-                    level="ERROR",
-                    component="supabase_anti_spam",
-                    message=f"Supabase returned HTTP {res.status_code} during hash registration",
-                    details={"status_code": res.status_code, "body": res.text[:200], "hash": file_hash}
-                )
+        client = await get_client()
+        res = await client.post(url, json=payload, headers=get_headers(), timeout=4.0)
+        if res.status_code in (200, 201):
+            records = res.json()
+            synced_to_supabase = True
+            result = records[0] if isinstance(records, list) and records else payload
+            # Also record locally with _synced=True
+            _record_hash_locally(result, synced=True)
+            return result
+        elif res.status_code == 409 or "23505" in res.text or "duplicate" in res.text.lower():
+            raise ValueError("DUPLICATE_HASH: This identical image has already been uploaded.")
+        else:
+            record_admin_alert(
+                level="ERROR",
+                component="supabase_anti_spam",
+                message=f"Supabase returned HTTP {res.status_code} during hash registration",
+                details={"status_code": res.status_code, "body": res.text[:200], "hash": file_hash}
+            )
     except ValueError:
         raise
     except httpx.RequestError as exc:
@@ -267,20 +268,20 @@ async def insert_patient_record(
     synced_to_supabase = False
 
     try:
-        async with httpx.AsyncClient(timeout=4.0) as client:
-            res = await client.post(url, json=payload, headers=get_headers(use_service_role=True))
-            if res.status_code in (200, 201):
-                records = res.json()
-                synced_to_supabase = True
-                if isinstance(records, list) and records:
-                    payload = records[0]
-            else:
-                record_admin_alert(
-                    level="ERROR",
-                    component="supabase_ehr",
-                    message=f"Supabase returned HTTP {res.status_code} during patient record insert",
-                    details={"status_code": res.status_code, "body": res.text[:200], "patient_name": patient_name}
-                )
+        client = await get_client()
+        res = await client.post(url, json=payload, headers=get_headers(use_service_role=True), timeout=4.0)
+        if res.status_code in (200, 201):
+            records = res.json()
+            synced_to_supabase = True
+            if isinstance(records, list) and records:
+                payload = records[0]
+        else:
+            record_admin_alert(
+                level="ERROR",
+                component="supabase_ehr",
+                message=f"Supabase returned HTTP {res.status_code} during patient record insert",
+                details={"status_code": res.status_code, "body": res.text[:200], "patient_name": patient_name}
+            )
     except httpx.RequestError as exc:
         record_admin_alert(
             level="WARNING",
@@ -318,18 +319,18 @@ async def fetch_patient_records(is_mobile_view: bool = False) -> list[dict[str, 
     supabase_records: list[dict[str, Any]] = []
 
     try:
-        async with httpx.AsyncClient(timeout=4.0) as client:
-            res = await client.get(url, headers=get_headers(use_service_role=not is_mobile_view))
-            if res.status_code == 200:
-                supabase_records = res.json()
-                supabase_online = True
-            else:
-                record_admin_alert(
-                    level="ERROR",
-                    component="supabase_ehr",
-                    message=f"Supabase query returned HTTP {res.status_code}",
-                    details={"status_code": res.status_code, "body": res.text[:200]}
-                )
+        client = await get_client()
+        res = await client.get(url, headers=get_headers(use_service_role=not is_mobile_view), timeout=4.0)
+        if res.status_code == 200:
+            supabase_records = res.json()
+            supabase_online = True
+        else:
+            record_admin_alert(
+                level="ERROR",
+                component="supabase_ehr",
+                message=f"Supabase query returned HTTP {res.status_code}",
+                details={"status_code": res.status_code, "body": res.text[:200]}
+            )
     except httpx.RequestError as exc:
         record_admin_alert(
             level="WARNING",
@@ -394,18 +395,18 @@ async def sync_appointment_to_supabase(appointment: dict[str, Any]) -> dict[str,
     }
 
     try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
-            res = await client.post(url, json=payload, headers=get_headers())
-            if res.status_code in (200, 201):
-                records = res.json()
-                return records[0] if isinstance(records, list) and records else payload
-            else:
-                record_admin_alert(
-                    level="ERROR",
-                    component="supabase_appointments",
-                    message=f"Supabase appointment sync returned HTTP {res.status_code}",
-                    details={"status_code": res.status_code, "body": res.text[:200], "patient": payload["patient_name"]}
-                )
+        client = await get_client()
+        res = await client.post(url, json=payload, headers=get_headers(), timeout=3.0)
+        if res.status_code in (200, 201):
+            records = res.json()
+            return records[0] if isinstance(records, list) and records else payload
+        else:
+            record_admin_alert(
+                level="ERROR",
+                component="supabase_appointments",
+                message=f"Supabase appointment sync returned HTTP {res.status_code}",
+                details={"status_code": res.status_code, "body": res.text[:200], "patient": payload["patient_name"]}
+            )
     except httpx.RequestError as exc:
         record_admin_alert(
             level="WARNING",
@@ -482,19 +483,19 @@ async def fetch_appointments_from_supabase() -> list[dict[str, Any]]:
     """Fetches appointments list from Supabase as Priority 1."""
     url = f"{get_rest_url()}/appointments?select=*&order=created_at.desc"
     try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
-            res = await client.get(url, headers=get_headers())
-            if res.status_code == 200:
-                raw_list = res.json()
-                if isinstance(raw_list, list) and raw_list:
-                    return [format_supabase_appointment(a) for a in raw_list]
-            else:
-                record_admin_alert(
-                    level="ERROR",
-                    component="supabase_appointments",
-                    message=f"Failed to fetch appointments from Supabase: HTTP {res.status_code}",
-                    details={"status_code": res.status_code, "body": res.text[:200]}
-                )
+        client = await get_client()
+        res = await client.get(url, headers=get_headers(), timeout=3.0)
+        if res.status_code == 200:
+            raw_list = res.json()
+            if isinstance(raw_list, list) and raw_list:
+                return [format_supabase_appointment(a) for a in raw_list]
+        else:
+            record_admin_alert(
+                level="ERROR",
+                component="supabase_appointments",
+                message=f"Failed to fetch appointments from Supabase: HTTP {res.status_code}",
+                details={"status_code": res.status_code, "body": res.text[:200]}
+            )
     except httpx.RequestError as exc:
         record_admin_alert(
             level="WARNING",
@@ -517,20 +518,20 @@ async def update_appointment_status_in_supabase(appointment_id: str, new_status:
     url = f"{get_rest_url()}/appointments?id=eq.{appointment_id}"
     payload = {"status": new_status.lower()}
     try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
-            res = await client.patch(url, json=payload, headers=get_headers())
-            if res.status_code in (200, 204):
-                if res.text:
-                    records = res.json()
-                    return format_supabase_appointment(records[0]) if isinstance(records, list) and records else None
-                return {"id": appointment_id, "status": new_status}
-            else:
-                record_admin_alert(
-                    level="ERROR",
-                    component="supabase_appointments",
-                    message=f"Failed to update appointment {appointment_id} in Supabase: HTTP {res.status_code}",
-                    details={"status_code": res.status_code, "body": res.text[:200]}
-                )
+        client = await get_client()
+        res = await client.patch(url, json=payload, headers=get_headers(), timeout=3.0)
+        if res.status_code in (200, 204):
+            if res.text:
+                records = res.json()
+                return format_supabase_appointment(records[0]) if isinstance(records, list) and records else None
+            return {"id": appointment_id, "status": new_status}
+        else:
+            record_admin_alert(
+                level="ERROR",
+                component="supabase_appointments",
+                message=f"Failed to update appointment {appointment_id} in Supabase: HTTP {res.status_code}",
+                details={"status_code": res.status_code, "body": res.text[:200]}
+            )
     except Exception as exc:
         record_admin_alert(
             level="WARNING",
@@ -547,19 +548,19 @@ async def fetch_inventory_from_supabase() -> list[dict[str, Any]]:
     """Fetches dispensary inventory from Supabase as Priority 1."""
     url = f"{get_rest_url()}/inventory?select=*&order=id.asc"
     try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
-            res = await client.get(url, headers=get_headers())
-            if res.status_code == 200:
-                raw_items = res.json()
-                if isinstance(raw_items, list) and raw_items:
-                    return [format_supabase_inventory(i) for i in raw_items]
-            else:
-                record_admin_alert(
-                    level="ERROR",
-                    component="supabase_inventory",
-                    message=f"Failed to fetch inventory from Supabase: HTTP {res.status_code}",
-                    details={"status_code": res.status_code, "body": res.text[:200]}
-                )
+        client = await get_client()
+        res = await client.get(url, headers=get_headers(), timeout=3.0)
+        if res.status_code == 200:
+            raw_items = res.json()
+            if isinstance(raw_items, list) and raw_items:
+                return [format_supabase_inventory(i) for i in raw_items]
+        else:
+            record_admin_alert(
+                level="ERROR",
+                component="supabase_inventory",
+                message=f"Failed to fetch inventory from Supabase: HTTP {res.status_code}",
+                details={"status_code": res.status_code, "body": res.text[:200]}
+            )
     except httpx.RequestError as exc:
         record_admin_alert(
             level="WARNING",
@@ -595,17 +596,17 @@ async def sync_inventory_to_supabase(item: dict[str, Any]) -> dict[str, Any] | N
     }
 
     try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
-            res = await client.post(url, json=payload, headers=get_headers())
-            if res.status_code in (200, 201):
-                return payload
-            else:
-                record_admin_alert(
-                    level="ERROR",
-                    component="supabase_inventory",
-                    message=f"Supabase inventory sync failed with HTTP {res.status_code}",
-                    details={"status_code": res.status_code, "body": res.text[:200], "item_id": item.get("id")}
-                )
+        client = await get_client()
+        res = await client.post(url, json=payload, headers=get_headers(), timeout=3.0)
+        if res.status_code in (200, 201):
+            return payload
+        else:
+            record_admin_alert(
+                level="ERROR",
+                component="supabase_inventory",
+                message=f"Supabase inventory sync failed with HTTP {res.status_code}",
+                details={"status_code": res.status_code, "body": res.text[:200], "item_id": item.get("id")}
+            )
     except httpx.RequestError as exc:
         record_admin_alert(
             level="WARNING",
@@ -647,20 +648,20 @@ async def update_inventory_item_in_supabase(item_id: str, updates: dict[str, Any
         payload["is_active"] = updates.get("isActive", updates.get("is_active"))
 
     try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
-            res = await client.patch(url, json=payload, headers=get_headers())
-            if res.status_code in (200, 204):
-                if res.text:
-                    records = res.json()
-                    return format_supabase_inventory(records[0]) if isinstance(records, list) and records else None
-                return payload
-            else:
-                record_admin_alert(
-                    level="ERROR",
-                    component="supabase_inventory",
-                    message=f"Failed to update inventory item {item_id} in Supabase: HTTP {res.status_code}",
-                    details={"status_code": res.status_code, "body": res.text[:200]}
-                )
+        client = await get_client()
+        res = await client.patch(url, json=payload, headers=get_headers(), timeout=3.0)
+        if res.status_code in (200, 204):
+            if res.text:
+                records = res.json()
+                return format_supabase_inventory(records[0]) if isinstance(records, list) and records else None
+            return payload
+        else:
+            record_admin_alert(
+                level="ERROR",
+                component="supabase_inventory",
+                message=f"Failed to update inventory item {item_id} in Supabase: HTTP {res.status_code}",
+                details={"status_code": res.status_code, "body": res.text[:200]}
+            )
     except Exception as exc:
         record_admin_alert(
             level="WARNING",
@@ -699,19 +700,20 @@ async def reconcile_offline_data() -> dict[str, Any]:
         if not r.get("_synced", False):
             payload = {k: v for k, v in r.items() if not k.startswith("_")}
             try:
-                async with httpx.AsyncClient(timeout=4.0) as client:
-                    res = await client.post(
-                        f"{get_rest_url()}/patient_records",
-                        json=payload,
-                        headers=get_headers(use_service_role=True)
-                    )
-                    if res.status_code in (200, 201, 409):
-                        r["_synced"] = True
-                        r["synced_at"] = datetime.now(timezone.utc).isoformat()
-                        records_synced += 1
-                        records_updated = True
-                    else:
-                        errors.append(f"Record {r.get('id')}: HTTP {res.status_code}")
+                client = await get_client()
+                res = await client.post(
+                    f"{get_rest_url()}/patient_records",
+                    json=payload,
+                    headers=get_headers(use_service_role=True),
+                    timeout=4.0
+                )
+                if res.status_code in (200, 201, 409):
+                    r["_synced"] = True
+                    r["synced_at"] = datetime.now(timezone.utc).isoformat()
+                    records_synced += 1
+                    records_updated = True
+                else:
+                    errors.append(f"Record {r.get('id')}: HTTP {res.status_code}")
             except Exception as exc:
                 errors.append(f"Record {r.get('id')}: {exc!s}")
 
@@ -730,19 +732,20 @@ async def reconcile_offline_data() -> dict[str, Any]:
                 "uploaded_by": h.get("uploaded_by")
             }
             try:
-                async with httpx.AsyncClient(timeout=4.0) as client:
-                    res = await client.post(
-                        f"{get_rest_url()}/uploaded_file_hashes",
-                        json=payload,
-                        headers=get_headers()
-                    )
-                    if res.status_code in (200, 201, 409) or "23505" in res.text:
-                        h["_synced"] = True
-                        h["synced_at"] = datetime.now(timezone.utc).isoformat()
-                        hashes_synced += 1
-                        hashes_updated = True
-                    else:
-                        errors.append(f"Hash {h.get('file_hash')}: HTTP {res.status_code}")
+                client = await get_client()
+                res = await client.post(
+                    f"{get_rest_url()}/uploaded_file_hashes",
+                    json=payload,
+                    headers=get_headers(),
+                    timeout=4.0
+                )
+                if res.status_code in (200, 201, 409) or "23505" in res.text:
+                    h["_synced"] = True
+                    h["synced_at"] = datetime.now(timezone.utc).isoformat()
+                    hashes_synced += 1
+                    hashes_updated = True
+                else:
+                    errors.append(f"Hash {h.get('file_hash')}: HTTP {res.status_code}")
             except Exception as exc:
                 errors.append(f"Hash {h.get('file_hash')}: {exc!s}")
 
