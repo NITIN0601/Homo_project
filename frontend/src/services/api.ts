@@ -28,6 +28,8 @@ import type {
   BookedAppointment,
   ConsultationInvoice,
   BlockedCalendarDate,
+  ContinuityPreferenceResponse,
+  DoctorSummary,
 } from "../types";
 import { BACKEND, CLINIC, WHATSAPP, STORAGE_KEYS, MOCK_TOKENS } from "../config";
 import { formatDateShort } from "../utils/format";
@@ -110,7 +112,7 @@ export const api = {
       return res;
     },
 
-    google: async (payload: { email: string; name: string; portal_intent?: string }): Promise<{ token: string; profile: UserProfile }> => {
+    google: async (payload: { email: string; name?: string; portal_intent?: string; hospital_id?: string; id_token?: string }): Promise<{ token: string; profile: UserProfile }> => {
       if (USE) {
         const res = await apiFetch<{ status: string; token: string; profile: UserProfile }>("/auth/google", {
           method: "POST",
@@ -125,11 +127,36 @@ export const api = {
       return {
         token: MOCK_TOKENS.DEMO_JWT,
         profile: {
-          id: "usr-google-01",
-          name: payload.name,
+          id: `usr-g-${Date.now().toString(36)}`,
+          name: payload.name || "Google Patient",
           email: payload.email,
-          initials: payload.name.slice(0, 2).toUpperCase(),
+          initials: (payload.name || "GP").slice(0, 2).toUpperCase(),
           role: payload.email.includes("admin") ? "admin" : "patient",
+          phone: "+91 98450 12345",
+        },
+      };
+    },
+
+    acceptInviteWithGoogle: async (payload: { token: string; email: string; name?: string }): Promise<{ token: string; profile: UserProfile }> => {
+      if (USE) {
+        const res = await apiFetch<{ status: string; token: string; profile: UserProfile }>("/auth/accept-invite-google", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        if (res.token) {
+          localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, res.token);
+          localStorage.setItem(STORAGE_KEYS.AUTH_PROFILE, JSON.stringify(res.profile));
+        }
+        return res;
+      }
+      return {
+        token: MOCK_TOKENS.DEMO_JWT,
+        profile: {
+          id: `usr-g-${Date.now().toString(36)}`,
+          name: payload.name || "Google Patient",
+          email: payload.email,
+          initials: (payload.name || "GP").slice(0, 2).toUpperCase(),
+          role: "patient",
           phone: "+91 98450 12345",
         },
       };
@@ -337,6 +364,28 @@ export const api = {
           body: JSON.stringify({ status }),
         });
       } catch {
+        return null;
+      }
+    },
+    checkContinuityPreference: async (
+      hospitalId?: string,
+      identifier?: string,
+      date?: string,
+      slot?: string
+    ): Promise<ContinuityPreferenceResponse | null> => {
+      if (!identifier) return null;
+      try {
+        const params = new URLSearchParams({
+          identifier,
+          ...(hospitalId ? { hospital_id: hospitalId } : {}),
+          ...(date ? { date } : {}),
+          ...(slot ? { slot } : {}),
+        });
+        return await serverFetch<ContinuityPreferenceResponse>(
+          `/api/v1/scheduling/continuity-preference?${params.toString()}`
+        );
+      } catch (err) {
+        console.warn("Continuity preference check failed:", err);
         return null;
       }
     },

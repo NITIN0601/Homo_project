@@ -142,16 +142,22 @@ const AuthPanel: React.FC = () => {
     setLoading(false);
   };
 
-  // ── Google OAuth Sign-In ───────────────────────────────────────────────────
-  const handleGoogleSignIn = async () => {
+  // ── Google OAuth Sign-In (Passwordless for Patients) ──────────────────────
+  const handleGoogleSignIn = async (customEmail?: string, customName?: string) => {
     setError(null);
     setLoading(true);
     try {
-      // Connects with Google OAuth Identity Provider through API gateway
+      const targetEmail = (customEmail || email || "patient.google@gmail.com").trim().toLowerCase();
+      const targetName = (
+        customName ||
+        (targetEmail.includes("@") ? targetEmail.split("@")[0].replace(/[._]/g, " ") : "Google Patient")
+      ).trim();
+
       const authRes = await api.auth.google({
-        email: "patient.google@gmail.com",
-        name: "Google Account Patient",
+        email: targetEmail,
+        name: targetName,
         portal_intent: "patient",
+        hospital_id: state.tenant?.id || "default",
       });
       login(authRes.profile);
       closeAuthModal();
@@ -703,6 +709,39 @@ const AuthPanel: React.FC = () => {
                   <div>
                     <h3 className="font-bold text-stone-800 text-sm">Patient Registration</h3>
                     <p className="text-stone-500 text-[11px]">Register your details to save delivery address & payment methods</p>
+                  </div>
+
+                  {/* 1-Click Fast Google Sign-Up (Passwordless) */}
+                  <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-3 text-center space-y-2">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="text-sm">⚡</span>
+                      <span className="text-xs font-bold text-emerald-950">1-Click Patient Sign-Up</span>
+                    </div>
+                    <p className="text-[11px] text-emerald-800 leading-snug">
+                      No password required. Connect your Google account to register instantly.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => handleGoogleSignIn(regEmail || undefined, regName || undefined)}
+                      className="w-full py-2 px-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 font-bold text-xs text-stone-700 transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95 cursor-pointer"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.42 7.33 24 12 24z"/>
+                        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.58 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                      </svg>
+                      <span>Sign Up with Google (Passwordless)</span>
+                    </button>
+                  </div>
+
+                  <div className="relative my-1">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-stone-200" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-white px-2 text-[10px] font-bold text-stone-400">or register with email</span>
+                    </div>
                   </div>
 
                   {/* First Name (compulsory), Middle Name (optional), Last Name (compulsory) */}

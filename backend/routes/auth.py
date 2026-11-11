@@ -7,6 +7,7 @@ from core.config import settings
 from core.security import require_admin_role
 from fastapi import APIRouter, Depends, HTTPException, status
 from schemas.auth import (
+    AcceptGoogleInviteRequest,
     GoogleAuthRequest,
     InviteUserRequest,
     LoginRequest,
@@ -17,9 +18,10 @@ from schemas.auth import (
 )
 from services.auth_service import (
     accept_user_invite,
+    accept_user_invite_with_google,
+    authenticate_or_register_google_user,
     authenticate_user,
     create_user_invite,
-    generate_local_jwt,
     generate_otp,
     register_user,
     verify_otp_code,
@@ -69,38 +71,27 @@ async def admin_login_endpoint(req: LoginRequest):
 @router.post("/google", summary="Google OAuth Authentication (Scoped for Admin vs Patient)")
 async def google_auth_endpoint(req: GoogleAuthRequest):
     """
-    Authenticates or provisions user via Google Identity.
+    Authenticates or provisions user via Google Identity without requiring password creation.
     Admin privileges are strictly granted ONLY to pre-authorized clinic doctor emails.
     """
-    authorized_admin_emails = set(settings.AUTHORIZED_ADMIN_EMAILS)
-    is_authorized_admin = req.email.strip().lower() in authorized_admin_emails
-
-    if req.portal_intent == "admin" and not is_authorized_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access Denied: Your Google account is not recognized as a registered clinic administrator.",
+    try:
+        profile, token, assigned_role = authenticate_or_register_google_user(
+            email=req.email,
+            name=req.name,
+            portal_intent=req.portal_intent,
+            hospital_id=req.hospital_id,
+            id_token=req.id_token,
         )
-
-    assigned_role = "admin" if is_authorized_admin else "patient"
-    assigned_hospital = (req.hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "default")).strip().lower()
-
-    profile = {
-        "id": "usr-admin-001" if assigned_role == "admin" else f"usr-g-{int(hash(req.email) % 100000)}",
-        "name": req.name,
-        "initials": "".join([n[0] for n in req.name.split()[:2]]).upper() or "GU",
-        "email": req.email.strip().lower(),
-        "role": assigned_role,
-        "hospital_id": assigned_hospital,
-        "phone": settings.CLINIC_PHONE if assigned_role == "admin" else "",
-        "provider": "google",
-    }
-    token = generate_local_jwt(profile)
-    return {
-        "status": "success",
-        "role": assigned_role,
-        "token": token,
-        "profile": profile,
-    }
+        return {
+            "status": "success",
+            "role": assigned_role,
+            "token": token,
+            "profile": profile,
+        }
+    except ValueError as ve:
+        err_msg = str(ve)
+        status_code = status.HTTP_403_FORBIDDEN if "Access Denied" in err_msg else status.HTTP_400_BAD_REQUEST
+        raise HTTPException(status_code=status_code, detail=err_msg)
 
 
 @router.post("/register", summary="Register user with email validation and secure password hash")
@@ -204,4 +195,24 @@ async def accept_invite_endpoint(req: VerifyInviteRequest):
         }
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
+
+
+@router.post("/accept-invite-google", summary="Accept invite instantly using Google Authentication (Passwordless)")
+async def accept_invite_google_endpoint(req: AcceptGoogleInviteRequest):
+    """Claims an invite token via Google OAuth with zero password creation."""
+    try:
+        profile, token = accept_user_invite_with_google(
+            token=req.token,
+            email=req.email,
+            name=req.name,
+        )
+        return {
+            "status": "success",
+            "message": "Invite claimed with Google. Welcome to the portal!",
+            "token": token,
+            "profile": profile,
+        }
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+
 

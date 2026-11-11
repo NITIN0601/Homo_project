@@ -51,3 +51,10 @@ class InviteUserRequest(BaseModel):
 class VerifyInviteRequest(BaseModel):
     token: str = Field(..., example="inv_abc123456")
     password: str = Field(..., min_length=6, example="NewPassword123!")
+
+
+class AcceptGoogleInviteRequest(BaseModel):
+    token: str = Field(..., example="inv_abc123456")
+    email: str = Field(..., example="patient@gmail.com")
+    name: str = Field(default="Google Patient", example="Google Patient")
+

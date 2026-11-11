@@ -320,5 +320,138 @@ def accept_user_invite(token: str, password: str) -> tuple[dict[str, Any], str]:
     return user_view, jwt_token
 
 
+def authenticate_or_register_google_user(
+    email: str,
+    name: str = "Google User",
+    portal_intent: str = "patient",
+    hospital_id: str | None = None,
+    id_token: str | None = None,
+) -> tuple[dict[str, Any], str, str]:
+    """
+    Authenticates or provisions a user via Google OAuth Identity without password creation.
+    - Zero password required (provider: 'google').
+    - Persistent profile saved in clinic accounts store.
+    - Multi-tenant hospital affiliation and quota enforcement.
+    - Security guardrail: Admin access strictly limited to AUTHORIZED_ADMIN_EMAILS.
+    Returns (profile, token, assigned_role).
+    """
+    clean_email = validate_email(email)
+    authorized_admin_emails = {e.strip().lower() for e in settings.AUTHORIZED_ADMIN_EMAILS}
+    is_authorized_admin = clean_email in authorized_admin_emails
+
+    if portal_intent == "admin" and not is_authorized_admin:
+        raise ValueError("Access Denied: Your Google account is not recognized as a registered clinic administrator.")
+
+    assigned_role = "admin" if is_authorized_admin else "patient"
+    assigned_hospital = (hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "default")).strip().lower()
+
+    accounts = _load_accounts()
+    existing = accounts.get(clean_email)
+
+    if existing:
+        user_role = "admin" if is_authorized_admin else existing.get("role", assigned_role)
+        existing["provider"] = "google"
+        existing["last_login"] = datetime.now(timezone.utc).isoformat()
+        if name and name != "Google User" and not existing.get("name"):
+            existing["name"] = name.strip()
+        _save_accounts(accounts)
+
+        profile = {
+            "id": existing["id"],
+            "name": existing.get("name", name),
+            "initials": "".join([n[0] for n in existing.get("name", name).split()[:2]]).upper() or "GU",
+            "email": clean_email,
+            "role": user_role,
+            "hospital_id": existing.get("hospital_id", assigned_hospital),
+            "phone": existing.get("phone", ""),
+            "provider": "google",
+        }
+        token = generate_local_jwt(profile)
+        return profile, token, user_role
+
+    # New user registering automatically via Google (Passwordless)
+    if assigned_role == "patient":
+        current_patients = sum(
+            1 for a in accounts.values()
+            if a.get("role") == "patient" and a.get("hospital_id", "").lower() == assigned_hospital
+        )
+        if current_patients >= settings.MAX_CUSTOMERS_PER_HOSPITAL:
+            raise ValueError(
+                f"Hospital quota reached: Maximum {settings.MAX_CUSTOMERS_PER_HOSPITAL} patients reached for '{assigned_hospital}'."
+            )
+
+    parts = [p for p in name.strip().split() if p]
+    fn = parts[0] if parts else "Google"
+    ln = parts[-1] if len(parts) > 1 else "Patient"
+    mn = " ".join(parts[1:-1]) if len(parts) > 2 else ""
+
+    user_id = "usr-admin-001" if assigned_role == "admin" else f"usr-{uuid.uuid4().hex[:8]}"
+
+    account_entry = {
+        "id": user_id,
+        "name": name.strip(),
+        "first_name": fn,
+        "middle_name": mn,
+        "last_name": ln,
+        "email": clean_email,
+        "role": assigned_role,
+        "hospital_id": assigned_hospital,
+        "phone": settings.CLINIC_PHONE if assigned_role == "admin" else "",
+        "provider": "google",
+        "has_password": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "last_login": datetime.now(timezone.utc).isoformat(),
+    }
+    accounts[clean_email] = account_entry
+    _save_accounts(accounts)
+
+    profile = {
+        "id": user_id,
+        "name": name.strip(),
+        "initials": "".join([n[0] for n in name.split()[:2]]).upper() or "GU",
+        "email": clean_email,
+        "role": assigned_role,
+        "hospital_id": assigned_hospital,
+        "phone": account_entry["phone"],
+        "provider": "google",
+    }
+    token = generate_local_jwt(profile)
+    return profile, token, assigned_role
+
+
+def accept_user_invite_with_google(
+    token: str,
+    email: str,
+    name: str = "Google User",
+) -> tuple[dict[str, Any], str]:
+    """Claims an invite token using Google Sign-In with zero password creation."""
+    invites = load_json(INVITES_FILE, default={})
+    invite = invites.get(token)
+    if not invite:
+        raise ValueError("Invalid or expired invite token.")
+
+    if invite.get("is_claimed"):
+        raise ValueError("This invite token has already been claimed.")
+
+    if datetime.now(timezone.utc).timestamp() > invite.get("expires_at", 0):
+        raise ValueError("This invite token has expired. Please request a new invite.")
+
+    # Provision user profile via Google OAuth without password
+    profile, jwt_token, _ = authenticate_or_register_google_user(
+        email=email,
+        name=invite.get("name") or name,
+        portal_intent="patient" if invite.get("role") == "patient" else "admin",
+        hospital_id=invite.get("hospital_id"),
+    )
+
+    invite["is_claimed"] = True
+    invite["claimed_at"] = datetime.now(timezone.utc).isoformat()
+    invites[token] = invite
+    save_json(INVITES_FILE, invites)
+
+    return profile, jwt_token
+
+
+
 
 
