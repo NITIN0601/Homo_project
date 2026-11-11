@@ -1054,5 +1054,203 @@
     "uploaded_by": "mobile_worker_test",
     "uploaded_at": "2026-11-04T21:24:39.404774+00:00",
     "_synced": false
+  },
+  {
+    "id": "1e3e1292-10a4-4da4-a280-caec16128816",
+    "file_hash": "sha256_test_hash_4bf87a37f75d4b948b39a508a1bf96c0",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T19:56:25.496332+00:00",
+    "_synced": false
+  },
+  {
+    "id": "87ab0d80-2e0e-455f-a863-e0c29fc280ad",
+    "file_hash": "sha256_test_hash_af2975cef76045e7b7352c89a1fdba98",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:01:29.059520+00:00",
+    "_synced": false
+  },
+  {
+    "id": "2283d33b-c549-4c94-b73f-17ea27ca74af",
+    "file_hash": "sha256_test_hash_f37a888f5ca5448e9d775329df00fdae",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:04:32.113357+00:00",
+    "_synced": false
+  },
+  {
+    "id": "2ec52b31-9fd4-4053-a4ed-39c5d0a5cb48",
+    "file_hash": "sha256_test_hash_e6387cc5833c4f049671fb6b9d0b5322",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:04:51.181431+00:00",
+    "_synced": false
+  },
+  {
+    "id": "97be36db-78dd-4e02-b32e-99760a18fa02",
+    "file_hash": "sha256_test_hash_f0e2894ae360423983d03b6f2085ab41",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:05:11.312334+00:00",
+    "_synced": false
+  },
+  {
+    "id": "27c44e97-bdc8-4d47-a49b-b4a756090432",
+    "file_hash": "sha256_test_hash_6bc7fdfa3c6c4eb9977ed16bfcf253c9",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:09:55.184215+00:00",
+    "_synced": false
+  },
+  {
+    "id": "12b70376-9f31-4aaa-ae2b-656b793bbc4d",
+    "file_hash": "sha256_test_hash_e6ec8cb97a384da58bee4812d6815c75",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:13:35.927673+00:00",
+    "_synced": false
+  },
+  {
+    "id": "6e58a285-f6b1-4993-9407-80ea26b0ed4d",
+    "file_hash": "sha256_test_hash_0c90c40febcd4c09854544f50c1b81e5",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:14:28.364802+00:00",
+    "_synced": false
+  },
+  {
+    "id": "07b6001d-6fc8-4365-b325-e21b12fb69ff",
+    "file_hash": "sha256_test_hash_ae61a4a6f9e74a0f84541397b63d1ce6",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:22:47.470384+00:00",
+    "_synced": false
+  },
+  {
+    "id": "224c9558-78f3-487a-988b-b9d449c585b8",
+    "file_hash": "sha256_test_hash_c74a01e8f2324447967aa5806ce03103",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:27:41.825131+00:00",
+    "_synced": false
+  },
+  {
+    "id": "fdfb6457-c25b-412d-a16e-9aa8a6f0bb43",
+    "file_hash": "sha256_test_hash_bbc0e56ac0a74bbaaa8ca7c370b7b2ff",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:47:06.577364+00:00",
+    "_synced": false
+  },
+  {
+    "id": "f5da8f5b-7ca5-409e-80ed-272205f9e8fd",
+    "file_hash": "sha256_test_hash_39b06a8f84a945c99984d22870d7d05c",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:47:30.352326+00:00",
+    "_synced": false
+  },
+  {
+    "id": "0ec92dfa-cd00-44cc-8fbb-0221eb41e826",
+    "file_hash": "sha256_test_hash_c15f41e121af402f93c781817d3e93f8",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:56:08.998115+00:00",
+    "_synced": false
+  },
+  {
+    "id": "1b05ddf7-55c4-4105-87f7-86c48ed6d879",
+    "file_hash": "sha256_test_hash_f3eebd5278f34e3389fdfa720b70222b",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:59:02.096188+00:00",
+    "_synced": false
+  },
+  {
+    "id": "86582009-8fbd-42a1-b07d-b6a9cb1d0610",
+    "file_hash": "sha256_test_hash_7f4a45f2783c4756b03d89d68a5855a3",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T20:59:49.599858+00:00",
+    "_synced": false
+  },
+  {
+    "id": "af7e564b-ffba-490d-9421-aaf35f135bd7",
+    "file_hash": "sha256_test_hash_93309e67b35a465e8f316443a92614b0",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T21:39:39.684512+00:00",
+    "_synced": false
+  },
+  {
+    "id": "d45ecc87-4e0a-47e2-a6d3-dd3cab63419b",
+    "file_hash": "sha256_test_hash_107b3406f5e94982a55d5da5de0aade7",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T21:40:19.301361+00:00",
+    "_synced": false
+  },
+  {
+    "id": "fe878634-a524-4948-9e35-e5e100ef9e73",
+    "file_hash": "sha256_test_hash_0cdc614ce2444ef5baeb83b767df0732",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T21:44:21.742890+00:00",
+    "_synced": false
+  },
+  {
+    "id": "22418a32-22f9-47b5-bd51-ba861ee966f3",
+    "file_hash": "sha256_test_hash_0bfafa0767e2459cbd7c63fd7fcc0f26",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T21:57:20.768166+00:00",
+    "_synced": false
+  },
+  {
+    "id": "f89b48f0-bd55-4f46-8394-99fdbd1bab38",
+    "file_hash": "sha256_test_hash_a748243abf874c2bb32796a63e944fe2",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T22:03:31.033349+00:00",
+    "_synced": false
+  },
+  {
+    "id": "26ca0f32-6836-40a1-a948-185597ead36f",
+    "file_hash": "sha256_test_hash_0a0c99478369454cb0326d1ae652637b",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T22:06:39.775877+00:00",
+    "_synced": false
+  },
+  {
+    "id": "ea1c3b0c-ac90-4313-85e7-39b856c40ec0",
+    "file_hash": "sha256_test_hash_c9aa7c3b7acd4fcea25f4d62f73e27fa",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T22:07:09.029804+00:00",
+    "_synced": false
   }
 ]

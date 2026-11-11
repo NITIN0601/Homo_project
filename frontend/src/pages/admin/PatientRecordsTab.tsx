@@ -5,6 +5,7 @@ import { MEDICINE_CATALOGUE } from "../../context/AppContext";
 import { formatINR, formatDateTime, splitFullName } from "../../utils/format";
 import { useTenant } from "../../context/ThemeProvider";
 import { Badge, Button } from "../../components/ui";
+import { PatientInviteModal } from "./modals/PatientInviteModal";
 
 interface PatientRecordsTabProps {
   patientList: UserProfile[];
@@ -47,6 +48,7 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
 }) => {
   const { tenant } = useTenant();
   const [searchQuery, setSearchQuery] = useState("");
+  const [inviteModalPatient, setInviteModalPatient] = useState<UserProfile | null>(null);
 
   const filteredPatients = useMemo(() => {
     return patientList.filter((p) => {
@@ -221,6 +223,17 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
                         title="Post consultation fee for this patient to pay in their portal"
                       >
                         <span>💳</span> + Post Fee
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInviteModalPatient(patient);
+                        }}
+                        title="Send onboarding activation link to this patient via WhatsApp or Email"
+                      >
+                        <span>✉️</span> Invite Portal
                       </Button>
                     </div>
 
@@ -542,6 +555,12 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
           );
         })}
       </div>
+
+      <PatientInviteModal
+        patient={inviteModalPatient}
+        isOpen={!!inviteModalPatient}
+        onClose={() => setInviteModalPatient(null)}
+      />
     </div>
   );
 };

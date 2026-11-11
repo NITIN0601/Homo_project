@@ -12,10 +12,11 @@ export type Page =
   | "mobile-worker"
   | "privacy-policy"
   | "terms"
+  | "join"
   | "404";
 
 // ── Authentication & RBAC ────────────────────────────────────────────────────
-export type UserRole = "patient" | "admin";
+export type UserRole = "patient" | "admin" | "super_admin";
 
 export interface SavedCard {
   id: string;
@@ -271,6 +272,10 @@ export interface AppointmentPayload {
   endTime: string;
   providerCalendarId: string;
   patientCalendarSyncRequested: boolean;
+  doctorId?: string;
+  doctorName?: string;
+  hospitalId?: string;
+  continuityStatus?: string;
 }
 
 export interface Appointment {
@@ -284,6 +289,10 @@ export interface Appointment {
   status: AppointmentStatus;
   notes?: string;
   calendarEventId?: string;
+  doctorId?: string;
+  doctorName?: string;
+  hospitalId?: string;
+  continuityStatus?: string;
 }
 
 export interface BookedAppointment {
@@ -304,6 +313,36 @@ export interface BookedAppointment {
   notes?: string;
   cancellationReason?: string;
   createdAt?: string;
+  doctorId?: string;
+  doctorName?: string;
+  hospitalId?: string;
+  continuityStatus?: string;
+}
+
+export interface DoctorSummary {
+  id: string;
+  name: string;
+  short_name?: string;
+  title?: string;
+  qualifications?: string;
+  specialties: string[];
+  avatar_url?: string;
+  is_active: boolean;
+  calendar_id?: string;
+  is_primary?: boolean;
+}
+
+export interface ContinuityPreferenceResponse {
+  is_returning_patient: boolean;
+  status: "new_patient" | "preferred_doctor_available" | "doctor_unavailable_on_date" | "doctor_inactive";
+  message: string;
+  last_visit_date?: string | null;
+  preferred_doctor?: DoctorSummary | null;
+  previous_doctor_name?: string | null;
+  recommended_alternate?: DoctorSummary | null;
+  next_available_date?: string | null;
+  case_transfer_required: boolean;
+  hospital_doctors: DoctorSummary[];
 }
 
 export interface PatientClinicalMedia {
