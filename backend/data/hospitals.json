@@ -105,7 +105,7 @@
       "enableGoogleReviews": true
     },
     "isActive": true,
-    "updatedAt": "2026-11-09T22:47:52.617530+00:00"
+    "updatedAt": "2026-11-11T22:07:09.202732+00:00"
   },
   {
     "id": "apollo",
@@ -156,6 +156,1018 @@
       "enableOnlinePayments": true,
       "enableTelemedicine": true,
       "enableGoogleReviews": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-127aaa",
+    "slug": "test-med-127aaa",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-127aaa",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-154b6b",
+    "slug": "test-med-154b6b",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-154b6b",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-cb8d73",
+    "slug": "test-med-cb8d73",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-cb8d73",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-206bb5",
+    "slug": "test-med-206bb5",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-206bb5",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-8062c4",
+    "slug": "test-med-8062c4",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-8062c4",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-90aef5",
+    "slug": "test-med-90aef5",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-90aef5",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-b27049",
+    "slug": "test-med-b27049",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-b27049",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-eff614",
+    "slug": "test-med-eff614",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-eff614",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-4b5c5f",
+    "slug": "test-med-4b5c5f",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-4b5c5f",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-da697e",
+    "slug": "test-med-da697e",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-da697e",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-9175c9",
+    "slug": "test-med-9175c9",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-9175c9",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-7da79c",
+    "slug": "test-med-7da79c",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-7da79c",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-6cea35",
+    "slug": "test-med-6cea35",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-6cea35",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-e97b96",
+    "slug": "test-med-e97b96",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-e97b96",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-bdfcf2",
+    "slug": "test-med-bdfcf2",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-bdfcf2",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-e76285",
+    "slug": "test-med-e76285",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-e76285",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-fc86d3",
+    "slug": "test-med-fc86d3",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-fc86d3",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-0eafc3",
+    "slug": "test-med-0eafc3",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-0eafc3",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-9b5822",
+    "slug": "test-med-9b5822",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-9b5822",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-f05ec5",
+    "slug": "test-med-f05ec5",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-f05ec5",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-eee181",
+    "slug": "test-med-eee181",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-eee181",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-de8533",
+    "slug": "test-med-de8533",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-de8533",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
     },
     "isActive": true
   }

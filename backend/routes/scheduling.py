@@ -5,20 +5,21 @@ Indian public holidays feed, and doctor blocked dates.
 """
 
 import logging
-import threading
 from datetime import datetime
 from typing import Any
 
 from core.config import settings
 from core.security import get_current_user_optional, scope_items_to_patient_or_admin
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from schemas.scheduling import BookAppointmentRequest
+from schemas.scheduling import BookAppointmentRequest, ContinuityPreferenceResponse
 from services.calendar_service import (
     GOOGLE_CALENDAR_ID,
     fetch_google_calendar_indian_holidays,
     filter_holidays_by_month,
 )
+from services.continuity_service import resolve_patient_doctor_continuity
 from services.data_store import (
+    InterProcessLock,
     get_all_appointments,
     get_all_blocked_dates,
     save_appointment,
@@ -46,8 +47,8 @@ logger = logging.getLogger("scheduling_routes")
 
 router = APIRouter(tags=["Scheduling & Calendar"])
 
-# Concurrency lock for slot reservation
-_booking_lock = threading.Lock()
+# Inter-process kernel lock for slot reservation across multi-worker processes
+_booking_lock = InterProcessLock("appointment_booking.lock")
 
 
 @router.get("/calendar/holidays", summary="Fetch Indian holidays from Google Calendar ICS")
@@ -150,6 +151,22 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
         hospital = get_hospital(req.hospital_id)
         doctor = get_doctor(req.doctor_id, hospital.get("id"))
 
+        continuity_info = resolve_patient_doctor_continuity(
+            hospital_id=hospital.get("id"),
+            patient_identifier=req.user_email or req.user_phone or "",
+            preferred_date=date_part,
+            preferred_slot=time_part,
+        )
+        cont_status = req.continuity_status or (
+            "Continuing Care"
+            if continuity_info.get("status") == "preferred_doctor_available"
+            else (
+                f"Transferred from {continuity_info.get('previous_doctor_name')}"
+                if continuity_info.get("previous_doctor_name")
+                else "New Patient"
+            )
+        )
+
         apt_record = {
             "id": f"apt-{int(datetime.now().timestamp() * 1000)}",
             "hospitalId": hospital.get("id"),
@@ -168,6 +185,7 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
             "type": "In-Person Clinic Visit",
             "chiefReason": req.description or "Clinical Consultation",
             "status": "Confirmed",
+            "continuityStatus": cont_status,
             "calendarEventId": None,
             "createdAt": datetime.now().isoformat(),
         }
@@ -226,6 +244,32 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
         "email_delivery": email_res,
         "whatsapp_delivery": wa_res,
     }
+
+
+@router.get(
+    "/scheduling/continuity-preference",
+    response_model=ContinuityPreferenceResponse,
+    summary="Resolve patient doctor continuity preference & availability fallback",
+)
+async def get_continuity_preference_endpoint(
+    hospital_id: str | None = Query(default=None, description="Hospital Tenant ID"),
+    identifier: str = Query(..., description="Patient email or phone number"),
+    date: str | None = Query(default=None, description="Preferred appointment date YYYY-MM-DD"),
+    slot: str | None = Query(default=None, description="Preferred time slot HH:MM"),
+):
+    """
+    Evaluates patient consultation history and resolves doctor continuity.
+    - If returning patient: preferences their previous treating doctor.
+    - If previous doctor is inactive: recommends active colleague with case transfer note.
+    - If previous doctor is fully booked on preferred date: suggests next available date or alternate colleague.
+    """
+    res = resolve_patient_doctor_continuity(
+        hospital_id=hospital_id,
+        patient_identifier=identifier,
+        preferred_date=date,
+        preferred_slot=slot,
+    )
+    return res
 
 
 @router.get("/appointments", summary="List all booked appointments")

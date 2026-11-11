@@ -166,9 +166,14 @@ export const AppointmentsTab: React.FC<AppointmentsTabProps> = ({
                     {apt.time.split(" ")[0]}
                   </span>
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h4 className="font-extrabold text-stone-900 text-sm">{apt.patientName}</h4>
                       <span className="font-mono text-xs text-stone-400 font-bold">#{apt.patientId}</span>
+                      {apt.continuityStatus && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          🩺 {apt.continuityStatus}
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-stone-500 font-medium">
                       {apt.date === todayYMD || apt.date === "Today" ? "Today" : apt.date} · {apt.time}

@@ -475,9 +475,14 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                         {apt.time.split(" ")[0]}
                       </span>
                       <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="font-extrabold text-stone-900 text-xs">{apt.patientName}</h4>
                           <span className="font-mono text-[10px] text-stone-400 font-bold">#{apt.patientId}</span>
+                          {apt.continuityStatus && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              🩺 {apt.continuityStatus}
+                            </span>
+                          )}
                         </div>
                         <p className="text-[11px] text-stone-500 font-medium">{apt.chiefReason.slice(0, 48)}…</p>
                       </div>
