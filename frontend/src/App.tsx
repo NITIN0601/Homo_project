@@ -3,6 +3,7 @@ import React, { Suspense, useEffect } from "react";
 // ─── Context (SSOT) ───────────────────────────────────────────────────────────
 import { AppProvider, useApp } from "./context/AppContext";
 import { ThemeProvider, useTenant } from "./context/ThemeProvider";
+import { ToastProvider } from "./context/ToastContext";
 import { USE_MOCK_DATA, PHASE_CONFIG } from "./config";
 
 // ─── Layout & Navigation Components ──────────────────────────────────────────
@@ -32,6 +33,7 @@ const CartPage          = React.lazy(() => import("./pages/CartPage"));
 const OrderMedicinePage = React.lazy(() => import("./pages/OrderMedicinePage"));
 const VisitSummaryPage  = React.lazy(() => import("./pages/VisitSummaryPage"));
 const AdminDashboard    = React.lazy(() => import("./pages/AdminDashboard"));
+const SuperAdminDashboard = React.lazy(() => import("./pages/SuperAdminDashboard"));
 const MobileWorkerPage  = React.lazy(() => import("./pages/MobileWorkerPage"));
 const PrivacyPolicyPage = React.lazy(() => import("./pages/PrivacyPolicyPage"));
 const TermsPage         = React.lazy(() => import("./pages/TermsPage"));
@@ -76,6 +78,13 @@ const PageRouter: React.FC = () => {
       return (
         <ProtectedRoute requiredRole="admin">
           <AdminDashboard />
+        </ProtectedRoute>
+      );
+
+    case "super-admin-dashboard":
+      return (
+        <ProtectedRoute requiredRole="super_admin">
+          <SuperAdminDashboard />
         </ProtectedRoute>
       );
 
@@ -161,7 +170,9 @@ const App: React.FC = () => (
   <RootErrorBoundary>
     <ThemeProvider>
       <AppProvider>
-        <AppShell />
+        <ToastProvider>
+          <AppShell />
+        </ToastProvider>
       </AppProvider>
     </ThemeProvider>
   </RootErrorBoundary>

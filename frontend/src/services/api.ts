@@ -29,7 +29,6 @@ import type {
   ConsultationInvoice,
   BlockedCalendarDate,
   ContinuityPreferenceResponse,
-  DoctorSummary,
 } from "../types";
 import { BACKEND, CLINIC, WHATSAPP, STORAGE_KEYS, MOCK_TOKENS } from "../config";
 import { formatDateShort } from "../utils/format";
@@ -483,6 +482,31 @@ export const api = {
 
   // ── Multi-Tenant Platform & Super Admin Management ────────────────────────────
   platform: {
+    onboardHospital: async (payload: Record<string, unknown>) => {
+      return apiFetch<{
+        status: string;
+        message: string;
+        hospital: any;
+        doctor: any;
+        invite: any;
+        invite_url: string;
+        email_delivery: any;
+      }>("/super-admin/onboard-hospital", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+    },
+    updateHospitalFeatures: async (hospitalId: string, features: Record<string, boolean>) => {
+      return apiFetch<{
+        status: string;
+        message: string;
+        hospital_id: string;
+        features: Record<string, boolean>;
+      }>(`/super-admin/hospitals/${hospitalId}/features`, {
+        method: "PUT",
+        body: JSON.stringify({ features }),
+      });
+    },
     createHospital: async (data: Record<string, unknown>) => {
       return apiFetch("/hospitals", {
         method: "POST",

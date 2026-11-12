@@ -43,6 +43,11 @@ export function parseRouteFromLocation(): ParsedRoute {
     return { page: pageParam };
   }
 
+  // Super Admin routes
+  if (rawPath === "/super-admin" || rawPath === "/super-admin/dashboard" || rawPath === "/platform") {
+    return { page: "super-admin-dashboard" };
+  }
+
   // Admin routes
   if (rawPath === "/admin" || rawPath === "/admin/dashboard" || rawPath === "/dashboard") {
     return { page: "admin-dashboard", adminTab: "dashboard" };
@@ -111,6 +116,7 @@ export function getUrlForState(page: Page, adminTab?: AdminTab): string {
       default:             return "/admin/dashboard";
     }
   }
+  if (page === "super-admin-dashboard") return "/super-admin";
   switch (page) {
     case "about":          return "/about";
     case "appointments":   return "/appointments";

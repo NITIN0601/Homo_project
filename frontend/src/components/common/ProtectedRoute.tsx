@@ -5,7 +5,7 @@ import { THEME_GRADIENTS, THEME_COLORS } from "../../config";
 // ─── Props ───────────────────────────────────────────────────────────────────
 interface ProtectedRouteProps {
   /** The role required to render children */
-  requiredRole: "admin" | "patient";
+  requiredRole: "admin" | "patient" | "super_admin";
   children: ReactNode;
   /** Optional custom fallback; defaults to the generic RBAC wall below */
   fallback?: ReactNode;
