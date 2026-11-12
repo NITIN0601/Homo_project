@@ -4,6 +4,7 @@ import { formatDateWithWeekday, formatDateISO } from "../../utils/format";
 import { Modal } from "../../components/ui";
 import { MORNING_SLOTS, EVENING_SLOTS } from "../../config";
 import { useApp } from "../../context/AppContext";
+import { useToast } from "../../context/ToastContext";
 import type { BlockedDateEntry } from "./types";
 
 export const BLOCKING_REASON_TEMPLATES: Record<"ooo" | "holiday" | "leave", string[]> = {
@@ -56,6 +57,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({
   onUpdateBlockedDate,
 }) => {
   const { updateBlockedDate: updateBlockedDateFallback } = useApp();
+  const toast = useToast();
 
   const [newOooDate, setNewOooDate] = useState(() => {
     const d = new Date();
@@ -219,7 +221,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({
     if (!newOooDate) return;
 
     if (blockDurationType === "time_based" && selectedSlots.length === 0 && (!startTime || !endTime)) {
-      alert("Please select at least one time slot or enter a start/end time window.");
+      toast.warning("Please select at least one time slot or enter a start/end time window.");
       return;
     }
 

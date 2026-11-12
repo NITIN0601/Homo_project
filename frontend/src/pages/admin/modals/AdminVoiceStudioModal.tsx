@@ -1,15 +1,15 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import type { UserProfile, HomeopathicRemedySuggestion } from "../../../types";
-import { useApp, MEDICINE_CATALOGUE } from "../../../context/AppContext";
+import { useApp } from "../../../context/AppContext";
+import { useToast } from "../../../context/ToastContext";
 import { MOCK_ACCOUNTS } from "../../../data/mocks";
-import { VOICE_STUDIO, DOCTOR, CLINIC, WHATSAPP, USE_MOCK_DATA } from "../../../config";
+import { VOICE_STUDIO, WHATSAPP, USE_MOCK_DATA } from "../../../config";
 import {
   transcribeAudioFile,
   parseConsultationTextWithLLM,
   buildApprovedVisitRecord,
   getPatientVisibleCaseRecord,
-  LANGUAGE_LABELS,
   runVoiceStudioEvaluationHarness,
   type StructuredConsultationDraft,
   type VoiceStudioTranscriptionResult,
@@ -40,6 +40,7 @@ export const AdminVoiceStudioModal: React.FC<AdminVoiceStudioModalProps> = ({
   onClose,
 }) => {
   const { state, addVisitSummary } = useApp();
+  const toast = useToast();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -156,7 +157,7 @@ export const AdminVoiceStudioModal: React.FC<AdminVoiceStudioModalProps> = ({
     setTestingProviderId(providerId);
     setTestResult(null);
     try {
-      const res = await modelProviderManager.testConnection(providerId);
+      const res = await modelProviderManager.testProviderConnection(providerId);
       setTestResult(res);
     } catch (err: any) {
       setTestResult({ ok: false, message: err?.message || "Connection failed" });
@@ -168,10 +169,10 @@ export const AdminVoiceStudioModal: React.FC<AdminVoiceStudioModalProps> = ({
   const handleFetchLiveModels = async (providerId: LLMProviderId) => {
     setFetchingModelsProvId(providerId);
     try {
-      const models = await modelProviderManager.fetchLiveModels(providerId);
-      alert(`✓ Discovered ${models.length} live models from ${providerId.toUpperCase()} API!`);
+      const models = await modelProviderManager.fetchLiveModelsForProvider(providerId);
+      toast.success(`✓ Discovered ${models.length} live models from ${providerId.toUpperCase()} API!`);
     } catch (err: any) {
-      alert(`Could not fetch live models: ${err?.message || "Check API Key"}`);
+      toast.error(`Could not fetch live models: ${err?.message || "Check API Key"}`);
     } finally {
       setFetchingModelsProvId(null);
     }
@@ -180,14 +181,10 @@ export const AdminVoiceStudioModal: React.FC<AdminVoiceStudioModalProps> = ({
   const handleAddCustomModel = (providerId: LLMProviderId) => {
     const val = (customModelInputs[providerId] || "").trim();
     if (!val) return;
-    modelProviderManager.addCustomModel(providerId, {
-      id: val,
-      name: `${val} (Custom)`,
-      description: "User registered custom / fine-tuned model",
-    });
+    modelProviderManager.addCustomModelToProvider(providerId, val);
     setActiveModelId(val);
     setCustomModelInputs((prev) => ({ ...prev, [providerId]: "" }));
-    alert(`✓ Registered and selected model: ${val}`);
+    toast.success(`✓ Registered and selected model: ${val}`);
   };
 
   const computeSha256 = async (blob: Blob): Promise<string> => {
@@ -250,43 +247,45 @@ export const AdminVoiceStudioModal: React.FC<AdminVoiceStudioModalProps> = ({
       );
 
       const structuredDraft = await parseConsultationTextWithLLM(
-        transcriptionResult.transcriptText,
-        transcriptionResult.detectedLanguage,
-        transcriptionResult.detectedLanguageLabel
+        transcriptionResult.text,
+        transcriptionResult.language,
+        currentPatient
       );
 
       setDraft(structuredDraft);
-      setDetectedLang(transcriptionResult.detectedLanguage);
+      setDetectedLang(transcriptionResult.language);
       setDetectedLangLabel(transcriptionResult.detectedLanguageLabel);
-      setEvalTelemetry(transcriptionResult.telemetry);
+      setEvalTelemetry(transcriptionResult.telemetry || null);
 
       setEditDiagnosis(structuredDraft.chiefDiagnosis);
       const initialRemedies: HomeopathicRemedySuggestion[] =
-        structuredDraft.homeopathicCaseRecord?.treatment_plan?.medicines_suggested &&
-        structuredDraft.homeopathicCaseRecord.treatment_plan.medicines_suggested.length > 0
-          ? structuredDraft.homeopathicCaseRecord.treatment_plan.medicines_suggested
-          : structuredDraft.prescribedRemedies.map((r) => ({
-              remedy_name: r.medicineName || "Nux Vomica",
-              potency: r.potency || "30C",
-              dosage_form: "Globules (Size 30 cane sugar)",
-              frequency: r.dosage || "4 globules twice daily",
-              instructions: r.duration ? `Duration: ${r.duration}` : "Take 4 globules directly on tongue",
-            }));
+        structuredDraft.caseRecord?.treatment_plan?.medicines_suggested &&
+        structuredDraft.caseRecord.treatment_plan.medicines_suggested.length > 0
+          ? structuredDraft.caseRecord.treatment_plan.medicines_suggested
+          : [
+              {
+                remedy_name: structuredDraft.suggestedRemedyName || "Nux Vomica",
+                potency: structuredDraft.suggestedPotency || "200C",
+                dosage_form: "Globules (Size 30 cane sugar)",
+                frequency: "4 globules twice daily",
+                instructions: structuredDraft.dosageInstruction || "Take 4 globules directly on tongue",
+              },
+            ];
 
       setEditRemedies(initialRemedies);
       setEditAdvice(structuredDraft.lifestyleAdvice);
-      setEditDoctorNotes(structuredDraft.clinicalNotes);
+      setEditDoctorNotes(structuredDraft.clinicalNotesDoctorOnly);
 
       setStep("review");
     } catch {
-      alert("VoiceStudio processing failed. Re-dictating consultation.");
+      toast.error("VoiceStudio processing failed. Re-dictating consultation.");
       setStep("record");
     }
   };
 
   const syncedCaseRecord = useMemo(() => {
-    if (!draft?.homeopathicCaseRecord) return null;
-    const base = draft.homeopathicCaseRecord;
+    if (!draft?.caseRecord) return null;
+    const base = draft.caseRecord;
     return {
       ...base,
       clinical_summary: {
@@ -302,10 +301,10 @@ export const AdminVoiceStudioModal: React.FC<AdminVoiceStudioModalProps> = ({
       patient_visibility_permissions: {
         share_remedies: shareRemedy,
         share_modalities: shareModalities,
-        share_diet_lifestyle: shareAdvice,
+        share_lifestyle: shareAdvice,
         share_mental_state: shareMentalState,
-        share_miasmatic_analysis: shareMiasm,
-        share_physician_internal_notes: shareClinicalNotes,
+        share_miasm: shareMiasm,
+        share_conversation_summary: shareClinicalNotes,
       },
       forensic_audio_provenance: {
         retained_on_local_clinic_system: retainAudioOnSystem && !audioIsPurged,
@@ -313,7 +312,7 @@ export const AdminVoiceStudioModal: React.FC<AdminVoiceStudioModalProps> = ({
         audio_duration_seconds: audioDurationSec,
         is_permanently_purged: audioIsPurged,
         watermark_standard: "ABDM-M3-HEALTHCARE-AUDIT",
-        recorded_at: draft.visitDate,
+        recorded_at: base.metadata?.visiting_date || new Date().toISOString().split("T")[0],
       },
     };
   }, [
@@ -353,49 +352,32 @@ export const AdminVoiceStudioModal: React.FC<AdminVoiceStudioModalProps> = ({
     const finalApprovedDraft: StructuredConsultationDraft = {
       ...draft,
       chiefDiagnosis: editDiagnosis,
-      prescribedRemedies: editRemedies.map((item, idx) => {
-        const found = MEDICINE_CATALOGUE.find(
-          (m) => m.name.toLowerCase().includes(item.remedy_name.toLowerCase())
-        );
-        return {
-          medicineId: found?.id || `m-custom-${idx}`,
-          medicineName: item.remedy_name,
-          potency: item.potency,
-          dosage: item.instructions || item.frequency || "4 globules twice daily",
-          duration: "14 days",
-        };
-      }),
+      suggestedRemedyName: editRemedies[0]?.remedy_name || draft.suggestedRemedyName,
+      suggestedPotency: editRemedies[0]?.potency || draft.suggestedPotency,
+      dosageInstruction: editRemedies[0]?.instructions || draft.dosageInstruction,
       lifestyleAdvice: editAdvice,
-      clinicalNotes: editDoctorNotes,
-      homeopathicCaseRecord: syncedCaseRecord || draft.homeopathicCaseRecord,
-      privacyShareOptions: {
-        shareRemedy,
-        shareModalities,
-        shareAdvice,
-        shareMentalState,
-        shareMiasm,
-        shareClinicalNotes,
-        sendWhatsApp,
-        sendEmail,
-      },
+      clinicalNotesDoctorOnly: editDoctorNotes,
+      caseRecord: syncedCaseRecord || draft.caseRecord,
     };
 
-    const finalRecord = buildApprovedVisitRecord(
-      finalApprovedDraft,
-      currentPatient.id,
-      DOCTOR.TITLE,
-      CLINIC.BRANCHES.MAIN
-    );
+    const finalRecord = buildApprovedVisitRecord(finalApprovedDraft, {
+      shareRemedyWithPatient: shareRemedy,
+      shareModalitiesWithPatient: shareModalities,
+      shareAdviceWithPatient: shareAdvice,
+      shareMentalStateWithPatient: shareMentalState,
+      shareMiasmWithPatient: shareMiasm,
+      shareClinicalNotesWithPatient: shareClinicalNotes,
+      customDoctorNote: editDoctorNotes,
+    });
 
     addVisitSummary(currentPatient.id, finalRecord);
 
     if (sendWhatsApp) {
-      const waText = encodeURIComponent(
-        `Hello ${currentPatient.name}, Dr. ${DOCTOR.NAME} has released your consultation summary (#${finalRecord.id}).\n` +
-        `Prescription: ${editRemedies.map((r) => `${r.remedy_name} ${r.potency}`).join(", ")}.\n` +
-        `Details: ${WHATSAPP.APP_URL}/visit-summary`
+      const waUrl = WHATSAPP.buildUrl(
+        WHATSAPP.TEMPLATES.CONSULTATION_SUMMARY(currentPatient.name, editDiagnosis, editAdvice),
+        currentPatient.phone || WHATSAPP.NUMBER_CLEAN
       );
-      window.open(`https://wa.me/${(currentPatient.phone || WHATSAPP.CLINIC_PHONE).replace(/[^0-9]/g, "")}?text=${waText}`, "_blank");
+      window.open(waUrl, "_blank");
     }
 
     setStep("approved");
@@ -414,7 +396,7 @@ export const AdminVoiceStudioModal: React.FC<AdminVoiceStudioModalProps> = ({
       const rep = await runVoiceStudioEvaluationHarness();
       setHarnessReport(rep);
     } catch {
-      alert("Evaluation harness test error.");
+      toast.error("Evaluation harness test error.");
     } finally {
       setIsHarnessRunning(false);
     }

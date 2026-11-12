@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import type { HospitalTenantConfig, AdminPasscode } from "../../../types/tenant";
-import { Button, Modal } from "../../../components/ui";
+import type { HospitalTenantConfig, AdminPasscode } from "../../../../types/tenant";
+import { Button, Modal } from "../../../../components/ui";
 
 interface CustomerViewSaveModalProps {
   isOpen: boolean;

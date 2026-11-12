@@ -27,19 +27,14 @@ import type {
   ConsultationInvoiceStatus,
 } from "../types";
 import {
-  DEMO_CREDENTIALS,
   STORAGE_KEYS,
-  USE_MOCK_DATA,
 } from "../config";
 import {
   MEDICINE_CATALOGUE,
   MOCK_ACCOUNTS,
   MOCK_INVENTORY,
-  MOCK_VISIT_SUMMARIES as DEMO_VISIT_SUMMARIES,
-  MOCK_INITIAL_ORDERS as DEMO_ORDERS,
   MOCK_INITIAL_APPOINTMENTS as DEFAULT_APPOINTMENTS,
   MOCK_INITIAL_INVOICES as DEFAULT_CONSULTATION_INVOICES,
-  MOCK_BLOCKED_DATES as DEFAULT_BLOCKED_DATES,
 } from "../data/mocks";
 import { api } from "../services/api";
 
@@ -69,9 +64,7 @@ export * from "./appReducer";
 
 import {
   parseRouteFromLocation,
-  getUrlForState,
   syncUrlWithState,
-  type ParsedRoute,
 } from "../router/routeParser";
 import { INITIAL_STATE } from "./appInitialState";
 import { appReducer } from "./appReducer";
@@ -682,12 +675,21 @@ export function useApp(): AppContextValue {
 }
 
 // ─── RBAC guard ───────────────────────────────────────────────────────────────
-export function useRequireRole(required: "admin" | "patient"): void {
+export function useRequireRole(required: "admin" | "patient" | "super_admin"): void {
   const { state } = useApp();
   const role = state.authUser?.role;
+  if (!role) {
+    throw new RbacAccessError(
+      `Access denied: role 'guest' cannot access a '${required}' resource.`
+    );
+  }
+  // Hierarchical RBAC: super_admin inherits administrative and patient clinical access
+  if (role === "super_admin") {
+    return;
+  }
   if (role !== required) {
     throw new RbacAccessError(
-      `Access denied: role '${role ?? "guest"}' cannot access a '${required}' resource.`
+      `Access denied: role '${role}' cannot access a '${required}' resource.`
     );
   }
 }

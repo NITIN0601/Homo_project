@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { PatientClinicalMedia } from "../../../types";
 import { Modal, Button, Badge } from "../../../components/ui";
+import { useToast } from "../../../context/ToastContext";
 
 interface ClinicalMediaLightboxModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export const ClinicalMediaLightboxModal: React.FC<ClinicalMediaLightboxModalProp
   media,
   onClose,
 }) => {
+  const toast = useToast();
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSeconds, setPlaybackSeconds] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState<1 | 1.25 | 1.5>(1);
@@ -69,7 +71,7 @@ export const ClinicalMediaLightboxModal: React.FC<ClinicalMediaLightboxModalProp
             <Button
               variant="outline"
               size="sm"
-              onClick={() => alert(`Downloaded clinical artifact #${media.id} (${media.title})`)}
+              onClick={() => toast.success(`Downloaded clinical artifact #${media.id} (${media.title})`)}
             >
               <span>📥</span> Download Copy
             </Button>

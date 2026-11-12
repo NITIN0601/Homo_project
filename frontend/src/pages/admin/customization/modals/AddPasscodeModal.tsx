@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import type { AdminPasscode } from "../../../types/tenant";
-import { Button, Modal } from "../../../components/ui";
+import type { AdminPasscode } from "../../../../types/tenant";
+import { Button, Modal } from "../../../../components/ui";
 
 interface AddPasscodeModalProps {
   isOpen: boolean;

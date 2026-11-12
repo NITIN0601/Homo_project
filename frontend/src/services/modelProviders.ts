@@ -9,7 +9,7 @@
  */
 
 import type { HomeopathicCaseRecord, UserProfile } from "../types";
-import { CLINIC, DOCTOR, STORAGE_KEYS } from "../config";
+import { CLINIC, STORAGE_KEYS } from "../config";
 import { extractHomeopathicCaseRecord } from "./voiceStudio";
 import { formatDateISO } from "../utils/format";
 

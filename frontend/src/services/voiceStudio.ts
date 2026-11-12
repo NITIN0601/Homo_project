@@ -24,6 +24,7 @@ export interface VoiceStudioTranscriptionResult {
   source: "voicestudio-daemon" | "fallback-engine";
   beamSearchMode: "explicit-conditioned" | "auto-detection-head";
   caseRecord?: HomeopathicCaseRecord;
+  telemetry?: any;
 }
 
 export interface VoiceStudioEvalMetric {

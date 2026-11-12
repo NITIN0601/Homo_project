@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTenant } from "../../context/ThemeProvider";
 import { useApp } from "../../context/AppContext";
+import { useToast } from "../../context/ToastContext";
 import { HOSPITAL_TENANTS } from "../../config/tenants";
 import type { HospitalTenantConfig, AdminPasscode, CustomizationAuditLogEntry } from "../../types/tenant";
 import { type CustomerFeedback, INITIAL_CUSTOMER_FEEDBACKS } from "../../types/feedback";
@@ -45,6 +46,7 @@ const INITIAL_AUDIT_LOGS: CustomizationAuditLogEntry[] = [
 export const CustomizationTab: React.FC = () => {
   const { tenant, setTenantId, updateTenant, resetTenantToDefaults } = useTenant();
   const { state: appState } = useApp();
+  const toast = useToast();
 
   const currentAdminName = appState.authUser?.name || "Super Admin";
   const currentAdminId = appState.authUser?.id || "adm-001";
@@ -252,12 +254,12 @@ export const CustomizationTab: React.FC = () => {
 
   const handleDeletePasscode = (id: string, label: string) => {
     if (passcodes.length <= 1) {
-      alert("At least one master security passcode must remain active.");
+      toast.error("At least one master security passcode must remain active.");
       return;
     }
     const entered = window.prompt("Enter an active admin passcode to authorize deletion:");
     if (!entered || !passcodes.some((p) => p.code.trim() === entered.trim())) {
-      alert("Passcode verification failed. Deletion aborted.");
+      toast.error("Passcode verification failed. Deletion aborted.");
       return;
     }
 

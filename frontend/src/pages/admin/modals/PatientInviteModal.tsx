@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { UserProfile } from "../../../types";
-import { Modal, Button, Input } from "../../../components/ui";
+import { Modal, Button } from "../../../components/ui";
 import { api } from "../../../services/api";
 import { useTenant } from "../../../context/ThemeProvider";
 

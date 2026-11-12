@@ -1,3 +1,5 @@
+import { CLINIC, DOCTOR } from "../config";
+
 // ─── Classical Homeopathy Universal System Instruction ─────────────────────────
 export const CLASSICAL_HOMEOPATHY_SYSTEM_PROMPT = `You are an expert AI medical scribe specializing in Classical Homeopathy with decades of clinical experience.
 Your task is to process a raw speech-to-text transcript of a doctor-patient interaction and structure it into a precise, valid JSON format.
