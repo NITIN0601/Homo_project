@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useApp } from "../context/AppContext";
 import { useTenant } from "../context/ThemeProvider";
+import { useToast } from "../context/ToastContext";
 import type { CartItem, PlacedOrder } from "../types";
 import PhoneInput from "../components/forms/PhoneInput";
 import { Button } from "../components/ui";
@@ -185,6 +186,7 @@ const SummaryRow: React.FC<{
 const CartPage: React.FC = () => {
   const { state, cartSubtotalINR, clearCart, navigateTo, placeOrder, openTrackingModal } = useApp();
   const { tenant } = useTenant();
+  const toast = useToast();
   const { cart, authUser } = state;
 
   // Checkout modal & payment state
@@ -252,19 +254,19 @@ const CartPage: React.FC = () => {
 
     const nameVal = validateFullName(name);
     if (!nameVal.isValid) {
-      alert(nameVal.error);
+      toast.error(nameVal.error || "Please enter a valid full name.");
       return;
     }
 
     const emailVal = validateEmail(email);
     if (!emailVal.isValid) {
-      alert(emailVal.error);
+      toast.error(emailVal.error || "Please enter a valid email address.");
       return;
     }
 
     const phoneVal = validatePhone(phone);
     if (!phoneVal.isValid) {
-      alert(phoneVal.error);
+      toast.error(phoneVal.error || "Please enter a valid phone number.");
       return;
     }
 

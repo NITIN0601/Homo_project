@@ -79,25 +79,25 @@ export const THEME_COLORS = {
   DANGER_RED:          "#b91c1c",
 } as const;
 
-// ─── Standard CSS Gradients (SSOT) ───────────────────────────────────────────
+// ─── Standard CSS Gradients (SSOT — Dynamic with CSS Token Variables) ─────────
 export const THEME_GRADIENTS = {
-  /** Primary clinic emerald action gradient (used across headers, buttons, accents) */
-  PRIMARY: "linear-gradient(135deg, #064e3b 0%, #059669 100%)",
+  /** Primary clinic action gradient (dynamically driven by tenant primary & accent) */
+  PRIMARY: "linear-gradient(135deg, var(--brand-primary, #064e3b) 0%, var(--brand-accent, #059669) 100%)",
 
   /** Short shorthand equivalent for inline styles */
-  PRIMARY_SHORT: "linear-gradient(135deg, #064e3b, #059669)",
+  PRIMARY_SHORT: "linear-gradient(135deg, var(--brand-primary, #064e3b), var(--brand-accent, #059669))",
 
-  /** Hero banner deep navy to emerald brand blend */
-  HERO: "linear-gradient(135deg, #1e3a6e 0%, #152d56 50%, #2d6a30 100%)",
+  /** Hero banner deep primary-dark to accent brand blend */
+  HERO: "linear-gradient(135deg, var(--brand-primary-dark, #1e3a6e) 0%, var(--brand-primary, #152d56) 50%, var(--brand-accent, #2d6a30) 100%)",
 
-  /** Deep dark emerald footer gradient */
-  FOOTER: "linear-gradient(135deg, #022c22 0%, #064e3b 55%, #065f46 100%)",
+  /** Deep dark footer gradient */
+  FOOTER: "linear-gradient(135deg, var(--brand-primary-dark, #022c22) 0%, var(--brand-primary, #064e3b) 55%, var(--brand-accent, #065f46) 100%)",
 
   /** Bright CTA button gradient (e.g. Google Maps, primary actions) */
-  CTA_EMERALD: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+  CTA_EMERALD: "linear-gradient(135deg, var(--brand-accent, #10b981) 0%, var(--brand-primary, #059669) 100%)",
 
   /** Three-stop text gradient for high-contrast titles */
-  TEXT_GRADIENT: "linear-gradient(135deg, #064e3b 0%, #059669 60%, #34d399 100%)",
+  TEXT_GRADIENT: "linear-gradient(135deg, var(--brand-primary, #064e3b) 0%, var(--brand-accent, #059669) 60%, #34d399 100%)",
 
   /** Soft danger alert backdrop gradient */
   DANGER_SOFT: "linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)",

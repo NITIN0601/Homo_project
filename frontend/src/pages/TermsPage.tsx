@@ -1,9 +1,15 @@
 import React from "react";
 import { useApp } from "../context/AppContext";
-import { CLINIC } from "../config";
+import { useClinic } from "../hooks/useClinic";
 
 export const TermsPage: React.FC = () => {
   const { navigateTo } = useApp();
+  const clinic = useClinic();
+
+  const customTerms = clinic.legal?.termsConditionsText;
+  const emergencyNotice =
+    clinic.legal?.emergencyNotice ||
+    "The web application is not intended for medical emergencies. Please seek immediate medical attention or call emergency services in case of an acute or life-threatening situation.";
 
   return (
     <div className="max-w-4xl mx-auto space-y-6" style={{ animation: "fadeInUp 0.35s ease both" }}>
@@ -14,7 +20,7 @@ export const TermsPage: React.FC = () => {
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-stone-800">Terms &amp; Conditions</h1>
             <p className="text-stone-500 text-xs mt-0.5">
-              {CLINIC.FULL_NAME} · {CLINIC.ADDRESS.SHORT}
+              {clinic.name} · {clinic.address.short}
             </p>
           </div>
         </div>
@@ -28,57 +34,57 @@ export const TermsPage: React.FC = () => {
           <p className="font-extrabold text-sm flex items-center gap-1.5">
             <span>⚠️</span> Medical Emergency Notice
           </p>
-          <p>
-            The web application is not intended for medical emergencies. Please seek immediate medical attention in case of an emergency.
-          </p>
+          <p>{emergencyNotice}</p>
         </div>
 
-        <section className="space-y-3">
-          <p className="font-semibold text-stone-800 text-sm">
-            By using the {CLINIC.FULL_NAME} web application, you agree to the following:
-          </p>
-
-          <ul className="space-y-3 pl-1">
-            <li className="flex items-start gap-2.5">
-              <span className="text-emerald-600 font-bold mt-0.5">•</span>
-              <span>Appointment requests are subject to availability and confirmation by the clinic.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="text-emerald-600 font-bold mt-0.5">•</span>
-              <span>Patients are requested to provide accurate and relevant personal and health information.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="text-emerald-600 font-bold mt-0.5">•</span>
-              <span>Appointments may be cancelled or rescheduled by either the patient or clinic with reasonable notice.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="text-emerald-600 font-bold mt-0.5">•</span>
-              <span>Information provided on the website is for general purposes and does not replace a personal consultation.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="text-emerald-600 font-bold mt-0.5">•</span>
-              <span>Treatment outcomes may vary from person to person, and no specific outcome is guaranteed.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="text-emerald-600 font-bold mt-0.5">•</span>
-              <span>The web application is not intended for medical emergencies. Please seek immediate medical attention in case of an emergency.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="text-emerald-600 font-bold mt-0.5">•</span>
-              <span>Patient information will be handled in accordance with our Privacy Policy and applicable laws.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="text-emerald-600 font-bold mt-0.5">•</span>
-              <span>The clinic reserves the right to update its services, timings, and website content when required.</span>
-            </li>
-          </ul>
-
-          <div className="pt-3 border-t border-stone-100">
-            <p className="font-bold text-stone-800">
-              By using the web application, you acknowledge and agree to these Terms &amp; Conditions.
-            </p>
+        {customTerms ? (
+          <div className="space-y-4 whitespace-pre-line text-stone-700">
+            {customTerms}
           </div>
-        </section>
+        ) : (
+          <section className="space-y-3">
+            <p className="font-semibold text-stone-800 text-sm">
+              By using the {clinic.name} web application, you agree to the following:
+            </p>
+
+            <ul className="space-y-3 pl-1">
+              <li className="flex items-start gap-2.5">
+                <span className="text-emerald-600 font-bold mt-0.5">•</span>
+                <span>Appointment requests are subject to availability and confirmation by {clinic.shortName}.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="text-emerald-600 font-bold mt-0.5">•</span>
+                <span>Patients are requested to provide accurate and relevant personal and health information.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="text-emerald-600 font-bold mt-0.5">•</span>
+                <span>Appointments may be cancelled or rescheduled by either the patient or clinic with reasonable notice.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="text-emerald-600 font-bold mt-0.5">•</span>
+                <span>Information provided on the platform is for general clinical coordination and does not replace a personal consultation with your assigned physician.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="text-emerald-600 font-bold mt-0.5">•</span>
+                <span>Treatment outcomes may vary from person to person, and no specific medical outcome is guaranteed.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="text-emerald-600 font-bold mt-0.5">•</span>
+                <span>Patient information will be handled in accordance with {clinic.shortName}&apos;s Privacy Policy and applicable healthcare regulations.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="text-emerald-600 font-bold mt-0.5">•</span>
+                <span>{clinic.name} reserves the right to update its services, clinical timings, and platform terms when required.</span>
+              </li>
+            </ul>
+
+            <div className="pt-3 border-t border-stone-100">
+              <p className="font-bold text-stone-800">
+                By using this web portal, you acknowledge and agree to these Terms &amp; Conditions.
+              </p>
+            </div>
+          </section>
+        )}
 
         <div className="pt-4 border-t border-stone-100 flex items-center justify-between">
           <button

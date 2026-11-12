@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useApp } from "../../context/AppContext";
+import { useTenant } from "../../context/ThemeProvider";
 import { Button, Badge } from "../../components/ui";
 import { CLINIC, THEME_GRADIENTS } from "../../config";
 import { api } from "../../services/api";
@@ -15,6 +16,7 @@ export const AppointmentConfirmationBanner: React.FC<AppointmentConfirmationBann
   onReset,
 }) => {
   const { state, dispatch, userTzInfo } = useApp();
+  const { tenant } = useTenant();
   const [resending, setResending] = useState(false);
   const [resentSuccess, setResentSuccess] = useState(false);
   const [claimPassword, setClaimPassword] = useState("");
@@ -65,7 +67,7 @@ export const AppointmentConfirmationBanner: React.FC<AppointmentConfirmationBann
         email: payload.patientDetails.email,
         name: payload.patientDetails.name,
         portal_intent: "patient",
-        hospital_id: state.tenant?.id || "default",
+        hospital_id: tenant.id || "default",
       });
       if (res && res.profile) {
         dispatch({ type: "LOGIN", payload: res.profile });

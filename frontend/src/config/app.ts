@@ -97,6 +97,7 @@ export const VOICE_STUDIO = {
   ENABLED: true,
   HTTP_BASE_URL: ENV.VOICESTUDIO_URL,
   TRANSCRIPTION_ENDPOINT: "/v1/audio/transcriptions",
+  DEFAULT_LANGUAGE: "auto",
   SUPPORTED_LANGUAGES: [
     { code: "auto", label: "🌐 Auto-Detect Language (Default)" },
     { code: "te",   label: "🇮🇳 Telugu (తెలుగు)" },

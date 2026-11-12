@@ -18,6 +18,13 @@ export interface HospitalBranding {
   aboutClinicText?: string;
 }
 
+export interface DoctorSharingPreferences {
+  shareBio?: boolean;
+  shareSpecialties?: boolean;
+  shareQualifications?: boolean;
+  shareDirectPhone?: boolean;
+}
+
 export interface HospitalDoctor {
   id?: string;
   name: string;
@@ -28,6 +35,9 @@ export interface HospitalDoctor {
   aboutText?: string;
   specialties?: string[];
   avatarUrl?: string;
+  phone?: string;
+  email?: string;
+  sharingPreferences?: DoctorSharingPreferences;
 }
 
 export interface HospitalContact {
@@ -64,6 +74,16 @@ export interface HospitalFeatures {
   enableFollowupFeedback?: boolean;      // My summary: Followup & feedback (Default: true)
   enableAgastyaBot?: boolean;            // AgastyaBot AI assistant widget for customers (Default: true)
   enablePatientProfileEdit?: boolean;    // Patient details edit option in customer view (Default: true)
+  allowDoctorCustomBio?: boolean;        // Super admin allows doctor custom bio to appear on patient pages
+  allowDoctorSpecialties?: boolean;      // Super admin allows doctor specialties to display to patients
+  allowDoctorDirectContact?: boolean;    // Super admin allows doctor direct phone/email to display to patients
+}
+
+export interface HospitalLegal {
+  termsConditionsText?: string;
+  privacyPolicyText?: string;
+  emergencyNotice?: string;
+  lastUpdated?: string;
 }
 
 export interface AdminPasscode {
@@ -99,4 +119,5 @@ export interface HospitalTenantConfig {
   contact: HospitalContact;
   branding: HospitalBranding;
   features: HospitalFeatures;
+  legal?: HospitalLegal;
 }

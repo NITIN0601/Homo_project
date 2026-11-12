@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { useApp } from "../context/AppContext";
 import { useTenant } from "../context/ThemeProvider";
 import CalendarPicker from "../components/forms/CalendarPicker";
@@ -6,14 +6,10 @@ import PhoneInput from "../components/forms/PhoneInput";
 import { Button, Badge, Card, Input, Textarea } from "../components/ui";
 import {
   CLINIC,
-  OFFICE_HOURS,
   MORNING_SLOTS,
   EVENING_SLOTS,
-  THEME_COLORS,
-  THEME_GRADIENTS,
 } from "../config";
 import { api } from "../services/api";
-import { formatDateFull } from "../utils/format";
 import {
   validateFullName,
   validateEmail,
@@ -24,7 +20,6 @@ import {
   getClinicTimeInfo,
   isSlotPassed,
   mapClinicSlotToUserTime,
-  getMappedSessionHours,
 } from "../utils/timezone";
 import type {
   AppointmentFormValues,

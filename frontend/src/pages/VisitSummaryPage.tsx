@@ -305,7 +305,7 @@ export const VisitSummaryPage: React.FC = () => {
         <Tabs
           tabs={availablePortalTabs}
           activeTab={activePortalTab}
-          onChange={(id) => handleTabSwitch(id as "records" | "payments" | "feedback")}
+          onTabChange={(id) => handleTabSwitch(id as "records" | "payments" | "feedback")}
         />
       )}
 

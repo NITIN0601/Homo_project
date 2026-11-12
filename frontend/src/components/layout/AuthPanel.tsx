@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useApp } from "../../context/AppContext";
+import { useTenant } from "../../context/ThemeProvider";
 import { MOCK_ACCOUNTS } from "../../data/mocks";
 import {
   USE_MOCK_DATA,
@@ -24,6 +25,7 @@ const getInitials = (name: string): string => {
 
 const AuthPanel: React.FC = () => {
   const { state, login, logout, closeAuthModal, navigateTo, setAdminTab, toggleOrdersModal } = useApp();
+  const { tenant } = useTenant();
   const { authUser, isAuthModalOpen } = state;
 
   // Active Auth Tab: 'signin' | 'register'
@@ -157,7 +159,7 @@ const AuthPanel: React.FC = () => {
         email: targetEmail,
         name: targetName,
         portal_intent: "patient",
-        hospital_id: state.tenant?.id || "default",
+        hospital_id: tenant.id || "default",
       });
       login(authRes.profile);
       closeAuthModal();
@@ -590,7 +592,9 @@ const AuthPanel: React.FC = () => {
 
                   <button
                     type="button"
-                    onClick={handleGoogleSignIn}
+                    onClick={() => {
+                      void handleGoogleSignIn();
+                    }}
                     className="w-full py-2.5 px-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 font-bold text-xs text-stone-700 transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95"
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24">

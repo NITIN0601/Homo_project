@@ -1,30 +1,34 @@
 import React from "react";
 import { useApp } from "../context/AppContext";
-import { CLINIC, DOCTOR, OFFICE_HOURS, CARE_AREA_PILLS } from "../config";
+import { useClinic } from "../hooks/useClinic";
+import { CARE_AREA_PILLS, CLINIC, OFFICE_HOURS } from "../config";
 
 /**
- * HomePage — Phase 1 Patient Landing
- * Strictly adheres to SSOT values, direct links to Book Appointment,
- * About, and Visit Summaries, and provides verified Clinic Address & Hours.
+ * HomePage — Dynamic White-Label Patient Landing
+ * Automatically reflects active hospital tenant branding, lead physician,
+ * verified address, hours, and care specialties.
  */
 const HomePage: React.FC = () => {
   const { state, navigateTo, sessionHours } = useApp();
+  const clinic = useClinic();
   const { authUser } = state;
-  const isAdmin = authUser?.role === "admin";
+  const isSuperAdmin = authUser?.role === "super_admin";
+  const isAdmin = authUser?.role === "admin" || isSuperAdmin;
 
   const quickLinks = [
     { icon: "📅", label: "Book Appointment",  page: "appointments"  as const, desc: "Schedule in-person or tele-consultation" },
     ...(authUser ? [{ icon: "📋", label: "My Clinical Summary", page: "visit-summary" as const, desc: "View doctor notes & prescription timeline" }] : []),
     { icon: "🌿", label: "About Clinic",       page: "about"         as const, desc: "Doctor credentials & clinic philosophy" },
-    ...(isAdmin ? [{ icon: "🔒", label: "Admin Console", page: "admin-dashboard" as const, desc: "Doctor clinical roster & inventory" }] : []),
+    ...(isSuperAdmin ? [{ icon: "⚡", label: "Super Admin", page: "super-admin-dashboard" as const, desc: "Hospital onboarding & fleet manager" }] : []),
+    ...(isAdmin && !isSuperAdmin ? [{ icon: "🔒", label: "Admin Console", page: "admin-dashboard" as const, desc: "Doctor clinical roster & inventory" }] : []),
   ];
 
   return (
     <div className="max-w-3xl mx-auto flex flex-col items-center text-center gap-8 py-8 px-4" style={{ animation: "fadeInUp 0.3s ease both" }}>
       {/* Hero mark */}
       <img
-        src={CLINIC.LOGO_PATH}
-        alt={CLINIC.LOGO_ALT}
+        src={clinic.logoUrl}
+        alt={`${clinic.name} Logo`}
         className="w-24 h-24 object-contain drop-shadow-md"
         width={96}
         height={96}
@@ -32,13 +36,16 @@ const HomePage: React.FC = () => {
 
       <div className="space-y-2">
         <h1 className="text-3xl sm:text-4xl font-black text-stone-800 leading-tight">
-          {CLINIC.FULL_NAME}
+          {clinic.name}
         </h1>
-        <p className="text-emerald-800 font-semibold text-sm tracking-wide">
-          {CLINIC.TAGLINE}
+        <p
+          className="font-bold text-sm tracking-wide"
+          style={{ color: clinic.branding.primaryColor }}
+        >
+          {clinic.tagline}
         </p>
         <p className="text-stone-500 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto">
-          Under the expert clinical care of <strong>{DOCTOR.NAME}</strong> ({DOCTOR.QUALIFICATIONS}). {DOCTOR.DESIGNATION} at {DOCTOR.COLLEGE} with {DOCTOR.EXPERIENCE_YEARS} of dedicated clinical experience.
+          Under the expert clinical care of <strong>{clinic.primaryDoctorName}</strong> ({clinic.primaryDoctorQualifications}). {clinic.primaryDoctorTitle} with {clinic.primaryDoctorExperience} of dedicated clinical experience.
         </p>
         {authUser && (
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold mt-2">
@@ -98,26 +105,26 @@ const HomePage: React.FC = () => {
           </div>
 
           <div className="space-y-1.5 text-xs text-stone-600">
-            <p className="font-bold text-stone-800">{CLINIC.ADDRESS.STREET}</p>
-            <p>{CLINIC.ADDRESS.CITY_STATE} – {CLINIC.ADDRESS.PINCODE}</p>
+            <p className="font-bold text-stone-800">{clinic.address.street}</p>
+            <p>{clinic.address.short} – {clinic.address.pincode}</p>
             <div className="pt-1.5 border-t border-stone-100 space-y-1">
               <p className="flex items-center gap-2">
                 <span className="text-stone-400">📞 Phone / WhatsApp:</span>
-                <a href={`tel:${CLINIC.PHONE_TEL}`} className="font-bold text-emerald-800 hover:underline">
-                  {CLINIC.PHONE_DISPLAY}
+                <a href={`tel:${clinic.phoneTel}`} className="font-bold text-emerald-800 hover:underline">
+                  {clinic.phone}
                 </a>
               </p>
               <p className="flex items-center gap-2">
                 <span className="text-stone-400">✉️ Email:</span>
-                <a href={`mailto:${CLINIC.SUPPORT_EMAIL}`} className="font-bold text-emerald-800 hover:underline">
-                  {CLINIC.SUPPORT_EMAIL}
+                <a href={`mailto:${clinic.email}`} className="font-bold text-emerald-800 hover:underline">
+                  {clinic.email}
                 </a>
               </p>
             </div>
           </div>
 
           <a
-            href={CLINIC.ADDRESS.MAPS_URL}
+            href={clinic.address.mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-900 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 transition-colors"

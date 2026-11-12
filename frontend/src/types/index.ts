@@ -9,6 +9,7 @@ export type Page =
   | "order-medicine"
   | "visit-summary"
   | "admin-dashboard"
+  | "super-admin-dashboard"
   | "mobile-worker"
   | "privacy-policy"
   | "terms"
@@ -50,6 +51,9 @@ export interface UserProfile {
   bloodGroup?: string;
   knownAllergies?: string[];
   medicalHistoryTags?: string[];
+  hospital_id?: string;
+  assigned_doctor_id?: string;
+  assigned_doctor_name?: string;
 }
 
 /** Null = no one is logged in (guest state) */

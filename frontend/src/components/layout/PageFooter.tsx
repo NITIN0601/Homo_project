@@ -24,8 +24,8 @@ const PageFooter: React.FC = () => {
           {/* Brand + copyright */}
           <div className="flex items-center gap-2.5">
             <img
-              src={CLINIC.LOGO_PATH}
-              alt={CLINIC.LOGO_ALT}
+              src={tenant.branding.logoUrl || CLINIC.LOGO_PATH}
+              alt={`${tenant.name} Logo`}
               className="h-7 w-7 object-contain opacity-85"
               width={28}
               height={28}

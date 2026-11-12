@@ -1,6 +1,8 @@
 import React, { useRef, useMemo } from "react";
 import { useApp } from "../../context/AppContext";
 import { useTenant } from "../../context/ThemeProvider";
+import { useClinic } from "../../hooks/useClinic";
+import { HOSPITAL_TENANTS } from "../../config/tenants";
 import { MOCK_ACCOUNTS } from "../../data/mocks";
 import CartIcon from "./CartIcon";
 import AuthPanel from "./AuthPanel";
@@ -22,11 +24,13 @@ import type { AdminTab } from "../../types";
 // ─── NavBar ───────────────────────────────────────────────────────────────────
 const NavBar: React.FC = () => {
   const { state, navigateTo, setAdminTab, openAuthModal } = useApp();
-  const { tenant } = useTenant();
+  const { tenant, setTenantId } = useTenant();
+  const clinic = useClinic();
   const { activePage, authUser, isAuthModalOpen, adminTab, appointments, inventory, blockedDates } = state;
 
   const avatarRef = useRef<HTMLButtonElement>(null);
-  const isAdmin = authUser?.role === "admin";
+  const isSuperAdmin = authUser?.role === "super_admin";
+  const isAdmin = authUser?.role === "admin" || isSuperAdmin;
   const clinicTime = useMemo(() => getClinicTimeInfo(), []);
 
   const adminStats = useMemo(() => {
@@ -79,16 +83,17 @@ const NavBar: React.FC = () => {
         <button
           id="brand-logo-btn"
           onClick={() => {
-            if (isAdmin) navigateTo("admin-dashboard");
+            if (isSuperAdmin) navigateTo("super-admin-dashboard");
+            else if (isAdmin) navigateTo("admin-dashboard");
             else navigateTo("home");
           }}
           className="flex items-center gap-2.5 group select-none flex-shrink-0
             focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none rounded-xl cursor-pointer"
-          aria-label={`${CLINIC.FULL_NAME} — Return to home`}
+          aria-label={`${clinic.name} — Return to home`}
         >
           <img
-            src={CLINIC.LOGO_PATH}
-            alt={CLINIC.LOGO_ALT}
+            src={clinic.logoUrl}
+            alt={`${clinic.name} Logo`}
             className="h-9 w-9 sm:h-10 sm:w-10 object-contain transition-transform duration-300 group-hover:scale-105"
             width={40}
             height={40}
@@ -96,15 +101,15 @@ const NavBar: React.FC = () => {
           <div className="flex flex-col text-left">
             <span
               className="font-extrabold text-sm sm:text-base tracking-tight leading-none block"
-              style={{ color: tenant.branding.primaryColor, letterSpacing: "-0.01em" }}
+              style={{ color: clinic.branding.primaryColor, letterSpacing: "-0.01em" }}
             >
-              {tenant.shortName}
+              {clinic.shortName}
             </span>
             <span
               className="text-[9px] font-bold tracking-wider uppercase leading-none mt-0.5"
-              style={{ color: tenant.branding.accentColor }}
+              style={{ color: clinic.branding.accentColor }}
             >
-              {tenant.tagline.split("•")[0] || "Health & Wellness"}
+              {clinic.tagline.split("•")[0] || "Health & Wellness"}
             </span>
           </div>
         </button>
@@ -246,6 +251,39 @@ const NavBar: React.FC = () => {
             <span className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Local EHR
             </span>
+          )}
+
+          {/* Hospital Tenant Selector (Visible to Super Admin or in Dev/Demo mode) */}
+          {(isSuperAdmin || USE_MOCK_DATA) && (
+            <div className="hidden sm:flex items-center gap-1 bg-stone-100 hover:bg-stone-200/80 border border-stone-300 rounded-full px-2 py-1 text-xs transition-colors">
+              <span className="text-xs">🏥</span>
+              <select
+                value={tenant.id}
+                onChange={(e) => setTenantId(e.target.value)}
+                className="bg-transparent text-stone-800 text-[11px] font-bold outline-none cursor-pointer max-w-[120px] truncate"
+                title="Switch Active Hospital Tenant"
+                aria-label="Active Hospital Facility"
+              >
+                {Object.values(HOSPITAL_TENANTS).map((h) => (
+                  <option key={h.id} value={h.id} className="text-stone-900 bg-white">
+                    {h.shortName || h.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Super Admin Privileged Portal Pill */}
+          {isSuperAdmin && (
+            <button
+              onClick={() => navigateTo("super-admin-dashboard")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black text-white bg-gradient-to-r from-indigo-700 via-indigo-600 to-slate-900 hover:opacity-90 shadow-sm transition-all active:scale-95 cursor-pointer border border-indigo-400/40"
+              title="Super Administrator Console"
+              aria-label="Super Administrator Console"
+            >
+              <span>⚡</span>
+              <span className="hidden sm:inline">Super Admin</span>
+            </button>
           )}
 
           {/* Doctor Voice Studio Header Button (Admin Only) */}

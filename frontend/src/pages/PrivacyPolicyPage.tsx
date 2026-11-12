@@ -1,9 +1,12 @@
 import React from "react";
 import { useApp } from "../context/AppContext";
-import { CLINIC } from "../config";
+import { useClinic } from "../hooks/useClinic";
 
 export const PrivacyPolicyPage: React.FC = () => {
   const { navigateTo } = useApp();
+  const clinic = useClinic();
+
+  const customPolicy = clinic.legal?.privacyPolicyText;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6" style={{ animation: "fadeInUp 0.35s ease both" }}>
@@ -14,7 +17,7 @@ export const PrivacyPolicyPage: React.FC = () => {
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-stone-800">Privacy Policy</h1>
             <p className="text-stone-500 text-xs mt-0.5">
-              {CLINIC.FULL_NAME} · {CLINIC.ADDRESS.SHORT}
+              {clinic.name} · {clinic.address.short}
             </p>
           </div>
         </div>
@@ -27,27 +30,35 @@ export const PrivacyPolicyPage: React.FC = () => {
             <span>🔒</span> Patient Privacy &amp; Confidentiality
           </p>
           <p>
-            At <strong>{CLINIC.FULL_NAME}</strong>, we respect the privacy and confidentiality of our patients. Personal information, including contact details, appointment information, and health-related information, is collected only for providing consultations, managing appointments, maintaining patient records, and follow-up care.
+            At <strong>{clinic.name}</strong>, we respect the privacy and confidentiality of our patients. Personal information, including contact details, appointment information, and clinical records, is collected strictly for providing medical care, managing appointments, maintaining electronic health records, and follow-up clinical support.
           </p>
         </div>
 
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-stone-900 border-b border-stone-100 pb-2">
-            Confidentiality &amp; Protection of Information
-          </h2>
-          <p>
-            Patient information is kept confidential and reasonable measures are taken to protect it from unauthorised access or disclosure. Information will not be sold or used for unrelated purposes and may be shared only when required by law or for legitimate healthcare purposes.
-          </p>
-        </section>
+        {customPolicy ? (
+          <div className="space-y-4 whitespace-pre-line text-stone-700">
+            {customPolicy}
+          </div>
+        ) : (
+          <>
+            <section className="space-y-3">
+              <h2 className="text-base font-extrabold text-stone-900 border-b border-stone-100 pb-2">
+                Confidentiality &amp; Protection of Information
+              </h2>
+              <p>
+                Patient information is kept confidential with multi-tenant encryption and reasonable security safeguards. Information is never sold or used for commercial advertising, and may only be accessed by authorized clinical personnel or disclosed when mandated by medical law.
+              </p>
+            </section>
 
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-stone-900 border-b border-stone-100 pb-2">
-            Patient Consent
-          </h2>
-          <p>
-            By using our web application and providing your information, you consent to its collection and use for the purposes stated above.
-          </p>
-        </section>
+            <section className="space-y-3">
+              <h2 className="text-base font-extrabold text-stone-900 border-b border-stone-100 pb-2">
+                Patient Consent
+              </h2>
+              <p>
+                By using our digital health portal and providing your information, you consent to its collection and clinical use in accordance with applicable healthcare data protection standards.
+              </p>
+            </section>
+          </>
+        )}
 
         <section className="space-y-2 pt-2 border-t border-stone-100">
           <h3 className="text-sm font-extrabold text-stone-900">Contact the Clinic</h3>
@@ -55,10 +66,10 @@ export const PrivacyPolicyPage: React.FC = () => {
             For questions or requests regarding your patient records or appointment details, please reach out to us:
           </p>
           <p className="text-xs text-stone-700 font-semibold">
-            📧 Email: <a href={`mailto:${CLINIC.SUPPORT_EMAIL}`} className="text-emerald-700 hover:underline">{CLINIC.SUPPORT_EMAIL}</a> · 📞 Phone / WhatsApp: <a href={`tel:${CLINIC.PHONE_TEL}`} className="text-emerald-700 hover:underline">{CLINIC.PHONE_DISPLAY}</a>
+            📧 Email: <a href={`mailto:${clinic.email}`} className="text-emerald-700 hover:underline">{clinic.email}</a> · 📞 Phone / WhatsApp: <a href={`tel:${clinic.phoneTel}`} className="text-emerald-700 hover:underline">{clinic.phone}</a>
           </p>
           <p className="text-xs text-stone-500">
-            📍 {CLINIC.ADDRESS.STREET}, {CLINIC.ADDRESS.CITY} – {CLINIC.ADDRESS.PINCODE}, {CLINIC.ADDRESS.STATE}
+            📍 {clinic.address.full}
           </p>
         </section>
 
