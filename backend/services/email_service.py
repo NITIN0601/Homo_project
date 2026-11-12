@@ -150,3 +150,118 @@ async def send_appointment_confirmation(
     except Exception as exc:
         logger.error("Failed to send email via Resend: %s", exc)
         return {"success": False, "error": str(exc)}
+
+
+async def send_doctor_onboarding_email(
+    doctor_email: str,
+    doctor_name: str,
+    doctor_title: str,
+    hospital_name: str,
+    hospital_id: str,
+    invite_url: str,
+    reg_no: str | None = None,
+    api_key: str | None = None,
+) -> dict[str, Any]:
+    """
+    Sends official doctor onboarding email with credentials and activation link via Resend.
+    Allows doctor to sign in via Google OAuth or accept invite link to set password.
+    """
+    key = api_key or RESEND_API_KEY
+    subject = f"Welcome to {hospital_name} — Doctor Portal Credentials & Activation"
+
+    reg_row = f'<p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Medical Reg:</strong> {reg_no}</p>' if reg_no else ""
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }}
+          .card {{ max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }}
+          .header {{ background: #0f172a; padding: 32px 24px; text-align: center; color: #ffffff; }}
+          .body-content {{ padding: 28px 24px; }}
+          .btn {{ display: inline-block; background: #047857; color: #ffffff !important; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; margin-top: 14px; }}
+          .badge {{ display: inline-block; background: #ecfdf5; color: #065f46; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; }}
+          .detail-box {{ background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin: 20px 0; }}
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="header">
+            <span class="badge">DOCTOR ONBOARDING</span>
+            <h1 style="margin: 12px 0 0 0; font-size: 22px; font-weight: 800;">Welcome, Dr. {doctor_name}!</h1>
+            <p style="margin: 6px 0 0 0; font-size: 13px; color: #94a3b8;">{hospital_name} Clinical Practice Network</p>
+          </div>
+          <div class="body-content">
+            <p style="font-size: 14px; line-height: 1.6;">
+              You have been registered as a verified consulting practitioner for <strong>{hospital_name}</strong> by the platform Super Administrator.
+            </p>
+            <div class="detail-box">
+              <p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Practitioner:</strong> {doctor_name}</p>
+              <p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Designation:</strong> {doctor_title}</p>
+              {reg_row}
+              <p style="margin: 0; font-size: 13px;"><strong>Hospital ID:</strong> <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">{hospital_id}</code></p>
+            </div>
+            <h3 style="font-size: 14px; margin-top: 24px; margin-bottom: 8px;">How to Sign In to Your Doctor Console:</h3>
+            <ul style="font-size: 13px; line-height: 1.7; padding-left: 20px; color: #475569;">
+              <li><strong>Option 1 (Google 1-Click Login):</strong> Visit the Doctor Portal and click <em>"Sign In with Google"</em> using this email address (<strong>{doctor_email}</strong>). No password setup required.</li>
+              <li><strong>Option 2 (Set Password / Sign Up):</strong> Click the activation link below to establish a secure password for your clinical console.</li>
+            </ul>
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="{invite_url}" class="btn">Activate Doctor Portal Account →</a>
+            </div>
+            <p style="font-size: 11px; color: #94a3b8; text-align: center;">
+              Invite link: {invite_url}<br>
+              This link is valid for 7 days. If you did not expect this invite, please contact the facility administrator.
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+    """
+
+    payload = {
+        "from": f"{hospital_name} <onboarding@resend.dev>",
+        "to": [doctor_email],
+        "subject": subject,
+        "html": html_content,
+    }
+
+    if not key or key == "re_YourFreeApiKeyHere":
+        logger.warning("RESEND_API_KEY is not configured. Simulating delivery in DEMO mode.")
+        return {
+            "success": True,
+            "status": "mock_delivered",
+            "message": "Demo mode: Doctor onboarding email simulated successfully.",
+            "doctor_email": doctor_email,
+            "invite_url": invite_url,
+        }
+
+    headers = {
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        if HAS_HTTPX:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.post(RESEND_API_URL, json=payload, headers=headers)
+                data = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+                if resp.status_code in [200, 201]:
+                    return {"success": True, "data": data, "status": "sent"}
+                else:
+                    return {"success": False, "error": data.get("message", resp.text), "status_code": resp.status_code}
+        else:
+            req = urllib.request.Request(
+                RESEND_API_URL,
+                data=json.dumps(payload).encode("utf-8"),
+                headers=headers,
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=10.0) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                return {"success": True, "data": data, "status": "sent"}
+    except Exception as exc:
+        logger.error("Failed to send doctor onboarding email: %s", exc)
+        return {"success": False, "error": str(exc)}

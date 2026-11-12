@@ -12,6 +12,8 @@ from schemas.hospital import (
     DevModeToggleRequest,
     DoctorCreateRequest,
     HospitalCreateRequest,
+    HospitalFeaturesUpdateRequest,
+    HospitalOnboardRequest,
 )
 from services.doctor_service import create_doctor, get_doctor, list_doctors
 from services.hospital_service import (
@@ -21,8 +23,71 @@ from services.hospital_service import (
     resolve_hospital,
     save_hospital,
 )
+from services.onboarding_service import onboard
 
 router = APIRouter(tags=["Hospital & Doctor Multi-Tenancy"])
+
+
+@router.post("/onboard", summary="Unified Onboarding Endpoint (Hospital, Doctor, or Patient)")
+async def unified_onboard_endpoint(
+    payload: dict,
+    target: str = Query(..., description="Target entity: 'hospital', 'doctor', or 'patient'"),
+    user: dict = Depends(require_admin_role),
+):
+    """
+    Unified Onboarding Microservice endpoint.
+    Routes to hospital, doctor, or patient onboarding with shared validation,
+    account provisioning, email dispatch, and audit logging.
+    """
+    if target not in ("hospital", "doctor", "patient"):
+        raise HTTPException(status_code=400, detail="target must be 'hospital', 'doctor', or 'patient'")
+
+    if target == "hospital" and user.get("role") != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin role required to onboard a hospital.")
+
+    try:
+        return await onboard(target, payload, actor_email=user.get("email", "admin"))
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+
+
+@router.post("/super-admin/onboard-hospital", summary="Complete Hospital & Doctor Onboarding (Super Admin only)")
+async def onboard_hospital_endpoint(
+    req: HospitalOnboardRequest,
+    user: dict = Depends(require_super_admin_role),
+):
+    """
+    Super Admin Onboarding Master Flow:
+    Delegates to unified onboarding engine with doctor provisioning, Google OAuth setup, and email.
+    """
+    try:
+        return await onboard("hospital", req.model_dump(), actor_email=user.get("email", "superadmin"))
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+
+
+@router.put("/super-admin/hospitals/{hospital_id}/features", summary="Manage layout functionalities (Super Admin only)")
+async def update_hospital_features_endpoint(
+    hospital_id: str,
+    req: HospitalFeaturesUpdateRequest,
+    user: dict = Depends(require_super_admin_role),
+):
+    """
+    Super Admin Feature & Layout Governor:
+    Dynamically toggles functionalities what doctor can view and what patient can view.
+    """
+    hospital = get_hospital(hospital_id)
+    if not hospital:
+        raise HTTPException(status_code=404, detail=f"Hospital '{hospital_id}' not found.")
+
+    hospital["features"] = {**(hospital.get("features") or {}), **req.features}
+    save_hospital(hospital)
+    return {
+        "status": "success",
+        "message": f"Features updated for '{hospital.get('name')}'.",
+        "hospital_id": hospital_id,
+        "features": hospital["features"],
+    }
 
 
 @router.post("/hospitals", summary="Create a new hospital tenant (Super Admin only)")

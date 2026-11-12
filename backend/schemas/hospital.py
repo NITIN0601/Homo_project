@@ -42,3 +42,41 @@ class DoctorCreateRequest(BaseModel):
 
 class DevModeToggleRequest(BaseModel):
     use_mock_data: bool = Field(..., description="True to activate Mock Dev Data, False for Production DB/PostgreSQL")
+
+
+class HospitalOnboardRequest(BaseModel):
+    # Hospital details
+    id: str = Field(..., example="apollo-care", description="Hospital tenant slug/id")
+    name: str = Field(..., example="Apollo Health City")
+    short_name: str | None = Field(default=None, example="Apollo Care")
+    tagline: str | None = Field(default="Clinical Excellence Everywhere")
+    phone: str = Field(default="+91 80 4900 1122")
+    email: str = Field(default="admin@apollocare.in")
+    street: str | None = Field(default="Jubilee Hills")
+    city: str | None = Field(default="Hyderabad")
+    state: str | None = Field(default="Telangana")
+    pincode: str | None = Field(default="500033")
+    country: str | None = Field(default="India")
+    primary_color: str = Field(default="#1e3a8a")
+    accent_color: str = Field(default="#0284c7")
+
+    # Feature / Capability Toggles (What Doctor & Patient can view/use)
+    features: dict[str, bool] | None = Field(
+        default=None,
+        description="Feature flag overrides (Doctor portal & Patient portal capabilities)",
+    )
+
+    # Doctor details
+    doctor_name: str = Field(..., example="Dr. Rajesh Sharma")
+    doctor_title: str | None = Field(default=None, example="Senior Consultant Physician, MD")
+    doctor_email: str = Field(..., example="dr.sharma@apollocare.in")
+    doctor_phone: str | None = Field(default="+91 98450 12345")
+    doctor_qualifications: str | None = Field(default="MD, MBBS, Fellowship in Telemedicine")
+    doctor_reg_no: str | None = Field(default=None, example="MCI-2012-8841")
+    doctor_experience_years: int = Field(default=10, ge=0)
+    doctor_specialties: list[str] = Field(default_factory=lambda: ["General Medicine", "Telehealth"])
+    doctor_bio: str | None = Field(default=None)
+
+
+class HospitalFeaturesUpdateRequest(BaseModel):
+    features: dict[str, bool] = Field(..., description="Map of feature toggles for doctor and patient views")

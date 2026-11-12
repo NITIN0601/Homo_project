@@ -337,16 +337,45 @@ def authenticate_or_register_google_user(
     """
     clean_email = validate_email(email)
     authorized_admin_emails = {e.strip().lower() for e in settings.AUTHORIZED_ADMIN_EMAILS}
-    is_authorized_admin = clean_email in authorized_admin_emails
+    accounts = _load_accounts()
+    existing = accounts.get(clean_email)
+    is_in_accounts_as_admin = bool(existing and existing.get("role") in ("admin", "super_admin"))
+
+    from services.doctor_service import get_all_doctors
+    matching_doctor = next((d for d in get_all_doctors() if (d.get("email") or "").strip().lower() == clean_email), None)
+    is_in_doctors_registry = bool(matching_doctor)
+
+    invites = load_json(INVITES_FILE, default={})
+    matching_invite_token, matching_invite = next(
+        ((t, inv) for t, inv in invites.items() if (inv.get("email") or "").strip().lower() == clean_email and inv.get("role") in ("admin", "doctor") and not inv.get("is_claimed")),
+        (None, None)
+    )
+    is_invited_as_doctor = bool(matching_invite)
+
+    is_authorized_admin = (
+        clean_email in authorized_admin_emails or
+        is_in_accounts_as_admin or
+        is_in_doctors_registry or
+        is_invited_as_doctor
+    )
 
     if portal_intent == "admin" and not is_authorized_admin:
         raise ValueError("Access Denied: Your Google account is not recognized as a registered clinic administrator.")
 
     assigned_role = "admin" if is_authorized_admin else "patient"
-    assigned_hospital = (hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "default")).strip().lower()
+    assigned_hospital = (
+        hospital_id or
+        (matching_doctor.get("hospitalId") if matching_doctor else None) or
+        (matching_invite.get("hospital_id") if matching_invite else None) or
+        (existing.get("hospital_id") if existing else None) or
+        getattr(settings, "DEFAULT_HOSPITAL_ID", "default")
+    ).strip().lower()
 
-    accounts = _load_accounts()
-    existing = accounts.get(clean_email)
+    if matching_invite and matching_invite_token:
+        matching_invite["is_claimed"] = True
+        matching_invite["claimed_at"] = datetime.now(timezone.utc).isoformat()
+        invites[matching_invite_token] = matching_invite
+        save_json(INVITES_FILE, invites)
 
     if existing:
         user_role = "admin" if is_authorized_admin else existing.get("role", assigned_role)
@@ -385,7 +414,7 @@ def authenticate_or_register_google_user(
     ln = parts[-1] if len(parts) > 1 else "Patient"
     mn = " ".join(parts[1:-1]) if len(parts) > 2 else ""
 
-    user_id = "usr-admin-001" if assigned_role == "admin" else f"usr-{uuid.uuid4().hex[:8]}"
+    user_id = (matching_doctor.get("id") if matching_doctor else None) or (f"usr-doc-{uuid.uuid4().hex[:6]}" if assigned_role == "admin" else f"usr-{uuid.uuid4().hex[:8]}")
 
     account_entry = {
         "id": user_id,
@@ -396,7 +425,7 @@ def authenticate_or_register_google_user(
         "email": clean_email,
         "role": assigned_role,
         "hospital_id": assigned_hospital,
-        "phone": settings.CLINIC_PHONE if assigned_role == "admin" else "",
+        "phone": (matching_doctor.get("phone") if matching_doctor else None) or (matching_invite.get("phone") if matching_invite else "") or (settings.CLINIC_PHONE if assigned_role == "admin" else ""),
         "provider": "google",
         "has_password": False,
         "created_at": datetime.now(timezone.utc).isoformat(),

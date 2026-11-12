@@ -553,5 +553,152 @@
     "bio": "Dedicated medical professional providing personalized healthcare.",
     "isPrimary": false,
     "isActive": true
+  },
+  {
+    "id": "doc-cc0908",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-273FC0",
+    "licenseId": "LIC-DOC-CC0908",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-56aed0",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-110540",
+    "licenseId": "LIC-DOC-56AED0",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-087ac5",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-E21668",
+    "licenseId": "LIC-DOC-087AC5",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-ef4e85",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-604EA7",
+    "licenseId": "LIC-DOC-EF4E85",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-83d33f",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-170D6A",
+    "licenseId": "LIC-DOC-83D33F",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-5b48de",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-0AF562",
+    "licenseId": "LIC-DOC-5B48DE",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-01fefd",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-2CF855",
+    "licenseId": "LIC-DOC-01FEFD",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
   }
 ]

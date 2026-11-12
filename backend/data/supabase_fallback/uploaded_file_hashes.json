@@ -1252,5 +1252,77 @@
     "uploaded_by": "mobile_worker_test",
     "uploaded_at": "2026-11-11T22:07:09.029804+00:00",
     "_synced": false
+  },
+  {
+    "id": "5755e46b-dec5-4535-a42f-8bc83bdff09d",
+    "file_hash": "sha256_test_hash_9bcd66c3cb85467bae1f41ec0f9594c2",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T22:36:02.205789+00:00",
+    "_synced": false
+  },
+  {
+    "id": "2dcdce18-5a97-48ad-9416-4889ac0403c8",
+    "file_hash": "sha256_test_hash_334786e176cc4339bb4e1caee39d37b3",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T22:36:14.034973+00:00",
+    "_synced": false
+  },
+  {
+    "id": "387322de-d214-48c1-9555-f63db8f36339",
+    "file_hash": "sha256_test_hash_f9af8d7d08e0469ba4adfaf9386a6bc7",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T22:44:57.293949+00:00",
+    "_synced": false
+  },
+  {
+    "id": "513b02a8-0696-483b-a088-27b7a1bcdb57",
+    "file_hash": "sha256_test_hash_f137fdaf9d384946825c4a9234bee84c",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T23:13:18.021056+00:00",
+    "_synced": false
+  },
+  {
+    "id": "7be444dd-d84f-4b2c-ba22-bcc8117b526c",
+    "file_hash": "sha256_test_hash_da34ac50022f491c83546a6ccf7b7c95",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T23:19:02.082350+00:00",
+    "_synced": false
+  },
+  {
+    "id": "20841556-b6d9-43fd-bc2c-93cee9deb65b",
+    "file_hash": "sha256_test_hash_4b70303ce5344296afa7d745efd8c20c",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T23:24:30.498963+00:00",
+    "_synced": false
+  },
+  {
+    "id": "c9b4622b-aa30-4f90-8ab9-55f6d6be1828",
+    "file_hash": "sha256_test_hash_8c00996bf2fe46e195542ccba3db2bf6",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T23:28:18.851902+00:00",
+    "_synced": false
+  },
+  {
+    "id": "a467276b-8204-4512-967d-1c629ba4b19c",
+    "file_hash": "sha256_test_hash_03ba9c986ba84b2fa84562061f0c22e4",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-11T23:29:28.601575+00:00",
+    "_synced": false
   }
 ]
