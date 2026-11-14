@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button, Modal, Input } from "../../../components/ui";
+import { sanitizeText, sanitizeArrayOfStrings } from "../../../utils/sanitize";
 
 interface EditPatientProfileModalProps {
   isOpen: boolean;
@@ -52,13 +53,16 @@ export const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = (
 
   const handleSavePatientProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    const allergies = editAllergiesText.split(",").map((s) => s.trim()).filter(Boolean);
-    const history = editHistoryText.split(",").map((s) => s.trim()).filter(Boolean);
+    const cleanName = sanitizeText(editPatientName, 120) || initialName;
+    const cleanAge = Math.min(Math.max(Number(editAge) || initialAge, 0), 130);
+    const allergies = sanitizeArrayOfStrings(editAllergiesText, 30, 80);
+    const history = sanitizeArrayOfStrings(editHistoryText, 30, 150);
+
     onSave({
-      patientName: editPatientName.trim() || initialName,
-      age: Number(editAge) || initialAge,
-      gender: editGender,
-      bloodGroup: editBloodGroup,
+      patientName: cleanName,
+      age: cleanAge,
+      gender: sanitizeText(editGender, 30),
+      bloodGroup: sanitizeText(editBloodGroup, 10),
       knownAllergies: allergies,
       medicalHistory: history,
     });

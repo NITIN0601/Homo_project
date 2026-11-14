@@ -10,7 +10,12 @@ from typing import Any
 from core.config import settings
 from core.security import get_current_user_optional, scope_items_to_patient_or_admin
 from fastapi import APIRouter, Depends, HTTPException
-from schemas.billing import PaymentValidateRequest
+from schemas.billing import (
+    CreateConsultationInvoiceRequest,
+    CreateOrderRequest,
+    PaymentValidateRequest,
+    UpdateConsultationInvoiceRequest,
+)
 from services.data_store import (
     get_all_invoices,
     get_all_orders,
@@ -35,13 +40,17 @@ async def list_invoices_endpoint(user: dict[str, Any] | None = Depends(get_curre
 
 
 @router.post("/consultation-invoices", summary="Create consultation invoice")
-async def create_invoice_endpoint(payload: dict[str, Any]):
-    return save_invoice(payload)
+async def create_invoice_endpoint(payload: CreateConsultationInvoiceRequest):
+    data = payload.model_dump(exclude_none=True)
+    if not data.get("id"):
+        data["id"] = f"INV-{int(datetime.now(timezone.utc).timestamp() * 1000)}"
+    return save_invoice(data)
 
 
 @router.put("/consultation-invoices/{invoice_id}", summary="Update consultation invoice / submit payment")
-async def update_invoice_endpoint(invoice_id: str, payload: dict[str, Any]):
-    updated = update_invoice(invoice_id, payload)
+async def update_invoice_endpoint(invoice_id: str, payload: UpdateConsultationInvoiceRequest):
+    data = payload.model_dump(exclude_none=True)
+    updated = update_invoice(invoice_id, data)
     if not updated:
         raise HTTPException(status_code=404, detail="Invoice not found")
     return updated
@@ -71,17 +80,18 @@ async def list_orders_endpoint(user: dict[str, Any] | None = Depends(get_current
 
 @router.post("/orders/create", summary="Place medicine order")
 @router.post("/orders", summary="Place medicine order (alias)")
-async def create_order_endpoint(payload: dict[str, Any]):
-    order_id = payload.get("id") or f"ORD-{int(datetime.now().timestamp() * 1000)}"
-    payload["id"] = order_id
-    payload.setdefault("status", "processing")
-    payload.setdefault("createdAt", datetime.now(timezone.utc).isoformat())
-    save_order(payload)
+async def create_order_endpoint(payload: CreateOrderRequest):
+    data = payload.model_dump(exclude_none=True)
+    order_id = data.get("id") or f"ORD-{int(datetime.now(timezone.utc).timestamp() * 1000)}"
+    data["id"] = order_id
+    data.setdefault("status", "processing")
+    data.setdefault("createdAt", datetime.now(timezone.utc).isoformat())
+    save_order(data)
     return {
         "success": True,
         "message": f"Order #{order_id} recorded successfully.",
         "orderId": order_id,
-        "order": payload,
+        "order": data,
     }
 
 

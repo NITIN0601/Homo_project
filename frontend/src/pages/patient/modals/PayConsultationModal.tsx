@@ -4,6 +4,7 @@ import { useTenant } from "../../../context/ThemeProvider";
 import type { ConsultationInvoice } from "../../../types";
 import { CLINIC, DOCTOR, INDIAN_BANKS } from "../../../config";
 import { formatINR, formatDateTime } from "../../../utils/format";
+import { sanitizeText, sanitizeAlphanumeric } from "../../../utils/sanitize";
 import { Button, Modal, Input } from "../../../components/ui";
 
 interface PayConsultationModalProps {
@@ -59,13 +60,14 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
 
       const submittedAt = formatDateTime();
 
+      const cleanUpi = sanitizeText(customPatientUpi, 100);
       submitConsultationPayment(
         payingInvoice.id,
         paymentMethodTab,
         txRef,
         submittedAt,
-        customPatientUpi.trim() || authUser?.savedUpiId,
-        paymentMethodTab === "netbanking" ? selectedBank : undefined
+        cleanUpi || authUser?.savedUpiId,
+        paymentMethodTab === "netbanking" ? sanitizeText(selectedBank, 80) : undefined
       );
 
       setIsProcessingPayment(false);

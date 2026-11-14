@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { ConsultationInvoice } from "../../../types";
 import { formatINR } from "../../../utils/format";
+import { sanitizeAlphanumeric } from "../../../utils/sanitize";
 import { Modal, Input, Button } from "../../../components/ui";
 
 interface UtrReconciliationModalProps {
@@ -31,10 +32,11 @@ export const UtrReconciliationModal: React.FC<UtrReconciliationModalProps> = ({
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const verifiedRef = adminUtrInput.trim()
-      ? (adminUtrInput.startsWith("UPI-") || adminUtrInput.startsWith("CARD-") || adminUtrInput.startsWith("NB-")
-          ? adminUtrInput
-          : `UPI-UTR-${adminUtrInput}`)
+    const cleanRef = sanitizeAlphanumeric(adminUtrInput, true, 60);
+    const verifiedRef = cleanRef
+      ? (cleanRef.startsWith("UPI-") || cleanRef.startsWith("CARD-") || cleanRef.startsWith("NB-")
+          ? cleanRef
+          : `UPI-UTR-${cleanRef}`)
       : invoice.transactionRef || `CONFIRMED-${Math.floor(100000 + Math.random() * 900000)}`;
 
     onConfirmReconciliation(invoice.id, verifiedRef, invoice.status === "paid");
