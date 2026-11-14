@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { PharmacyPurchaseOrder } from "../types";
-import { LOGISTICS_HUBS } from "../../../config";
+import { LOGISTICS_HUBS, PHARMACY_SUPPLIERS } from "../../../config";
 import { formatDateISO, formatDateTime } from "../../../utils/format";
 import { Modal, Input, Select, Textarea, Button } from "../../../components/ui";
 
@@ -19,7 +19,7 @@ export const CustomPOModal: React.FC<CustomPOModalProps> = ({
   const [potency, setPotency] = useState("30C");
   const [qty, setQty] = useState(25);
   const [unit, setUnit] = useState("Vials (30ml)");
-  const [vendor, setVendor] = useState("Dr. Reckeweg & Co. Germany");
+  const [vendor, setVendor] = useState<string>(PHARMACY_SUPPLIERS.DEFAULT);
   const [urgency, setUrgency] = useState<"Normal" | "Urgent" | "Critical">("Urgent");
   const [notes, setNotes] = useState("Urgent clinic dispensary stock replenishment.");
 
@@ -170,12 +170,10 @@ export const CustomPOModal: React.FC<CustomPOModalProps> = ({
             label="Distributor / Vendor *"
             value={vendor}
             onChange={(e) => setVendor(e.target.value)}
-            options={[
-              { value: "Dr. Reckeweg & Co. Germany", label: "Dr. Reckeweg & Co. Germany" },
-              { value: "SBL Pvt Ltd India", label: "SBL Pvt Ltd India" },
-              { value: "Dr. Willmar Schwabe India", label: "Dr. Willmar Schwabe India" },
-              { value: "Medisynth Chemicals", label: "Medisynth Chemicals" },
-            ]}
+            options={PHARMACY_SUPPLIERS.LIST.map((supplier) => ({
+              value: supplier,
+              label: supplier,
+            }))}
           />
 
           <Select

@@ -112,9 +112,11 @@ export const ThemeProvider: React.FC<{
     };
     window.addEventListener("storage", handleSync);
     window.addEventListener("tenant_features_changed", handleSync);
+    window.addEventListener("tenant_registry_updated", handleSync);
     return () => {
       window.removeEventListener("storage", handleSync);
       window.removeEventListener("tenant_features_changed", handleSync);
+      window.removeEventListener("tenant_registry_updated", handleSync);
     };
   }, [initialTenantId]);
 

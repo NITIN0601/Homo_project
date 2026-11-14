@@ -5,6 +5,7 @@ import { MEDICINE_CATALOGUE } from "../../context/AppContext";
 import { formatINR, formatDateTime, splitFullName } from "../../utils/format";
 import { useTenant } from "../../context/ThemeProvider";
 import { Badge, Button } from "../../components/ui";
+import { PrescribedRemediesList } from "../../components/common";
 import { PatientInviteModal } from "./modals/PatientInviteModal";
 
 interface PatientRecordsTabProps {
@@ -342,28 +343,11 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
                               </div>
                             )}
 
-                            {vis.prescribedRemedies && vis.prescribedRemedies.length > 0 && (
-                              <div>
-                                <span className="font-bold text-[10px] text-stone-500 uppercase">
-                                  Prescribed Remedies:
-                                </span>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
-                                  {vis.prescribedRemedies.map((rem, i) => (
-                                    <div
-                                      key={i}
-                                      className="p-2 bg-white rounded-lg border border-stone-200 text-[11px]"
-                                    >
-                                      <p className="font-black text-stone-900">
-                                        {rem.medicineName} {rem.potency}
-                                      </p>
-                                      <p className="text-stone-600 text-[10px]">
-                                        Dosage: {rem.dosage} · Duration: {rem.duration}
-                                      </p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                            {/* Prescribed Remedies via SSOT Primitive */}
+                            <PrescribedRemediesList
+                              remedies={vis.prescribedRemedies}
+                              variant="light"
+                            />
 
                             {vis.clinicalNotes && (
                               <p className="text-stone-600 bg-white p-2 rounded-lg border border-stone-200/70 text-[11px]">

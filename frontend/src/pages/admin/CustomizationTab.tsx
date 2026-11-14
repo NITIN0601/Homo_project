@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTenant } from "../../context/ThemeProvider";
 import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
-import { HOSPITAL_TENANTS } from "../../config/tenants";
+import { getAllHospitalTenants } from "../../config/tenants";
 import type { HospitalTenantConfig, AdminPasscode, CustomizationAuditLogEntry } from "../../types/tenant";
 import { type CustomerFeedback, INITIAL_CUSTOMER_FEEDBACKS } from "../../types/feedback";
 import { USE_MOCK_DATA } from "../../config";
@@ -365,7 +365,7 @@ export const CustomizationTab: React.FC = () => {
               onChange={(e) => setTenantId(e.target.value)}
               className="bg-stone-800 text-emerald-300 font-bold text-xs py-1.5 px-3 rounded-xl border border-stone-600 focus:outline-none focus:ring-1 focus:ring-emerald-400 cursor-pointer"
             >
-              {Object.values(HOSPITAL_TENANTS).map((t) => (
+              {getAllHospitalTenants().map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.name} ({t.id})
                 </option>

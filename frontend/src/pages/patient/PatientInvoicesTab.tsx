@@ -4,6 +4,7 @@ import type { ConsultationInvoice } from "../../types";
 import { CLINIC } from "../../config";
 import { formatINR } from "../../utils/format";
 import { Button, Badge } from "../../components/ui";
+import { InvoiceSummaryMetrics, InvoiceStatusBadge } from "../../components/common";
 
 interface PatientInvoicesTabProps {
   patientInvoices: ConsultationInvoice[];
@@ -32,52 +33,18 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* Financial Summary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-3xl p-5 card-shadow border border-stone-200/80">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">Total Invoiced</span>
-          <p className="text-2xl font-black text-stone-900 mt-1">{formatINR(totalBilledINR)}</p>
-          <p className="text-[11px] text-stone-500 mt-0.5">{patientInvoices.length} Total Invoices</p>
-        </div>
-
-        <div className={`rounded-3xl p-5 card-shadow border transition-all ${pendingInvoices.length > 0
-            ? "bg-amber-50/80 border-amber-300 ring-2 ring-amber-400/20"
-            : "bg-white border-stone-200/80"
-          }`}>
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">Pending Due</span>
-            {pendingInvoices.length > 0 && (
-              <Badge variant="warning" size="micro" pulse>
-                Action Needed
-              </Badge>
-            )}
-          </div>
-          <p className="text-2xl font-black text-amber-900 mt-1">{formatINR(totalPendingINR)}</p>
-          <p className="text-[11px] text-amber-700/80 mt-0.5">{pendingInvoices.length} Bills Awaiting Settlement</p>
-        </div>
-
-        <div className={`rounded-3xl p-5 card-shadow border transition-all ${processingInvoices.length > 0
-            ? "bg-sky-50/80 border-sky-300 ring-2 ring-sky-400/20"
-            : "bg-white border-stone-200/80"
-          }`}>
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 block">Under Verification</span>
-            {processingInvoices.length > 0 && (
-              <Badge variant="info" size="micro" pulse>
-                In Review
-              </Badge>
-            )}
-          </div>
-          <p className="text-2xl font-black text-sky-900 mt-1">{processingInvoices.length}</p>
-          <p className="text-[11px] text-sky-700/80 mt-0.5">Submitted · Awaiting Doctor Receipt Match</p>
-        </div>
-
-        <div className="bg-emerald-50/80 rounded-3xl p-5 card-shadow border border-emerald-300">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Confirmed & Settled</span>
-          <p className="text-2xl font-black text-emerald-900 mt-1">{formatINR(totalPaidINR)}</p>
-          <p className="text-[11px] text-emerald-700/80 mt-0.5">{paidInvoices.length} Paid with Official Tax Receipts</p>
-        </div>
-      </div>
+      {/* Financial Summary KPI Cards (SSOT Shared Primitive) */}
+      <InvoiceSummaryMetrics
+        metrics={{
+          totalBilledINR,
+          totalInvoicesCount: patientInvoices.length,
+          totalPendingINR,
+          pendingCount: pendingInvoices.length,
+          processingCount: processingInvoices.length,
+          totalPaidINR,
+          paidCount: paidInvoices.length,
+        }}
+      />
 
       {/* ── Consultation Fees & Online Invoicing ───────────────────────── */}
       <div className="space-y-4">
@@ -274,9 +241,7 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
                       </span>
                       <strong className="text-stone-900 font-bold">{formatINR(inv.amountINR)}</strong>
                       <span className="text-stone-500">· {inv.consultationType}</span>
-                      <Badge variant="success" size="micro">
-                        ✓ Paid
-                      </Badge>
+                      <InvoiceStatusBadge status={inv.status} size="micro" />
                     </div>
                     <p className="text-[11px] text-stone-500">
                       Visit Date: {inv.visitDate} · Settled on: {inv.paidAt || inv.issuedAt}

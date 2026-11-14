@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import type { ConsultationInvoice, UserProfile } from "../../types";
 import { formatINR, formatDateTime } from "../../utils/format";
 import { Badge, Button } from "../../components/ui";
+import { InvoiceStatusBadge } from "../../components/common/InvoiceStatusBadge";
 
 interface BillingInvoicesTabProps {
   invoices: ConsultationInvoice[];
@@ -231,22 +232,8 @@ export const BillingInvoicesTab: React.FC<BillingInvoicesTabProps> = ({
                     {inv.consultationType}
                   </span>
 
-                  {/* Status Badge via Primitives */}
-                  {inv.status === "paid" && (
-                    <Badge variant="success" size="sm" icon={<span>✓</span>}>
-                      Confirmed &amp; Settled
-                    </Badge>
-                  )}
-                  {inv.status === "processing" && (
-                    <Badge variant="info" size="sm" pulse icon={<span>🔔</span>}>
-                      Verification Required
-                    </Badge>
-                  )}
-                  {inv.status === "pending" && (
-                    <Badge variant="warning" size="sm" icon={<span>⏳</span>}>
-                      Awaiting Patient Payment
-                    </Badge>
-                  )}
+                  {/* Status Badge via SSOT Primitives */}
+                  <InvoiceStatusBadge status={inv.status} size="sm" />
                 </div>
 
                 <p className="text-[11px] text-stone-600">

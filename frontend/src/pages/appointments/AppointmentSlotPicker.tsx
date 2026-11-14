@@ -6,6 +6,7 @@ import {
   OFFICE_HOURS,
   MORNING_SLOTS,
   EVENING_SLOTS,
+  ALL_TIME_SLOTS,
   THEME_COLORS,
 } from "../../config";
 import { formatDateFull } from "../../utils/format";
@@ -15,7 +16,7 @@ import {
   getMappedSessionHours,
 } from "../../utils/timezone";
 
-const TIME_SLOTS: readonly string[] = [...MORNING_SLOTS, ...EVENING_SLOTS];
+const TIME_SLOTS: readonly string[] = ALL_TIME_SLOTS;
 
 interface AppointmentSlotPickerProps {
   selectedDate: string;

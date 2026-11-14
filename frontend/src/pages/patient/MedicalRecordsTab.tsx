@@ -3,6 +3,7 @@ import { useTenant } from "../../context/ThemeProvider";
 import type { VisitSummaryRecord } from "../../types";
 import { CLINIC } from "../../config";
 import { Button, Badge } from "../../components/ui";
+import { PrescribedRemediesList } from "../../components/common";
 
 interface MedicalRecordsTabProps {
   medicalFile: {
@@ -164,43 +165,13 @@ export const MedicalRecordsTab: React.FC<MedicalRecordsTabProps> = ({
                   </div>
                 </div>
 
-                {/* Prescribed Remedies Overview */}
-                <div className="space-y-2">
-                  <span className="font-bold text-stone-600 uppercase tracking-wider text-[10px] block">
-                    Prescribed Remedies & Regimen
-                  </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {visit.prescribedRemedies.map((item, i) => (
-                      <div
-                        key={i}
-                        className="p-3 rounded-2xl bg-sage-50/50 border border-sage-200/80 flex items-center justify-between gap-2"
-                      >
-                        <div>
-                          <p className="font-extrabold text-stone-900 text-xs">
-                            {item.medicineName ? (
-                              <span>{item.medicineName} <span className="text-sage-700 font-mono text-[11px]">{item.potency}</span></span>
-                            ) : (
-                              <span>Formulation #{i + 1} <span className="text-stone-500 font-normal text-[11px]">(Classical Totality Prescription)</span></span>
-                            )}
-                          </p>
-                          <p className="text-[11px] text-sage-800 mt-1">
-                            <strong className="text-stone-700">Dosage:</strong> {item.dosage} ({item.duration})
-                          </p>
-                        </div>
-                        {tenant.features.enableECommerce && (
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => onOrderRemedy(item.medicineId)}
-                            className="text-[11px] py-1 px-2.5 shrink-0"
-                          >
-                            + Add to Cart
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                {/* Prescribed Remedies Overview (SSOT Shared Primitive) */}
+                <PrescribedRemediesList
+                  remedies={visit.prescribedRemedies}
+                  canAddToCart={Boolean(tenant.features.enableECommerce)}
+                  onAddToCart={onOrderRemedy}
+                  variant="sage"
+                />
 
                 {/* Collapsible Clinical Details Section */}
                 {isExpanded && (

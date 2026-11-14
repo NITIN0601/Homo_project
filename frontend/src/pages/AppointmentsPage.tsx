@@ -8,6 +8,7 @@ import {
   CLINIC,
   MORNING_SLOTS,
   EVENING_SLOTS,
+  ALL_TIME_SLOTS,
 } from "../config";
 import { api } from "../services/api";
 import {
@@ -34,8 +35,8 @@ import { AppointmentConfirmationBanner } from "./appointments/AppointmentConfirm
 import { PatientDoctorContinuityBanner } from "./appointments/PatientDoctorContinuityBanner";
 
 // ─── Time slots (Imported from Central Config SSOT) ──────────────────────────
-export { MORNING_SLOTS, EVENING_SLOTS };
-const TIME_SLOTS: readonly string[] = [...MORNING_SLOTS, ...EVENING_SLOTS];
+export { MORNING_SLOTS, EVENING_SLOTS, ALL_TIME_SLOTS };
+const TIME_SLOTS: readonly string[] = ALL_TIME_SLOTS;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function toISO(date: string, time: string): string {

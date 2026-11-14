@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import type { BookedAppointment } from "../../../types";
 import { getClinicTimeInfo } from "../../../utils/timezone";
-import { MORNING_SLOTS, EVENING_SLOTS } from "../../../config";
+import { ALL_TIME_SLOTS } from "../../../config";
 import { Modal, Input, Select, Textarea, Button } from "../../../components/ui";
 import { useApp } from "../../../context/AppContext";
 
@@ -84,7 +84,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
     setNameErrors({});
   };
 
-  const allSlots = [...MORNING_SLOTS, ...EVENING_SLOTS];
+  const allSlots = ALL_TIME_SLOTS;
 
   return (
     <Modal
