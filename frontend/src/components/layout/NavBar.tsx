@@ -2,7 +2,7 @@ import React, { useRef, useMemo } from "react";
 import { useApp } from "../../context/AppContext";
 import { useTenant } from "../../context/ThemeProvider";
 import { useClinic } from "../../hooks/useClinic";
-import { HOSPITAL_TENANTS } from "../../config/tenants";
+import { getAllHospitalTenants } from "../../config/tenants";
 import { MOCK_ACCOUNTS } from "../../data/mocks";
 import CartIcon from "./CartIcon";
 import AuthPanel from "./AuthPanel";
@@ -264,7 +264,7 @@ const NavBar: React.FC = () => {
                 title="Switch Active Hospital Tenant"
                 aria-label="Active Hospital Facility"
               >
-                {Object.values(HOSPITAL_TENANTS).map((h) => (
+                {getAllHospitalTenants().map((h) => (
                   <option key={h.id} value={h.id} className="text-stone-900 bg-white">
                     {h.shortName || h.name}
                   </option>

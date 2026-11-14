@@ -169,3 +169,17 @@ export const ModalFooter: React.FC<HTMLAttributes<HTMLDivElement>> = ({ classNam
     {children}
   </div>
 );
+
+// Compound Component Pattern Attachment
+export interface ModalComponent extends React.FC<ModalProps> {
+  Header: typeof ModalHeader;
+  Body: typeof ModalBody;
+  Footer: typeof ModalFooter;
+}
+
+const CompoundModal = Modal as ModalComponent;
+CompoundModal.Header = ModalHeader;
+CompoundModal.Body = ModalBody;
+CompoundModal.Footer = ModalFooter;
+
+export default CompoundModal;

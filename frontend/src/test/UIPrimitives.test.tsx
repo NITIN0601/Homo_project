@@ -47,7 +47,7 @@ describe("Phase 1: Enterprise UI Primitives & Design Tokens", () => {
     it("renders with default primary variant and emerald background", () => {
       const html = renderToString(<Button>Book Appointment</Button>);
       expect(html).toContain("Book Appointment");
-      expect(html).toContain("bg-emerald-700");
+      expect(html).toContain("brand-primary");
       expect(html).toContain("min-h-[44px]");
     });
 

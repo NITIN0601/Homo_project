@@ -45,8 +45,13 @@ export * from "./common/ProviderSelector";
 export { default as ProviderSelector } from "./common/ProviderSelector";
 export * from "./common/ProtectedRoute";
 export { default as ProtectedRoute } from "./common/ProtectedRoute";
+export * from "./common/FeatureToggleGroup";
+export * from "./common/InvoiceStatusBadge";
+export * from "./common/InvoiceSummaryMetrics";
+export * from "./common/PrescribedRemediesList";
 export * from "./common/RootErrorBoundary";
 export { default as RootErrorBoundary } from "./common/RootErrorBoundary";
+export * from "./common/DashboardErrorBoundary";
 
 // Design System Primitives
 export * from "./ui";
