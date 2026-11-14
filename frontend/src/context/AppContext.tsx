@@ -26,9 +26,7 @@ import type {
   ConsultationInvoice,
   ConsultationInvoiceStatus,
 } from "../types";
-import {
-  STORAGE_KEYS,
-} from "../config";
+import { STORAGE_KEYS } from "../config";
 import {
   MEDICINE_CATALOGUE,
   MOCK_ACCOUNTS,
@@ -61,6 +59,7 @@ import { formatDateISO } from "../utils/format";
 export * from "../router/routeParser";
 export * from "./appInitialState";
 export * from "./appReducer";
+export * from "./slices";
 
 import {
   parseRouteFromLocation,
@@ -69,8 +68,22 @@ import {
 import { INITIAL_STATE } from "./appInitialState";
 import { appReducer } from "./appReducer";
 
-// ─── Context value shape ──────────────────────────────────────────────────────
-interface AppContextValue {
+// Domain Slice Contexts
+import {
+  AuthContext,
+  type AuthContextValue,
+  CartContext,
+  type CartContextValue,
+  NavigationContext,
+  type NavigationContextValue,
+  SchedulingContext,
+  type SchedulingContextValue,
+  ClinicalContext,
+  type ClinicalContextValue,
+} from "./slices";
+
+// ─── Consolidated Context Value Shape (Backwards Compatible Facade) ─────────
+export interface AppContextValue {
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
   cartTotalItems:     number;
@@ -140,7 +153,7 @@ interface AppContextValue {
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
-const AppContext = createContext<AppContextValue | null>(null);
+export const AppContext = createContext<AppContextValue | null>(null);
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -174,6 +187,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const closeTrackingModal = useCallback(()                   => dispatch({ type: "CLOSE_TRACKING_MODAL"              }), []);
   const toggleOrdersModal  = useCallback((open?: boolean)     => dispatch({ type: "TOGGLE_ORDERS_MODAL", payload: open   }), []);
   const addSavedCard       = useCallback((card: SavedCard)    => dispatch({ type: "ADD_SAVED_CARD",     payload: card  }), []);
+
   const addVisitSummary = useCallback((patientId: string, visit: VisitSummaryRecord) => {
     dispatch({ type: "ADD_VISIT_SUMMARY", payload: { patientId, visit } });
     fetch("/api/visit-summaries", {
@@ -182,12 +196,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       body: JSON.stringify({ patientId, visit }),
     }).catch(() => {});
   }, []);
+
   const updatePatientMedicalFile = useCallback((patientId: string, updates: Partial<PatientMedicalFile>) => {
     dispatch({ type: "UPDATE_PATIENT_MEDICAL_FILE", payload: { patientId, updates } });
     if (updates.patientName && stateRef.current.authUser?.id === patientId) {
       dispatch({ type: "UPDATE_USER_PROFILE", payload: { name: updates.patientName } });
     }
   }, []);
+
   const updateInventory    = useCallback((item: InventoryItem) => dispatch({ type: "UPDATE_INVENTORY", payload: item }), []);
 
   const blockDate = useCallback((
@@ -286,11 +302,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       payload: { id: targetId, date: targetDate },
     });
 
-    // Compute updated list immediately from latest stateRef
     const updated = stateRef.current.blockedDates.filter((b) => {
-      // 1. Direct ID match
       if (targetId && b.id === targetId) return false;
-      // 2. Direct date match (if only date provided, or if b has no id)
       if (targetDate && b.date === targetDate) {
         if (targetId && b.id && b.id !== targetId) return true;
         return false;
@@ -303,7 +316,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       localStorage.setItem(STORAGE_KEYS.BLOCKED_DATES, JSON.stringify(updated));
     } catch {}
 
-    // Sync to file-backed API
     api.calendar.saveBlockedDates(updated).catch(() => {});
   }, []);
 
@@ -442,6 +454,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       type: "UPDATE_INVOICE_TRANSACTION_REF",
       payload: { invoiceId, transactionRef },
     });
+    fetch(`/api/consultation-invoices/${invoiceId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transactionRef }),
+    }).catch(() => {});
   }, []);
 
   const payConsultationInvoice = useCallback((
@@ -454,10 +471,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       type: "PAY_CONSULTATION_INVOICE",
       payload: { invoiceId, paymentMethod, transactionRef, paidAt },
     });
+    fetch(`/api/consultation-invoices/${invoiceId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "paid", paymentMethod, transactionRef, paidAt }),
+    }).catch(() => {});
   }, []);
 
   const updateInvoiceStatus = useCallback((invoiceId: string, status: ConsultationInvoiceStatus) => {
     dispatch({ type: "UPDATE_INVOICE_STATUS", payload: { invoiceId, status } });
+    fetch(`/api/consultation-invoices/${invoiceId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    }).catch(() => {});
   }, []);
 
   // Synchronize cross-tab and cross-port state (real-time sync between Admin 5174 and Patient 5173)
@@ -562,15 +589,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     // Initial fetch
     syncFromServer();
-    // Intelligent adaptive sync: 15s background interval + instant sync on tab focus
-    const interval = setInterval(syncFromServer, 15000);
+    const interval = setInterval(syncFromServer, 5000);
     const onFocus = () => syncFromServer();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        syncFromServer();
+      }
+    };
     window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       isSubscribed = false;
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
       clearInterval(interval);
     };
   }, []);
@@ -582,7 +615,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // ── Initial Canonical URL & Browser Back/Forward (popstate) Support ───────────
   useEffect(() => {
-    // Initial sync on mount to ensure clean canonical URL and title
     syncUrlWithState(state.activePage, state.adminTab, true);
 
     const handlePopState = () => {
@@ -602,7 +634,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [clockTick, setClockTick] = React.useState(0);
 
   useEffect(() => {
-    // Minute-level clock tick to refresh clinic time without high-frequency re-render thrashing
     const timer = setInterval(() => {
       setClockTick((c) => c + 1);
     }, 60000);
@@ -628,17 +659,138 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     [state.userTimezone]
   );
 
-  const value = useMemo<AppContextValue>(() => ({
-    state, dispatch,
-    cartTotalItems, cartSubtotalINR,
-    navigateTo, openCart, closeCart, toggleCart,
-    addToCart, removeFromCart, updateQty, clearCart,
-    login, logout, openAuthModal, closeAuthModal,
-    placeOrder, openTrackingModal, closeTrackingModal, toggleOrdersModal, addSavedCard, addVisitSummary, updatePatientMedicalFile,
-    updateInventory, setAdminTab,
-    blockDate, blockDateRange, unblockDate, updateBlockedDate, isDateBlocked, isSlotBlocked, getBlockedEntriesForDate,
-    bookAppointment, cancelAppointment, updateAppointmentStatus,
-    getBookedSlotsForDate, isSlotBooked,
+  // ── Domain Slice Memoized Values ─────────────────────────────────────────────
+  const navigationValue = useMemo<NavigationContextValue>(() => ({
+    activePage: state.activePage,
+    adminTab: state.adminTab,
+    navigateTo,
+    setAdminTab,
+  }), [state.activePage, state.adminTab, navigateTo, setAdminTab]);
+
+  const authValue = useMemo<AuthContextValue>(() => ({
+    authUser: state.authUser,
+    isAuthModalOpen: state.isAuthModalOpen,
+    savedCards: state.authUser?.savedCards || [],
+    login,
+    logout,
+    openAuthModal,
+    closeAuthModal,
+    addSavedCard,
+  }), [state.authUser, state.isAuthModalOpen, login, logout, openAuthModal, closeAuthModal, addSavedCard]);
+
+  const cartValue = useMemo<CartContextValue>(() => ({
+    cart: state.cart,
+    isCartOpen: state.isCartOpen,
+    cartTotalItems,
+    cartSubtotalINR,
+    orders: state.orders,
+    trackingModalOrder: state.trackingModalOrder,
+    ordersModalOpen: state.ordersModalOpen,
+    openCart,
+    closeCart,
+    toggleCart,
+    addToCart,
+    removeFromCart,
+    updateQty,
+    clearCart,
+    placeOrder,
+    openTrackingModal,
+    closeTrackingModal,
+    toggleOrdersModal,
+  }), [
+    state.cart, state.isCartOpen, cartTotalItems, cartSubtotalINR, state.orders,
+    state.trackingModalOrder, state.ordersModalOpen, openCart, closeCart, toggleCart,
+    addToCart, removeFromCart, updateQty, clearCart, placeOrder, openTrackingModal,
+    closeTrackingModal, toggleOrdersModal,
+  ]);
+
+  const schedulingValue = useMemo<SchedulingContextValue>(() => ({
+    blockedDates: state.blockedDates,
+    appointments: state.appointments,
+    userTimezone: state.userTimezone,
+    setUserTimezone,
+    userTzInfo,
+    clinicTimeInfo,
+    sessionHours,
+    blockDate,
+    blockDateRange,
+    unblockDate,
+    updateBlockedDate,
+    isDateBlocked,
+    isSlotBlocked,
+    getBlockedEntriesForDate,
+    bookAppointment,
+    cancelAppointment,
+    updateAppointmentStatus,
+    getBookedSlotsForDate,
+    isSlotBooked,
+  }), [
+    state.blockedDates, state.appointments, state.userTimezone, setUserTimezone,
+    userTzInfo, clinicTimeInfo, sessionHours, blockDate, blockDateRange,
+    unblockDate, updateBlockedDate, isDateBlocked, isSlotBlocked,
+    getBlockedEntriesForDate, bookAppointment, cancelAppointment,
+    updateAppointmentStatus, getBookedSlotsForDate, isSlotBooked,
+  ]);
+
+  const clinicalValue = useMemo<ClinicalContextValue>(() => ({
+    visitSummaries: state.visitSummaries,
+    inventory: state.inventory,
+    consultationInvoices: state.consultationInvoices,
+    addVisitSummary,
+    updatePatientMedicalFile,
+    updateInventory,
+    postConsultationInvoice,
+    submitConsultationPayment,
+    confirmConsultationPayment,
+    updateInvoiceTransactionRef,
+    payConsultationInvoice,
+    updateInvoiceStatus,
+  }), [
+    state.visitSummaries, state.inventory, state.consultationInvoices,
+    addVisitSummary, updatePatientMedicalFile, updateInventory,
+    postConsultationInvoice, submitConsultationPayment,
+    confirmConsultationPayment, updateInvoiceTransactionRef,
+    payConsultationInvoice, updateInvoiceStatus,
+  ]);
+
+  const compositeValue = useMemo<AppContextValue>(() => ({
+    state,
+    dispatch,
+    cartTotalItems,
+    cartSubtotalINR,
+    navigateTo,
+    openCart,
+    closeCart,
+    toggleCart,
+    addToCart,
+    removeFromCart,
+    updateQty,
+    clearCart,
+    login,
+    logout,
+    openAuthModal,
+    closeAuthModal,
+    placeOrder,
+    openTrackingModal,
+    closeTrackingModal,
+    toggleOrdersModal,
+    addSavedCard,
+    addVisitSummary,
+    updatePatientMedicalFile,
+    updateInventory,
+    setAdminTab,
+    blockDate,
+    blockDateRange,
+    unblockDate,
+    updateBlockedDate,
+    isDateBlocked,
+    isSlotBlocked,
+    getBlockedEntriesForDate,
+    bookAppointment,
+    cancelAppointment,
+    updateAppointmentStatus,
+    getBookedSlotsForDate,
+    isSlotBooked,
     userTimezone: state.userTimezone,
     setUserTimezone,
     userTzInfo,
@@ -655,16 +807,31 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     navigateTo, openCart, closeCart, toggleCart,
     addToCart, removeFromCart, updateQty, clearCart,
     login, logout, openAuthModal, closeAuthModal,
-    placeOrder, openTrackingModal, closeTrackingModal, toggleOrdersModal, addSavedCard, addVisitSummary, updatePatientMedicalFile,
-    updateInventory, setAdminTab,
-    blockDate, blockDateRange, unblockDate, updateBlockedDate, isDateBlocked, isSlotBlocked, getBlockedEntriesForDate,
-    bookAppointment, cancelAppointment, updateAppointmentStatus,
-    getBookedSlotsForDate, isSlotBooked,
+    placeOrder, openTrackingModal, closeTrackingModal, toggleOrdersModal, addSavedCard,
+    addVisitSummary, updatePatientMedicalFile, updateInventory, setAdminTab,
+    blockDate, blockDateRange, unblockDate, updateBlockedDate, isDateBlocked,
+    isSlotBlocked, getBlockedEntriesForDate, bookAppointment, cancelAppointment,
+    updateAppointmentStatus, getBookedSlotsForDate, isSlotBooked,
     setUserTimezone, userTzInfo, clinicTimeInfo, sessionHours,
-    postConsultationInvoice, submitConsultationPayment, confirmConsultationPayment, updateInvoiceTransactionRef, payConsultationInvoice, updateInvoiceStatus,
+    postConsultationInvoice, submitConsultationPayment, confirmConsultationPayment,
+    updateInvoiceTransactionRef, payConsultationInvoice, updateInvoiceStatus,
   ]);
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <NavigationContext.Provider value={navigationValue}>
+      <AuthContext.Provider value={authValue}>
+        <CartContext.Provider value={cartValue}>
+          <SchedulingContext.Provider value={schedulingValue}>
+            <ClinicalContext.Provider value={clinicalValue}>
+              <AppContext.Provider value={compositeValue}>
+                {children}
+              </AppContext.Provider>
+            </ClinicalContext.Provider>
+          </SchedulingContext.Provider>
+        </CartContext.Provider>
+      </AuthContext.Provider>
+    </NavigationContext.Provider>
+  );
 };
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -674,32 +841,4 @@ export function useApp(): AppContextValue {
   return ctx;
 }
 
-// ─── RBAC guard ───────────────────────────────────────────────────────────────
-export function useRequireRole(required: "admin" | "patient" | "super_admin"): void {
-  const { state } = useApp();
-  const role = state.authUser?.role;
-  if (!role) {
-    throw new RbacAccessError(
-      `Access denied: role 'guest' cannot access a '${required}' resource.`
-    );
-  }
-  // Hierarchical RBAC: super_admin inherits administrative and patient clinical access
-  if (role === "super_admin") {
-    return;
-  }
-  if (role !== required) {
-    throw new RbacAccessError(
-      `Access denied: role '${role}' cannot access a '${required}' resource.`
-    );
-  }
-}
-
-export class RbacAccessError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "RbacAccessError";
-  }
-}
-
 export type { AuthUser };
-
