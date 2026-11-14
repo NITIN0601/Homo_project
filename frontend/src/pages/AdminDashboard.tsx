@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, Suspense, lazy } from "react";
 import { useApp, useRequireRole, MEDICINE_CATALOGUE } from "../context/AppContext";
 import { useTenant } from "../context/ThemeProvider";
 import { Button } from "../components/ui";
+import { DashboardErrorBoundary } from "../components";
 import { MOCK_ACCOUNTS } from "../data/mocks";
 import type {
   AdminTab,
@@ -381,7 +382,8 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ── ACTIVE TAB RENDERING (MODULAR SUB-COMPONENTS) ───────────────── */}
+      {/* ── ACTIVE TAB RENDERING (MODULAR SUB-COMPONENTS WITH ISOLATED ERROR BOUNDARY) ── */}
+      <DashboardErrorBoundary dashboardName="Doctor Admin Portal" tabName={activeTab} key={activeTab}>
       {activeTab === "dashboard" && (
         <OverviewTab
           appointments={appointments}
@@ -508,6 +510,7 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {activeTab === "customization" && <CustomizationTab />}
+      </DashboardErrorBoundary>
 
       {/* ── MODALS (ISOLATED & MODULAR) ─────────────────────────────────── */}
       <AppointmentBookingModal

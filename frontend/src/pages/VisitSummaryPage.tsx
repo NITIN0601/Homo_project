@@ -5,6 +5,7 @@ import type { VisitSummaryRecord, ConsultationInvoice } from "../types";
 import { CLINIC } from "../config";
 import { formatINR } from "../utils/format";
 import { Button, Tabs } from "../components/ui";
+import { DashboardErrorBoundary } from "../components/common/DashboardErrorBoundary";
 
 import MedicalRecordsTab from "./patient/MedicalRecordsTab";
 import PatientInvoicesTab from "./patient/PatientInvoicesTab";
@@ -309,41 +310,44 @@ export const VisitSummaryPage: React.FC = () => {
         />
       )}
 
-      {/* ── TAB 1: MEDICAL RECORDS & CLINICAL HISTORY ──────────────────── */}
-      {activePortalTab === "records" && tenant.features.enablePatientMedicalRecords !== false && (
-        <MedicalRecordsTab
-          medicalFile={medicalFile}
-          patientId={patientId}
-          onEditProfile={() => setIsEditPatientModalOpen(true)}
-          onViewJsonModalVisit={(v) => setViewJsonModalVisit(v)}
-          onOrderRemedy={handleOrderRemedy}
-        />
-      )}
+      {/* ── Patient Portal Tab Content Wrapped with Fault Isolation ── */}
+      <DashboardErrorBoundary dashboardName="Patient Portal" tabName={activePortalTab}>
+        {/* ── TAB 1: MEDICAL RECORDS & CLINICAL HISTORY ──────────────────── */}
+        {activePortalTab === "records" && tenant.features.enablePatientMedicalRecords !== false && (
+          <MedicalRecordsTab
+            medicalFile={medicalFile}
+            patientId={patientId}
+            onEditProfile={() => setIsEditPatientModalOpen(true)}
+            onViewJsonModalVisit={(v) => setViewJsonModalVisit(v)}
+            onOrderRemedy={handleOrderRemedy}
+          />
+        )}
 
-      {/* ── TAB 2: BILLING & PAYMENT HISTORY ──────────────────── */}
-      {activePortalTab === "payments" && tenant.features.enableBillingHistory !== false && (
-        <PatientInvoicesTab
-          patientInvoices={patientInvoices}
-          pendingInvoices={pendingInvoices}
-          processingInvoices={processingInvoices}
-          paidInvoices={paidInvoices}
-          totalBilledINR={totalBilledINR}
-          totalPendingINR={totalPendingINR}
-          totalPaidINR={totalPaidINR}
-          onPayInvoice={(inv) => setPayingInvoice(inv)}
-          onViewReceipt={(inv) => setViewingReceiptInvoice(inv)}
-        />
-      )}
+        {/* ── TAB 2: BILLING & PAYMENT HISTORY ──────────────────── */}
+        {activePortalTab === "payments" && tenant.features.enableBillingHistory !== false && (
+          <PatientInvoicesTab
+            patientInvoices={patientInvoices}
+            pendingInvoices={pendingInvoices}
+            processingInvoices={processingInvoices}
+            paidInvoices={paidInvoices}
+            totalBilledINR={totalBilledINR}
+            totalPendingINR={totalPendingINR}
+            totalPaidINR={totalPaidINR}
+            onPayInvoice={(inv) => setPayingInvoice(inv)}
+            onViewReceipt={(inv) => setViewingReceiptInvoice(inv)}
+          />
+        )}
 
-      {/* ── TAB 3: POST-CONSULTATION FOLLOW-UP & PATIENT FEEDBACK ─────────── */}
-      {activePortalTab === "feedback" && tenant.features.enableFollowupFeedback !== false && (
-        <PatientFeedbackTab
-          medicalFile={medicalFile}
-          patientId={patientId}
-          onTabSwitch={handleTabSwitch}
-          navigateTo={navigateTo}
-        />
-      )}
+        {/* ── TAB 3: POST-CONSULTATION FOLLOW-UP & PATIENT FEEDBACK ─────────── */}
+        {activePortalTab === "feedback" && tenant.features.enableFollowupFeedback !== false && (
+          <PatientFeedbackTab
+            medicalFile={medicalFile}
+            patientId={patientId}
+            onTabSwitch={handleTabSwitch}
+            navigateTo={navigateTo}
+          />
+        )}
+      </DashboardErrorBoundary>
 
       {/* ── MODALS ── */}
       <ViewCaseRecordJsonModal
