@@ -10,9 +10,55 @@ import { CLINIC } from "../../config";
 const CURRENT_YEAR = new Date().getFullYear();
 
 const PageFooter: React.FC = () => {
-  const { navigateTo, sessionHours } = useApp();
+  const { state, navigateTo, sessionHours } = useApp();
   const { tenant } = useTenant();
+  const { activePage, authUser } = state;
 
+  // 1. Dedicated Super Admin Enterprise Governance Footer
+  if (activePage === "super-admin-dashboard" || authUser?.role === "super_admin") {
+    return (
+      <footer
+        className="mt-12 py-6 border-t border-slate-800 bg-slate-900/90 text-stone-400 text-xs font-mono select-none"
+        aria-label="Platform Governance Footer"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-stone-200 font-bold">
+            <span className="text-indigo-400">⚡</span>
+            <span>Platform Governance Console</span>
+            <span className="text-stone-500 font-normal hidden sm:inline">· Multi-Tenant Hospital Infrastructure</span>
+          </div>
+          <div className="flex items-center gap-3 text-[11px] text-stone-400">
+            <span>HIPAA &amp; DPDP Compliant</span>
+            <span>·</span>
+            <span>Audit Trail SSOT</span>
+            <span>·</span>
+            <span>v2.4 Platform Fleet</span>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
+  // 2. Dedicated Doctor / Clinic Admin Console Footer
+  if (activePage === "admin-dashboard" || authUser?.role === "admin") {
+    return (
+      <footer
+        className="mt-12 py-5 border-t border-stone-200 bg-stone-100/70 text-xs text-stone-500 select-none"
+        aria-label="Doctor Console Footer"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-stone-500">
+          <p className="text-[11px] font-medium">
+            🩺 <strong>{tenant.name}</strong> · Clinical Administration Console
+          </p>
+          <p className="text-[10px] text-stone-400 font-mono">
+            Clinical Records &amp; Dispensary Management · Session: {authUser?.email || "Admin"}
+          </p>
+        </div>
+      </footer>
+    );
+  }
+
+  // 3. Centralized Patient & Consumer Clinic Footer
   return (
     <footer
       className="mt-10 border-t border-stone-200 bg-white/70 backdrop-blur-sm"

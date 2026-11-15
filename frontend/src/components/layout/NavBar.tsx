@@ -27,8 +27,8 @@ export const NavBar: React.FC = () => {
   const { activePage, authUser, isAuthModalOpen, adminTab, appointments, inventory, blockedDates } = state;
 
   const avatarRef = useRef<HTMLButtonElement>(null);
-  const isSuperAdmin = authUser?.role === "super_admin";
-  const isAdmin = authUser?.role === "admin" || isSuperAdmin;
+  const isSuperAdmin = authUser?.role === "super_admin" || activePage === "super-admin-dashboard";
+  const isAdminPage = activePage === "admin-dashboard" || (authUser?.role === "admin" && !isSuperAdmin);
   const clinicTime = useMemo(() => getClinicTimeInfo(), []);
 
   const adminStats = useMemo<AdminNavStats>(() => {
@@ -69,7 +69,7 @@ export const NavBar: React.FC = () => {
 
   const handleBrandClick = () => {
     if (isSuperAdmin) navigateTo("super-admin-dashboard");
-    else if (isAdmin) navigateTo("admin-dashboard");
+    else if (isAdminPage) navigateTo("admin-dashboard");
     else navigateTo("home");
   };
 
@@ -85,7 +85,14 @@ export const NavBar: React.FC = () => {
 
         {/* Navigation links (Desktop md:) */}
         <nav className="hidden md:flex items-center gap-1.5 ml-4 overflow-x-auto scrollbar-hide flex-shrink min-w-0" aria-label="Main navigation">
-          {isAdmin ? (
+          {isSuperAdmin ? (
+            <div className="flex items-center gap-2 text-xs font-bold text-stone-700 bg-indigo-50/90 border border-indigo-200/80 px-3.5 py-1 rounded-full shadow-2xs">
+              <span className="text-indigo-600">⚡</span>
+              <span className="text-indigo-950 font-black tracking-wide uppercase text-[10px]">Platform Controller</span>
+              <span className="text-stone-300">|</span>
+              <span className="text-stone-500 font-medium text-[11px]">Multi-Tenant Fleet Governance</span>
+            </div>
+          ) : isAdminPage ? (
             <NavAdminLinks
               activePage={activePage}
               adminTab={adminTab}
@@ -118,7 +125,7 @@ export const NavBar: React.FC = () => {
       </div>
 
       {/* Secondary Sub-Navigation Bar for Doctor Admin */}
-      {isAdmin && activePage === "admin-dashboard" && (
+      {isAdminPage && activePage === "admin-dashboard" && (
         <NavAdminSubBar
           activePrimaryGroup={activePrimaryGroup}
           adminTab={adminTab}

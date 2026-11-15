@@ -12,7 +12,13 @@ const BottomNav: React.FC = () => {
   const { state, navigateTo } = useApp();
   const { tenant } = useTenant();
   const { activePage, authUser } = state;
-  const isAdmin = authUser?.role === "admin";
+
+  // Hide mobile bottom nav completely on Super Admin console
+  if (activePage === "super-admin-dashboard" || authUser?.role === "super_admin") {
+    return null;
+  }
+
+  const isAdmin = authUser?.role === "admin" || activePage === "admin-dashboard";
   const navItems = isAdmin
     ? ADMIN_NAV_ITEMS
     : PATIENT_NAV_ITEMS.filter((item) => {

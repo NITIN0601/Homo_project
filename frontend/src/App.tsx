@@ -109,6 +109,7 @@ const PageRouter: React.FC = () => {
 const AppShell: React.FC = () => {
   const { state } = useApp();
   const { tenant } = useTenant();
+  const isSuperAdmin = state.authUser?.role === "super_admin" || state.activePage === "super-admin-dashboard";
   const isAdmin = state.authUser?.role === "admin" || state.activePage === "admin-dashboard";
 
   // Scroll to top whenever page navigation occurs
@@ -138,7 +139,7 @@ const AppShell: React.FC = () => {
       {PHASE_CONFIG.ENABLE_MEDICINE_ORDERING && <OrdersModal />}
 
       {/* ── Floating AI Chatbot & WhatsApp Business Widget (Patients only) ─ */}
-      {!isAdmin && tenant.features.enableAgastyaBot !== false && <ChatbotWidget />}
+      {!isAdmin && !isSuperAdmin && tenant.features.enableAgastyaBot !== false && <ChatbotWidget />}
 
       {/* ── GDPR / DPDP Cookie Consent Banner ──────────── */}
       <CookieConsentBanner />
