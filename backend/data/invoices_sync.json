@@ -21,7 +21,9 @@
     "transactionRef": "UTR-2026-9988776655",
     "paidAt": "Nov 03, 2026 05:15 PM",
     "doctorName": "Dr. Primary Physician",
-    "description": "Follow-up consultation fee"
+    "description": "Follow-up consultation fee",
+    "currency": "INR",
+    "currencySymbol": "\u20b9"
   },
   {
     "id": "inv-e2e-1",
@@ -47,7 +49,9 @@
     "patientId": "p-load-7",
     "doctorName": "Dr. Primary Physician",
     "amountINR": 750.0,
-    "description": "Consultation Fee"
+    "description": "Consultation Fee",
+    "currency": "INR",
+    "currencySymbol": "\u20b9"
   },
   {
     "id": "inv-load-5",
@@ -60,7 +64,9 @@
     "patientId": "p-load-5",
     "doctorName": "Dr. Primary Physician",
     "amountINR": 750.0,
-    "description": "Consultation Fee"
+    "description": "Consultation Fee",
+    "currency": "INR",
+    "currencySymbol": "\u20b9"
   },
   {
     "id": "inv-load-11",
@@ -69,7 +75,13 @@
     "patientPhone": "+91 98450 00000",
     "amount": 750,
     "date": "2027-02-09",
-    "status": "unpaid"
+    "status": "pending",
+    "patientId": "p-load-11",
+    "doctorName": "Dr. Primary Physician",
+    "amountINR": 750.0,
+    "currency": "INR",
+    "currencySymbol": "\u20b9",
+    "description": "Consultation Fee"
   },
   {
     "id": "inv-load-15",
@@ -82,7 +94,9 @@
     "patientId": "p-load-15",
     "doctorName": "Dr. Primary Physician",
     "amountINR": 750.0,
-    "description": "Consultation Fee"
+    "description": "Consultation Fee",
+    "currency": "INR",
+    "currencySymbol": "\u20b9"
   },
   {
     "id": "inv-load-3",
@@ -95,7 +109,9 @@
     "patientId": "p-load-3",
     "doctorName": "Dr. Primary Physician",
     "amountINR": 750.0,
-    "description": "Consultation Fee"
+    "description": "Consultation Fee",
+    "currency": "INR",
+    "currencySymbol": "\u20b9"
   },
   {
     "id": "inv-load-17",
@@ -108,7 +124,9 @@
     "patientId": "p-load-17",
     "doctorName": "Dr. Primary Physician",
     "amountINR": 750.0,
-    "description": "Consultation Fee"
+    "description": "Consultation Fee",
+    "currency": "INR",
+    "currencySymbol": "\u20b9"
   },
   {
     "id": "inv-load-9",
@@ -121,7 +139,9 @@
     "patientId": "p-load-9",
     "doctorName": "Dr. Primary Physician",
     "amountINR": 750.0,
-    "description": "Consultation Fee"
+    "description": "Consultation Fee",
+    "currency": "INR",
+    "currencySymbol": "\u20b9"
   },
   {
     "id": "inv-load-19",
@@ -134,7 +154,9 @@
     "patientId": "p-load-19",
     "doctorName": "Dr. Primary Physician",
     "amountINR": 750.0,
-    "description": "Consultation Fee"
+    "description": "Consultation Fee",
+    "currency": "INR",
+    "currencySymbol": "\u20b9"
   },
   {
     "id": "inv-load-13",
@@ -143,7 +165,13 @@
     "patientPhone": "+91 98450 00000",
     "amount": 750,
     "date": "2027-02-09",
-    "status": "unpaid"
+    "status": "pending",
+    "patientId": "p-load-13",
+    "doctorName": "Dr. Primary Physician",
+    "amountINR": 750.0,
+    "currency": "INR",
+    "currencySymbol": "\u20b9",
+    "description": "Consultation Fee"
   },
   {
     "id": "inv-load-1",
@@ -156,7 +184,9 @@
     "patientId": "p-load-1",
     "doctorName": "Dr. Primary Physician",
     "amountINR": 750.0,
-    "description": "Consultation Fee"
+    "description": "Consultation Fee",
+    "currency": "INR",
+    "currencySymbol": "\u20b9"
   },
   {
     "id": "INV-2026-101",

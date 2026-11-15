@@ -1414,5 +1414,59 @@
     "uploaded_by": "mobile_worker_test",
     "uploaded_at": "2026-11-15T02:41:07.129104+00:00",
     "_synced": false
+  },
+  {
+    "id": "42195e9a-2d5d-41ba-8ad1-63f58909979c",
+    "file_hash": "sha256_test_hash_9863fbf955cf4171a0413606b3e06dfc",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-15T02:54:26.679873+00:00",
+    "_synced": false
+  },
+  {
+    "id": "db7b6737-2a74-4814-8321-2900b6a01520",
+    "file_hash": "sha256_test_hash_c722210d417a497ea0749fad8712aa92",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-15T02:54:54.797952+00:00",
+    "_synced": false
+  },
+  {
+    "id": "bde2bcfc-8c72-4dfd-8adb-638d2708f8dd",
+    "file_hash": "sha256_test_hash_24df03a908064b5fb89a9abf00262b9d",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-15T02:55:39.890085+00:00",
+    "_synced": false
+  },
+  {
+    "id": "19dce67a-8f0f-4fb5-8e57-93830364c13d",
+    "file_hash": "sha256_test_hash_41355d74a11a4329aed15ab075b57a29",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-15T02:58:31.095730+00:00",
+    "_synced": false
+  },
+  {
+    "id": "a91f3c2c-4ef0-4a08-a0f9-b598ea5e6776",
+    "file_hash": "sha256_test_hash_38b967a32744419f8c1701e11f81c415",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-15T02:58:53.598461+00:00",
+    "_synced": false
+  },
+  {
+    "id": "5c5d3ce5-81e4-4569-a073-12edfdadeee1",
+    "file_hash": "sha256_test_hash_2810d4c3e8e642b3b076fc56efddacdd",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-15T03:03:49.969850+00:00",
+    "_synced": false
   }
 ]
