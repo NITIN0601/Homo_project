@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import type { InventoryItem } from "../../../types";
 import { INVENTORY as INV_CONFIG } from "../../../config";
 import { formatTimeShort, formatDateISO } from "../../../utils/format";
-import { INITIAL_PHARMACY_ORDERS, type BatchOrderItem, type PharmacyPurchaseOrder } from "../types";
+import type { BatchOrderItem, PharmacyPurchaseOrder } from "../types";
+import { MOCK_PHARMACY_ORDERS as INITIAL_PHARMACY_ORDERS } from "../../../data/mocks";
 
 interface UseRequisitionBatchProps {
   inventory: InventoryItem[];

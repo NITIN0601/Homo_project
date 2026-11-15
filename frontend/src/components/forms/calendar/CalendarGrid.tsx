@@ -2,7 +2,7 @@ import React from "react";
 import type { DynamicHoliday } from "../../../services/holidayService";
 import type { BlockedCalendarDate } from "../../../types";
 import { THEME_COLORS } from "../../../config";
-import { DAY_HEADERS, MONTHS, toYMD, isClinicOpen } from "./types";
+import { DAY_HEADERS, MONTHS, toYMD } from "./types";
 import { isDatePastClinicTime } from "../../../utils/timezone";
 
 interface CalendarGridProps {

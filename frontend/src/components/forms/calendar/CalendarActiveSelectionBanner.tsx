@@ -22,8 +22,8 @@ export const CalendarActiveSelectionBanner: React.FC<CalendarActiveSelectionBann
   onClearRange,
 }) => {
   if (adminMode && (startDate || selectedDate)) {
-    const activeStart = startDate || selectedDate;
-    const activeEnd = endDate;
+    const activeStart = startDate || selectedDate || "";
+    const activeEnd = endDate || "";
 
     return (
       <div
@@ -39,7 +39,7 @@ export const CalendarActiveSelectionBanner: React.FC<CalendarActiveSelectionBann
                 Active Calendar Selection
               </p>
               <p className="text-emerald-950 font-extrabold text-xs flex items-center flex-wrap gap-2">
-                {activeEnd && activeEnd > activeStart ? (
+                {activeEnd && activeStart && activeEnd > activeStart ? (
                   <span>
                     {formatDateWithWeekday(activeStart + "T00:00:00")} → {formatDateWithWeekday(activeEnd + "T00:00:00")}
                     <span className="ml-2 font-mono text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full font-black">

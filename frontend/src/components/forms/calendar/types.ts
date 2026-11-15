@@ -1,6 +1,3 @@
-import type { DynamicHoliday } from "../../../services/holidayService";
-import type { BlockedCalendarDate } from "../../../types";
-
 export interface CalendarPickerProps {
   selectedDate?: string;       // "YYYY-MM-DD" or ""
   onSelectDate?: (date: string) => void;

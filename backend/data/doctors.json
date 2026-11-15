@@ -1148,5 +1148,28 @@
     "availability": {},
     "isPrimary": false,
     "isActive": true
+  },
+  {
+    "id": "doc-8a27be",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-152012",
+    "licenseId": "LIC-DOC-8A27BE",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "consultationFee": 750.0,
+    "availability": {},
+    "isPrimary": false,
+    "isActive": true
   }
 ]

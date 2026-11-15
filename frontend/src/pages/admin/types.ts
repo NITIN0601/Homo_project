@@ -1,4 +1,5 @@
 import type { InventoryItem } from "../../types";
+export { MOCK_PHARMACY_ORDERS as INITIAL_PHARMACY_ORDERS } from "../../data/mocks";
 
 export interface TrackingCheckpoint {
   title: string;

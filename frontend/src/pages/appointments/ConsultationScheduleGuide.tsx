@@ -1,13 +1,13 @@
 import React from "react";
 import { CLINIC } from "../../config";
 import type { HospitalTenantConfig, HospitalDoctor } from "../../types/tenant";
-import type { TimezoneContextValue } from "../../utils/timezone";
+import type { UserTimezoneInfo, MappedSessionHours } from "../../utils/timezone";
 
 interface ConsultationScheduleGuideProps {
   tenant: HospitalTenantConfig;
   activeDoctor: HospitalDoctor;
-  userTzInfo: TimezoneContextValue["userTzInfo"];
-  sessionHours: TimezoneContextValue["sessionHours"];
+  userTzInfo: UserTimezoneInfo;
+  sessionHours: MappedSessionHours;
 }
 
 export const ConsultationScheduleGuide: React.FC<ConsultationScheduleGuideProps> = ({

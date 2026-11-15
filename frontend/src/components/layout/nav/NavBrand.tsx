@@ -1,8 +1,8 @@
 import React from "react";
-import type { ClinicConfig } from "../../../config";
+import type { ClinicFacade } from "../../../hooks/useClinic";
 
 interface NavBrandProps {
-  clinic: ClinicConfig;
+  clinic: ClinicFacade;
   onBrandClick: () => void;
 }
 
