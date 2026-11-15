@@ -252,6 +252,153 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
       expect(abbr).toBe("IST");
     });
   });
+
+  it("handles doctor-specific weekly off days dynamically", () => {
+    // 2026-11-17 is a Tuesday
+    const doctorWithTuesdayOff = {
+      name: "Dr. Rajesh Sharma",
+      title: "Consultant Physician",
+      regNo: "MCI-1234",
+      experienceYears: 10,
+      qualifications: "MD, MBBS",
+      availability: {
+        schedule: {
+          offDays: ["Tuesday"],
+          appointmentOnlyDays: ["Monday", "Wednesday", "Thursday", "Friday"],
+        },
+      },
+    };
+
+    const status = getClinicDateOperatingStatus("2026-11-17", "Asia/Kolkata", [], [], undefined, doctorWithTuesdayOff);
+    expect(status.allSlotsUnavailable).toBe(true);
+    expect(status.unavailabilityReason).toContain("Dr. Rajesh Sharma does not consult on Tuesdays");
+    for (const slot of status.slots) {
+      expect(slot.isUnavailable).toBe(true);
+      expect(slot.unavailableReason).toContain("Dr. Rajesh Sharma does not consult on Tuesdays");
+    }
+  });
+
+  it("handles doctor-specific scheduled holidays/leave dates", () => {
+    const doctorOnHoliday = {
+      name: "Dr. Anita Nair",
+      title: "Consultant Pulmonologist",
+      regNo: "MCI-5678",
+      experienceYears: 8,
+      qualifications: "MD, DNB",
+      availability: {
+        schedule: {
+          holidays: ["2026-12-25"],
+          offDays: ["Sunday"],
+        },
+      },
+    };
+
+    const status = getClinicDateOperatingStatus("2026-12-25", "Asia/Kolkata", [], [], undefined, doctorOnHoliday);
+    expect(status.allSlotsUnavailable).toBe(true);
+    expect(status.unavailabilityReason).toContain("Dr. Anita Nair is on scheduled leave / holiday on this date");
+    for (const slot of status.slots) {
+      expect(slot.isUnavailable).toBe(true);
+      expect(slot.unavailableReason).toContain("Dr. Anita Nair is on scheduled leave");
+    }
+  });
+
+  it("respects custom hospital hours and Sunday policies", () => {
+    // 2026-11-22 is a Sunday
+    const customHoursClosedSunday = {
+      timezone: "Asia/Kolkata",
+      morningDisplay: "09:00 AM – 12:00 PM",
+      morningStart: "09:00",
+      morningEnd: "12:00",
+      sundayPolicy: "Closed" as const,
+    };
+
+    const statusClosed = getClinicDateOperatingStatus("2026-11-22", "Asia/Kolkata", [], [], customHoursClosedSunday);
+    expect(statusClosed.allSlotsUnavailable).toBe(true);
+    expect(statusClosed.unavailabilityReason).toContain("Facility is closed on Sundays");
+
+    const customHoursApptSunday = {
+      timezone: "Asia/Kolkata",
+      morningDisplay: "09:00 AM – 12:00 PM",
+      morningStart: "09:00",
+      morningEnd: "12:00",
+      sundayPolicy: "Prior Appointment Only" as const,
+    };
+
+    const statusAppt = getClinicDateOperatingStatus("2026-11-22", "Asia/Kolkata", [], [], customHoursApptSunday);
+    expect(statusAppt.allSlotsUnavailable).toBe(false);
+    expect(statusAppt.slots.length).toBeGreaterThan(0);
+    expect(statusAppt.slots[0].isSundayPriorAppt).toBe(true);
+  });
+
+  describe("Automatic Location-to-Timezone Resolution", () => {
+    it("infers Indian timezone Asia/Kolkata from Indian cities, states, and country", () => {
+      const blr = inferTimezoneFromLocation("India", "Karnataka", "Bengaluru");
+      expect(blr.timeZone).toBe("Asia/Kolkata");
+      expect(blr.label).toBe("IST");
+      expect(blr.offset).toBe("UTC+05:30");
+      expect(blr.matchedBy).toBe("city");
+
+      const mumbai = inferTimezoneFromLocation("India", "Maharashtra", "Mumbai");
+      expect(mumbai.timeZone).toBe("Asia/Kolkata");
+
+      const delhiState = inferTimezoneFromLocation("India", "Delhi", "");
+      expect(delhiState.timeZone).toBe("Asia/Kolkata");
+
+      const indiaCountry = inferTimezoneFromLocation("India", "", "");
+      expect(indiaCountry.timeZone).toBe("Asia/Kolkata");
+    });
+
+    it("infers US regional timezones correctly by city and state", () => {
+      // US Eastern
+      const nyc = inferTimezoneFromLocation("USA", "New York", "New York");
+      expect(nyc.timeZone).toBe("America/New_York");
+      expect(nyc.matchedBy).toBe("city");
+
+      // US Pacific
+      const sf = inferTimezoneFromLocation("United States", "California", "San Francisco");
+      expect(sf.timeZone).toBe("America/Los_Angeles");
+
+      // US Central
+      const chicago = inferTimezoneFromLocation("USA", "Illinois", "Chicago");
+      expect(chicago.timeZone).toBe("America/Chicago");
+
+      // US Mountain
+      const denver = inferTimezoneFromLocation("USA", "Colorado", "Denver");
+      expect(denver.timeZone).toBe("America/Denver");
+
+      // US Arizona (no DST)
+      const phx = inferTimezoneFromLocation("USA", "Arizona", "Phoenix");
+      expect(phx.timeZone).toBe("America/Phoenix");
+    });
+
+    it("infers international timezones for UK, UAE, Singapore, Australia, and Canada", () => {
+      const london = inferTimezoneFromLocation("United Kingdom", "England", "London");
+      expect(london.timeZone).toBe("Europe/London");
+
+      const dubai = inferTimezoneFromLocation("United Arab Emirates", "Dubai", "Dubai");
+      expect(dubai.timeZone).toBe("Asia/Dubai");
+
+      const sgp = inferTimezoneFromLocation("Singapore", "", "Singapore");
+      expect(sgp.timeZone).toBe("Asia/Singapore");
+
+      const sydney = inferTimezoneFromLocation("Australia", "New South Wales", "Sydney");
+      expect(sydney.timeZone).toBe("Australia/Sydney");
+
+      const perth = inferTimezoneFromLocation("Australia", "Western Australia", "Perth");
+      expect(perth.timeZone).toBe("Australia/Perth");
+
+      const toronto = inferTimezoneFromLocation("Canada", "Ontario", "Toronto");
+      expect(toronto.timeZone).toBe("America/Toronto");
+    });
+
+    it("formats timezone offsets and abbreviations accurately", () => {
+      const offset = getTimezoneOffsetString("Asia/Kolkata");
+      expect(offset).toBe("UTC+05:30");
+
+      const abbr = getTimezoneAbbreviation("Asia/Kolkata");
+      expect(abbr).toBe("IST");
+    });
+  });
 });
 
 

@@ -231,3 +231,4 @@ def infer_timezone_from_location(
 
     # 4. Default Fallback
     return build_res("Asia/Kolkata", "fallback", "default", "Default IST")
+

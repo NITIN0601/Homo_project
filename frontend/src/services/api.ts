@@ -327,8 +327,19 @@ export const api = {
       end_time: string;
       summary?: string;
       description?: string;
+      user_phone?: string;
       phone?: string;
       patient_id?: string;
+      hospital_id?: string;
+      doctor_id?: string;
+      calendar_id?: string;
+      continuity_status?: string;
+      clinic_date?: string;
+      clinic_slot?: string;
+      user_date?: string;
+      user_time?: string;
+      user_timezone?: string;
+      consultation_type?: string;
     }) => {
       try {
         return await serverFetch<{

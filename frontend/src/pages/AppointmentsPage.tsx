@@ -134,7 +134,7 @@ function validate(
  * The frontend NEVER holds OAuth tokens.
  */
 const AppointmentsPage: React.FC = () => {
-  const { state, isSlotBooked, isSlotBlocked, bookAppointment, userTzInfo, clinicTimeInfo, sessionHours } = useApp();
+  const { state, isSlotBooked, isSlotBlocked, bookAppointment, userTzInfo, sessionHours } = useApp();
   const { tenant } = useTenant();
   const { authUser } = state;
 
@@ -195,6 +195,7 @@ const AppointmentsPage: React.FC = () => {
           experienceYears: tenant.doctor.experienceYears,
           specialties: selectedDoctor.specialties || tenant.doctor.specialties,
           aboutText: tenant.doctor.aboutText,
+          consultationFee: (selectedDoctor as any).consultationFee || tenant.doctor.consultationFee,
           availability: (selectedDoctor as any).availability || tenant.doctor.availability,
         }
       : tenant.doctor;
@@ -414,6 +415,16 @@ const AppointmentsPage: React.FC = () => {
       description: `Clinical consultation with ${chosenDoctorName} at ${tenant.name} (${tenant.contact.address.city}).\nType: ${newAppointment.type}\nContinuity: ${contStatus}\nReason: ${newAppointment.chiefReason}`,
       phone: payload.patientDetails.phone,
       patient_id: newAppointment.patientId,
+      hospital_id: tenant.id,
+      doctor_id: chosenDoctorId,
+      calendar_id: payload.providerCalendarId,
+      continuity_status: contStatus,
+      clinic_date: clinicDate,
+      clinic_slot: clinicSlot,
+      user_date: aptDate,
+      user_time: aptTime,
+      user_timezone: userTzInfo.timeZone,
+      consultation_type: newAppointment.type,
     });
 
     // Send confirmation email via API
@@ -449,21 +460,14 @@ const AppointmentsPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Live Clinic Operational Clocks */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="bg-emerald-50 border border-emerald-200/90 rounded-xl px-3 py-1.5 text-[11px] font-semibold text-emerald-900 flex items-center gap-1.5 shadow-2xs">
+        {/* Single Local Time Clock - Clean & Patient-Centric (Never Confusing Dual Clocks) */}
+        <div className="flex items-center gap-2">
+          <div className="bg-emerald-50 border border-emerald-200/90 rounded-xl px-3 py-1.5 text-[11px] font-semibold text-emerald-950 flex items-center gap-1.5 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Clinic Clock:</span>
-            <strong className="font-bold">{clinicTimeInfo.formattedTime}</strong>
-            <span className="text-emerald-700 text-[10px]">({clinicTimeInfo.label})</span>
+            <span>Your Time:</span>
+            <strong className="font-bold">{userTzInfo.formattedTime}</strong>
+            <span className="text-emerald-700 text-[10px]">({userTzInfo.label})</span>
           </div>
-          {!userTzInfo.isClinicTimezone && (
-            <div className="bg-stone-100 border border-stone-200 rounded-xl px-3 py-1.5 text-[11px] font-medium text-stone-700 flex items-center gap-1.5 shadow-2xs">
-              <span>🌎 Your Time:</span>
-              <strong className="font-bold">{userTzInfo.formattedTime}</strong>
-              <span className="text-stone-500 text-[10px]">({userTzInfo.label})</span>
-            </div>
-          )}
         </div>
       </div>
 
@@ -500,7 +504,7 @@ const AppointmentsPage: React.FC = () => {
                     {activeDoctor.experienceYears && (
                       <span>· Experience: <strong className="text-stone-600 font-semibold">{activeDoctor.experienceYears}+ Years</strong></span>
                     )}
-                    <span>· Fee: <strong className="text-emerald-700 font-bold">₹750</strong></span>
+                    <span>· Fee: <strong className="text-emerald-700 font-bold">{tenant.currencySymbol || "₹"}{activeDoctor.consultationFee || activeDoctor.availability?.consultationFee || 750}</strong></span>
                   </p>
                 </div>
               </div>
@@ -570,8 +574,12 @@ const AppointmentsPage: React.FC = () => {
         const isTelemedicineClinic = tenant.features.enableTelemedicine && tenant.hours?.walkinAllowed === false;
         const doctorSchedule = activeDoctor.availability?.schedule;
         const hasWalkins = !isTelemedicineClinic && (doctorSchedule?.walkinDays ? doctorSchedule.walkinDays.length > 0 : true);
-        const morningHoursDisplay = activeDoctor.availability?.morningHours || sessionHours.morning.display;
-        const eveningHoursDisplay = activeDoctor.availability?.eveningHours || sessionHours.evening.display;
+        const morningHoursDisplay = !userTzInfo.isClinicTimezone
+          ? sessionHours.morning.display
+          : (activeDoctor.availability?.morningHours || sessionHours.morning.display);
+        const eveningHoursDisplay = !userTzInfo.isClinicTimezone
+          ? sessionHours.evening.display
+          : (activeDoctor.availability?.eveningHours || sessionHours.evening.display);
         const walkinDaysDisplay = doctorSchedule?.walkinDays?.join(", ") || tenant.hours?.walkinDaysSummary || "Monday to Saturday";
         const apptDaysDisplay = doctorSchedule?.appointmentOnlyDays?.join(", ") || tenant.hours?.appointmentDaysSummary || "Morning sessions & Sundays";
         const offDaysList = doctorSchedule?.offDays || [];

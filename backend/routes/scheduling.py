@@ -174,11 +174,25 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
     with _booking_lock:
         existing = get_all_appointments()
         for apt in existing:
+            if apt.get("status") == "Cancelled":
+                continue
+
+            # Concurrency double-booking guard against doctor's clinic slot
+            if req.clinic_date and req.clinic_slot:
+                if (apt.get("clinicDate") == req.clinic_date and apt.get("clinicSlot") == req.clinic_slot) or (
+                    apt.get("date") == req.clinic_date and apt.get("slot") == req.clinic_slot
+                ):
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail=f"Time slot {req.clinic_slot} on {req.clinic_date} is already booked. Please choose a different slot.",
+                    )
+
+            # Fallback legacy check by start_time / date_part
             apt_date = apt.get("date")
             apt_slot = apt.get("slot") or apt.get("time", "")
             if (apt_date == date_part or apt_date == req.start_time) and (
                 apt_slot == time_part or apt.get("time") == time_part or apt.get("start_time") == req.start_time
-            ) and apt.get("status") != "Cancelled":
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail=f"Time slot {time_part} on {date_part} is already booked. Please choose a different slot.",
@@ -190,8 +204,8 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
         continuity_info = resolve_patient_doctor_continuity(
             hospital_id=hospital.get("id"),
             patient_identifier=req.user_email or req.user_phone or "",
-            preferred_date=date_part,
-            preferred_slot=time_part,
+            preferred_date=req.clinic_date or date_part,
+            preferred_slot=req.clinic_slot or time_part,
         )
         cont_status = req.continuity_status or (
             "Continuing Care"
@@ -213,12 +227,18 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
             "patientName": req.user_name,
             "patientPhone": req.user_phone or "+91 98123 45678",
             "patientEmail": req.user_email,
-            "date": date_part,
-            "time": time_part,
-            "slot": time_part,
+            "date": req.user_date or date_part,
+            "time": req.user_time or time_part,
+            "slot": req.clinic_slot or time_part,
+            "clinicDate": req.clinic_date or date_part,
+            "clinicSlot": req.clinic_slot or time_part,
+            "clinicTime": req.clinic_slot or time_part,
+            "userDate": req.user_date or date_part,
+            "userTime": req.user_time or time_part,
+            "userTimezone": req.user_timezone,
             "start_time": req.start_time,
             "end_time": req.end_time,
-            "type": "In-Person Clinic Visit",
+            "type": req.consultation_type or ("Online Tele-Consultation" if req.user_timezone and req.user_timezone != "Asia/Kolkata" else "In-Person Clinic Visit"),
             "chiefReason": req.description or "Clinical Consultation",
             "status": "Confirmed",
             "continuityStatus": cont_status,
