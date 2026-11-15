@@ -23,4 +23,8 @@ else
 fi
 
 $PYTHON_CMD -m unittest discover -s test -p "test_*.py" -v
+if [ -d "$ROOT_DIR/backend/tests" ]; then
+    echo "🧪 Running Backend Microservice & Telemetry Test Suite..."
+    PYTHONPATH="$ROOT_DIR/backend" $PYTHON_CMD -m unittest discover -s "$ROOT_DIR/backend/tests" -p "test_*.py" -v
+fi
 echo "✅ All tests passed successfully!"

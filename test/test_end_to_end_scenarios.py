@@ -285,8 +285,10 @@ class TestEndToEndClinicalScenarios(unittest.TestCase):
             "patientId": "usr-001",
             "patientName": "John Doe",
             "patientEmail": "john@agastyahomoeo.com",
+            "doctorName": "Dr. Primary Physician",
             "amountINR": 750,
             "status": "pending",
+            "description": "Follow-up consultation fee",
             "consultationType": "In-Person Clinic Visit",
             "issuedAt": "Nov 03, 2026 05:00 PM",
             "notes": "Follow-up consultation fee"

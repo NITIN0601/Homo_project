@@ -116,11 +116,14 @@ class Test100UsersParallelInteraction(unittest.TestCase):
                 invoice_payload = {
                     "id": f"inv-load-{idx}",
                     "invoiceNumber": f"INV-2026-L{idx:03d}",
+                    "patientId": f"p-load-{idx}",
                     "patientName": f"Patient L{idx}",
                     "patientPhone": "+91 98450 00000",
-                    "amount": 750,
+                    "doctorName": "Dr. Primary Physician",
+                    "amountINR": 750.0,
+                    "description": "Consultation Fee",
                     "date": base_day,
-                    "status": "unpaid",
+                    "status": "pending",
                 }
                 res = self.client.post("/api/v1/consultation-invoices", json=invoice_payload)
                 return ("admin_invoice", idx, res.status_code, res.json())
