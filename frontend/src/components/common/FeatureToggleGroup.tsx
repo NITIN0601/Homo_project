@@ -1,6 +1,7 @@
 import React from "react";
 import type { HospitalFeatures } from "../../types/tenant";
 import {
+  HOSPITAL_FEATURES,
   DOCTOR_PORTAL_FEATURES,
   PATIENT_PORTAL_FEATURES,
   type FeatureDefinition,
@@ -9,7 +10,7 @@ import {
 export interface FeatureToggleGroupProps {
   features: HospitalFeatures;
   onChange: (key: keyof HospitalFeatures, value: boolean) => void;
-  category?: "all" | "doctor" | "patient";
+  category?: "all" | "hospital" | "doctor" | "patient";
   className?: string;
   readOnly?: boolean;
 }
@@ -21,12 +22,28 @@ export const FeatureToggleGroup: React.FC<FeatureToggleGroupProps> = ({
   className = "",
   readOnly = false,
 }) => {
-  const renderFeatureItem = (feat: FeatureDefinition, accentColor: "indigo" | "emerald") => {
+  const handleFeatureChange = (key: keyof HospitalFeatures, val: boolean) => {
+    onChange(key, val);
+    // Eliminate duplicate/desync between enableOnlinePayments and enableCustomerPayments
+    if (key === "enableOnlinePayments") {
+      onChange("enableCustomerPayments", val);
+    } else if (key === "enableCustomerPayments") {
+      onChange("enableOnlinePayments", val);
+    }
+  };
+
+  const renderFeatureItem = (feat: FeatureDefinition, accentColor: "sky" | "indigo" | "emerald") => {
     const isChecked = features[feat.key] !== false;
     const checkboxClass =
-      accentColor === "indigo" ? "accent-indigo-600 text-indigo-600" : "accent-emerald-600 text-emerald-600";
+      accentColor === "sky"
+        ? "accent-sky-600 text-sky-600"
+        : accentColor === "indigo"
+        ? "accent-indigo-600 text-indigo-600"
+        : "accent-emerald-600 text-emerald-600";
     const activeBorderClass =
-      accentColor === "indigo"
+      accentColor === "sky"
+        ? "border-sky-200 bg-white shadow-xs"
+        : accentColor === "indigo"
         ? "border-indigo-200 bg-white shadow-xs"
         : "border-emerald-200 bg-white shadow-xs";
 
@@ -41,7 +58,7 @@ export const FeatureToggleGroup: React.FC<FeatureToggleGroupProps> = ({
           type="checkbox"
           checked={isChecked}
           disabled={readOnly}
-          onChange={(e) => onChange(feat.key, e.target.checked)}
+          onChange={(e) => handleFeatureChange(feat.key, e.target.checked)}
           className={`w-4 h-4 rounded mt-0.5 shrink-0 ${checkboxClass}`}
         />
         <div className="flex-1 min-w-0">
@@ -57,17 +74,38 @@ export const FeatureToggleGroup: React.FC<FeatureToggleGroupProps> = ({
 
   return (
     <div className={`space-y-4 ${className}`}>
+      {/* ── 1. HOSPITAL CORE FEATURES & PLATFORM SERVICES ── */}
+      {(category === "all" || category === "hospital") && (
+        <div className="p-4 bg-sky-50/50 rounded-2xl border border-sky-100 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg" aria-hidden="true">🏥</span>
+              <h4 className="font-black text-xs text-sky-950 uppercase tracking-wider">
+                Hospital Features (Central Platform Services &amp; Logistics)
+              </h4>
+            </div>
+            <span className="text-[10px] bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded-full">
+              Hospital Level
+            </span>
+          </div>
+          <div className="space-y-2">
+            {HOSPITAL_FEATURES.map((feat) => renderFeatureItem(feat, "sky"))}
+          </div>
+        </div>
+      )}
+
+      {/* ── 2. DOCTOR PORTAL CAPABILITIES & CLINICAL WORKSPACE ── */}
       {(category === "all" || category === "doctor") && (
         <div className="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-lg" aria-hidden="true">🩺</span>
               <h4 className="font-black text-xs text-indigo-950 uppercase tracking-wider">
-                Doctor Portal Capabilities (What Doctor Can View &amp; Use)
+                Doctor Features (Clinical Workspace Capabilities &amp; Policies)
               </h4>
             </div>
             <span className="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">
-              Clinical Workspace
+              Doctor Level
             </span>
           </div>
           <div className="space-y-2">
@@ -76,17 +114,18 @@ export const FeatureToggleGroup: React.FC<FeatureToggleGroupProps> = ({
         </div>
       )}
 
+      {/* ── 3. PATIENT PORTAL CAPABILITIES & VISIBILITY ── */}
       {(category === "all" || category === "patient") && (
         <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-lg" aria-hidden="true">🌿</span>
               <h4 className="font-black text-xs text-emerald-950 uppercase tracking-wider">
-                Patient Portal Capabilities (What Patient Can View &amp; Access)
+                Patient Features (Patient Portal Access &amp; Visibility)
               </h4>
             </div>
             <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
-              Patient Workspace
+              Patient Level
             </span>
           </div>
           <div className="space-y-2">
@@ -97,4 +136,3 @@ export const FeatureToggleGroup: React.FC<FeatureToggleGroupProps> = ({
     </div>
   );
 };
-

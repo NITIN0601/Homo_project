@@ -6,16 +6,15 @@ import { getAllHospitalTenants } from "../../config/tenants";
 import type { HospitalTenantConfig, AdminPasscode, CustomizationAuditLogEntry } from "../../types/tenant";
 import { type CustomerFeedback, INITIAL_CUSTOMER_FEEDBACKS } from "../../types/feedback";
 import { USE_MOCK_DATA } from "../../config";
+import { FeatureToggleGroup } from "../../components/common/FeatureToggleGroup";
+import { Button } from "../../components/ui";
 
-import CustomerViewSection from "./customization/CustomerViewSection";
-import ClinicalModulesSection from "./customization/ClinicalModulesSection";
 import PasscodesSection from "./customization/PasscodesSection";
 import ClinicProfileSection from "./customization/ClinicProfileSection";
 import DoctorProfileSection from "./customization/DoctorProfileSection";
 import BrandingSection from "./customization/BrandingSection";
 import FeedbackModerationSection from "./customization/FeedbackModerationSection";
 
-import CustomerViewSaveModal from "./customization/modals/CustomerViewSaveModal";
 import ChangePasscodeModal from "./customization/modals/ChangePasscodeModal";
 import AddPasscodeModal from "./customization/modals/AddPasscodeModal";
 
@@ -48,7 +47,8 @@ export const CustomizationTab: React.FC = () => {
   const { state: appState } = useApp();
   const toast = useToast();
 
-  const currentAdminName = appState.authUser?.name || "Super Admin";
+  const isSuperAdmin = appState.authUser?.role === "super_admin";
+  const currentAdminName = appState.authUser?.name || (isSuperAdmin ? "Super Admin" : "Doctor Admin");
   const currentAdminId = appState.authUser?.id || "adm-001";
 
   // Local form state initialized from active tenant
@@ -78,7 +78,6 @@ export const CustomizationTab: React.FC = () => {
   });
 
   // Modal States
-  const [isCustomerViewSaveModalOpen, setIsCustomerViewSaveModalOpen] = useState(false);
   const [isChangePasscodeModalOpen, setIsChangePasscodeModalOpen] = useState(false);
   const [isAddPasscodeModalOpen, setIsAddPasscodeModalOpen] = useState(false);
 
@@ -125,65 +124,18 @@ export const CustomizationTab: React.FC = () => {
     });
   };
 
-  const customerViewKeys: Array<keyof HospitalTenantConfig["features"]> = [
-    "displayDoctorDetails",
-    "enableAgastyaBot",
-    "enablePatientProfileEdit",
-    "enablePatientMedicalRecords",
-    "enableBillingHistory",
-    "enableFollowupFeedback",
-  ];
-
-  const hasCustomerViewChanges = customerViewKeys.some(
-    (k) => (formData.features[k] ?? true) !== (tenant.features[k] ?? true)
-  );
-
-  const toggleCustomerViewFeature = (key: keyof HospitalTenantConfig["features"]) => {
-    setFormData((prev) => ({
-      ...prev,
-      features: {
-        ...prev.features,
-        [key]: prev.features[key] === false ? true : false,
-      },
-    }));
-  };
-
-  const handleAuthorizedCustomerViewSave = () => {
+  const handleSaveAllFeatures = () => {
     updateTenant({
-      features: {
-        ...tenant.features,
-        displayDoctorDetails: formData.features.displayDoctorDetails,
-        enableAgastyaBot: formData.features.enableAgastyaBot,
-        enablePatientProfileEdit: formData.features.enablePatientProfileEdit,
-        enablePatientMedicalRecords: formData.features.enablePatientMedicalRecords,
-        enableBillingHistory: formData.features.enableBillingHistory,
-        enableFollowupFeedback: formData.features.enableFollowupFeedback,
-      },
+      features: formData.features,
     });
 
     appendAuditLog(
       "TOGGLE_FEATURE",
-      `Admin "${currentAdminName}" verified passcode and saved Customer View access filters for tenant "${formData.name}".`
+      `Super Admin "${currentAdminName}" updated 3-tier feature governance (Hospital, Doctor, Patient) for "${formData.name}".`
     );
 
-    setSaveSuccessMsg("✓ Customer View settings authorized & applied live to patient logins!");
+    setSaveSuccessMsg("✓ All layout & functionality permissions (Hospital, Doctor, Patient) saved and applied live!");
     setTimeout(() => setSaveSuccessMsg(null), 4000);
-  };
-
-  const handleSavePlatformModules = () => {
-    updateTenant({
-      features: {
-        ...tenant.features,
-        enableCustomerPayments: formData.features.enableCustomerPayments,
-        enableRawCaseJson: formData.features.enableRawCaseJson,
-        enableGoogleReviews: formData.features.enableGoogleReviews,
-        enableTelemedicine: formData.features.enableTelemedicine,
-        enableECommerce: formData.features.enableECommerce,
-        enablePrescriptionScan: formData.features.enablePrescriptionScan,
-      },
-    });
-    setSaveSuccessMsg("✓ Clinic & Platform Modules saved and applied live!");
-    setTimeout(() => setSaveSuccessMsg(null), 3500);
   };
 
   const handleSaveHospitalInfo = () => {
@@ -348,11 +300,13 @@ export const CustomizationTab: React.FC = () => {
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl font-black tracking-tight">Hospital &amp; Feature Customization</h2>
                 <span className="bg-emerald-500/30 text-emerald-200 border border-emerald-400/50 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
-                  Multi-Tenant Admin
+                  {isSuperAdmin ? "Multi-Tenant Super Admin" : "Doctor & Clinic Admin"}
                 </span>
               </div>
               <p className="text-emerald-200/90 text-xs mt-0.5">
-                Customize features, customer view permissions, branding, doctor profiles, and clinic identity per hospital tenant.
+                {isSuperAdmin
+                  ? "Configure platform feature governance (Hospital, Doctor, Patient), clinic branding, and physician profiles."
+                  : "Customize physician credentials, clinical bio, branding, and clinic profile. Feature enablement is governed centrally by Super Admin."}
               </p>
             </div>
           </div>
@@ -383,59 +337,94 @@ export const CustomizationTab: React.FC = () => {
           </div>
           <button
             onClick={() => setSaveSuccessMsg(null)}
-            className="text-xs text-emerald-800 hover:text-emerald-950 underline font-semibold"
+            className="text-xs text-emerald-800 hover:text-emerald-950 underline font-semibold cursor-pointer"
           >
             Dismiss
           </button>
         </div>
       )}
 
-      {/* ── 1. CUSTOMER VIEW CUSTOMIZATION & ACCESS FILTERS (PASSCODE PROTECTED) ── */}
-      <CustomerViewSection
-        formData={formData}
-        hasCustomerViewChanges={hasCustomerViewChanges}
-        toggleCustomerViewFeature={toggleCustomerViewFeature}
-        onOpenCustomerViewSaveModal={() => setIsCustomerViewSaveModalOpen(true)}
-      />
+      {/* ── FEATURE GOVERNANCE: SUPER ADMIN ONLY (DOCS DO NOT SEE PATIENT FEATURE CUSTOMIZATION) ── */}
+      {isSuperAdmin ? (
+        <div className="bg-white p-5 rounded-3xl border border-stone-200/80 shadow-xs space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl" aria-hidden="true">🎛️</span>
+                <h3 className="text-stone-900 font-extrabold text-base">
+                  Feature Governance &amp; Enablement (Super Admin Master Control)
+                </h3>
+                <span className="bg-indigo-100 text-indigo-900 border border-indigo-300 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                  Super Admin
+                </span>
+              </div>
+              <p className="text-stone-500 text-xs mt-0.5">
+                Enable or disable Hospital platform modules, Doctor clinical capabilities, and Patient portal visibility. Doctors have no access to alter patient portal capabilities.
+              </p>
+            </div>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleSaveAllFeatures}
+              className="bg-indigo-600 hover:bg-indigo-500 text-white"
+            >
+              <span>💾</span> Save All Feature Permissions
+            </Button>
+          </div>
 
-      {/* ── 2. GENERAL CLINICAL & PLATFORM FEATURE GATES ── */}
-      <ClinicalModulesSection
-        formData={formData}
-        toggleCustomerViewFeature={toggleCustomerViewFeature}
-        onSavePlatformModules={handleSavePlatformModules}
-      />
+          <FeatureToggleGroup
+            features={formData.features}
+            onChange={(key, val) => {
+              setFormData((prev) => ({
+                ...prev,
+                features: {
+                  ...prev.features,
+                  [key]: val,
+                  ...(key === "enableOnlinePayments" ? { enableCustomerPayments: val } : {}),
+                  ...(key === "enableCustomerPayments" ? { enableOnlinePayments: val } : {}),
+                },
+              }));
+            }}
+            category="all"
+          />
+        </div>
+      ) : (
+        /* Doctor Notice: Patient features cannot be altered by doctors */
+        <div className="p-4 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl flex items-start gap-3">
+          <span className="text-2xl" aria-hidden="true">🛡️</span>
+          <div className="space-y-1">
+            <h4 className="font-bold text-xs text-emerald-950 uppercase tracking-wider">
+              Feature Enablement &amp; Patient Portal Governance Policy
+            </h4>
+            <p className="text-xs text-stone-600 leading-relaxed">
+              Hospital platform modules, doctor clinical tools, and patient portal visibility settings are managed centrally by the <strong>Platform Super Administrator</strong>. Attending physicians cannot modify patient portal features. You may configure your clinical bio, contact sharing preferences, clinic hours, and branding below.
+            </p>
+          </div>
+        </div>
+      )}
 
-      {/* ── 3. ADMIN SECURITY PASSCODES & AUDIT TRAIL ── */}
-      <PasscodesSection
-        passcodes={passcodes}
-        auditLogs={auditLogs}
-        onChangePasscode={() => setIsChangePasscodeModalOpen(true)}
-        onAddPasscode={() => setIsAddPasscodeModalOpen(true)}
-        onDeletePasscode={handleDeletePasscode}
-      />
-
-      {/* ── 4. HOSPITAL & CLINIC IDENTITY ── */}
-      <ClinicProfileSection
-        formData={formData}
-        setFormData={setFormData}
-        onSaveHospitalInfo={handleSaveHospitalInfo}
-      />
-
-      {/* ── 5. DOCTOR PROFILE & BIO ── */}
+      {/* ── 1. DOCTOR PROFILE & BIO ── */}
       <DoctorProfileSection
         formData={formData}
         setFormData={setFormData}
         onSaveDoctorProfile={handleSaveDoctorProfile}
       />
 
-      {/* ── 6. BRANDING & MEDIA ASSETS ── */}
+      {/* ── 2. HOSPITAL & CLINIC IDENTITY ── */}
+      <ClinicProfileSection
+        formData={formData}
+        setFormData={setFormData}
+        onSaveHospitalInfo={handleSaveHospitalInfo}
+      />
+
+      {/* ── 3. BRANDING & MEDIA ASSETS ── */}
       <BrandingSection
         formData={formData}
         setFormData={setFormData}
         onSaveBranding={handleSaveBranding}
       />
 
-      {/* ── 7. CUSTOMER FEEDBACK & GOOGLE REVIEWS MODERATION ── */}
+      {/* ── 4. CUSTOMER FEEDBACK & GOOGLE REVIEWS MODERATION ── */}
       <FeedbackModerationSection
         feedbackList={feedbackList}
         onApproveFeedback={handleApproveFeedback}
@@ -445,16 +434,16 @@ export const CustomizationTab: React.FC = () => {
         onResetTenant={handleReset}
       />
 
-      {/* ── MODALS ── */}
-      <CustomerViewSaveModal
-        isOpen={isCustomerViewSaveModalOpen}
-        onClose={() => setIsCustomerViewSaveModalOpen(false)}
-        formData={formData}
-        currentAdminName={currentAdminName}
+      {/* ── 5. ADMIN SECURITY PASSCODES & AUDIT TRAIL ── */}
+      <PasscodesSection
         passcodes={passcodes}
-        onAuthorizedSave={handleAuthorizedCustomerViewSave}
+        auditLogs={auditLogs}
+        onChangePasscode={() => setIsChangePasscodeModalOpen(true)}
+        onAddPasscode={() => setIsAddPasscodeModalOpen(true)}
+        onDeletePasscode={handleDeletePasscode}
       />
 
+      {/* ── MODALS ── */}
       <ChangePasscodeModal
         isOpen={isChangePasscodeModalOpen}
         onClose={() => setIsChangePasscodeModalOpen(false)}

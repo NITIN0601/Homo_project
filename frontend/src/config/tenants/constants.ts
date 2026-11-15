@@ -30,6 +30,7 @@ export const DEFAULT_FACILITY_CONFIG = {
   defaultButtonRadius: "0.75rem",
   defaultFontSans: '"Inter", sans-serif',
   defaultLogoUrl: "/generic-clinic-logo.svg",
+  defaultBannerUrl: "/assets/banner.jpg",
 } as const;
 
 export const DEFAULT_DOCTOR_CONFIG = {
@@ -45,16 +46,19 @@ export const DEFAULT_NEW_TENANT_FEATURES: HospitalFeatures = {
   enableVoiceStudio: true,
   enablePrescriptionScan: true,
   enableOnlinePayments: true,
-  enableTelemedicine: true,
   enableCustomerPayments: true,
-  enableRawCaseJson: true,
-  enableGoogleReviews: false,
+  enableTelemedicine: true,
+  enableRawCaseJson: false,
+  enableGoogleReviews: true,
   displayDoctorDetails: true,
   enablePatientMedicalRecords: true,
   enableBillingHistory: true,
   enableFollowupFeedback: true,
   enableAgastyaBot: true,
   enablePatientProfileEdit: true,
+  allowDoctorCustomBio: true,
+  allowDoctorSpecialties: true,
+  allowDoctorDirectContact: true,
 };
 
 export interface FeatureDefinition {
@@ -62,43 +66,74 @@ export interface FeatureDefinition {
   label: string;
   description: string;
   icon: string;
-  category: "doctor" | "patient";
+  category: "hospital" | "doctor" | "patient";
 }
+
+export const HOSPITAL_FEATURES: readonly FeatureDefinition[] = [
+  {
+    key: "enableECommerce",
+    label: "Dispensary & Pharmacy Requisitions (E-Commerce)",
+    description: "Remedy stock control, medicine shopping cart, supplier PO dispatch, and logistics tracking",
+    icon: "💊",
+    category: "hospital",
+  },
+  {
+    key: "enableTelemedicine",
+    label: "Telemedicine & Outpatient Remote Calls",
+    description: "Remote video consultations, WhatsApp integration, and secure virtual appointments",
+    icon: "📹",
+    category: "hospital",
+  },
+  {
+    key: "enableGoogleReviews",
+    label: "Google Reviews & Patient Testimonials Showcase",
+    description: "Public verified clinic reviews showcase, ratings sync, and Google Maps integration",
+    icon: "⭐",
+    category: "hospital",
+  },
+] as const;
 
 export const DOCTOR_PORTAL_FEATURES: readonly FeatureDefinition[] = [
   {
     key: "enableVoiceStudio",
     label: "AI VoiceStudio Clinical Scribe",
-    description: "Speech-to-text dictation & automated SOAP clinical note generation",
+    description: "Speech-to-text dictation & automated SOAP clinical note generation for doctors",
     icon: "🎙️",
     category: "doctor",
   },
   {
     key: "enablePrescriptionScan",
     label: "OCR Prescription Scanning",
-    description: "Camera & document OCR for digital prescription ingestion",
+    description: "Camera & document OCR for digital prescription ingestion into patient files",
     icon: "📄",
-    category: "doctor",
-  },
-  {
-    key: "enableTelemedicine",
-    label: "Telemedicine & Outpatient Calls",
-    description: "Remote video consultations and secure audio appointments",
-    icon: "📹",
     category: "doctor",
   },
   {
     key: "enableRawCaseJson",
     label: "Classical Homeopathy Case Record JSON",
-    description: "Structured repertorization data and clinical JSON editor",
+    description: "Structured repertorization data and clinical JSON editor for doctors",
     icon: "🔬",
     category: "doctor",
   },
   {
-    key: "enableECommerce",
-    label: "Dispensary & Pharmacy Requisitions",
-    description: "Remedy stock control, supplier PO dispatch, and logistics tracking",
-    icon: "💊",
+    key: "allowDoctorCustomBio",
+    label: "Doctor Custom Biography Policy",
+    description: "Permits doctors to publish customized professional bio and clinical philosophy",
+    icon: "📝",
+    category: "doctor",
+  },
+  {
+    key: "allowDoctorSpecialties",
+    label: "Doctor Clinical Specialties Policy",
+    description: "Allows doctors to highlight custom clinical sub-specialties to patients",
+    icon: "🩺",
+    category: "doctor",
+  },
+  {
+    key: "allowDoctorDirectContact",
+    label: "Doctor Direct Phone & WhatsApp Policy",
+    description: "Permits doctors to share direct contact with patients rather than facility central desk",
+    icon: "📱",
     category: "doctor",
   },
 ] as const;
@@ -106,7 +141,7 @@ export const DOCTOR_PORTAL_FEATURES: readonly FeatureDefinition[] = [
 export const PATIENT_PORTAL_FEATURES: readonly FeatureDefinition[] = [
   {
     key: "displayDoctorDetails",
-    label: "Doctor Credentials & Registration",
+    label: "Doctor Credentials & Registration Display",
     description: "Display doctor title, registration number, and bio on patient pages",
     icon: "👨‍⚕️",
     category: "patient",
@@ -126,17 +161,31 @@ export const PATIENT_PORTAL_FEATURES: readonly FeatureDefinition[] = [
     category: "patient",
   },
   {
+    key: "enableOnlinePayments",
+    label: "Online Payment Gateway & Checkout",
+    description: "Allows patient checkout and online fee settlement via UPI, Cards, and NetBanking",
+    icon: "💰",
+    category: "patient",
+  },
+  {
     key: "enableFollowupFeedback",
     label: "Follow-up & Progress Submissions",
-    description: "Enables post-consultation patient symptom review submissions",
+    description: "Enables post-consultation patient symptom review and progress report submissions",
     icon: "📝",
     category: "patient",
   },
   {
-    key: "enableOnlinePayments",
-    label: "Online Payment Gateway",
-    description: "Allows patient checkout via UPI, Cards, and NetBanking",
-    icon: "💰",
+    key: "enableAgastyaBot",
+    label: "ClinicBot AI Assistant Widget",
+    description: "Floating patient assistant widget for remedy FAQs, clinic timings, and appointment queries",
+    icon: "🤖",
+    category: "patient",
+  },
+  {
+    key: "enablePatientProfileEdit",
+    label: "Patient Profile & Address Self-Editing",
+    description: "Allows patients to update their personal details, phone number, and delivery address",
+    icon: "👤",
     category: "patient",
   },
 ] as const;

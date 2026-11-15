@@ -22,10 +22,15 @@ const ManageFeaturesBody: React.FC<ManageFeaturesBodyProps> = ({ hospital, onClo
   const [isSaving, setIsSaving] = useState(false);
 
   const handleToggle = (key: keyof HospitalFeatures, value: boolean) => {
-    setFeatures((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setFeatures((prev) => {
+      const next = { ...prev, [key]: value };
+      if (key === "enableOnlinePayments") {
+        next.enableCustomerPayments = value;
+      } else if (key === "enableCustomerPayments") {
+        next.enableOnlinePayments = value;
+      }
+      return next;
+    });
   };
 
   const handleSave = async () => {
@@ -55,7 +60,7 @@ const ManageFeaturesBody: React.FC<ManageFeaturesBodyProps> = ({ hospital, onClo
           disabled={isSaving}
           className="bg-indigo-600 hover:bg-indigo-500 text-white"
         >
-          {isSaving ? "Saving..." : "Save Layout & Functionalities →"}
+          {isSaving ? "Saving..." : "Save Feature Governance →"}
         </Button>
       </div>
     </>
@@ -75,8 +80,8 @@ export const ManageFeaturesModal: React.FC<ManageFeaturesModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       size="lg"
-      title={`Manage Layout & Functionalities: ${hospital.name}`}
-      subtitle={`Configure workspace permissions and visibility for both Doctors and Patients of ${hospital.name}.`}
+      title={`Feature Enablement & Governance: ${hospital.name}`}
+      subtitle={`Super Admin Master Control: Enable or disable Hospital features, Doctor clinical capabilities, and Patient portal visibility for ${hospital.name}.`}
     >
       <ManageFeaturesBody
         key={hospital.id}

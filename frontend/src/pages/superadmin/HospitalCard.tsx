@@ -116,6 +116,15 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
             {hospital.features.enableBillingHistory && (
               <span className="px-2 py-0.5 rounded-md bg-stone-100 text-stone-800">💳 Billing</span>
             )}
+            {hospital.features.enableOnlinePayments && (
+              <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">💰 Payments</span>
+            )}
+            {hospital.features.enableGoogleReviews && (
+              <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800">⭐ Reviews</span>
+            )}
+            {hospital.features.enableAgastyaBot && (
+              <span className="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800">🤖 AI Bot</span>
+            )}
           </div>
         </div>
       </div>
