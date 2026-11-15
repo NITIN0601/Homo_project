@@ -4,6 +4,7 @@ export interface OnboardHospitalModalProps {
   isOpen: boolean;
   onClose: () => void;
   existingSlugs: string[];
+  initialTenant?: HospitalTenantConfig | null;
   onOnboard: (
     tenant: HospitalTenantConfig,
     doctor: HospitalDoctor,

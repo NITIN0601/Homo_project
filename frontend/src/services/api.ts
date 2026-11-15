@@ -518,6 +518,16 @@ export const api = {
         body: JSON.stringify({ features }),
       });
     },
+    updateHospital: async (hospitalId: string, payload: Record<string, unknown>) => {
+      return apiFetch<{
+        status: string;
+        message: string;
+        hospital: any;
+      }>(`/super-admin/hospitals/${hospitalId}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+    },
     createHospital: async (data: Record<string, unknown>) => {
       return apiFetch("/hospitals", {
         method: "POST",

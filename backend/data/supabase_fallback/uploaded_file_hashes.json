@@ -1576,5 +1576,14 @@
     "uploaded_by": "mobile_worker_test",
     "uploaded_at": "2026-11-15T17:06:49.511994+00:00",
     "_synced": false
+  },
+  {
+    "id": "143a5100-6922-4036-bdf1-184c85b897fd",
+    "file_hash": "sha256_test_hash_947c8bd6d1ad4fa2b675c9b384a2f086",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-15T17:20:00.288180+00:00",
+    "_synced": false
   }
 ]

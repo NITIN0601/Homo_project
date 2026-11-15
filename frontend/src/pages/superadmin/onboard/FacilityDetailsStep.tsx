@@ -10,6 +10,7 @@ interface FacilityDetailsStepProps extends StepProps {
   detectedCurrency: { code: string; symbol: string; name: string };
   activeTimezoneDetails: { timeZone: string; label: string; offset: string };
   slugError: string | null;
+  isEditing?: boolean;
 }
 
 export const FacilityDetailsStep: React.FC<FacilityDetailsStepProps> = ({
@@ -22,6 +23,7 @@ export const FacilityDetailsStep: React.FC<FacilityDetailsStepProps> = ({
   detectedCurrency,
   activeTimezoneDetails,
   slugError,
+  isEditing = false,
 }) => {
   return (
     <div className="p-4 bg-stone-50 rounded-2xl border border-stone-200/80 space-y-4">
@@ -54,10 +56,13 @@ export const FacilityDetailsStep: React.FC<FacilityDetailsStepProps> = ({
           <input
             type="text"
             required
+            disabled={isEditing}
             placeholder="e.g. city-care"
             value={form.hospitalSlug}
             onChange={(e) => updateField("hospitalSlug", e.target.value)}
-            className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
+            className={`w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none font-mono ${
+              isEditing ? "opacity-60 cursor-not-allowed bg-stone-100 text-stone-500" : "bg-stone-50 focus:bg-white"
+            }`}
           />
         </div>
       </div>

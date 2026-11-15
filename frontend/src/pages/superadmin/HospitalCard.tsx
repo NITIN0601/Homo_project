@@ -5,6 +5,7 @@ export interface HospitalCardProps {
   hospital: HospitalTenantConfig;
   isActive: boolean;
   onSwitch: (hospital: HospitalTenantConfig) => void;
+  onEditHospital: (hospital: HospitalTenantConfig) => void;
   onOpenFeatures: (hospital: HospitalTenantConfig) => void;
   onPreviewPatient: (hospital: HospitalTenantConfig) => void;
   onPreviewDoctor: (hospital: HospitalTenantConfig) => void;
@@ -14,6 +15,7 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
   hospital,
   isActive,
   onSwitch,
+  onEditHospital,
   onOpenFeatures,
   onPreviewPatient,
   onPreviewDoctor,
@@ -131,11 +133,11 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
 
       {/* Actions */}
       <div className="pt-3 border-t border-stone-100 flex flex-col gap-2">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-1.5">
           <button
             type="button"
             onClick={() => onSwitch(hospital)}
-            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
               isActive
                 ? "bg-indigo-100 text-indigo-950 font-black cursor-default"
                 : "bg-stone-100 hover:bg-stone-200 text-stone-800"
@@ -145,11 +147,19 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
           </button>
           <button
             type="button"
+            onClick={() => onEditHospital(hospital)}
+            className="py-2 px-2 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
+            title="Edit hospital details, branding, doctors, and hours"
+          >
+            <span>✏️ Edit</span>
+          </button>
+          <button
+            type="button"
             onClick={() => onOpenFeatures(hospital)}
-            className="py-2 px-3 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
+            className="py-2 px-2 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
             title="Manage what Doctor and Patient can view/do"
           >
-            <span>⚙️ Layout &amp; Access</span>
+            <span>⚙️ Access</span>
           </button>
         </div>
 

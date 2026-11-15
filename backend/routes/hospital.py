@@ -90,6 +90,32 @@ async def update_hospital_features_endpoint(
     }
 
 
+@router.put("/super-admin/hospitals/{hospital_id}", summary="Update hospital details (Super Admin only)")
+async def update_hospital_details_endpoint(
+    hospital_id: str,
+    payload: dict,
+    user: dict = Depends(require_super_admin_role),
+):
+    """Platform Super Admin: Updates hospital branding, contact, doctor, or configuration."""
+    hospital = get_hospital(hospital_id)
+    if not hospital:
+        raise HTTPException(status_code=404, detail=f"Hospital '{hospital_id}' not found.")
+
+    for k, v in payload.items():
+        if k != "id":
+            if isinstance(v, dict) and isinstance(hospital.get(k), dict):
+                hospital[k].update(v)
+            else:
+                hospital[k] = v
+    hospital["updatedAt"] = datetime.now(timezone.utc).isoformat()
+    save_hospital(hospital)
+    return {
+        "status": "success",
+        "message": f"Hospital '{hospital.get('name')}' updated successfully.",
+        "hospital": hospital,
+    }
+
+
 @router.post("/hospitals", summary="Create a new hospital tenant (Super Admin only)")
 async def create_hospital_endpoint(
     req: HospitalCreateRequest,

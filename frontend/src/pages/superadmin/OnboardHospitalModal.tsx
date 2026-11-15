@@ -70,15 +70,67 @@ const getInitialFormState = (): OnboardFormState => ({
   features: { ...DEFAULT_NEW_TENANT_FEATURES },
 });
 
+const getFormStateFromTenant = (t: HospitalTenantConfig): OnboardFormState => ({
+  hospitalName: t.name || "",
+  hospitalSlug: t.id || "",
+  tagline: t.tagline || "",
+  phone: t.contact?.phone || DEFAULT_FACILITY_CONFIG.defaultPhone,
+  email: t.contact?.email || DEFAULT_FACILITY_CONFIG.defaultEmail,
+  country: t.contact?.address?.country || "India",
+  state: t.contact?.address?.state || "Karnataka",
+  city: t.contact?.address?.city || "Bengaluru",
+  street: t.contact?.address?.street || DEFAULT_FACILITY_CONFIG.defaultStreet,
+  pincode: t.contact?.address?.pincode || "560003",
+  timezone: t.hours?.timezone || "Asia/Kolkata",
+  timezoneManualOverride: true,
+  primaryColor: t.branding?.primaryColor || DEFAULT_FACILITY_CONFIG.defaultPrimaryColor,
+  accentColor: t.branding?.accentColor || DEFAULT_FACILITY_CONFIG.defaultAccentColor,
+  logoUrl: t.branding?.logoUrl || "/generic-clinic-logo.svg",
+  bannerUrl: t.branding?.bannerUrl || "/assets/banner.jpg",
+  aboutClinicText: t.branding?.aboutClinicText || "",
+  doctorName: t.doctor?.name || "",
+  doctorEmail: t.doctor?.email || "",
+  doctorPhone: t.doctor?.phone || DEFAULT_DOCTOR_CONFIG.defaultPhone,
+  doctorTitle: t.doctor?.title || DEFAULT_DOCTOR_CONFIG.defaultTitle,
+  doctorQual: t.doctor?.qualifications || DEFAULT_DOCTOR_CONFIG.defaultQualifications,
+  doctorRegNo: t.doctor?.regNo || "",
+  doctorExp: t.doctor?.experienceYears || DEFAULT_DOCTOR_CONFIG.defaultExperienceYears,
+  doctorSpecialties: Array.isArray(t.doctor?.specialties)
+    ? t.doctor.specialties.join(", ")
+    : (t.doctor?.specialties || DEFAULT_DOCTOR_CONFIG.defaultSpecialties),
+  doctorBio: t.doctor?.aboutText || "",
+  doctorFee: t.doctor?.consultationFee || 750,
+  morningHours: t.hours?.morningDisplay || "10:00 AM – 01:30 PM",
+  eveningHours: t.hours?.eveningDisplay || "05:00 PM – 08:30 PM",
+  availableDays: t.hours?.availableDays || "Monday – Saturday",
+  sundayPolicy: (t.hours?.sundayPolicy as any) || "Prior Appointment Only",
+  features: { ...t.features },
+});
+
 export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
   isOpen,
   onClose,
   existingSlugs,
+  initialTenant,
   onOnboard,
 }) => {
   const toast = useToast();
-  const [form, setForm] = useState<OnboardFormState>(getInitialFormState);
+  const isEditing = Boolean(initialTenant);
+  const [form, setForm] = useState<OnboardFormState>(() =>
+    initialTenant ? getFormStateFromTenant(initialTenant) : getInitialFormState()
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync form state when modal opens or initialTenant changes
+  React.useEffect(() => {
+    if (isOpen) {
+      if (initialTenant) {
+        setForm(getFormStateFromTenant(initialTenant));
+      } else {
+        setForm(getInitialFormState());
+      }
+    }
+  }, [isOpen, initialTenant]);
 
   const detectedTz = useMemo(() => {
     return inferTimezoneFromLocation(form.country, form.state, form.city);
@@ -103,8 +155,9 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
 
   const slugError = useMemo(() => {
     if (!cleanSlug) return null;
+    if (isEditing && initialTenant && cleanSlug === initialTenant.id.toLowerCase()) return null;
     return existingSlugs.includes(cleanSlug) ? "A hospital with this slug already exists" : null;
-  }, [cleanSlug, existingSlugs]);
+  }, [cleanSlug, existingSlugs, isEditing, initialTenant]);
 
   const updateField = <K extends keyof OnboardFormState>(key: K, value: OnboardFormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -270,8 +323,12 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       size="lg"
-      title="Onboard New Hospital Facility"
-      subtitle="Configure hospital branding, lead physician credentials, and access permissions."
+      title={isEditing ? `✏️ Edit Hospital: ${initialTenant?.name}` : "Onboard New Hospital Facility"}
+      subtitle={
+        isEditing
+          ? "Update hospital branding, lead physician credentials, and access permissions."
+          : "Configure hospital branding, lead physician credentials, and access permissions."
+      }
     >
       <form onSubmit={handleSubmit} className="space-y-6 py-2">
         <FacilityDetailsStep
@@ -284,6 +341,7 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
           detectedCurrency={detectedCurrency}
           activeTimezoneDetails={activeTimezoneDetails}
           slugError={slugError}
+          isEditing={isEditing}
         />
 
         <FacilityScheduleStep
@@ -322,7 +380,13 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
             disabled={isSubmitting || !!slugError}
             className="bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer"
           >
-            {isSubmitting ? "Provisioning & Emailing..." : "Provision Hospital & Email Doctor →"}
+            {isSubmitting
+              ? isEditing
+                ? "Saving Changes..."
+                : "Provisioning & Emailing..."
+              : isEditing
+              ? "💾 Save Changes"
+              : "Provision Hospital & Email Doctor →"}
           </Button>
         </div>
       </form>

@@ -1412,5 +1412,43 @@
     "created_at": "2026-11-15T17:06:59.018609+00:00",
     "expires_at": 1795367219.018628,
     "is_claimed": false
+  },
+  "inv_n6d5x5JbjcYvMc_u10cYlLz8hcVafpdf": {
+    "token": "inv_n6d5x5JbjcYvMc_u10cYlLz8hcVafpdf",
+    "email": "invited_d3167c@gmail.com",
+    "name": "Invited Recipient",
+    "role": "patient",
+    "hospital_id": "default",
+    "phone": "",
+    "created_by": "admin",
+    "created_at": "2026-11-15T17:20:00.518982+00:00",
+    "expires_at": 1795368000.518987,
+    "is_claimed": true,
+    "claimed_at": "2026-11-15T17:20:00.530754+00:00"
+  },
+  "inv_E7BVSUgL8JPhGThI9dQYkVXaYOOhIMff": {
+    "token": "inv_E7BVSUgL8JPhGThI9dQYkVXaYOOhIMff",
+    "email": "alice.invited.015cbb@example.com",
+    "name": "Invited Patient Alice",
+    "role": "patient",
+    "hospital_id": "test-med-center",
+    "phone": "",
+    "created_by": "admin@agastyahomoeo.com",
+    "created_at": "2026-11-15T17:20:01.987280+00:00",
+    "expires_at": 1795368001.987285,
+    "is_claimed": true,
+    "claimed_at": "2026-11-15T17:20:02.018044+00:00"
+  },
+  "inv_cdUKFK9kCuNsmG1pyFs2QzIZIoVx-ER1": {
+    "token": "inv_cdUKFK9kCuNsmG1pyFs2QzIZIoVx-ER1",
+    "email": "sarah.jenkins@manhattancare.com",
+    "name": "Dr. Sarah Jenkins",
+    "role": "admin",
+    "hospital_id": "manhattan-care-48288a",
+    "phone": "+91 98450 00000",
+    "created_by": "superadmin@health.org",
+    "created_at": "2026-11-15T17:20:02.845887+00:00",
+    "expires_at": 1795368002.845903,
+    "is_claimed": false
   }
 }
