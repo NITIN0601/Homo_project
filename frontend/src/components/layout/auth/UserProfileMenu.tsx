@@ -57,11 +57,25 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
           <span
             className="mt-1.5 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest rounded-full px-2.5 py-0.5"
             style={{
-              background: authUser.role === "admin" ? THEME_COLORS.ADMIN_GOLD_ALPHA_25 : THEME_COLORS.WHITE_ALPHA_20,
-              color: authUser.role === "admin" ? THEME_COLORS.ADMIN_GOLD : THEME_COLORS.SAGE_200,
+              background:
+                authUser.role === "super_admin"
+                  ? "rgba(99, 102, 241, 0.3)"
+                  : authUser.role === "admin"
+                  ? THEME_COLORS.ADMIN_GOLD_ALPHA_25
+                  : THEME_COLORS.WHITE_ALPHA_20,
+              color:
+                authUser.role === "super_admin"
+                  ? "#e0e7ff"
+                  : authUser.role === "admin"
+                  ? THEME_COLORS.ADMIN_GOLD
+                  : THEME_COLORS.SAGE_200,
             }}
           >
-            {authUser.role === "admin" ? "🔒 Administrator" : "👤 Registered Patient"}
+            {authUser.role === "super_admin"
+              ? "⚡ Super Administrator"
+              : authUser.role === "admin"
+              ? "🔒 Clinic Administrator"
+              : "👤 Registered Patient"}
           </span>
         </div>
       </div>
@@ -93,6 +107,25 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
 
       {/* Quick nav links */}
       <div className="py-2">
+        {authUser.role === "super_admin" && (
+          <>
+            <ProfileLink
+              emoji="⚡"
+              label="Platform Super Admin Console"
+              onClick={() => { onNavigate("super-admin-dashboard"); onClose(); }}
+            />
+            <ProfileLink
+              emoji="🩺"
+              label="Clinic Doctor Admin Console"
+              onClick={() => { onSetAdminTab("dashboard"); onNavigate("admin-dashboard"); onClose(); }}
+            />
+            <ProfileLink
+              emoji="👁️"
+              label="Preview Patient Portal"
+              onClick={() => { onNavigate("home"); onClose(); }}
+            />
+          </>
+        )}
         {authUser.role === "patient" && (
           <>
             <ProfileLink

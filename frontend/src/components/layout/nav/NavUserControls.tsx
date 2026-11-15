@@ -62,10 +62,14 @@ export const NavUserControls: React.FC<NavUserControlsProps> = ({
       )}
 
       {/* Super Admin Privileged Portal Pill */}
-      {isSuperAdmin && (
+      {(isSuperAdmin || USE_MOCK_DATA) && (
         <button
           onClick={() => onNavigateTo("super-admin-dashboard")}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black text-white bg-gradient-to-r from-indigo-700 via-indigo-600 to-slate-900 hover:opacity-90 shadow-sm transition-all active:scale-95 cursor-pointer border border-indigo-400/40"
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black shadow-sm transition-all active:scale-95 cursor-pointer border ${
+            isSuperAdmin
+              ? "text-white bg-gradient-to-r from-indigo-700 via-indigo-600 to-slate-900 hover:opacity-90 border-indigo-400/40"
+              : "text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border-indigo-300"
+          }`}
           title="Super Administrator Console"
           aria-label="Super Administrator Console"
         >

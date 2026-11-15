@@ -54,9 +54,14 @@ class RbacErrorBoundary extends Component<
 }
 
 // ─── Generic RBAC Denial Screen ───────────────────────────────────────────────
-const AccessDeniedScreen: React.FC = () => {
+interface AccessDeniedScreenProps {
+  requiredRole?: "admin" | "patient" | "super_admin";
+}
+
+const AccessDeniedScreen: React.FC<AccessDeniedScreenProps> = ({ requiredRole = "admin" }) => {
   const { navigateTo, openAuthModal, login } = useApp();
   const { tenant } = useTenant();
+  const isSuperAdminRequired = requiredRole === "super_admin";
   const doctorDisplayName = tenant.doctor?.name || "the attending physician";
 
   return (
@@ -69,7 +74,7 @@ const AccessDeniedScreen: React.FC = () => {
       {/* Shield icon */}
       <div
         className="w-20 h-20 rounded-full flex items-center justify-center mb-5 shadow-inner"
-        style={{ background: THEME_GRADIENTS.DANGER_SOFT }}
+        style={{ background: isSuperAdminRequired ? "linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)" : THEME_GRADIENTS.DANGER_SOFT }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -77,7 +82,7 @@ const AccessDeniedScreen: React.FC = () => {
           height="36"
           viewBox="0 0 24 24"
           fill="none"
-          stroke={THEME_COLORS.DANGER_RED}
+          stroke={isSuperAdminRequired ? "#4338ca" : THEME_COLORS.DANGER_RED}
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -90,18 +95,26 @@ const AccessDeniedScreen: React.FC = () => {
       </div>
 
       <h1 className="text-2xl font-black text-stone-800 mb-2">
-        Doctor Admin Console Protected
+        {isSuperAdminRequired
+          ? "Platform Super Admin Console Protected"
+          : "Doctor Admin Console Protected"}
       </h1>
       <p className="text-stone-500 text-sm leading-relaxed mb-6">
-        This area is restricted to authorized clinic medical staff. If you are {doctorDisplayName} or a clinic administrator, please sign in with your administrative credentials.
+        {isSuperAdminRequired
+          ? "This area is restricted to Platform Super Administrators managing multi-hospital infrastructure, cross-tenant configurations, and governance."
+          : `This area is restricted to authorized clinic medical staff. If you are ${doctorDisplayName} or a clinic administrator, please sign in with your administrative credentials.`}
       </p>
 
       <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-center">
         <button
           onClick={openAuthModal}
-          className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-600 text-white transition-all shadow-sm active:scale-95 cursor-pointer"
+          className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-sm active:scale-95 cursor-pointer ${
+            isSuperAdminRequired
+              ? "bg-indigo-700 hover:bg-indigo-600"
+              : "bg-emerald-700 hover:bg-emerald-600"
+          }`}
         >
-          🔑 Sign In as Admin
+          {isSuperAdminRequired ? "⚡ Sign In as Super Admin" : "🔑 Sign In as Admin"}
         </button>
 
         <button
@@ -115,15 +128,27 @@ const AccessDeniedScreen: React.FC = () => {
       {USE_MOCK_DATA && (
         <div className="mt-6 pt-5 border-t border-stone-200/80 w-full flex flex-col items-center">
           <p className="text-[11px] font-semibold text-stone-400 mb-2">⚡ Quick Developer Demo Access:</p>
-          <button
-            onClick={() => {
-              login(MOCK_ACCOUNTS[DEMO_CREDENTIALS.ADMIN.email].profile);
-              navigateTo("admin-dashboard");
-            }}
-            className="text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
-          >
-            🩺 Instant Login as {doctorDisplayName} (Admin)
-          </button>
+          {isSuperAdminRequired ? (
+            <button
+              onClick={() => {
+                login(MOCK_ACCOUNTS[DEMO_CREDENTIALS.SUPER_ADMIN.email].profile);
+                navigateTo("super-admin-dashboard");
+              }}
+              className="text-xs font-bold text-indigo-700 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+            >
+              ⚡ Instant Demo Login as Super Admin
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                login(MOCK_ACCOUNTS[DEMO_CREDENTIALS.ADMIN.email].profile);
+                navigateTo("admin-dashboard");
+              }}
+              className="text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+            >
+              🩺 Instant Login as {doctorDisplayName} (Admin)
+            </button>
+          )}
         </div>
       )}
 
@@ -131,7 +156,9 @@ const AccessDeniedScreen: React.FC = () => {
         className="mt-6 text-[10px] text-stone-400 font-mono bg-stone-100/70 rounded-md px-3 py-1"
         aria-label="Error code"
       >
-        ERR_RBAC_403 · Clinical Role Verification Required
+        {isSuperAdminRequired
+          ? "ERR_RBAC_403 · Platform Super Administrator Role Required"
+          : "ERR_RBAC_403 · Clinical Role Verification Required"}
       </div>
     </div>
   );
@@ -151,10 +178,11 @@ const AccessDeniedScreen: React.FC = () => {
  * ```
  */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  requiredRole,
   children,
   fallback,
 }) => {
-  const denial = fallback ?? <AccessDeniedScreen />;
+  const denial = fallback ?? <AccessDeniedScreen requiredRole={requiredRole} />;
   return (
     <RbacErrorBoundary fallback={denial}>
       {children}

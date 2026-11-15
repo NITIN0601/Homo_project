@@ -64,20 +64,30 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             Mock SSOT
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-3 gap-1.5">
+          <button
+            type="button"
+            onClick={() => onQuickDemoLogin(DEMO_CREDENTIALS.SUPER_ADMIN.email)}
+            className="w-full py-1.5 px-1.5 bg-indigo-900 text-white rounded-lg font-bold text-[10px] hover:bg-indigo-800 transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
+            title="Sign in as Platform Super Administrator"
+          >
+            <span>⚡</span> Super Admin
+          </button>
           <button
             type="button"
             onClick={() => onQuickDemoLogin(DEMO_CREDENTIALS.ADMIN.email)}
-            className="w-full py-1.5 px-2 bg-emerald-800 text-white rounded-lg font-bold text-[10px] hover:bg-emerald-700 transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
+            className="w-full py-1.5 px-1.5 bg-emerald-800 text-white rounded-lg font-bold text-[10px] hover:bg-emerald-700 transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
+            title="Sign in as Hospital Doctor Admin"
           >
-            <span>🩺</span> Admin (Doctor)
+            <span>🩺</span> Doctor Admin
           </button>
           <button
             type="button"
             onClick={() => onQuickDemoLogin(DEMO_CREDENTIALS.PATIENT.email)}
-            className="w-full py-1.5 px-2 bg-white border border-emerald-300 text-emerald-900 rounded-lg font-bold text-[10px] hover:bg-emerald-100 transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
+            className="w-full py-1.5 px-1.5 bg-white border border-emerald-300 text-emerald-900 rounded-lg font-bold text-[10px] hover:bg-emerald-100 transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
+            title="Sign in as Patient"
           >
-            <span>👤</span> Patient (John)
+            <span>👤</span> Patient
           </button>
         </div>
         <p className="text-[10px] text-stone-500 text-center font-mono">

@@ -97,7 +97,9 @@ const AuthPanel: React.FC = () => {
     const acc = MOCK_ACCOUNTS[email];
     if (acc) {
       login(acc.profile);
-      if (acc.profile.role === "admin") {
+      if (acc.profile.role === "super_admin") {
+        navigateTo("super-admin-dashboard");
+      } else if (acc.profile.role === "admin") {
         navigateTo("admin-dashboard");
       } else {
         navigateTo("home");

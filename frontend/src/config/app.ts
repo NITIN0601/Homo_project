@@ -55,10 +55,11 @@ export const STORAGE_KEYS = {
 
 // ─── Demo / Mock Credentials (DEV only — never ship to production) ────────────
 export const DEMO_CREDENTIALS = {
-  ADMIN:    { email: DOCTOR.EMAIL,                  password: "admin123",   name: DOCTOR.NAME },
-  PATIENT:  { email: "john@example.com",            password: "patient123", name: "John Doe", id: "usr-001" },
-  PATIENT2: { email: "priya@example.com",           password: "patient456", name: "Priya Sharma", id: "usr-002" },
-  HINT:     "admin@example.com · john@example.com",
+  SUPER_ADMIN: { email: "superadmin@platform.ehr",   password: "admin123",   name: "Global Platform Administrator", id: "usr-superadmin-001" },
+  ADMIN:       { email: DOCTOR.EMAIL,                 password: "admin123",   name: DOCTOR.NAME },
+  PATIENT:     { email: "john@example.com",           password: "patient123", name: "John Doe", id: "usr-001" },
+  PATIENT2:    { email: "priya@example.com",          password: "patient456", name: "Priya Sharma", id: "usr-002" },
+  HINT:        "superadmin@platform.ehr · admin@example.com · john@example.com",
 } as const;
 
 // ─── Phase 1 vs Phase 2 Feature Flags (SSOT) ──────────────────────────────────

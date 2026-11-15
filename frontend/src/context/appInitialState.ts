@@ -26,27 +26,40 @@ import { getUserTimezone } from "../utils/timezone";
 import { parseRouteFromLocation } from "../router/routeParser";
 
 export const getInitialAuthUser = (): AuthUser => {
-  try {
-    if (typeof window !== "undefined" && sessionStorage.getItem(STORAGE_KEYS.EXPLICIT_LOGOUT) === "true") {
-      return null;
+  if (typeof window !== "undefined" && sessionStorage.getItem(STORAGE_KEYS.EXPLICIT_LOGOUT) === "true") {
+    return null;
+  }
+
+  // In local mock sandbox mode, prioritize explicit URL routes and query overrides
+  if (typeof window !== "undefined" && USE_MOCK_DATA && !import.meta.env.PROD) {
+    const params = new URLSearchParams(window.location.search);
+    const roleParam = params.get("role");
+    const port = window.location.port;
+    const pathname = window.location.pathname.toLowerCase();
+
+    // Explicit super admin override via path or role param
+    if (roleParam === "super_admin" || roleParam === "superadmin" || pathname.includes("super-admin")) {
+      return MOCK_ACCOUNTS[DEMO_CREDENTIALS.SUPER_ADMIN.email]?.profile ?? null;
     }
+    // Explicit developer dev-port (5174) or explicit ?role=admin or /admin path
+    if (roleParam === "admin" || port === "5174" || pathname.startsWith("/admin")) {
+      return MOCK_ACCOUNTS[DEMO_CREDENTIALS.ADMIN.email]?.profile ?? null;
+    }
+  }
+
+  try {
     const raw = localStorage.getItem(STORAGE_KEYS.AUTH_PROFILE);
     if (raw) return JSON.parse(raw);
   } catch {
     // ignore
   }
 
-  // Only allow URL role override in local development with mock data explicitly enabled
+  // Default demo patient assignment for dev ports (5173) or mock sandbox fallback
   if (typeof window !== "undefined" && USE_MOCK_DATA && !import.meta.env.PROD) {
     const params = new URLSearchParams(window.location.search);
     const roleParam = params.get("role");
     const port = window.location.port;
 
-    // Explicit developer dev-port (5174) or explicit ?role=admin (SANDBOX/DEV ONLY)
-    if (roleParam === "admin" || port === "5174") {
-      return MOCK_ACCOUNTS[DEMO_CREDENTIALS.ADMIN.email]?.profile ?? null;
-    }
-    // Explicit demo patient param or patient port (5173)
     if (roleParam === "patient" || roleParam === "user" || port === "5173") {
       return MOCK_ACCOUNTS[DEMO_CREDENTIALS.PATIENT.email]?.profile ?? null;
     }
@@ -60,12 +73,12 @@ export const getInitialPage = (user: AuthUser): Page => {
   if (typeof window !== "undefined") {
     const parsed = parseRouteFromLocation();
     if (parsed && parsed.page !== "home") {
-      // If user is trying to reach admin-dashboard but is not logged in as admin,
-      // allow ProtectedRoute to display the secure administrator login gate
       return parsed.page;
     }
     if (window.location.pathname === "/" || window.location.pathname === "/home") {
-      // If user is already authenticated as Doctor Admin, open dashboard directly
+      if (user?.role === "super_admin") {
+        return "super-admin-dashboard";
+      }
       if (user?.role === "admin") {
         return "admin-dashboard";
       }
@@ -77,6 +90,9 @@ export const getInitialPage = (user: AuthUser): Page => {
     if (pageParam) return pageParam;
 
     const port = window.location.port;
+    if (user?.role === "super_admin" || (USE_MOCK_DATA && !import.meta.env.PROD && params.get("role") === "super_admin")) {
+      return "super-admin-dashboard";
+    }
     if (user?.role === "admin" || (USE_MOCK_DATA && !import.meta.env.PROD && (port === "5174" || params.get("role") === "admin"))) {
       return "admin-dashboard";
     }

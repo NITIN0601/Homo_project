@@ -2,6 +2,40 @@ import type { UserProfile } from "../../types";
 import { CLINIC, DEMO_CREDENTIALS, DOCTOR } from "../../config";
 
 export const MOCK_ACCOUNTS: Record<string, { password: string; profile: UserProfile }> = {
+  [DEMO_CREDENTIALS.SUPER_ADMIN.email]: {
+    password: DEMO_CREDENTIALS.SUPER_ADMIN.password,
+    profile: {
+      id:       DEMO_CREDENTIALS.SUPER_ADMIN.id,
+      name:     DEMO_CREDENTIALS.SUPER_ADMIN.name,
+      initials: "SA",
+      email:    DEMO_CREDENTIALS.SUPER_ADMIN.email,
+      role:     "super_admin",
+      phone:    "+91 99999 00000",
+      address: {
+        street:  "Global Platform Healthtech Hub",
+        city:    "Bengaluru",
+        state:   "Karnataka",
+        pincode: "560001",
+      },
+    },
+  },
+  "superadmin@platform.internal": {
+    password: "admin123",
+    profile: {
+      id:       "usr-superadmin-002",
+      name:     "Platform Systems Architect",
+      initials: "PA",
+      email:    "superadmin@platform.internal",
+      role:     "super_admin",
+      phone:    "+91 99999 00001",
+      address: {
+        street:  "Global Platform Healthtech Hub",
+        city:    "Bengaluru",
+        state:   "Karnataka",
+        pincode: "560001",
+      },
+    },
+  },
   [DEMO_CREDENTIALS.ADMIN.email]: {
     password: DEMO_CREDENTIALS.ADMIN.password,
     profile: {
