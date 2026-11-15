@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import type { HospitalTenantConfig, HospitalDoctor, HospitalFeatures } from "../../types/tenant";
 import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
@@ -19,6 +19,12 @@ import {
   DEFAULT_NEW_TENANT_FEATURES,
   type ColorPreset,
 } from "../../config/tenants/constants";
+import {
+  COMMON_TIMEZONES,
+  inferTimezoneFromLocation,
+  getTimezoneOffsetString,
+  getTimezoneAbbreviation,
+} from "../../utils/timezone";
 
 export interface OnboardHospitalModalProps {
   isOpen: boolean;
@@ -37,10 +43,13 @@ export interface OnboardFormState {
   tagline: string;
   phone: string;
   email: string;
+  country: string;
+  state: string;
   city: string;
   street: string;
-  state: string;
   pincode: string;
+  timezone: string;
+  timezoneManualOverride: boolean;
   primaryColor: string;
   accentColor: string;
   doctorName: string;
@@ -66,10 +75,13 @@ const getInitialFormState = (): OnboardFormState => ({
   tagline: "",
   phone: DEFAULT_FACILITY_CONFIG.defaultPhone,
   email: DEFAULT_FACILITY_CONFIG.defaultEmail,
-  city: DEFAULT_FACILITY_CONFIG.defaultCity,
+  country: "India",
+  state: "Karnataka",
+  city: "Bengaluru",
   street: DEFAULT_FACILITY_CONFIG.defaultStreet,
-  state: DEFAULT_FACILITY_CONFIG.defaultState,
-  pincode: DEFAULT_FACILITY_CONFIG.defaultPincode,
+  pincode: "560003",
+  timezone: "Asia/Kolkata",
+  timezoneManualOverride: false,
   primaryColor: DEFAULT_FACILITY_CONFIG.defaultPrimaryColor,
   accentColor: DEFAULT_FACILITY_CONFIG.defaultAccentColor,
   doctorName: "",
@@ -99,8 +111,51 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
   const [form, setForm] = useState<OnboardFormState>(getInitialFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const detectedTz = useMemo(() => {
+    return inferTimezoneFromLocation(form.country, form.state, form.city);
+  }, [form.country, form.state, form.city]);
+
+  const activeTimezoneDetails = useMemo(() => {
+    const tz = form.timezone || detectedTz.timeZone;
+    return {
+      timeZone: tz,
+      label: getTimezoneAbbreviation(tz),
+      offset: getTimezoneOffsetString(tz),
+    };
+  }, [form.timezone, detectedTz]);
+
   const updateField = <K extends keyof OnboardFormState>(key: K, value: OnboardFormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleLocationChange = (field: "country" | "state" | "city", value: string) => {
+    setForm((prev) => {
+      const next = { ...prev, [field]: value };
+      if (!prev.timezoneManualOverride) {
+        const nextCountry = field === "country" ? value : prev.country;
+        const nextState = field === "state" ? value : prev.state;
+        const nextCity = field === "city" ? value : prev.city;
+        const det = inferTimezoneFromLocation(nextCountry, nextState, nextCity);
+        next.timezone = det.timeZone;
+      }
+      return next;
+    });
+  };
+
+  const handleTimezoneChange = (tz: string) => {
+    setForm((prev) => ({
+      ...prev,
+      timezone: tz,
+      timezoneManualOverride: true,
+    }));
+  };
+
+  const handleResetTimezoneToAuto = () => {
+    setForm((prev) => ({
+      ...prev,
+      timezone: detectedTz.timeZone,
+      timezoneManualOverride: false,
+    }));
   };
 
   const handleApplyPreset = (preset: ColorPreset) => {
@@ -141,6 +196,7 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
 
     setIsSubmitting(true);
     try {
+      const effectiveTz = form.timezone || detectedTz.timeZone;
       const doctorConfig: HospitalDoctor = {
         id: `doc-${cleanSlug}-01`,
         name: cleanDocName,
@@ -154,6 +210,7 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
         email: cleanDocEmail,
         consultationFee: Number(form.doctorFee) || 750,
         availability: {
+          timezone: effectiveTz,
           days: form.availableDays,
           morningHours: form.morningHours,
           eveningHours: form.eveningHours,
@@ -173,7 +230,7 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
         doctors: [doctorConfig],
         specialties: doctorConfig.specialties,
         hours: {
-          timezone: "Asia/Kolkata",
+          timezone: effectiveTz,
           morningDisplay: form.morningHours,
           eveningDisplay: form.eveningHours,
           availableDays: form.availableDays,
@@ -190,7 +247,7 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
             city: sanitizeText(form.city, 60),
             state: sanitizeText(form.state, 60) || DEFAULT_FACILITY_CONFIG.defaultState,
             pincode: sanitizePincode(form.pincode) || DEFAULT_FACILITY_CONFIG.defaultPincode,
-            country: DEFAULT_FACILITY_CONFIG.defaultCountry,
+            country: sanitizeText(form.country, 60) || "India",
           },
           mapsUrl: `https://maps.google.com/?q=${encodeURIComponent(`${cleanHospitalName} ${form.city}`)}`,
           googleReviewUrl: "",
@@ -269,14 +326,72 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div>
-              <label className="text-[10px] font-bold text-stone-500 uppercase">Facility City *</label>
+              <label className="text-[10px] font-bold text-stone-500 uppercase">Country *</label>
+              <input
+                type="text"
+                list="country-suggestions"
+                required
+                value={form.country}
+                onChange={(e) => handleLocationChange("country", e.target.value)}
+                placeholder="e.g. India"
+                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
+              />
+              <datalist id="country-suggestions">
+                <option value="India" />
+                <option value="United States" />
+                <option value="United Kingdom" />
+                <option value="United Arab Emirates" />
+                <option value="Singapore" />
+                <option value="Australia" />
+                <option value="Canada" />
+                <option value="Germany" />
+                <option value="France" />
+              </datalist>
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-stone-500 uppercase">State / Province *</label>
+              <input
+                type="text"
+                required
+                value={form.state}
+                onChange={(e) => handleLocationChange("state", e.target.value)}
+                placeholder="e.g. Karnataka"
+                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-stone-500 uppercase">City *</label>
               <input
                 type="text"
                 required
                 value={form.city}
-                onChange={(e) => updateField("city", e.target.value)}
+                onChange={(e) => handleLocationChange("city", e.target.value)}
+                placeholder="e.g. Bengaluru"
+                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-stone-500 uppercase">Postal / Pincode</label>
+              <input
+                type="text"
+                value={form.pincode}
+                onChange={(e) => updateField("pincode", e.target.value)}
+                placeholder="e.g. 560003"
+                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="text-[10px] font-bold text-stone-500 uppercase">Street Address</label>
+              <input
+                type="text"
+                placeholder="e.g. 123 Healthcare Blvd, Medical Wing"
+                value={form.street}
+                onChange={(e) => updateField("street", e.target.value)}
                 className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
               />
             </div>
@@ -302,15 +417,56 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
             </div>
           </div>
 
-          <div>
-            <label className="text-[10px] font-bold text-stone-500 uppercase">Street Address</label>
-            <input
-              type="text"
-              placeholder="e.g. 123 Healthcare Blvd, Medical Wing"
-              value={form.street}
-              onChange={(e) => updateField("street", e.target.value)}
-              className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
-            />
+          {/* Operational Timezone Auto-Calculation Card */}
+          <div className="p-3 bg-blue-50/70 rounded-xl border border-blue-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+            <div className="space-y-0.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs">🌐</span>
+                <span className="text-[11px] font-black text-blue-950 uppercase tracking-wide">
+                  Facility Timezone
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-blue-200/80 text-blue-900">
+                  {activeTimezoneDetails.label} ({activeTimezoneDetails.offset})
+                </span>
+                {form.timezoneManualOverride ? (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">
+                    Manual Selection
+                  </span>
+                ) : (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-medium">
+                    Auto-Detected from {detectedTz.matchedLocation}
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-blue-800">
+                Operating and doctor hours entered below are scheduled under{" "}
+                <span className="font-semibold text-blue-950">{activeTimezoneDetails.timeZone}</span> ({activeTimezoneDetails.label}).
+                Patients globally will see slots converted accurately to their local times.
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0 w-full sm:w-auto">
+              <select
+                value={form.timezone}
+                onChange={(e) => handleTimezoneChange(e.target.value)}
+                className="border border-blue-300 rounded-lg px-2.5 py-1 text-xs bg-white text-blue-950 font-medium shadow-sm outline-none"
+              >
+                {COMMON_TIMEZONES.map((tz) => (
+                  <option key={tz.timeZone} value={tz.timeZone}>
+                    {tz.label}
+                  </option>
+                ))}
+              </select>
+              {form.timezoneManualOverride && (
+                <button
+                  type="button"
+                  onClick={handleResetTimezoneToAuto}
+                  title="Reset to auto-detected timezone based on location"
+                  className="px-2 py-1 text-[10px] font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors whitespace-nowrap"
+                >
+                  ↺ Reset
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -320,8 +476,8 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
             <p className="text-[11px] font-black text-amber-950 uppercase tracking-wider">
               2. Facility Consultation Hours &amp; Operating Schedule
             </p>
-            <span className="text-[10px] bg-amber-200/80 text-amber-900 font-bold px-2 py-0.5 rounded-full">
-              Asia/Kolkata (IST) Standard
+            <span className="text-[10px] bg-amber-200/90 text-amber-950 font-bold px-2.5 py-0.5 rounded-full">
+              In {activeTimezoneDetails.label} ({activeTimezoneDetails.timeZone})
             </span>
           </div>
 
@@ -385,7 +541,7 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
               3. Lead Consulting Doctor (Google Login &amp; Credentials)
             </p>
             <span className="text-[10px] bg-indigo-200 text-indigo-900 font-bold px-2 py-0.5 rounded-full">
-              Activation Email Dispatched
+              Operates in {activeTimezoneDetails.label}
             </span>
           </div>
 

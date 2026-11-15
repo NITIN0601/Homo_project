@@ -3,6 +3,9 @@ import {
   getLocalizedSlotsForDate,
   isUserSlotPassed,
   getUserTimezone,
+  inferTimezoneFromLocation,
+  getTimezoneOffsetString,
+  getTimezoneAbbreviation,
 } from "../utils/timezone";
 import {
   isClinicDateConcluded,
@@ -178,6 +181,76 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
     expect(statusAppt.allSlotsUnavailable).toBe(false);
     expect(statusAppt.slots.length).toBeGreaterThan(0);
     expect(statusAppt.slots[0].isSundayPriorAppt).toBe(true);
+  });
+
+  describe("Automatic Location-to-Timezone Resolution", () => {
+    it("infers Indian timezone Asia/Kolkata from Indian cities, states, and country", () => {
+      const blr = inferTimezoneFromLocation("India", "Karnataka", "Bengaluru");
+      expect(blr.timeZone).toBe("Asia/Kolkata");
+      expect(blr.label).toBe("IST");
+      expect(blr.offset).toBe("UTC+05:30");
+      expect(blr.matchedBy).toBe("city");
+
+      const mumbai = inferTimezoneFromLocation("India", "Maharashtra", "Mumbai");
+      expect(mumbai.timeZone).toBe("Asia/Kolkata");
+
+      const delhiState = inferTimezoneFromLocation("India", "Delhi", "");
+      expect(delhiState.timeZone).toBe("Asia/Kolkata");
+
+      const indiaCountry = inferTimezoneFromLocation("India", "", "");
+      expect(indiaCountry.timeZone).toBe("Asia/Kolkata");
+    });
+
+    it("infers US regional timezones correctly by city and state", () => {
+      // US Eastern
+      const nyc = inferTimezoneFromLocation("USA", "New York", "New York");
+      expect(nyc.timeZone).toBe("America/New_York");
+      expect(nyc.matchedBy).toBe("city");
+
+      // US Pacific
+      const sf = inferTimezoneFromLocation("United States", "California", "San Francisco");
+      expect(sf.timeZone).toBe("America/Los_Angeles");
+
+      // US Central
+      const chicago = inferTimezoneFromLocation("USA", "Illinois", "Chicago");
+      expect(chicago.timeZone).toBe("America/Chicago");
+
+      // US Mountain
+      const denver = inferTimezoneFromLocation("USA", "Colorado", "Denver");
+      expect(denver.timeZone).toBe("America/Denver");
+
+      // US Arizona (no DST)
+      const phx = inferTimezoneFromLocation("USA", "Arizona", "Phoenix");
+      expect(phx.timeZone).toBe("America/Phoenix");
+    });
+
+    it("infers international timezones for UK, UAE, Singapore, Australia, and Canada", () => {
+      const london = inferTimezoneFromLocation("United Kingdom", "England", "London");
+      expect(london.timeZone).toBe("Europe/London");
+
+      const dubai = inferTimezoneFromLocation("United Arab Emirates", "Dubai", "Dubai");
+      expect(dubai.timeZone).toBe("Asia/Dubai");
+
+      const sgp = inferTimezoneFromLocation("Singapore", "", "Singapore");
+      expect(sgp.timeZone).toBe("Asia/Singapore");
+
+      const sydney = inferTimezoneFromLocation("Australia", "New South Wales", "Sydney");
+      expect(sydney.timeZone).toBe("Australia/Sydney");
+
+      const perth = inferTimezoneFromLocation("Australia", "Western Australia", "Perth");
+      expect(perth.timeZone).toBe("Australia/Perth");
+
+      const toronto = inferTimezoneFromLocation("Canada", "Ontario", "Toronto");
+      expect(toronto.timeZone).toBe("America/Toronto");
+    });
+
+    it("formats timezone offsets and abbreviations accurately", () => {
+      const offset = getTimezoneOffsetString("Asia/Kolkata");
+      expect(offset).toBe("UTC+05:30");
+
+      const abbr = getTimezoneAbbreviation("Asia/Kolkata");
+      expect(abbr).toBe("IST");
+    });
   });
 });
 

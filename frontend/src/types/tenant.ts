@@ -37,6 +37,7 @@ export interface DoctorWeeklySchedule {
 }
 
 export interface DoctorAvailability {
+  timezone?: string;
   days?: string;
   morningHours?: string;
   eveningHours?: string;
