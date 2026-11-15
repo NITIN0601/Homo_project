@@ -11,14 +11,17 @@ Features:
 """
 
 import logging
+import traceback
+import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from core.audit import AuditTraceMiddleware
+from core.audit import AuditTraceMiddleware, record_audit_entry
 from core.config import get_supabase_rest_url, is_mock_enabled, settings
 from core.dependencies import RateLimitExceeded, limiter, rate_limit_handler
-from fastapi import APIRouter, FastAPI, HTTPException, Query
+from fastapi import APIRouter, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from routes.auth import router as auth_router
 from routes.billing import router as billing_router
 from routes.clinical_records import router as clinical_router
@@ -26,6 +29,9 @@ from routes.communications import router as communications_router
 from routes.dispensary import router as dispensary_router
 from routes.hospital import router as hospital_router
 from routes.scheduling import router as scheduling_router
+from routes.telemetry import record_crash_report
+from routes.telemetry import router as telemetry_router
+from schemas.telemetry import scrub_phi_pii
 from services.supabase_service import (
     check_supabase_health,
     clear_admin_alerts,
@@ -72,6 +78,66 @@ app = FastAPI(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
+
+
+@app.exception_handler(Exception)
+async def global_unhandled_exception_handler(request: Request, exc: Exception):
+    """
+    Catches all unhandled server exceptions, strips any PHI/PII, and logs to
+    disk telemetry and forensic audit trail without leaking sensitive patient data.
+    """
+    if isinstance(exc, HTTPException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    incident_id = f"inc-be-{uuid.uuid4().hex[:10]}"
+    tb = traceback.format_exc()
+    sanitized_tb = scrub_phi_pii(tb)
+    sanitized_msg = scrub_phi_pii(str(exc))
+    clean_path = scrub_phi_pii(request.url.path)
+
+    report_data = {
+        "incident_id": incident_id,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "error_name": type(exc).__name__,
+        "error_message": sanitized_msg,
+        "stack_trace": sanitized_tb,
+        "component_stack": None,
+        "url": clean_path,
+        "route": clean_path,
+        "device": {
+            "screen_width": 0,
+            "screen_height": 0,
+            "user_agent": scrub_phi_pii(request.headers.get("user-agent", "server")),
+            "language": scrub_phi_pii(request.headers.get("accept-language", "en")),
+            "platform": "backend-python",
+            "online": True,
+        },
+        "location": {
+            "timezone": "UTC",
+            "locale": "en-US",
+        },
+        "source": f"backend_unhandled:{request.method}:{clean_path}",
+        "user_action": "server_unhandled_exception",
+    }
+
+    record_crash_report(report_data)
+    record_audit_entry({
+        "action": "SERVER_UNHANDLED_EXCEPTION",
+        "incident_id": incident_id,
+        "error_name": type(exc).__name__,
+        "route": clean_path,
+        "method": request.method,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "An unexpected server error occurred.",
+            "incident_id": incident_id,
+            "message": "This issue has been safely recorded for our engineering team without storing any personal or clinical information.",
+        },
+    )
 
 # CORS Middleware
 app.add_middleware(
@@ -166,6 +232,7 @@ api_router.include_router(dispensary_router)
 api_router.include_router(billing_router)
 api_router.include_router(communications_router)
 api_router.include_router(hospital_router)
+api_router.include_router(telemetry_router)
 
 # Mount Clean API Routers (/api/v1 primary + root /api parity)
 app.include_router(api_router, prefix="/api/v1")
