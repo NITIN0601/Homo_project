@@ -1549,5 +1549,32 @@
     "uploaded_by": "mobile_worker_test",
     "uploaded_at": "2026-11-15T17:01:09.185105+00:00",
     "_synced": false
+  },
+  {
+    "id": "bbb66de5-8e91-4baf-b940-5497621f0e29",
+    "file_hash": "sha256_test_hash_b4e375fd5bb74f5eadaf3f9bded612eb",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-15T17:05:42.188815+00:00",
+    "_synced": false
+  },
+  {
+    "id": "325c3075-2234-4730-b6e1-6360dea30502",
+    "file_hash": "sha256_test_hash_10d12240f1cb4fcea875b533771573e4",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-15T17:06:15.312646+00:00",
+    "_synced": false
+  },
+  {
+    "id": "74d02f77-616d-410d-9db9-6a3675a061ec",
+    "file_hash": "sha256_test_hash_cda7199ab5404a80b440468060c8da1a",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-15T17:06:49.511994+00:00",
+    "_synced": false
   }
 ]
