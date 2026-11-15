@@ -19,6 +19,35 @@
     "calendarId": "primary",
     "avatarUrl": "/assets/doctor-default.jpg",
     "bio": "Holistic clinical physician dedicated to evidence-based healthcare and patient-centered clinical care.",
+    "consultationFee": 500,
+    "availability": {
+      "days": "Mon - Fri",
+      "morningHours": "09:00 AM \u2013 1:00 PM",
+      "eveningHours": "3:00 PM \u2013 6:00 PM",
+      "consultationFee": 500,
+      "schedule": {
+        "appointmentOnlyDays": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "walkinDays": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "offDays": [
+          "Saturday",
+          "Sunday"
+        ],
+        "holidays": []
+      },
+      "telemedicineOnly": false
+    },
     "isPrimary": true,
     "isActive": true
   },
@@ -43,6 +72,29 @@
     "calendarId": "primary",
     "avatarUrl": "/assets/doctor-bk.jpg",
     "bio": "Holistic Classical Homeopathy practitioner with clinical specialization in chronic pathologies, constitutional repertorization, and evidence-based patient follow-ups.",
+    "consultationFee": 750,
+    "availability": {
+      "days": "Mon - Sun",
+      "morningHours": "10:30 AM \u2013 1:30 PM",
+      "eveningHours": "6:00 PM \u2013 8:30 PM",
+      "consultationFee": 750,
+      "schedule": {
+        "appointmentOnlyDays": [
+          "Sunday"
+        ],
+        "walkinDays": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ],
+        "offDays": [],
+        "holidays": []
+      },
+      "telemedicineOnly": false
+    },
     "isPrimary": true,
     "isActive": true
   },
@@ -66,6 +118,29 @@
     "calendarId": "primary",
     "avatarUrl": "/assets/doctor-ar.jpg",
     "bio": "Specialist in pediatric and allergic constitutional assessments using repertorization methodologies.",
+    "consultationFee": 800,
+    "availability": {
+      "days": "Mon, Wed, Fri, Sat",
+      "morningHours": "10:00 AM \u2013 2:00 PM",
+      "eveningHours": "5:00 PM \u2013 8:00 PM",
+      "consultationFee": 800,
+      "schedule": {
+        "appointmentOnlyDays": [
+          "Monday",
+          "Wednesday",
+          "Friday",
+          "Saturday"
+        ],
+        "walkinDays": [],
+        "offDays": [
+          "Tuesday",
+          "Thursday",
+          "Sunday"
+        ],
+        "holidays": []
+      },
+      "telemedicineOnly": true
+    },
     "isPrimary": false,
     "isActive": true
   },
@@ -89,6 +164,29 @@
     "calendarId": "primary",
     "avatarUrl": "/assets/doctor-rn.jpg",
     "bio": "Senior Consultant in Internal Medicine with extensive experience in comprehensive multi-disciplinary tele-triage.",
+    "consultationFee": 600,
+    "availability": {
+      "days": "Mon - Fri",
+      "morningHours": "09:00 AM \u2013 1:00 PM",
+      "eveningHours": "4:00 PM \u2013 7:00 PM",
+      "consultationFee": 600,
+      "schedule": {
+        "appointmentOnlyDays": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "walkinDays": [],
+        "offDays": [
+          "Saturday",
+          "Sunday"
+        ],
+        "holidays": []
+      },
+      "telemedicineOnly": true
+    },
     "isPrimary": true,
     "isActive": true
   },
@@ -688,6 +786,195 @@
     "title": "Dr. Sarah Connor, MD",
     "regNo": "REG-2CF855",
     "licenseId": "LIC-DOC-01FEFD",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-3d79e3",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-6896AC",
+    "licenseId": "LIC-DOC-3D79E3",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-0105ba",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-5C746B",
+    "licenseId": "LIC-DOC-0105BA",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-528cfb",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-B90172",
+    "licenseId": "LIC-DOC-528CFB",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-a3dfc0",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-BD4C47",
+    "licenseId": "LIC-DOC-A3DFC0",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-4b6dab",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-496CD2",
+    "licenseId": "LIC-DOC-4B6DAB",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-0c3ad4",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-F7CB59",
+    "licenseId": "LIC-DOC-0C3AD4",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-692f47",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-1C988F",
+    "licenseId": "LIC-DOC-692F47",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-ef45c4",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-848DAA",
+    "licenseId": "LIC-DOC-EF45C4",
+    "email": "sarah.connor@testmed.org",
+    "phone": "+91 98450 12345",
+    "experienceYears": 8,
+    "qualifications": "BHMS, MD",
+    "specialties": [
+      "Integrative Medicine"
+    ],
+    "calendarId": "primary",
+    "avatarUrl": "/assets/doctor-placeholder.jpg",
+    "bio": "Dedicated medical professional providing personalized healthcare.",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "id": "doc-560ce5",
+    "hospitalId": "test-med-center",
+    "name": "Dr. Sarah Connor, MD",
+    "shortName": "Dr. Sarah Connor",
+    "title": "Dr. Sarah Connor, MD",
+    "regNo": "REG-88CC05",
+    "licenseId": "LIC-DOC-560CE5",
     "email": "sarah.connor@testmed.org",
     "phone": "+91 98450 12345",
     "experienceYears": 8,

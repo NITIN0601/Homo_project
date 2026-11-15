@@ -60,6 +60,12 @@ class HospitalOnboardRequest(BaseModel):
     primary_color: str = Field(default="#1e3a8a")
     accent_color: str = Field(default="#0284c7")
 
+    # Operational Hours & Scheduling
+    timezone: str | None = Field(default="Asia/Kolkata", example="Asia/Kolkata")
+    morning_hours: str | None = Field(default="10:00 AM – 01:30 PM", example="10:00 AM – 01:30 PM")
+    evening_hours: str | None = Field(default="05:00 PM – 08:30 PM", example="05:00 PM – 08:30 PM")
+    sunday_policy: str | None = Field(default="Prior Appointment Only", example="Prior Appointment Only")
+
     # Feature / Capability Toggles (What Doctor & Patient can view/use)
     features: dict[str, bool] | None = Field(
         default=None,
@@ -76,6 +82,8 @@ class HospitalOnboardRequest(BaseModel):
     doctor_experience_years: int = Field(default=10, ge=0)
     doctor_specialties: list[str] = Field(default_factory=lambda: ["General Medicine", "Telehealth"])
     doctor_bio: str | None = Field(default=None)
+    doctor_available_days: str | None = Field(default="Monday – Saturday", example="Monday – Saturday")
+    doctor_consultation_fee: float | None = Field(default=750.0, ge=0, example=750.0)
 
 
 class HospitalFeaturesUpdateRequest(BaseModel):

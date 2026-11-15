@@ -97,6 +97,13 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
         "country": payload.get("country", "India"),
         "primary_color": primary_color,
         "accent_color": accent_color,
+        "hours": {
+            "timezone": payload.get("timezone", "Asia/Kolkata"),
+            "morningDisplay": payload.get("morning_hours", "10:00 AM – 01:30 PM"),
+            "eveningDisplay": payload.get("evening_hours", "05:00 PM – 08:30 PM"),
+            "availableDays": payload.get("available_days", "Monday – Saturday"),
+            "sundayPolicy": payload.get("sunday_policy", "Prior Appointment Only"),
+        },
         "features": features,
         "legal": legal,
     }
@@ -121,6 +128,13 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
             "reg_no": payload.get("doctor_reg_no") or f"MED-{clean_id.upper()}-{uuid.uuid4().hex[:4].upper()}",
             "specialties": payload.get("doctor_specialties") or ["General Medicine", "Holistic Health"],
             "bio": payload.get("doctor_bio") or f"Primary clinical consultant for {name}.",
+            "consultation_fee": float(payload.get("doctor_consultation_fee") or 750.0),
+            "availability": {
+                "days": payload.get("doctor_available_days", "Monday – Saturday"),
+                "morning": payload.get("morning_hours", "10:00 AM – 01:30 PM"),
+                "evening": payload.get("evening_hours", "05:00 PM – 08:30 PM"),
+                "consultationFee": float(payload.get("doctor_consultation_fee") or 750.0),
+            },
             "is_primary": True,
         }
         doctor_resp = await _onboard_doctor(doc_payload, actor_email=actor_email)
