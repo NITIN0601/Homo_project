@@ -5,8 +5,8 @@ import {
   PHASE_CONFIG,
   PLACEHOLDERS,
   THEME_GRADIENTS,
-  MOCK_ACCOUNTS,
 } from "../../../config";
+import { MOCK_ACCOUNTS } from "../../../data/mocks";
 import { validateEmail, validateFullName, validatePhone } from "../../../utils/validation";
 
 export interface RegisterFormData {

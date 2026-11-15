@@ -20,3 +20,4 @@ export * from "./navigation";
 export * from "./commerce";
 export * from "./countries";
 export * from "./banks";
+export { MOCK_ACCOUNTS } from "../data/mocks";
