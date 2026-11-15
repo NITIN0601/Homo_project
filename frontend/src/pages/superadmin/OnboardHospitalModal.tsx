@@ -52,6 +52,11 @@ export interface OnboardFormState {
   doctorExp: number;
   doctorSpecialties: string;
   doctorBio: string;
+  doctorFee: number;
+  morningHours: string;
+  eveningHours: string;
+  availableDays: string;
+  sundayPolicy: "Prior Appointment Only" | "Walk-in OPD" | "Closed";
   features: HospitalFeatures;
 }
 
@@ -76,6 +81,11 @@ const getInitialFormState = (): OnboardFormState => ({
   doctorExp: DEFAULT_DOCTOR_CONFIG.defaultExperienceYears,
   doctorSpecialties: DEFAULT_DOCTOR_CONFIG.defaultSpecialties,
   doctorBio: "",
+  doctorFee: 750,
+  morningHours: "10:00 AM – 01:30 PM",
+  eveningHours: "05:00 PM – 08:30 PM",
+  availableDays: "Monday – Saturday",
+  sundayPolicy: "Prior Appointment Only",
   features: { ...DEFAULT_NEW_TENANT_FEATURES },
 });
 
@@ -142,6 +152,13 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
         specialties: sanitizeArrayOfStrings(form.doctorSpecialties, 20, 50),
         phone: sanitizePhone(form.doctorPhone),
         email: cleanDocEmail,
+        consultationFee: Number(form.doctorFee) || 750,
+        availability: {
+          days: form.availableDays,
+          morningHours: form.morningHours,
+          eveningHours: form.eveningHours,
+          consultationFee: Number(form.doctorFee) || 750,
+        },
       };
 
       const newTenant: HospitalTenantConfig = {
@@ -155,6 +172,14 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
         doctor: doctorConfig,
         doctors: [doctorConfig],
         specialties: doctorConfig.specialties,
+        hours: {
+          timezone: "Asia/Kolkata",
+          morningDisplay: form.morningHours,
+          eveningDisplay: form.eveningHours,
+          availableDays: form.availableDays,
+          sundayPolicy: form.sundayPolicy,
+          consultationSlotMinutes: 30,
+        },
         contact: {
           phone: sanitizePhone(form.phone),
           phoneDisplay: sanitizePhone(form.phone),
@@ -289,11 +314,75 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
           </div>
         </div>
 
-        {/* 2. Lead Doctor Section */}
+        {/* 2. Facility Operational Hours & Scheduling */}
+        <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-200/70 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-black text-amber-950 uppercase tracking-wider">
+              2. Facility Consultation Hours &amp; Operating Schedule
+            </p>
+            <span className="text-[10px] bg-amber-200/80 text-amber-900 font-bold px-2 py-0.5 rounded-full">
+              Asia/Kolkata (IST) Standard
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] font-bold text-stone-600 uppercase">
+                Morning Session (Prior Appointment Only)
+              </label>
+              <input
+                type="text"
+                placeholder="10:00 AM – 01:30 PM"
+                value={form.morningHours}
+                onChange={(e) => updateField("morningHours", e.target.value)}
+                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-white outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-stone-600 uppercase">
+                Evening Session (Walk-in OPD)
+              </label>
+              <input
+                type="text"
+                placeholder="05:00 PM – 08:30 PM"
+                value={form.eveningHours}
+                onChange={(e) => updateField("eveningHours", e.target.value)}
+                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] font-bold text-stone-600 uppercase">Operating Days</label>
+              <input
+                type="text"
+                placeholder="e.g. Monday – Saturday"
+                value={form.availableDays}
+                onChange={(e) => updateField("availableDays", e.target.value)}
+                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-stone-600 uppercase">Sunday Consultation Policy</label>
+              <select
+                value={form.sundayPolicy}
+                onChange={(e) => updateField("sundayPolicy", e.target.value as any)}
+                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
+              >
+                <option value="Prior Appointment Only">Prior Appointment Only (Online Booking Confirmed)</option>
+                <option value="Walk-in OPD">Walk-in OPD Open</option>
+                <option value="Closed">Closed on Sunday</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Lead Doctor Section */}
         <div className="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-black text-indigo-950 uppercase tracking-wider">
-              2. Lead Consulting Doctor (Google Login &amp; Credentials)
+              3. Lead Consulting Doctor (Google Login &amp; Credentials)
             </p>
             <span className="text-[10px] bg-indigo-200 text-indigo-900 font-bold px-2 py-0.5 rounded-full">
               Activation Email Dispatched
@@ -372,7 +461,7 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="text-[10px] font-bold text-stone-600 uppercase">Doctor Direct Phone</label>
               <input
@@ -384,10 +473,22 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">Specialties (comma-separated)</label>
+              <label className="text-[10px] font-bold text-stone-600 uppercase">Consultation Fee (INR)</label>
+              <input
+                type="number"
+                min={0}
+                max={50000}
+                placeholder="750"
+                value={form.doctorFee}
+                onChange={(e) => updateField("doctorFee", Number(e.target.value) || 0)}
+                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-stone-600 uppercase">Specialties</label>
               <input
                 type="text"
-                placeholder="e.g. General Medicine, Pulmonology"
+                placeholder="e.g. Classical Homeopathy, Pathology"
                 value={form.doctorSpecialties}
                 onChange={(e) => updateField("doctorSpecialties", e.target.value)}
                 className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
@@ -407,17 +508,17 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
           </div>
         </div>
 
-        {/* 3. Functionality Governance */}
+        {/* 4. Functionality Governance */}
         <div className="space-y-3">
           <p className="text-[11px] font-black text-stone-700 uppercase tracking-wider">
-            3. Layout &amp; Functionality Governance (Super Admin Control)
+            4. Layout &amp; Functionality Governance (Super Admin Control)
           </p>
           <FeatureToggleGroup features={form.features} onChange={handleFeatureToggle} category="all" />
         </div>
 
-        {/* 4. Brand Color Palette */}
+        {/* 5. Brand Color Palette */}
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-stone-500 uppercase">4. Choose Brand Color Palette</label>
+          <label className="text-[10px] font-bold text-stone-500 uppercase">5. Choose Brand Color Palette</label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {DEFAULT_COLOR_PRESETS.map((p) => {
               const isSelected = form.primaryColor === p.primary;

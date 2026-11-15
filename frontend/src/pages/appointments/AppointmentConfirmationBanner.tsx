@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useApp } from "../../context/AppContext";
 import { useTenant } from "../../context/ThemeProvider";
 import { Button, Badge } from "../../components/ui";
-import { CLINIC, THEME_GRADIENTS } from "../../config";
+import { THEME_GRADIENTS } from "../../config";
 import { api } from "../../services/api";
 import type { AppointmentPayload } from "../../types";
 

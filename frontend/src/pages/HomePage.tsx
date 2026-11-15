@@ -42,7 +42,7 @@ const HomePage: React.FC = () => {
           className="font-bold text-sm tracking-wide"
           style={{ color: clinic.branding.primaryColor }}
         >
-          {clinic.tagline}
+          {clinic.tagline || CLINIC.TAGLINE}
         </p>
         <p className="text-stone-500 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto">
           Under the expert clinical care of <strong>{clinic.primaryDoctorName}</strong> ({clinic.primaryDoctorQualifications}). {clinic.primaryDoctorTitle} with {clinic.primaryDoctorExperience} of dedicated clinical experience.

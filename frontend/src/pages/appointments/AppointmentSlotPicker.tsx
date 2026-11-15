@@ -8,9 +8,10 @@ import {
 import { formatDateFull } from "../../utils/format";
 import {
   getClinicDateOperatingStatus,
-  type LocalizedConsultationSlot,
 } from "../../utils/schedulingEngine";
 import type { LocalizedUserSlot } from "../../utils/timezone";
+import type { HospitalDoctor } from "../../types/tenant";
+import type { DoctorSummary } from "../../types";
 
 interface AppointmentSlotPickerProps {
   selectedDate: string;
@@ -18,6 +19,7 @@ interface AppointmentSlotPickerProps {
   onSelectSlot: (s: string, localizedSlot?: LocalizedUserSlot) => void;
   onSelectDate?: (d: string) => void;
   selectedLocalizedSlotKey?: string;
+  selectedDoctor?: HospitalDoctor | DoctorSummary | null;
   error?: string;
 }
 
@@ -27,6 +29,7 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
   onSelectSlot,
   onSelectDate,
   selectedLocalizedSlotKey,
+  selectedDoctor,
   error,
 }) => {
   const { state, userTzInfo, clinicTimeInfo } = useApp();
@@ -43,10 +46,20 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
       .filter(Boolean);
   }, [state.appointments]);
 
+  const activeDoc = selectedDoctor || tenant.doctor;
+
   // Modular Scheduling Engine: compute date availability, elapsed status, and localized slots
   const operatingStatus = useMemo(
-    () => getClinicDateOperatingStatus(selectedDate, userTzInfo.timeZone, bookedSlots, state.blockedDates),
-    [selectedDate, userTzInfo.timeZone, bookedSlots, state.blockedDates]
+    () =>
+      getClinicDateOperatingStatus(
+        selectedDate,
+        userTzInfo.timeZone,
+        bookedSlots,
+        state.blockedDates,
+        tenant.hours,
+        activeDoc
+      ),
+    [selectedDate, userTzInfo.timeZone, bookedSlots, state.blockedDates, tenant.hours, activeDoc]
   );
 
   const onSelectSlotRef = useRef(onSelectSlot);
@@ -152,6 +165,15 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
           <p className="text-amber-800 text-xs font-medium">
             Please choose an upcoming date on the calendar above to view open consultation slots.
           </p>
+          {operatingStatus.suggestedNextDate && onSelectDate && (
+            <button
+              type="button"
+              onClick={() => onSelectDate(operatingStatus.suggestedNextDate!)}
+              className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+            >
+              📅 Jump to Next Available Date ({operatingStatus.suggestedNextDate})
+            </button>
+          )}
         </div>
       )}
 

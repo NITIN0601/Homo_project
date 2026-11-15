@@ -36,6 +36,8 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
   onToggleOrders,
   onClose,
 }) => {
+  if (!authUser) return null;
+
   return (
     <div className="overflow-y-auto">
       {/* Profile header */}

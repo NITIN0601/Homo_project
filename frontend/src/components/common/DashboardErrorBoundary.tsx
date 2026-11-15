@@ -6,6 +6,7 @@ interface DashboardErrorBoundaryProps {
   children: ReactNode;
   dashboardName?: string;
   tabName?: string;
+  featureName?: string;
   onReset?: () => void;
 }
 

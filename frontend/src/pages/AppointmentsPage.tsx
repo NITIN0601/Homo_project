@@ -9,6 +9,7 @@ import {
   MORNING_SLOTS,
   EVENING_SLOTS,
   ALL_TIME_SLOTS,
+  THEME_GRADIENTS,
 } from "../config";
 import { api } from "../services/api";
 import {
@@ -18,9 +19,7 @@ import {
   VALIDATION_MESSAGES,
 } from "../utils/validation";
 import {
-  getClinicTimeInfo,
   isSlotPassed,
-  mapClinicSlotToUserTime,
   isUserSlotPassed,
   type LocalizedUserSlot,
 } from "../utils/timezone";
@@ -101,6 +100,20 @@ function validate(
   if (!v.selectedSlot || !TIME_SLOTS.includes(v.selectedSlot)) {
     e.selectedSlot = VALIDATION_MESSAGES.SLOT_REQUIRED;
   }
+
+  // Validate slot availability using public verification callbacks
+  if (isSlotBookedFn && v.selectedDate && v.selectedSlot && isSlotBookedFn(v.selectedDate, v.selectedSlot)) {
+    e.selectedSlot = "This slot is already reserved by another patient. Please choose another available slot.";
+  }
+  if (isSlotBlockedFn && v.selectedDate && v.selectedSlot) {
+    const blk = isSlotBlockedFn(v.selectedDate, v.selectedSlot);
+    if (blk) {
+      e.selectedSlot = typeof blk === "object" && blk?.reason
+        ? `Doctor is unavailable during this slot: ${blk.reason}. Please select another time.`
+        : "Doctor is unavailable during this time slot. Please choose another slot.";
+    }
+  }
+
   return e;
 }
 
@@ -169,6 +182,23 @@ const AppointmentsPage: React.FC = () => {
   const [continuityLoading, setContinuityLoading] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorSummary | null>(null);
   const [selectedLocalizedSlot, setSelectedLocalizedSlot] = useState<LocalizedUserSlot | null>(null);
+
+  // Active consulting physician for customized hours, bio, and slot generation
+  const activeDoctor = useMemo(() => {
+    return selectedDoctor
+      ? {
+          id: selectedDoctor.id,
+          name: selectedDoctor.name,
+          title: selectedDoctor.title || "Consulting Physician",
+          qualifications: tenant.doctor.qualifications,
+          regNo: tenant.doctor.regNo,
+          experienceYears: tenant.doctor.experienceYears,
+          specialties: selectedDoctor.specialties || tenant.doctor.specialties,
+          aboutText: tenant.doctor.aboutText,
+          availability: (selectedDoctor as any).availability || tenant.doctor.availability,
+        }
+      : tenant.doctor;
+  }, [selectedDoctor, tenant.doctor]);
 
   // Automatically evaluate previous physician continuity when email, phone, or date changes
   useEffect(() => {
@@ -268,7 +298,7 @@ const AppointmentsPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const errs = validate(form);
+    const errs = validate(form, isSlotBooked, isSlotBlocked);
     if (Object.keys(errs).length) {
       setErrors(errs);
       document.getElementById(Object.keys(errs)[0])?.focus();
@@ -408,51 +438,199 @@ const AppointmentsPage: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto" style={{ animation: "fadeInUp 0.4s ease both" }}>
-      {/* Page header */}
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold text-stone-800">📅 Book an Appointment</h1>
-        <p className="text-stone-500 text-sm mt-1">
-          Consultation with <strong>{tenant.doctor.name}</strong> at {tenant.name} ({tenant.contact.address.city}).
-        </p>
-      </div>
-
-      {/* ── Walk-in vs Scheduled Consultation Guide ─────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-        <div className="bg-blue-50/90 border border-blue-200/90 rounded-2xl p-4 text-xs space-y-1.5 shadow-2xs">
-          <div className="flex items-center gap-2 font-extrabold text-blue-950">
-            <span className="text-base">🚶‍♂️</span>
-            <span>Evening Walk-in OPD ({sessionHours.evening.display})</span>
-          </div>
-          <p className="text-blue-900 leading-relaxed text-[11px]">
-            Walk-ins are welcomed directly at{" "}
-            <a
-              href={tenant.contact.mapsUrl || CLINIC.ADDRESS.MAPS_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-bold underline decoration-blue-400 hover:text-blue-950 inline-flex items-center gap-1 cursor-pointer"
-              title={`Open ${tenant.name} on Google Maps`}
-            >
-              <span>{tenant.name} ({tenant.contact.address.street}, {tenant.contact.address.city})</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="opacity-80">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
-            </a>{" "}
-            Monday to Saturday. Tokens are issued at reception upon arrival.
+      {/* Page header with Live Clinic Clock & Timezone Sync */}
+      <div className="mb-5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-stone-200/80 pb-4">
+        <div>
+          <h1 className="text-2xl font-black text-stone-800 tracking-tight flex items-center gap-2">
+            <span>📅</span> Book a Consultation
+          </h1>
+          <p className="text-stone-500 text-xs sm:text-sm mt-0.5">
+            Select a verified appointment slot with {tenant.name} ({tenant.contact.address.city}).
           </p>
         </div>
 
-        <div className="bg-emerald-50/90 border border-emerald-200/90 rounded-2xl p-4 text-xs space-y-1.5 shadow-2xs">
-          <div className="flex items-center gap-2 font-extrabold text-emerald-950">
-            <span className="text-base">📅</span>
-            <span>Prior Appointment Only ({sessionHours.morning.display})</span>
+        {/* Live Clinic Operational Clocks */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="bg-emerald-50 border border-emerald-200/90 rounded-xl px-3 py-1.5 text-[11px] font-semibold text-emerald-900 flex items-center gap-1.5 shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Clinic Clock:</span>
+            <strong className="font-bold">{clinicTimeInfo.formattedTime}</strong>
+            <span className="text-emerald-700 text-[10px]">({clinicTimeInfo.label})</span>
           </div>
-          <p className="text-emerald-900 leading-relaxed text-[11px]">
-            {sessionHours.morning.sessionLabel} consultations (<strong>{sessionHours.morning.display}</strong>) and all <strong>Sunday</strong> visits with <strong>{tenant.doctor.name}</strong> require prior booking using the calendar below.
-          </p>
+          {!userTzInfo.isClinicTimezone && (
+            <div className="bg-stone-100 border border-stone-200 rounded-xl px-3 py-1.5 text-[11px] font-medium text-stone-700 flex items-center gap-1.5 shadow-2xs">
+              <span>🌎 Your Time:</span>
+              <strong className="font-bold">{userTzInfo.formattedTime}</strong>
+              <span className="text-stone-500 text-[10px]">({userTzInfo.label})</span>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* ── Attending Doctor Profile & Clinical Credentials Card ── */}
+      <div className="mb-6 bg-white border border-stone-200/90 rounded-2xl p-5 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-3">
+              <div className="flex items-start gap-3.5">
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white text-base shadow-sm flex-shrink-0"
+                  style={{ background: THEME_GRADIENTS.PRIMARY }}
+                >
+                  {activeDoctor.name
+                    .replace(/^Dr\.\s*/i, "")
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase() || "DR"}
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-base sm:text-lg font-black text-stone-900 leading-tight">
+                      {activeDoctor.name}
+                    </h2>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                      🩺 Attending Physician
+                    </span>
+                  </div>
+                  <p className="text-stone-500 text-xs mt-0.5 font-medium">
+                    {activeDoctor.title} {activeDoctor.qualifications ? `· ${activeDoctor.qualifications}` : ""}
+                  </p>
+                  <p className="text-[11px] text-stone-400 mt-0.5 font-medium flex flex-wrap items-center gap-2">
+                    {activeDoctor.regNo && <span>Reg: <strong className="text-stone-600 font-semibold">{activeDoctor.regNo}</strong></span>}
+                    {activeDoctor.experienceYears && (
+                      <span>· Experience: <strong className="text-stone-600 font-semibold">{activeDoctor.experienceYears}+ Years</strong></span>
+                    )}
+                    <span>· Fee: <strong className="text-emerald-700 font-bold">₹750</strong></span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Multi-Doctor Switcher if multiple doctors exist */}
+              {tenant.doctors && tenant.doctors.length > 1 && (
+                <div className="flex items-center gap-1.5 self-start sm:self-center">
+                  <span className="text-[10px] font-bold text-stone-400 uppercase">Doctor:</span>
+                  <div className="inline-flex rounded-xl bg-stone-100 p-1">
+                    {tenant.doctors.map((d) => {
+                      const isSelected = (selectedDoctor?.name || tenant.doctor.name) === d.name;
+                      return (
+                        <button
+                          key={d.name}
+                          type="button"
+                          onClick={() => {
+                            setSelectedDoctor({
+                              id: d.id || "doc-default",
+                              name: d.name,
+                              title: d.title,
+                              calendar_id: d.email,
+                              specialties: d.specialties || [],
+                              is_active: true,
+                            });
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            isSelected
+                              ? "bg-white text-stone-900 shadow-2xs font-extrabold"
+                              : "text-stone-500 hover:text-stone-800"
+                          }`}
+                        >
+                          {d.name.split(" ")[1] || d.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Specialties & Clinical Philosophy */}
+            {activeDoctor.specialties && activeDoctor.specialties.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mr-1">
+                  Clinical Focus:
+                </span>
+                {activeDoctor.specialties.map((spec) => (
+                  <span
+                    key={spec}
+                    className="px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200/70 text-stone-700 text-[11px] font-semibold"
+                  >
+                    ✦ {spec}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {activeDoctor.aboutText && (
+              <p className="text-stone-600 text-xs leading-relaxed font-normal bg-stone-50/70 rounded-xl p-3 border border-stone-100">
+                {activeDoctor.aboutText}
+              </p>
+            )}
+          </div>
+
+      {/* ── Dynamic Walk-in vs Scheduled Consultation Guide ─────────── */}
+      {(() => {
+        const isTelemedicineClinic = tenant.features.enableTelemedicine && tenant.hours?.walkinAllowed === false;
+        const doctorSchedule = activeDoctor.availability?.schedule;
+        const hasWalkins = !isTelemedicineClinic && (doctorSchedule?.walkinDays ? doctorSchedule.walkinDays.length > 0 : true);
+        const morningHoursDisplay = activeDoctor.availability?.morningHours || sessionHours.morning.display;
+        const eveningHoursDisplay = activeDoctor.availability?.eveningHours || sessionHours.evening.display;
+        const walkinDaysDisplay = doctorSchedule?.walkinDays?.join(", ") || tenant.hours?.walkinDaysSummary || "Monday to Saturday";
+        const apptDaysDisplay = doctorSchedule?.appointmentOnlyDays?.join(", ") || tenant.hours?.appointmentDaysSummary || "Morning sessions & Sundays";
+        const offDaysList = doctorSchedule?.offDays || [];
+
+        if (isTelemedicineClinic || !hasWalkins) {
+          return (
+            <div className="bg-sky-50/90 border border-sky-200/90 rounded-2xl p-4 text-xs space-y-1.5 shadow-2xs mb-6">
+              <div className="flex items-center gap-2 font-extrabold text-sky-950">
+                <span className="text-base">🌐</span>
+                <span>Scheduled Consultations Only (Tele-Care &amp; Dedicated Appointments)</span>
+              </div>
+              <p className="text-sky-900 leading-relaxed text-[11px]">
+                All consultations with <strong>{activeDoctor.name}</strong> at {tenant.name} are scheduled strictly by prior appointment ({morningHoursDisplay} &amp; {eveningHoursDisplay}) to ensure dedicated, unhurried clinical care.
+                {offDaysList.length > 0 && <span className="block mt-1 font-semibold text-sky-950">🏖️ Weekly Off: {offDaysList.join(", ")}</span>}
+              </p>
+            </div>
+          );
+        }
+
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+            <div className="bg-blue-50/90 border border-blue-200/90 rounded-2xl p-4 text-xs space-y-1.5 shadow-2xs">
+              <div className="flex items-center gap-2 font-extrabold text-blue-950">
+                <span className="text-base">🚶‍♂️</span>
+                <span>Walk-in OPD ({eveningHoursDisplay})</span>
+              </div>
+              <p className="text-blue-900 leading-relaxed text-[11px]">
+                Walk-ins welcomed directly at{" "}
+                <a
+                  href={tenant.contact.mapsUrl || CLINIC.ADDRESS.MAPS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold underline decoration-blue-400 hover:text-blue-950 inline-flex items-center gap-1 cursor-pointer"
+                  title={`Open ${tenant.name} on Google Maps`}
+                >
+                  <span>{tenant.name} ({tenant.contact.address.street}, {tenant.contact.address.city})</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="opacity-80">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                </a>{" "}
+                during {walkinDaysDisplay}. Tokens issued at reception upon arrival.
+              </p>
+            </div>
+
+            <div className="bg-emerald-50/90 border border-emerald-200/90 rounded-2xl p-4 text-xs space-y-1.5 shadow-2xs">
+              <div className="flex items-center gap-2 font-extrabold text-emerald-950">
+                <span className="text-base">📅</span>
+                <span>Prior Appointment Only ({morningHoursDisplay})</span>
+              </div>
+              <p className="text-emerald-900 leading-relaxed text-[11px]">
+                {apptDaysDisplay} with <strong>{activeDoctor.name}</strong> require prior booking using the calendar below.
+                {offDaysList.length > 0 && <span className="block mt-1 font-semibold text-emerald-950">🏖️ Weekly Off: {offDaysList.join(", ")}</span>}
+              </p>
+            </div>
+          </div>
+        );
+      })()}
 
       <form id="appointment-form" onSubmit={handleSubmit} noValidate className="space-y-5">
 
@@ -588,6 +766,7 @@ const AppointmentsPage: React.FC = () => {
               setSelectedLocalizedSlot(null);
             }}
             selectedLocalizedSlotKey={selectedLocalizedSlot?.slotKey}
+            selectedDoctor={activeDoctor}
             error={errors.selectedSlot}
           />
         </DashboardErrorBoundary>

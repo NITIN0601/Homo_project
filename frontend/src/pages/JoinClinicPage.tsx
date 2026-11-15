@@ -53,7 +53,7 @@ export const JoinClinicPage: React.FC = () => {
         dispatch({ type: "LOGIN", payload: res.profile });
         setSuccess(true);
         setTimeout(() => {
-          if (res.profile.role === "doctor" || res.profile.role === "admin" || res.profile.role === "super_admin") {
+          if (res.profile.role === "admin" || res.profile.role === "super_admin") {
             navigateTo("admin-dashboard");
           } else {
             navigateTo("visit-summary");
@@ -86,7 +86,7 @@ export const JoinClinicPage: React.FC = () => {
         dispatch({ type: "LOGIN", payload: res.profile });
         setSuccess(true);
         setTimeout(() => {
-          if (res.profile.role === "doctor" || res.profile.role === "admin" || res.profile.role === "super_admin") {
+          if (res.profile.role === "admin" || res.profile.role === "super_admin") {
             navigateTo("admin-dashboard");
           } else {
             navigateTo("visit-summary");

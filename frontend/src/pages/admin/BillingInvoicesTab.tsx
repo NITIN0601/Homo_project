@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import type { ConsultationInvoice, UserProfile } from "../../types";
 import { formatINR, formatDateTime } from "../../utils/format";
-import { Badge, Button } from "../../components/ui";
+import { Button } from "../../components/ui";
 import { InvoiceStatusBadge } from "../../components/common/InvoiceStatusBadge";
 
 interface BillingInvoicesTabProps {
