@@ -726,5 +726,31 @@
     "expires_at": 1795314717.047216,
     "is_claimed": true,
     "claimed_at": "2026-11-15T02:31:57.074713+00:00"
+  },
+  "inv_VEAp1qK3xLtgoXawJm5twmd0YR8uAAPT": {
+    "token": "inv_VEAp1qK3xLtgoXawJm5twmd0YR8uAAPT",
+    "email": "invited_f1b1bd@gmail.com",
+    "name": "Invited Recipient",
+    "role": "patient",
+    "hospital_id": "default",
+    "phone": "",
+    "created_by": "admin",
+    "created_at": "2026-11-15T02:41:07.351451+00:00",
+    "expires_at": 1795315267.351457,
+    "is_claimed": true,
+    "claimed_at": "2026-11-15T02:41:07.360568+00:00"
+  },
+  "inv_7mQj6SPsUUFFIFCJGi4SaRyx8kxXPeXE": {
+    "token": "inv_7mQj6SPsUUFFIFCJGi4SaRyx8kxXPeXE",
+    "email": "alice.invited.6cca3c@example.com",
+    "name": "Invited Patient Alice",
+    "role": "patient",
+    "hospital_id": "test-med-center",
+    "phone": "",
+    "created_by": "admin@agastyahomoeo.com",
+    "created_at": "2026-11-15T02:41:08.653978+00:00",
+    "expires_at": 1795315268.653982,
+    "is_claimed": true,
+    "claimed_at": "2026-11-15T02:41:08.681070+00:00"
   }
 }

@@ -115,6 +115,8 @@ def create_doctor(data: dict[str, Any]) -> dict[str, Any]:
         "calendarId": "primary",
         "avatarUrl": data.get("avatar_url") or "/assets/doctor-placeholder.jpg",
         "bio": data.get("bio") or "Dedicated medical professional providing personalized healthcare.",
+        "consultationFee": float(data.get("consultationFee") or data.get("consultation_fee") or 750.0),
+        "availability": data.get("availability") or {},
         "isPrimary": bool(data.get("is_primary", False)),
         "isActive": True,
     }

@@ -43,7 +43,11 @@
     "patientPhone": "+91 98450 00000",
     "amount": 750,
     "date": "2027-02-09",
-    "status": "unpaid"
+    "status": "pending",
+    "patientId": "p-load-7",
+    "doctorName": "Dr. Primary Physician",
+    "amountINR": 750.0,
+    "description": "Consultation Fee"
   },
   {
     "id": "inv-load-5",

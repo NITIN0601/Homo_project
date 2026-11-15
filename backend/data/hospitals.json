@@ -135,7 +135,7 @@
       "appointmentDaysSummary": "Mon \u2013 Sat Morning (10:30 AM \u2013 1:30 PM) & All Day Sunday"
     },
     "isActive": true,
-    "updatedAt": "2026-11-15T02:31:55.698617+00:00"
+    "updatedAt": "2026-11-15T02:41:07.341375+00:00"
   },
   {
     "id": "apollo",
@@ -1915,6 +1915,52 @@
     "domain": null,
     "subdomains": [
       "test-med-d9f464",
+      "clinic",
+      "ehr"
+    ],
+    "contact": {
+      "phone": "+91 98450 12345",
+      "phoneDisplay": "+91 98450 12345",
+      "email": "contact@testmed.org",
+      "emergencyPhone": "+91 98450 12345",
+      "address": {
+        "street": null,
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "country": "India"
+      }
+    },
+    "branding": {
+      "primaryColor": "#2563eb",
+      "primaryDarkColor": "#115e59",
+      "accentColor": "#14b8a6",
+      "neutralBg": "#fafaf9",
+      "cardRadius": "1.25rem",
+      "buttonRadius": "0.75rem",
+      "logoUrl": "/logo.png"
+    },
+    "features": {
+      "enableECommerce": true,
+      "enableVoiceStudio": true,
+      "enablePrescriptionScan": true,
+      "enableOnlinePayments": true,
+      "enableTelemedicine": true,
+      "enableGoogleReviews": true,
+      "enableInventoryManagement": true,
+      "enableInvoicing": true,
+      "enableExportAudit": true
+    },
+    "isActive": true
+  },
+  {
+    "id": "test-med-b126ff",
+    "slug": "test-med-b126ff",
+    "name": "Test Medical Center",
+    "shortName": "Test Med",
+    "tagline": "Compassionate healthcare",
+    "domain": null,
+    "subdomains": [
+      "test-med-b126ff",
       "clinic",
       "ehr"
     ],

@@ -18,6 +18,7 @@ from typing import Any, Literal
 
 from core.audit import record_audit_entry
 from core.config import settings
+from core.timezone_utils import infer_timezone_from_location
 from services.auth_service import create_user_invite, register_user, validate_email
 from services.doctor_service import create_doctor
 from services.email_service import send_appointment_confirmation, send_doctor_onboarding_email
@@ -97,16 +98,33 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
         "country": payload.get("country", "India"),
         "primary_color": primary_color,
         "accent_color": accent_color,
-        "hours": {
-            "timezone": payload.get("timezone", "Asia/Kolkata"),
-            "morningDisplay": payload.get("morning_hours", "10:00 AM – 01:30 PM"),
-            "eveningDisplay": payload.get("evening_hours", "05:00 PM – 08:30 PM"),
-            "availableDays": payload.get("available_days", "Monday – Saturday"),
-            "sundayPolicy": payload.get("sunday_policy", "Prior Appointment Only"),
-        },
-        "features": features,
-        "legal": legal,
     }
+
+    # Location-based timezone inference: ensures zero ambiguity when entering operational hours
+    country = hospital_record["country"]
+    state = hospital_record["state"]
+    city = hospital_record["city"]
+    explicit_tz = payload.get("timezone")
+
+    if not explicit_tz or (
+        explicit_tz == "Asia/Kolkata"
+        and country
+        and country.strip().lower() not in ["india", "bharat", "in"]
+    ):
+        inferred = infer_timezone_from_location(country=country, state=state, city=city)
+        facility_tz = inferred["timeZone"]
+    else:
+        facility_tz = explicit_tz
+
+    hospital_record["hours"] = {
+        "timezone": facility_tz,
+        "morningDisplay": payload.get("morning_hours", "10:00 AM – 01:30 PM"),
+        "eveningDisplay": payload.get("evening_hours", "05:00 PM – 08:30 PM"),
+        "availableDays": payload.get("available_days", "Monday – Saturday"),
+        "sundayPolicy": payload.get("sunday_policy", "Prior Appointment Only"),
+    }
+    hospital_record["features"] = features
+    hospital_record["legal"] = legal
 
     created_hospital = create_hospital(hospital_record)
 
@@ -130,6 +148,7 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
             "bio": payload.get("doctor_bio") or f"Primary clinical consultant for {name}.",
             "consultation_fee": float(payload.get("doctor_consultation_fee") or 750.0),
             "availability": {
+                "timezone": facility_tz,
                 "days": payload.get("doctor_available_days", "Monday – Saturday"),
                 "morning": payload.get("morning_hours", "10:00 AM – 01:30 PM"),
                 "evening": payload.get("evening_hours", "05:00 PM – 08:30 PM"),
@@ -184,6 +203,13 @@ async def _onboard_doctor(payload: dict[str, Any], actor_email: str) -> dict[str
         "calendarId": "primary",
         "avatarUrl": payload.get("avatar_url") or "/assets/doctor-placeholder.jpg",
         "bio": payload.get("bio") or "Dedicated medical professional providing personalized holistic healthcare.",
+        "consultationFee": float(payload.get("consultation_fee") or payload.get("consultationFee") or 750.0),
+        "availability": payload.get("availability") or {
+            "days": payload.get("available_days", "Monday – Saturday"),
+            "morningHours": payload.get("morning_hours", "10:00 AM – 01:30 PM"),
+            "eveningHours": payload.get("evening_hours", "05:00 PM – 08:30 PM"),
+            "consultationFee": float(payload.get("consultation_fee") or payload.get("consultationFee") or 750.0),
+        },
         "isPrimary": bool(payload.get("is_primary", False)),
         "isActive": True,
         # Doctor-to-Patient Sharing Preferences
