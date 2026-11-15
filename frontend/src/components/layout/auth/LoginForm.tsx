@@ -58,7 +58,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-[11px] space-y-2">
         <div className="flex items-center justify-between">
           <span className="font-extrabold text-emerald-950 flex items-center gap-1">
-            <span>⚡</span> 1-Click Demo Login
+            <span>⚡</span> Simulate Login
           </span>
           <span className="text-[10px] bg-emerald-200 text-emerald-900 font-bold px-1.5 py-0.5 rounded">
             Mock SSOT
@@ -69,7 +69,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             type="button"
             onClick={() => onQuickDemoLogin(DEMO_CREDENTIALS.SUPER_ADMIN.email)}
             className="w-full py-1.5 px-1.5 bg-indigo-900 text-white rounded-lg font-bold text-[10px] hover:bg-indigo-800 transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
-            title="Sign in as Platform Super Administrator"
+            title="Simulate Login as Super Admin"
           >
             <span>⚡</span> Super Admin
           </button>
@@ -77,15 +77,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             type="button"
             onClick={() => onQuickDemoLogin(DEMO_CREDENTIALS.ADMIN.email)}
             className="w-full py-1.5 px-1.5 bg-emerald-800 text-white rounded-lg font-bold text-[10px] hover:bg-emerald-700 transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
-            title="Sign in as Hospital Doctor Admin"
+            title="Simulate Login as Admin"
           >
-            <span>🩺</span> Doctor Admin
+            <span>🩺</span> Admin
           </button>
           <button
             type="button"
             onClick={() => onQuickDemoLogin(DEMO_CREDENTIALS.PATIENT.email)}
             className="w-full py-1.5 px-1.5 bg-white border border-emerald-300 text-emerald-900 rounded-lg font-bold text-[10px] hover:bg-emerald-100 transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
-            title="Sign in as Patient"
+            title="Simulate Login as Patient"
           >
             <span>👤</span> Patient
           </button>

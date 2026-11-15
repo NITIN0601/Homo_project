@@ -79,7 +79,9 @@ export const DemoHeaderBanner: React.FC = () => {
         <div className="flex items-center flex-wrap gap-2">
           {/* Quick-switch simulated identities */}
           <div className="flex items-center gap-1 bg-stone-800/80 p-0.5 rounded-lg border border-stone-700/60 text-[10px]">
-            <span className="px-1.5 text-stone-400 font-semibold">Switch Role:</span>
+            <span className="px-1.5 text-stone-300 font-bold uppercase tracking-wider text-[9px] flex items-center gap-1">
+              <span>⚡</span> Simulate Login:
+            </span>
 
             {/* 1. Super Admin Role & Console */}
             <button
@@ -87,12 +89,12 @@ export const DemoHeaderBanner: React.FC = () => {
                 login(MOCK_ACCOUNTS[DEMO_CREDENTIALS.SUPER_ADMIN.email].profile);
                 navigateTo("super-admin-dashboard");
               }}
-              className={`px-2 py-0.5 rounded font-bold transition-colors cursor-pointer flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded font-bold transition-all cursor-pointer flex items-center gap-1 ${
                 isSuperAdminPage || isSuperAdminRole
-                  ? "bg-indigo-600 text-white shadow-xs"
+                  ? "bg-indigo-600 text-white shadow-xs ring-1 ring-indigo-400"
                   : "text-stone-300 hover:text-white hover:bg-stone-700"
               }`}
-              title="Switch identity to Platform Super Administrator"
+              title="Simulate Login as Super Admin"
             >
               <span>⚡</span> Super Admin
             </button>
@@ -103,14 +105,14 @@ export const DemoHeaderBanner: React.FC = () => {
                 login(MOCK_ACCOUNTS[DEMO_CREDENTIALS.ADMIN.email].profile);
                 navigateTo("admin-dashboard");
               }}
-              className={`px-2 py-0.5 rounded font-bold transition-colors cursor-pointer flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded font-bold transition-all cursor-pointer flex items-center gap-1 ${
                 isAdminPage || isAdminRole
-                  ? "bg-emerald-600 text-white shadow-xs"
+                  ? "bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-400"
                   : "text-stone-300 hover:text-white hover:bg-stone-700"
               }`}
-              title={`Switch identity to Admin Doctor (${doctorShortName})`}
+              title={`Simulate Login as Admin (${doctorShortName})`}
             >
-              <span>🩺</span> Doctor Admin
+              <span>🩺</span> Admin
             </button>
 
             {/* 3. Patient Role & Portal */}
@@ -119,14 +121,14 @@ export const DemoHeaderBanner: React.FC = () => {
                 login(MOCK_ACCOUNTS[DEMO_CREDENTIALS.PATIENT.email].profile);
                 navigateTo("home");
               }}
-              className={`px-2 py-0.5 rounded font-bold transition-colors cursor-pointer flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded font-bold transition-all cursor-pointer flex items-center gap-1 ${
                 !isSuperAdminPage && !isAdminPage && authUser?.id === "usr-001"
-                  ? "bg-emerald-600 text-white shadow-xs"
+                  ? "bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-400"
                   : "text-stone-300 hover:text-white hover:bg-stone-700"
               }`}
-              title="Switch identity to Patient John Doe"
+              title="Simulate Login as Patient (John)"
             >
-              <span>👤</span> Patient (John)
+              <span>👤</span> Patient
             </button>
 
             {/* 4. Second Patient */}
@@ -135,12 +137,12 @@ export const DemoHeaderBanner: React.FC = () => {
                 login(MOCK_ACCOUNTS[DEMO_CREDENTIALS.PATIENT2.email].profile);
                 navigateTo("home");
               }}
-              className={`px-2 py-0.5 rounded font-bold transition-colors cursor-pointer ${
+              className={`px-2 py-1 rounded font-bold transition-colors cursor-pointer ${
                 !isSuperAdminPage && !isAdminPage && authUser?.id === "usr-002"
-                  ? "bg-emerald-600 text-white shadow-xs"
-                  : "text-stone-300 hover:text-white hover:bg-stone-700"
+                  ? "bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-400"
+                  : "text-stone-400 hover:text-white hover:bg-stone-700"
               }`}
-              title="Switch identity to Patient Priya Sharma"
+              title="Simulate Login as Patient (Priya)"
             >
               👩 Priya
             </button>
