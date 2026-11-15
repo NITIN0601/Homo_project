@@ -72,8 +72,12 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
         "enableFollowupFeedback": True,
         "enableOnlinePayments": True,
         "enableCustomerPayments": True,
+        "enableGoogleReviews": True,
+        "enableAgastyaBot": True,
+        "enablePatientProfileEdit": True,
         "allowDoctorDirectContact": True,
         "allowDoctorCustomBio": True,
+        "allowDoctorSpecialties": True,
     }
     features = {**default_features, **(payload.get("features") or {})}
 
@@ -99,6 +103,9 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
         "country": payload.get("country", "India"),
         "primary_color": primary_color,
         "accent_color": accent_color,
+        "logo_url": payload.get("logo_url") or payload.get("branding", {}).get("logoUrl") or "/generic-clinic-logo.svg",
+        "banner_url": payload.get("banner_url") or payload.get("branding", {}).get("bannerUrl") or "/assets/banner.jpg",
+        "about_clinic_text": payload.get("about_clinic_text") or payload.get("branding", {}).get("aboutClinicText"),
     }
 
     # Location-based timezone inference: ensures zero ambiguity when entering operational hours

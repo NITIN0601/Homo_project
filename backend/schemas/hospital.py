@@ -21,6 +21,9 @@ class HospitalCreateRequest(BaseModel):
     currency_symbol: str | None = Field(default=None, example="₹")
     primary_color: str = Field(default="#0d9488", example="#0d9488")
     accent_color: str = Field(default="#14b8a6", example="#14b8a6")
+    logo_url: str | None = Field(default="/generic-clinic-logo.svg", example="/generic-clinic-logo.svg")
+    banner_url: str | None = Field(default="/assets/banner.jpg", example="/assets/banner.jpg")
+    about_clinic_text: str | None = Field(default=None, example="Specialized outpatient medical facility.")
     features: dict[str, bool] | None = Field(
         default=None,
         description="Feature flag overrides (enableECommerce, enableVoiceStudio, etc.)",
@@ -63,6 +66,9 @@ class HospitalOnboardRequest(BaseModel):
     currency_symbol: str | None = Field(default=None, example="₹")
     primary_color: str = Field(default="#1e3a8a")
     accent_color: str = Field(default="#0284c7")
+    logo_url: str | None = Field(default="/generic-clinic-logo.svg", example="/generic-clinic-logo.svg")
+    banner_url: str | None = Field(default="/assets/banner.jpg", example="/assets/banner.jpg")
+    about_clinic_text: str | None = Field(default=None, example="Comprehensive health center dedicated to clinical precision.")
 
     # Operational Hours & Scheduling
     timezone: str | None = Field(default="Asia/Kolkata", example="Asia/Kolkata")
