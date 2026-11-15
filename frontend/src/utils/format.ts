@@ -4,13 +4,16 @@
  */
 
 import { COMMERCE_CONFIG } from "../config/commerce";
+import { formatCurrency, inferCurrencyFromCountry, SUPPORTED_CURRENCIES, type CurrencyInfo } from "./currency";
+
+export { formatCurrency, inferCurrencyFromCountry, SUPPORTED_CURRENCIES, type CurrencyInfo };
 
 /**
  * Format an amount in INR with Indian comma separators and the rupee symbol.
  * Example: 1450 -> "₹1,450"
  */
 export function formatINR(amount: number): string {
-  return `${COMMERCE_CONFIG.CURRENCY_SYMBOL}${amount.toLocaleString(COMMERCE_CONFIG.CURRENCY_LOCALE)}`;
+  return formatCurrency(amount, COMMERCE_CONFIG.CURRENCY_CODE, COMMERCE_CONFIG.CURRENCY_SYMBOL);
 }
 
 /**

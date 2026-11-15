@@ -18,6 +18,7 @@ from typing import Any, Literal
 
 from core.audit import record_audit_entry
 from core.config import settings
+from core.currency_utils import infer_currency_from_country
 from core.timezone_utils import infer_timezone_from_location
 from services.auth_service import create_user_invite, register_user, validate_email
 from services.doctor_service import create_doctor
@@ -116,6 +117,13 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
     else:
         facility_tz = explicit_tz
 
+    # Location-based currency resolution: ensures local billing per country
+    curr_info = infer_currency_from_country(country)
+    facility_currency = payload.get("currency") or curr_info["code"]
+    facility_symbol = payload.get("currency_symbol") or curr_info["symbol"]
+
+    hospital_record["currency"] = facility_currency
+    hospital_record["currencySymbol"] = facility_symbol
     hospital_record["hours"] = {
         "timezone": facility_tz,
         "morningDisplay": payload.get("morning_hours", "10:00 AM – 01:30 PM"),

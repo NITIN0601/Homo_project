@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import type { UserProfile, ConsultationInvoice } from "../../../types";
 import { useTenant } from "../../../context/ThemeProvider";
 import { CLINIC } from "../../../config";
-import { formatINR, formatDateISO, formatDateTime } from "../../../utils/format";
+import { formatCurrency, formatDateISO, formatDateTime } from "../../../utils/format";
 import { Modal, Button, Input, Textarea } from "../../../components/ui";
 
 interface PostConsultationFeeModalProps {
@@ -38,6 +38,9 @@ export const PostConsultationFeeModal: React.FC<PostConsultationFeeModalProps> =
       doctorName: tenant.doctor.title || CLINIC.DOCTOR_TITLE,
       visitDate: feeDate || formatDateISO(),
       amountINR: Number(feeAmount) || 750,
+      amount: Number(feeAmount) || 750,
+      currency: tenant.currency || "INR",
+      currencySymbol: tenant.currencySymbol || "₹",
       consultationType: feeType,
       notes: feeNotes.trim() || "Consultation fee for clinical case analysis",
       status: feeInitialStatus,
@@ -48,7 +51,7 @@ export const PostConsultationFeeModal: React.FC<PostConsultationFeeModalProps> =
     };
 
     onPostInvoice(newInvoice);
-    setSuccessMessage(`✓ Consultation fee of ${formatINR(newInvoice.amountINR)} posted for ${patient.name}!`);
+    setSuccessMessage(`✓ Consultation fee of ${formatCurrency(newInvoice.amount ?? newInvoice.amountINR, tenant.currency, tenant.currencySymbol)} posted for ${patient.name}!`);
     setTimeout(() => {
       setSuccessMessage(null);
       onClose();
@@ -79,7 +82,7 @@ export const PostConsultationFeeModal: React.FC<PostConsultationFeeModalProps> =
             size="sm"
             className="bg-amber-600 hover:bg-amber-700 text-white font-bold"
           >
-            <span>💳</span> Post Fee Invoice ({formatINR(feeAmount)}) →
+            <span>💳</span> Post Fee Invoice ({formatCurrency(feeAmount, tenant.currency, tenant.currencySymbol)}) →
           </Button>
         </div>
       }
@@ -118,9 +121,9 @@ export const PostConsultationFeeModal: React.FC<PostConsultationFeeModalProps> =
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
-              Consultation Fee Amount (INR ₹)
+              Consultation Fee Amount ({tenant.currency || "INR"} {tenant.currencySymbol || "₹"})
             </label>
-            <span className="text-[10px] text-stone-400">Standard: ₹750</span>
+            <span className="text-[10px] text-stone-400">Standard: {tenant.currencySymbol || "₹"}{tenant.doctor.consultationFee || 750}</span>
           </div>
 
           <div className="flex items-center gap-2 mb-2">
@@ -135,7 +138,7 @@ export const PostConsultationFeeModal: React.FC<PostConsultationFeeModalProps> =
                     : "bg-stone-100 border-stone-200 text-stone-700 hover:bg-stone-200"
                 }`}
               >
-                {formatINR(amt)}
+                {formatCurrency(amt, tenant.currency, tenant.currencySymbol)}
               </button>
             ))}
           </div>

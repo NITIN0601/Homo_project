@@ -158,6 +158,8 @@ export interface HospitalTenantConfig {
   doctors?: HospitalDoctor[];      // Multi-doctor roster for scalable multi-physician clinics
   specialties?: string[];          // Hospital-level clinical specialties & treated care areas
   hours?: HospitalHoursConfig;     // Operating hours, session windows & Sunday consultation policy
+  currency?: string;               // Local billing currency: "INR" | "USD" | "GBP" | "AED" | "EUR" | "CAD" | "AUD" | "SGD"
+  currencySymbol?: string;         // Local currency display symbol: "₹" | "$" | "£" | "AED" | "€" | "C$" | "A$" | "S$"
   contact: HospitalContact;
   branding: HospitalBranding;
   features: HospitalFeatures;

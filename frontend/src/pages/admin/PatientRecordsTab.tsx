@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import type { UserProfile, VisitSummaryRecord, ConsultationInvoice, PatientClinicalMedia } from "../../types";
 import { CLINIC } from "../../config";
 import { MEDICINE_CATALOGUE } from "../../context/AppContext";
-import { formatINR, formatDateTime, splitFullName } from "../../utils/format";
+import { formatCurrency, formatDateTime, splitFullName } from "../../utils/format";
 import { useTenant } from "../../context/ThemeProvider";
 import { Badge, Button } from "../../components/ui";
 import { PrescribedRemediesList } from "../../components/common";
@@ -447,7 +447,7 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
                                 <span className="font-mono font-bold text-[10px] bg-stone-900 text-amber-400 px-2 py-0.5 rounded">
                                   #{inv.id}
                                 </span>
-                                <strong className="text-stone-900">{formatINR(inv.amountINR)}</strong>
+                                <strong className="text-stone-900">{formatCurrency(inv.amount ?? inv.amountINR, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}</strong>
                                 <span className="text-stone-500 text-[11px]">· {inv.consultationType}</span>
                                 <span
                                   className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${

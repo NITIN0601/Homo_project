@@ -3,7 +3,7 @@ import { useApp, MEDICINE_CATALOGUE } from "../context/AppContext";
 import { useTenant } from "../context/ThemeProvider";
 import type { VisitSummaryRecord, ConsultationInvoice } from "../types";
 import { CLINIC } from "../config";
-import { formatINR } from "../utils/format";
+import { formatCurrency } from "../utils/format";
 import { Button, Tabs } from "../components/ui";
 import { DashboardErrorBoundary } from "../components/common/DashboardErrorBoundary";
 
@@ -196,7 +196,7 @@ export const VisitSummaryPage: React.FC = () => {
         icon: "💳",
         badge: pendingInvoices.length > 0 ? (
           <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-400 text-stone-950 animate-pulse">
-            {pendingInvoices.length} Due ({formatINR(totalPendingINR)})
+            {pendingInvoices.length} Due ({formatCurrency(totalPendingINR, tenant.currency, tenant.currencySymbol)})
           </span>
         ) : processingInvoices.length > 0 ? (
           <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-sky-400 text-stone-950 animate-pulse">

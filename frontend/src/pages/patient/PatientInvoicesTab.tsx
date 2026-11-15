@@ -2,7 +2,7 @@ import React from "react";
 import { useTenant } from "../../context/ThemeProvider";
 import type { ConsultationInvoice } from "../../types";
 import { CLINIC } from "../../config";
-import { formatINR } from "../../utils/format";
+import { formatCurrency } from "../../utils/format";
 import { Button, Badge } from "../../components/ui";
 import { InvoiceSummaryMetrics, InvoiceStatusBadge } from "../../components/common";
 
@@ -44,6 +44,8 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
           totalPaidINR,
           paidCount: paidInvoices.length,
         }}
+        currency={tenant.currency}
+        currencySymbol={tenant.currencySymbol}
       />
 
       {/* ── Consultation Fees & Online Invoicing ───────────────────────── */}
@@ -96,7 +98,7 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
                         Amount Due
                       </span>
                       <span className="text-xl font-black text-stone-900">
-                        {formatINR(inv.amountINR)}
+                        {formatCurrency(inv.amount ?? inv.amountINR, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}
                       </span>
                     </div>
 
@@ -107,7 +109,7 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
                         onClick={() => onPayInvoice(inv)}
                         className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-black"
                       >
-                        <span>💳</span> Settle Fee Online ({formatINR(inv.amountINR)}) →
+                        <span>💳</span> Settle Fee Online ({formatCurrency(inv.amount ?? inv.amountINR, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}) →
                       </Button>
                     ) : (
                       <div className="bg-stone-100 text-stone-600 px-3 py-1.5 rounded-xl text-xs font-semibold border border-stone-200">
@@ -166,7 +168,7 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
                       Submitted Amount
                     </span>
                     <span className="text-xl font-black text-stone-900">
-                      {formatINR(inv.amountINR)}
+                      {formatCurrency(inv.amount ?? inv.amountINR, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}
                     </span>
                   </div>
                 </div>
@@ -239,7 +241,7 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
                       <span className="font-mono text-[10px] font-bold bg-stone-100 text-stone-700 px-2 py-0.5 rounded">
                         #{inv.id}
                       </span>
-                      <strong className="text-stone-900 font-bold">{formatINR(inv.amountINR)}</strong>
+                      <strong className="text-stone-900 font-bold">{formatCurrency(inv.amount ?? inv.amountINR, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}</strong>
                       <span className="text-stone-500">· {inv.consultationType}</span>
                       <InvoiceStatusBadge status={inv.status} size="micro" />
                     </div>

@@ -2,7 +2,7 @@ import React from "react";
 import { useTenant } from "../../../context/ThemeProvider";
 import type { ConsultationInvoice } from "../../../types";
 import { CLINIC, DOCTOR } from "../../../config";
-import { formatINR } from "../../../utils/format";
+import { formatCurrency } from "../../../utils/format";
 import { Button, Modal } from "../../../components/ui";
 
 interface ReceiptModalProps {
@@ -15,6 +15,12 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   onClose,
 }) => {
   const { tenant } = useTenant();
+
+  if (!invoice) return null;
+
+  const currencyCode = invoice.currency || tenant.currency || "INR";
+  const currencySymbol = invoice.currencySymbol || tenant.currencySymbol || "₹";
+  const amount = invoice.amount ?? invoice.amountINR;
 
   return (
     <Modal
@@ -83,7 +89,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 <tr>
                   <th className="p-3">Description</th>
                   <th className="p-3 text-right">Qty</th>
-                  <th className="p-3 text-right">Amount (INR)</th>
+                  <th className="p-3 text-right">Amount ({currencyCode})</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -93,18 +99,18 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                     <span className="text-[11px] text-stone-500">{invoice.notes || "Case taking evaluation & analysis"}</span>
                   </td>
                   <td className="p-3 text-right font-mono">1</td>
-                  <td className="p-3 text-right font-bold text-stone-900">{formatINR(invoice.amountINR)}</td>
+                  <td className="p-3 text-right font-bold text-stone-900">{formatCurrency(amount, currencyCode, currencySymbol)}</td>
                 </tr>
                 <tr className="bg-stone-50/50 text-stone-500 text-[11px]">
-                  <td className="p-3" colSpan={2}>CGST (0%) & SGST (0%) — Healthcare Services Exemption</td>
-                  <td className="p-3 text-right font-mono">₹0.00</td>
+                  <td className="p-3" colSpan={2}>Healthcare Services / Professional Consultation</td>
+                  <td className="p-3 text-right font-mono">{formatCurrency(0, currencyCode, currencySymbol)}</td>
                 </tr>
               </tbody>
               <tfoot className="bg-stone-900 text-white font-bold">
                 <tr>
                   <td className="p-3 text-sm" colSpan={2}>Total Amount Paid</td>
                   <td className="p-3 text-right text-base text-amber-400 font-mono">
-                    {formatINR(invoice.amountINR)}
+                    {formatCurrency(amount, currencyCode, currencySymbol)}
                   </td>
                 </tr>
               </tfoot>

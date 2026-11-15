@@ -25,6 +25,7 @@ import {
   getTimezoneOffsetString,
   getTimezoneAbbreviation,
 } from "../../utils/timezone";
+import { inferCurrencyFromCountry } from "../../utils/currency";
 
 export interface OnboardHospitalModalProps {
   isOpen: boolean;
@@ -114,6 +115,10 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
   const detectedTz = useMemo(() => {
     return inferTimezoneFromLocation(form.country, form.state, form.city);
   }, [form.country, form.state, form.city]);
+
+  const detectedCurrency = useMemo(() => {
+    return inferCurrencyFromCountry(form.country);
+  }, [form.country]);
 
   const activeTimezoneDetails = useMemo(() => {
     const tz = form.timezone || detectedTz.timeZone;
@@ -229,6 +234,8 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
         doctor: doctorConfig,
         doctors: [doctorConfig],
         specialties: doctorConfig.specialties,
+        currency: detectedCurrency.code,
+        currencySymbol: detectedCurrency.symbol,
         hours: {
           timezone: effectiveTz,
           morningDisplay: form.morningHours,
@@ -468,6 +475,22 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
               )}
             </div>
           </div>
+
+          {/* Location Currency Indicator */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 bg-emerald-50/70 rounded-xl border border-emerald-200/80 text-xs gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-base">💰</span>
+              <div>
+                <span className="font-bold text-emerald-950">Local Billing Currency:</span>{" "}
+                <span className="font-mono font-bold text-emerald-900 bg-white px-2 py-0.5 rounded border border-emerald-300">
+                  {detectedCurrency.name} ({detectedCurrency.symbol})
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] text-emerald-800 font-medium">
+              Bills, patient invoices &amp; doctor fees will be raised in this location currency
+            </span>
+          </div>
         </div>
 
         {/* 2. Facility Operational Hours & Scheduling */}
@@ -629,7 +652,7 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">Consultation Fee (INR)</label>
+              <label className="text-[10px] font-bold text-stone-600 uppercase">Consultation Fee ({detectedCurrency.code} {detectedCurrency.symbol})</label>
               <input
                 type="number"
                 min={0}

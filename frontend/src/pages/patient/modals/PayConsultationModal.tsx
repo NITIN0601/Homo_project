@@ -3,7 +3,7 @@ import { useApp } from "../../../context/AppContext";
 import { useTenant } from "../../../context/ThemeProvider";
 import type { ConsultationInvoice } from "../../../types";
 import { CLINIC, DOCTOR, INDIAN_BANKS } from "../../../config";
-import { formatINR, formatDateTime } from "../../../utils/format";
+import { formatCurrency, formatDateTime } from "../../../utils/format";
 import { sanitizeText } from "../../../utils/sanitize";
 import { Button, Modal, Input } from "../../../components/ui";
 
@@ -37,6 +37,10 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
   const [cardExpiry, setCardExpiry] = useState<string>("12/28");
   const [cardCvv, setCardCvv] = useState<string>("•••");
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
+
+  const displayCurrency = payingInvoice?.currency || tenant.currency;
+  const displaySymbol = payingInvoice?.currencySymbol || tenant.currencySymbol || "₹";
+  const displayAmount = payingInvoice ? (payingInvoice.amount ?? payingInvoice.amountINR) : 0;
 
   const filteredBanks = useMemo(() => {
     if (!bankSearchQuery.trim()) return INDIAN_BANKS;
@@ -116,7 +120,7 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
               className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-black"
             >
               <span>📤 Submit Payment for Verification</span>
-              <span>({formatINR(payingInvoice.amountINR)}) →</span>
+              <span>({formatCurrency(displayAmount, displayCurrency, displaySymbol)}) →</span>
             </Button>
           </div>
         ) : undefined
@@ -136,7 +140,7 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
             </div>
             <div className="text-right">
               <span className="text-[10px] text-stone-500 uppercase tracking-wider block">Total Amount</span>
-              <span className="text-xl font-black text-stone-900">{formatINR(payingInvoice.amountINR)}</span>
+              <span className="text-xl font-black text-stone-900">{formatCurrency(displayAmount, displayCurrency, displaySymbol)}</span>
             </div>
           </div>
 
@@ -209,7 +213,7 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
                       {DOCTOR.UPI_ID}
                     </p>
                     <p className="text-[11px] text-stone-500">
-                      Scan with GPay, PhonePe, Paytm, or BHIM to send {formatINR(payingInvoice.amountINR)} directly to {tenant.doctor.title || CLINIC.DOCTOR_TITLE}.
+                      Scan with GPay, PhonePe, Paytm, or BHIM to send {formatCurrency(displayAmount, displayCurrency, displaySymbol)} directly to {tenant.doctor.title || CLINIC.DOCTOR_TITLE}.
                     </p>
                   </div>
                 </div>

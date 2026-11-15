@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { ConsultationInvoice } from "../../../types";
-import { formatINR } from "../../../utils/format";
+import { formatCurrency } from "../../../utils/format";
 import { sanitizeAlphanumeric } from "../../../utils/sanitize";
 import { Modal, Input, Button } from "../../../components/ui";
 
@@ -80,7 +80,9 @@ export const UtrReconciliationModal: React.FC<UtrReconciliationModalProps> = ({
           </div>
           <div className="text-right">
             <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">Consultation Fee</span>
-            <span className="text-lg font-black text-emerald-800">{formatINR(invoice.amountINR)}</span>
+            <span className="text-lg font-black text-emerald-800">
+              {formatCurrency(invoice.amount ?? invoice.amountINR, invoice.currency, invoice.currencySymbol)}
+            </span>
           </div>
         </div>
 

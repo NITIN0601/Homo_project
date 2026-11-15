@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import type { ConsultationInvoice, UserProfile } from "../../types";
-import { formatINR, formatDateTime } from "../../utils/format";
+import { formatCurrency, formatDateTime } from "../../utils/format";
+import { useTenant } from "../../context/ThemeProvider";
 import { Button } from "../../components/ui";
 import { InvoiceStatusBadge } from "../../components/common/InvoiceStatusBadge";
 
@@ -21,6 +22,7 @@ export const BillingInvoicesTab: React.FC<BillingInvoicesTabProps> = ({
   onUpdateStatus,
   onOpenPostFeeModal,
 }) => {
+  const { tenant } = useTenant();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "processing" | "paid">("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -105,7 +107,7 @@ export const BillingInvoicesTab: React.FC<BillingInvoicesTabProps> = ({
           <span className="text-[10px] font-extrabold text-stone-400 uppercase tracking-wider block">
             Total Billed
           </span>
-          <p className="text-xl font-black text-stone-900">{formatINR(stats.totalBilled)}</p>
+          <p className="text-xl font-black text-stone-900">{formatCurrency(stats.totalBilled, tenant.currency, tenant.currencySymbol)}</p>
           <p className="text-[11px] text-stone-500">{stats.totalCount} Invoices Total</p>
         </div>
 
@@ -113,7 +115,7 @@ export const BillingInvoicesTab: React.FC<BillingInvoicesTabProps> = ({
           <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">
             ✓ Collected &amp; Settled
           </span>
-          <p className="text-xl font-black text-emerald-900">{formatINR(stats.totalPaid)}</p>
+          <p className="text-xl font-black text-emerald-900">{formatCurrency(stats.totalPaid, tenant.currency, tenant.currencySymbol)}</p>
           <p className="text-[11px] text-emerald-700">{stats.paidCount} Paid Invoices</p>
         </div>
 
@@ -122,7 +124,7 @@ export const BillingInvoicesTab: React.FC<BillingInvoicesTabProps> = ({
             <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
             Verification Needed
           </span>
-          <p className="text-xl font-black text-sky-950">{formatINR(stats.totalProcessing)}</p>
+          <p className="text-xl font-black text-sky-950">{formatCurrency(stats.totalProcessing, tenant.currency, tenant.currencySymbol)}</p>
           <p className="text-[11px] text-sky-800">{stats.processingCount} Awaiting UTR Verification</p>
         </div>
 
@@ -130,7 +132,7 @@ export const BillingInvoicesTab: React.FC<BillingInvoicesTabProps> = ({
           <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">
             ⏳ Awaiting Payment
           </span>
-          <p className="text-xl font-black text-amber-900">{formatINR(stats.totalPending)}</p>
+          <p className="text-xl font-black text-amber-900">{formatCurrency(stats.totalPending, tenant.currency, tenant.currencySymbol)}</p>
           <p className="text-[11px] text-amber-700">{stats.pendingCount} Pending Invoices</p>
         </div>
       </div>
@@ -224,7 +226,7 @@ export const BillingInvoicesTab: React.FC<BillingInvoicesTabProps> = ({
                     #{inv.id}
                   </span>
                   <span className="font-extrabold text-stone-900 text-base">
-                    {formatINR(inv.amountINR)}
+                    {formatCurrency(inv.amount ?? inv.amountINR, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}
                   </span>
                   <strong className="text-stone-800 text-xs">· {inv.patientName}</strong>
                   <span className="font-mono text-stone-400 text-[11px]">({inv.patientId})</span>

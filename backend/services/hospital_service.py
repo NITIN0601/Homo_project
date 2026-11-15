@@ -144,6 +144,10 @@ def create_hospital(data: dict[str, Any]) -> dict[str, Any]:
         "tagline": data.get("tagline", "Quality patient-first healthcare"),
         "domain": data.get("domain", f"{h_id}.org"),
         "subdomains": [h_id, "clinic", "ehr"],
+        "currency": data.get("currency") or "INR",
+        "currencySymbol": data.get("currencySymbol") or "₹",
+        "hours": data.get("hours"),
+        "legal": data.get("legal"),
         "contact": {
             "phone": data.get("phone", "+91 98450 12345"),
             "phoneDisplay": data.get("phone", "+91 98450 12345"),

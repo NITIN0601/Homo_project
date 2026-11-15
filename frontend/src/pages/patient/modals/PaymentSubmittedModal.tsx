@@ -2,7 +2,7 @@ import React from "react";
 import { useTenant } from "../../../context/ThemeProvider";
 import type { ConsultationInvoice } from "../../../types";
 import { CLINIC } from "../../../config";
-import { formatINR } from "../../../utils/format";
+import { formatCurrency } from "../../../utils/format";
 import { Button, Modal } from "../../../components/ui";
 
 interface PaymentSubmittedModalProps {
@@ -37,7 +37,7 @@ export const PaymentSubmittedModal: React.FC<PaymentSubmittedModalProps> = ({
 
           <div>
             <p className="text-xs text-stone-500 mt-1">
-              Your payment submission of <strong className="text-stone-900">{formatINR(paymentSuccessData.invoice.amountINR)}</strong> has been recorded and forwarded to the doctor.
+              Your payment submission of <strong className="text-stone-900">{formatCurrency(paymentSuccessData.invoice.amount ?? paymentSuccessData.invoice.amountINR, paymentSuccessData.invoice.currency || tenant.currency, paymentSuccessData.invoice.currencySymbol || tenant.currencySymbol)}</strong> has been recorded and forwarded to the doctor.
             </p>
           </div>
 

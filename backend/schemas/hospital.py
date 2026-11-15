@@ -17,6 +17,8 @@ class HospitalCreateRequest(BaseModel):
     city: str | None = Field(default="Bengaluru", example="Bengaluru")
     state: str | None = Field(default="Karnataka", example="Karnataka")
     country: str | None = Field(default="India", example="India")
+    currency: str | None = Field(default=None, example="INR")
+    currency_symbol: str | None = Field(default=None, example="₹")
     primary_color: str = Field(default="#0d9488", example="#0d9488")
     accent_color: str = Field(default="#14b8a6", example="#14b8a6")
     features: dict[str, bool] | None = Field(
@@ -57,6 +59,8 @@ class HospitalOnboardRequest(BaseModel):
     state: str | None = Field(default="Telangana")
     pincode: str | None = Field(default="500033")
     country: str | None = Field(default="India")
+    currency: str | None = Field(default=None, example="INR")
+    currency_symbol: str | None = Field(default=None, example="₹")
     primary_color: str = Field(default="#1e3a8a")
     accent_color: str = Field(default="#0284c7")
 
