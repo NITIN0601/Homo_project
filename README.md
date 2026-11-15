@@ -3,8 +3,9 @@
 
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Homo__project-blue?logo=github)](https://github.com/NITIN0601/Homo_project)
 [![Maintainer](https://img.shields.io/badge/Maintainer-NITIN0601-green?logo=github)](https://github.com/NITIN0601)
-[![Python Version](https://img.shields.io/badge/Python-3.14-blue?logo=python)](https://www.python.org/)
+[![Python Version](https://img.shields.io/badge/Python-%3E%3D3.10%20(up%20to%203.14)-blue?logo=python)](https://www.python.org/)
 [![Node Version](https://img.shields.io/badge/Node-%3E%3D20-green?logo=node.js)](https://nodejs.org/)
+[![Tests](https://img.shields.io/badge/Tests-220%20Passed%20(132%20BE%20%2B%2088%20FE)-brightgreen?logo=vitest)](https://vitest.dev/)
 [![License](https://img.shields.io/badge/License-MIT-purple)]()
 
 A multi-tenant, cloud-and-edge Electronic Health Records (EHR) and clinical management platform designed for classical homeopathy practices. Maintained by [NITIN0601](https://github.com/NITIN0601) under the [Homo_project](https://github.com/NITIN0601/Homo_project) repository. Built on a decoupled microservice architecture to support independent horizontal and vertical scaling across frontend, backend, database, and API gateway services.
@@ -156,10 +157,10 @@ Homo_project/
 
 Before launching locally, ensure you have the following installed:
 
-- **Node.js**: `>= 20.x`
-- **npm**: `>= 10.x`
-- **Python**: `3.14.x` (check with `python3 --version`)
-- **Docker & Docker Compose**: *(Optional, required only for full containerized stack)*
+- **Node.js**: `>= 20.x` (check with `node -v`)
+- **npm**: `>= 10.x` (check with `npm -v`)
+- **Python**: `>= 3.10` (Python 3.10, 3.11, 3.12, 3.13, and 3.14 fully supported; check with `python3 --version`)
+- **Docker & Docker Compose**: *(Optional, required only for full containerized microservice stack)*
 
 ---
 
@@ -169,7 +170,7 @@ Before launching locally, ensure you have the following installed:
 
 ```bash
 # Clone the repository from GitHub
-git clone https://github.com/NITIN0601/Homo_project.git Homo_project
+git clone https://github.com/NITIN0601/Homo_project.git
 cd Homo_project
 
 # Configure environment variables for frontend and backend:
@@ -183,27 +184,30 @@ cp backend/.env.example backend/.env
 cp .env.example .env
 ```
 
-The system operates out-of-the-box in local development mode without requiring external API keys.
+The system operates out-of-the-box in local development mode with built-in zero-config JSON persistence in `backend/data/`. No external API keys or external database setup are required to start immediately.
 
 ---
 
-### Step 2: Backend Setup (Python 3.14)
+### Step 2: Backend Setup (Python 3.10 - 3.14)
 
-1. **Verify or Initialize Python 3.14 Virtual Environment**:
+1. **Initialize Python Virtual Environment**:
    ```bash
    cd backend
 
-   # Create virtual environment with Python 3.14 (if not already present)
-   python3.14 -m venv venv
+   # Create virtual environment (use python3 or your preferred python binary)
+   python3 -m venv venv
 
    # Activate virtual environment
+   # On macOS / Linux:
    source venv/bin/activate
+   # On Windows (cmd / PowerShell):
+   # .\venv\Scripts\activate
 
-   # Verify Python version is 3.14
+   # Verify Python version
    python --version
    ```
 
-2. **Install Pinned Dependencies**:
+2. **Install Backend Dependencies**:
    ```bash
    pip install --upgrade pip
    pip install -r requirements.txt
@@ -211,17 +215,18 @@ The system operates out-of-the-box in local development mode without requiring e
 
 3. **Start the Backend Development Server**:
    ```bash
-   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+   uvicorn main:app --host 127.0.0.1 --port 8000 --reload
    ```
-   - API is live at: `http://localhost:8000`
+   - API Service: `http://localhost:8000`
    - Interactive Swagger API Documentation: `http://localhost:8000/docs`
+   - Healthcheck & Status: `http://localhost:8000/health`
    - OpenAPI Specification: `http://localhost:8000/openapi.json`
 
 ---
 
 ### Step 3: Frontend Setup (React 19 + Vite)
 
-From the project root:
+In a new terminal window from the project root (`Homo_project`):
 
 1. **Install Node Dependencies**:
    ```bash
@@ -236,13 +241,17 @@ From the project root:
 
 ---
 
-### Step 4: Running Both Services Concurrently
+### Step 4: Running Both Services Concurrently (One-Command Launch)
 
 From the project root, launch both the backend and frontend simultaneously with a single command:
 
 ```bash
 npm run dev:all
 ```
+
+This starts:
+- FastAPI Backend on `http://localhost:8000` (auto-detects virtual environment in `backend/venv/`)
+- Vite React SPA on `http://localhost:5173` (proxies `/api/v1` to `http://localhost:8000`)
 
 ---
 
@@ -307,43 +316,77 @@ docker compose -f infra/docker-compose.yml down
 Run tests and linters across the entire stack from the root directory:
 
 ```bash
-# Run ALL tests (Backend + Frontend)
+# Run ALL 220 tests (Backend 132 + Frontend 88)
 npm run test:all
 
-# Run only Python Backend Tests (113 test cases)
+# Run only Python Backend Tests (132 test cases across 8 suites)
 npm run test:backend
 # Or directly: ./test/run_tests.sh
 
-# Run only Frontend Vitest Suite (41 test cases)
+# Run only Frontend Vitest Suite (88 test cases across 8 suites)
 npm run test:frontend
 
 # Run Fast Frontend Linter (oxlint)
 npm run lint
 
-# Compile and Type-Check Production Frontend Bundle
+# Compile and Type-Check Production Frontend Bundle (tsc -b && vite build)
 npm run build
 ```
 
 ---
 
-## 🏥 Multi-Tenant Hospital & Doctor Configuration
+## 🏥 Dynamic Multi-Tenant Hospital & Doctor Roster
 
-The application natively supports multi-tenant operation. Hospital settings, branding, and doctor rosters are dynamically resolved via:
+The platform features strict multi-tenant isolation with zero hardcoded sensitive data or doctor leakages:
 
-1. **Subdomain Resolution**: `agastya.yourdomain.com` vs `apollo.yourdomain.com`
-2. **Query Parameter**: `http://localhost:5173/?tenant=agastya` or `http://localhost:5173/?tenant=apollo`
-3. **HTTP Header**: `X-Tenant-ID: agastya` (sent to `/api/v1/...` backend endpoints)
+1. **Resolution Methods**:
+   - **Query Parameter**: `http://localhost:5173/?tenant=agastya` or `http://localhost:5173/?tenant=apollo`
+   - **Subdomain Routing**: `agastya.yourdomain.com` vs `apollo.yourdomain.com`
+   - **HTTP Header**: `X-Tenant-ID: agastya` (sent with REST API calls)
+   - **Navbar Switcher**: Interactive switcher dropdown on the top navigation bar.
 
-Hospital configurations are decoupled in `backend/data/hospitals.json` and doctor rosters in `backend/data/doctors.json`.
+2. **Decoupled Tenant Schemas**:
+   - Hospital configurations: `backend/data/hospitals.json`
+   - Doctor rosters: `backend/data/doctors.json`
+   - Frontend tenant definitions: `frontend/src/config/tenants/`
+
+3. **Tailored Bio vs Hospital Summary**:
+   - Doctor bio is tailored to the physician's clinical degrees, experience, and certifications.
+   - Hospital summary is dynamically customized per healthcare organization (e.g., NABH accreditation, foundation date, facility highlights).
+   - Specialties list is cleanly partitioned at both doctor and hospital levels without duplicate entries.
+
+4. **Super Admin Multi-Tenant Governance**:
+   - Navigate to `/super-admin` (Login: `superadmin@platform.internal`).
+   - Dynamically onboard new hospitals (`POST /api/v1/hospitals`) and doctors (`POST /api/v1/doctors`) with custom branding, themes, phone numbers, and consultation fees without server restarts.
+
+---
+
+## 🕐 Modular Cross-Timezone Scheduling Engine
+
+Homeopathic consultations operate on a unified single source of truth in clinic time (`Asia/Kolkata` / IST) while automatically rendering accurately in any international patient's local timezone (e.g. US Eastern `America/New_York`):
+
+- **Local Date Strictness**: When an international user selects Sunday, November 15 on their calendar, they see all slots belonging to their local Sunday date.
+- **Cross-Midnight Alignment**: A Sunday morning slot at 10:00 AM IST corresponds to Saturday night 11:30 PM EST. The engine checks candidate days ($D-1, D, D+1$) so Saturday evening slots appear under Saturday and Sunday morning slots appear under Sunday.
+- **Sunday Prior Appointment Rule**: Sunday clinic hours are handled strictly as *Prior Appointment Only*, providing immediate online booking clarity while notifying the user that the clinic will confirm their slot.
+- **Elapsed Time Detection**: Past slots for the current day are automatically flagged and disabled in real time. If all slots for today have elapsed, the picker guides the patient with a one-click button to jump to the next available operating date.
+
+---
+
+## 🛡️ Zero-PHI Crash Telemetry & Error Boundary
+
+- **Client Error Boundary**: React 19 `DashboardErrorBoundary` catches unhandled rendering errors and displays a user-friendly recovery UI with retry and report buttons.
+- **Zero-PHI Sanitization**: The telemetry client (`frontend/src/utils/telemetry.ts`) aggressively scrubs patient names, emails, phone numbers, UUIDs, and JWTs from stack traces and URLs before transmission.
+- **Telemetry Ingestion API**: Backend route `POST /api/telemetry/report` captures sanitized error telemetry into the forensic audit trail (`audit_traces.jsonl`) with unique incident IDs (`#inc-XXXXXX`).
 
 ---
 
 ## 🔒 Security & HIPAA Compliance
 
-- **Atomic Double-Booking Prevention**: Database-level unique constraint on `(start_time, doctor_title)`.
-- **Role-Based Access Control (RBAC)**: Admin routes enforce JWT bearer verification and role checking.
+- **Atomic Double-Booking Prevention**: Database-level unique constraint on `(start_time, doctor_title)` preventing race conditions under high concurrency.
+- **Role-Based Access Control (RBAC)**: Strict separation between `super_admin`, `admin`, `patient`, and `guest` roles.
+- **Input Sanitization**: Pydantic v2 schemas sanitize and strip HTML/XSS and enforce numeric bounds on all billing and clinical endpoints.
 - **PHI Data Protection Guard**: The `mobile_patient_view` database view strips raw audio and local disk paths before mobile access.
-- **Audit Logging**: Every request is tagged with `X-Trace-ID` and `X-Session-ID` headers and logged to `audit_traces.jsonl`.
+- **Forensic Audit Logging**: Every request is tagged with `X-Trace-ID` and `X-Session-ID` headers and logged to `backend/data/audit_traces.jsonl`.
 
 ---
 
