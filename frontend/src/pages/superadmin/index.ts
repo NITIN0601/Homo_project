@@ -3,4 +3,4 @@ export * from "./HospitalCard";
 export * from "./ManageFeaturesModal";
 export * from "./OnboardHospitalModal";
 export * from "./OnboardSuccessDialog";
-
+export * from "./onboard";

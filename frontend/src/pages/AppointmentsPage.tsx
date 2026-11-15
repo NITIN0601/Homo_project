@@ -2,14 +2,12 @@ import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { useApp } from "../context/AppContext";
 import { useTenant } from "../context/ThemeProvider";
 import CalendarPicker from "../components/forms/CalendarPicker";
-import PhoneInput from "../components/forms/PhoneInput";
-import { Button, Badge, Card, Input, Textarea } from "../components/ui";
+import { Button, Badge, Card, Textarea } from "../components/ui";
 import {
   CLINIC,
   MORNING_SLOTS,
   EVENING_SLOTS,
   ALL_TIME_SLOTS,
-  THEME_GRADIENTS,
 } from "../config";
 import { api } from "../services/api";
 import {
@@ -31,9 +29,14 @@ import type {
   ContinuityPreferenceResponse,
   DoctorSummary,
 } from "../types";
-import { AppointmentSlotPicker } from "./appointments/AppointmentSlotPicker";
-import { AppointmentConfirmationBanner } from "./appointments/AppointmentConfirmationBanner";
-import { PatientDoctorContinuityBanner } from "./appointments/PatientDoctorContinuityBanner";
+import {
+  AppointmentSlotPicker,
+  AppointmentConfirmationBanner,
+  PatientDoctorContinuityBanner,
+  AttendingDoctorCard,
+  ConsultationScheduleGuide,
+  PatientDetailsCard,
+} from "./appointments";
 import { DashboardErrorBoundary } from "../components/common/DashboardErrorBoundary";
 
 // ─── Time slots (Imported from Central Config SSOT) ──────────────────────────
@@ -72,14 +75,12 @@ function validate(
 ): AppointmentFormErrors {
   const e: AppointmentFormErrors = {};
 
-  // First name is compulsory
   if (!v.firstName || !v.firstName.trim()) {
     e.firstName = "First name is required.";
   } else if (v.firstName.trim().length < 2) {
     e.firstName = "First name must be at least 2 characters.";
   }
 
-  // Last name is compulsory
   if (!v.lastName || !v.lastName.trim()) {
     e.lastName = "Last name is required.";
   } else if (v.lastName.trim().length < 2) {
@@ -101,7 +102,6 @@ function validate(
     e.selectedSlot = VALIDATION_MESSAGES.SLOT_REQUIRED;
   }
 
-  // Validate slot availability using public verification callbacks
   if (isSlotBookedFn && v.selectedDate && v.selectedSlot && isSlotBookedFn(v.selectedDate, v.selectedSlot)) {
     e.selectedSlot = "This slot is already reserved by another patient. Please choose another available slot.";
   }
@@ -117,28 +117,11 @@ function validate(
   return e;
 }
 
-// ─── AppointmentsPage ─────────────────────────────────────────────────────────
-/**
- * GOOGLE CALENDAR INTEGRATION NOTES (backend):
- * ────────────────────────────────────────────
- * Frontend POSTs `AppointmentPayload` → POST /api/appointments.
- *
- * Backend (Node/FastAPI) then:
- * 1. Authenticates via service account (or provider OAuth refresh token).
- * 2. Calls calendar.events.insert on providerCalendarId with the patient
- *    email as an attendee (sendUpdates:"all") → native GCal invite sent.
- * 3. If patientCalendarSyncRequested → inserts on patient's own calendar
- *    using their OAuth refresh token (one-time consent flow required).
- * 4. Stores returned calendarEventId in DB for reschedule/cancel support.
- *
- * The frontend NEVER holds OAuth tokens.
- */
 const AppointmentsPage: React.FC = () => {
   const { state, isSlotBooked, isSlotBlocked, bookAppointment, userTzInfo, sessionHours } = useApp();
   const { tenant } = useTenant();
   const { authUser } = state;
 
-  // Always bring patient directly to the top of the appointment scheduling form
   useEffect(() => {
     try {
       window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
@@ -147,7 +130,6 @@ const AppointmentsPage: React.FC = () => {
     }
   }, []);
 
-  // Dynamically calculate dates where all consultation slots are booked
   const fullyBookedDates = useMemo(() => {
     const counts: Record<string, number> = {};
     state.appointments.forEach((apt) => {
@@ -172,18 +154,16 @@ const AppointmentsPage: React.FC = () => {
     notes:            "",
   };
 
-  const [form,      setForm]      = useState<AppointmentFormValues>(INITIAL);
-  const [errors,    setErrors]    = useState<AppointmentFormErrors>({});
-  const [loading,   setLoading]   = useState(false);
+  const [form, setForm] = useState<AppointmentFormValues>(INITIAL);
+  const [errors, setErrors] = useState<AppointmentFormErrors>({});
+  const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState<AppointmentPayload | null>(null);
 
-  // ── Continuity of Care: Returning doctor preference & fallback state ────────
   const [continuity, setContinuity] = useState<ContinuityPreferenceResponse | null>(null);
   const [continuityLoading, setContinuityLoading] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorSummary | null>(null);
   const [selectedLocalizedSlot, setSelectedLocalizedSlot] = useState<LocalizedUserSlot | null>(null);
 
-  // Active consulting physician for customized hours, bio, and slot generation
   const activeDoctor = useMemo(() => {
     return selectedDoctor
       ? {
@@ -201,7 +181,6 @@ const AppointmentsPage: React.FC = () => {
       : tenant.doctor;
   }, [selectedDoctor, tenant.doctor]);
 
-  // Automatically evaluate previous physician continuity when email, phone, or date changes
   useEffect(() => {
     const ident = form.email.trim() || form.phone.trim() || authUser?.email || authUser?.phone;
     if (!ident) return;
@@ -235,7 +214,6 @@ const AppointmentsPage: React.FC = () => {
     };
   }, [form.email, form.phone, form.selectedDate, form.selectedSlot, tenant.id, authUser]);
 
-  // Automatically synchronize customer profile details into form when logged in
   useEffect(() => {
     if (authUser) {
       const names = splitFullName(authUser.name || "");
@@ -306,7 +284,6 @@ const AppointmentsPage: React.FC = () => {
       return;
     }
 
-    // Defensive check against real-time expiration or scheduling conflict
     if (selectedLocalizedSlot) {
       if (isUserSlotPassed(selectedLocalizedSlot.isoTimestamp)) {
         setErrors({
@@ -361,7 +338,6 @@ const AppointmentsPage: React.FC = () => {
       ? new Date(new Date(selectedLocalizedSlot.isoTimestamp).getTime() + 30 * 60000).toISOString()
       : toISO(form.selectedDate, addMinutes(form.selectedSlot, 30));
 
-    // 1. Immediately persist to global SSOT and localStorage to lock slot for all patients
     const newAppointment: BookedAppointment = {
       id: `apt-${Date.now()}`,
       patientId: authUser?.id || `usr-${Date.now().toString().slice(-4)}`,
@@ -388,7 +364,6 @@ const AppointmentsPage: React.FC = () => {
     };
     bookAppointment(newAppointment);
 
-    // 2. Prepare payload for calendar and notification delivery
     const payload: AppointmentPayload = {
       patientDetails: {
         name:  form.name.trim(),
@@ -405,7 +380,6 @@ const AppointmentsPage: React.FC = () => {
       continuityStatus: contStatus,
     };
 
-    // Live Calendar Event & Confirmation Dispatch via Backend/Vite
     await api.appointments.book({
       user_email: payload.patientDetails.email,
       user_name: payload.patientDetails.name,
@@ -427,7 +401,6 @@ const AppointmentsPage: React.FC = () => {
       consultation_type: newAppointment.type,
     });
 
-    // Send confirmation email via API
     await api.email.sendNotification({
       email: payload.patientDetails.email,
       subject: `Appointment Booking Confirmed — ${tenant.name}`,
@@ -449,7 +422,7 @@ const AppointmentsPage: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto" style={{ animation: "fadeInUp 0.4s ease both" }}>
-      {/* Page header with Live Clinic Clock & Timezone Sync */}
+      {/* Page header with Local Clock */}
       <div className="mb-5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-stone-200/80 pb-4">
         <div>
           <h1 className="text-2xl font-black text-stone-800 tracking-tight flex items-center gap-2">
@@ -460,7 +433,6 @@ const AppointmentsPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Single Local Time Clock - Clean & Patient-Centric (Never Confusing Dual Clocks) */}
         <div className="flex items-center gap-2">
           <div className="bg-emerald-50 border border-emerald-200/90 rounded-xl px-3 py-1.5 text-[11px] font-semibold text-emerald-950 flex items-center gap-1.5 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -472,251 +444,31 @@ const AppointmentsPage: React.FC = () => {
       </div>
 
       {/* ── Attending Doctor Profile & Clinical Credentials Card ── */}
-      <div className="mb-6 bg-white border border-stone-200/90 rounded-2xl p-5 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-3">
-              <div className="flex items-start gap-3.5">
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white text-base shadow-sm flex-shrink-0"
-                  style={{ background: THEME_GRADIENTS.PRIMARY }}
-                >
-                  {activeDoctor.name
-                    .replace(/^Dr\.\s*/i, "")
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .slice(0, 2)
-                    .toUpperCase() || "DR"}
-                </div>
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-base sm:text-lg font-black text-stone-900 leading-tight">
-                      {activeDoctor.name}
-                    </h2>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                      🩺 Attending Physician
-                    </span>
-                  </div>
-                  <p className="text-stone-500 text-xs mt-0.5 font-medium">
-                    {activeDoctor.title} {activeDoctor.qualifications ? `· ${activeDoctor.qualifications}` : ""}
-                  </p>
-                  <p className="text-[11px] text-stone-400 mt-0.5 font-medium flex flex-wrap items-center gap-2">
-                    {activeDoctor.regNo && <span>Reg: <strong className="text-stone-600 font-semibold">{activeDoctor.regNo}</strong></span>}
-                    {activeDoctor.experienceYears && (
-                      <span>· Experience: <strong className="text-stone-600 font-semibold">{activeDoctor.experienceYears}+ Years</strong></span>
-                    )}
-                    <span>· Fee: <strong className="text-emerald-700 font-bold">{tenant.currencySymbol || "₹"}{activeDoctor.consultationFee || activeDoctor.availability?.consultationFee || 750}</strong></span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Multi-Doctor Switcher if multiple doctors exist */}
-              {tenant.doctors && tenant.doctors.length > 1 && (
-                <div className="flex items-center gap-1.5 self-start sm:self-center">
-                  <span className="text-[10px] font-bold text-stone-400 uppercase">Doctor:</span>
-                  <div className="inline-flex rounded-xl bg-stone-100 p-1">
-                    {tenant.doctors.map((d) => {
-                      const isSelected = (selectedDoctor?.name || tenant.doctor.name) === d.name;
-                      return (
-                        <button
-                          key={d.name}
-                          type="button"
-                          onClick={() => {
-                            setSelectedDoctor({
-                              id: d.id || "doc-default",
-                              name: d.name,
-                              title: d.title,
-                              calendar_id: d.email,
-                              specialties: d.specialties || [],
-                              is_active: true,
-                            });
-                          }}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                            isSelected
-                              ? "bg-white text-stone-900 shadow-2xs font-extrabold"
-                              : "text-stone-500 hover:text-stone-800"
-                          }`}
-                        >
-                          {d.name.split(" ")[1] || d.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Specialties & Clinical Philosophy */}
-            {activeDoctor.specialties && activeDoctor.specialties.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mr-1">
-                  Clinical Focus:
-                </span>
-                {activeDoctor.specialties.map((spec) => (
-                  <span
-                    key={spec}
-                    className="px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200/70 text-stone-700 text-[11px] font-semibold"
-                  >
-                    ✦ {spec}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {activeDoctor.aboutText && (
-              <p className="text-stone-600 text-xs leading-relaxed font-normal bg-stone-50/70 rounded-xl p-3 border border-stone-100">
-                {activeDoctor.aboutText}
-              </p>
-            )}
-          </div>
+      <AttendingDoctorCard
+        tenant={tenant}
+        activeDoctor={activeDoctor}
+        selectedDoctor={selectedDoctor}
+        onSelectDoctor={(doc) => setSelectedDoctor(doc)}
+      />
 
       {/* ── Dynamic Walk-in vs Scheduled Consultation Guide ─────────── */}
-      {(() => {
-        const isTelemedicineClinic = tenant.features.enableTelemedicine && tenant.hours?.walkinAllowed === false;
-        const doctorSchedule = activeDoctor.availability?.schedule;
-        const hasWalkins = !isTelemedicineClinic && (doctorSchedule?.walkinDays ? doctorSchedule.walkinDays.length > 0 : true);
-        const morningHoursDisplay = !userTzInfo.isClinicTimezone
-          ? sessionHours.morning.display
-          : (activeDoctor.availability?.morningHours || sessionHours.morning.display);
-        const eveningHoursDisplay = !userTzInfo.isClinicTimezone
-          ? sessionHours.evening.display
-          : (activeDoctor.availability?.eveningHours || sessionHours.evening.display);
-        const walkinDaysDisplay = doctorSchedule?.walkinDays?.join(", ") || tenant.hours?.walkinDaysSummary || "Monday to Saturday";
-        const apptDaysDisplay = doctorSchedule?.appointmentOnlyDays?.join(", ") || tenant.hours?.appointmentDaysSummary || "Morning sessions & Sundays";
-        const offDaysList = doctorSchedule?.offDays || [];
-
-        if (isTelemedicineClinic || !hasWalkins) {
-          return (
-            <div className="bg-sky-50/90 border border-sky-200/90 rounded-2xl p-4 text-xs space-y-1.5 shadow-2xs mb-6">
-              <div className="flex items-center gap-2 font-extrabold text-sky-950">
-                <span className="text-base">🌐</span>
-                <span>Scheduled Consultations Only (Tele-Care &amp; Dedicated Appointments)</span>
-              </div>
-              <p className="text-sky-900 leading-relaxed text-[11px]">
-                All consultations with <strong>{activeDoctor.name}</strong> at {tenant.name} are scheduled strictly by prior appointment ({morningHoursDisplay} &amp; {eveningHoursDisplay}) to ensure dedicated, unhurried clinical care.
-                {offDaysList.length > 0 && <span className="block mt-1 font-semibold text-sky-950">🏖️ Weekly Off: {offDaysList.join(", ")}</span>}
-              </p>
-            </div>
-          );
-        }
-
-        return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-            <div className="bg-blue-50/90 border border-blue-200/90 rounded-2xl p-4 text-xs space-y-1.5 shadow-2xs">
-              <div className="flex items-center gap-2 font-extrabold text-blue-950">
-                <span className="text-base">🚶‍♂️</span>
-                <span>Walk-in OPD ({eveningHoursDisplay})</span>
-              </div>
-              <p className="text-blue-900 leading-relaxed text-[11px]">
-                Walk-ins welcomed directly at{" "}
-                <a
-                  href={tenant.contact.mapsUrl || CLINIC.ADDRESS.MAPS_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-bold underline decoration-blue-400 hover:text-blue-950 inline-flex items-center gap-1 cursor-pointer"
-                  title={`Open ${tenant.name} on Google Maps`}
-                >
-                  <span>{tenant.name} ({tenant.contact.address.street}, {tenant.contact.address.city})</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="opacity-80">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                    <polyline points="15 3 21 3 21 9" />
-                    <line x1="10" y1="14" x2="21" y2="3" />
-                  </svg>
-                </a>{" "}
-                during {walkinDaysDisplay}. Tokens issued at reception upon arrival.
-              </p>
-            </div>
-
-            <div className="bg-emerald-50/90 border border-emerald-200/90 rounded-2xl p-4 text-xs space-y-1.5 shadow-2xs">
-              <div className="flex items-center gap-2 font-extrabold text-emerald-950">
-                <span className="text-base">📅</span>
-                <span>Prior Appointment Only ({morningHoursDisplay})</span>
-              </div>
-              <p className="text-emerald-900 leading-relaxed text-[11px]">
-                {apptDaysDisplay} with <strong>{activeDoctor.name}</strong> require prior booking using the calendar below.
-                {offDaysList.length > 0 && <span className="block mt-1 font-semibold text-emerald-950">🏖️ Weekly Off: {offDaysList.join(", ")}</span>}
-              </p>
-            </div>
-          </div>
-        );
-      })()}
+      <ConsultationScheduleGuide
+        tenant={tenant}
+        activeDoctor={activeDoctor}
+        userTzInfo={userTzInfo}
+        sessionHours={sessionHours}
+      />
 
       <form id="appointment-form" onSubmit={handleSubmit} noValidate className="space-y-5">
-
         {/* ── Patient details ────────────────────────── */}
-        <Card variant="default" className="space-y-4 overflow-visible">
-          <h2 className="text-sm font-bold text-stone-700 flex items-center gap-2">
-            <span aria-hidden="true">👤</span> Patient Details
-          </h2>
-
-          {/* First Name (compulsory), Middle Name (optional), Last Name (compulsory) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Input
-              id="firstName"
-              label="First Name"
-              value={form.firstName || ""}
-              onChange={(e) => handleNameChange("firstName", e.target.value)}
-              placeholder="e.g. John"
-              autoComplete="given-name"
-              required
-              errorMessage={errors.firstName}
-            />
-            <Input
-              id="middleName"
-              label="Middle Name"
-              value={form.middleName || ""}
-              onChange={(e) => handleNameChange("middleName", e.target.value)}
-              placeholder="(Optional) e.g. Robert"
-              autoComplete="additional-name"
-              errorMessage={errors.middleName}
-            />
-            <Input
-              id="lastName"
-              label="Last Name"
-              value={form.lastName || ""}
-              onChange={(e) => handleNameChange("lastName", e.target.value)}
-              placeholder="e.g. Doe"
-              autoComplete="family-name"
-              required
-              errorMessage={errors.lastName}
-            />
-          </div>
-
-          {form.name && (
-            <p className="text-[11px] text-stone-500 font-medium -mt-1">
-              Full Name: <strong className="text-emerald-950">{form.name}</strong>
-            </p>
-          )}
-
-          <Input
-            id="email"
-            label="Email Address"
-            type="email"
-            value={form.email}
-            onChange={(e) => update("email", e.target.value)}
-            onBlur={handleEmailBlur}
-            placeholder="john@example.com"
-            autoComplete="email"
-            required
-            errorMessage={errors.email}
-          />
-          <div className="space-y-1">
-            <label htmlFor="phone" className="block text-[11px] sm:text-xs font-bold text-stone-700 tracking-wide uppercase select-none">
-              Phone Number <span className="text-rose-500 ml-1">*</span>
-            </label>
-            <PhoneInput
-              id="phone"
-              value={form.phone}
-              onChange={(full) => update("phone", full)}
-              defaultIso="IND"
-            />
-            {errors.phone && (
-              <p className="text-[11px] font-medium text-rose-600 flex items-center gap-1 animate-fadeIn">
-                <span>⚠️</span>
-                <span>{errors.phone}</span>
-              </p>
-            )}
-          </div>
-        </Card>
+        <PatientDetailsCard
+          form={form}
+          errors={errors}
+          onNameChange={handleNameChange}
+          onEmailChange={(val) => update("email", val)}
+          onEmailBlur={handleEmailBlur}
+          onPhoneChange={(full) => update("phone", full)}
+        />
 
         {/* ── Patient Doctor Continuity & Care Preference ── */}
         <PatientDoctorContinuityBanner

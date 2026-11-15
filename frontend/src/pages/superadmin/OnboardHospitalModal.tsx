@@ -2,7 +2,6 @@ import React, { useState, useMemo } from "react";
 import type { HospitalTenantConfig, HospitalDoctor, HospitalFeatures } from "../../types/tenant";
 import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
-import { FeatureToggleGroup } from "../../components/common/FeatureToggleGroup";
 import { useToast } from "../../context/ToastContext";
 import {
   sanitizeText,
@@ -13,62 +12,28 @@ import {
   sanitizeArrayOfStrings,
 } from "../../utils/sanitize";
 import {
-  DEFAULT_COLOR_PRESETS,
   DEFAULT_FACILITY_CONFIG,
   DEFAULT_DOCTOR_CONFIG,
   DEFAULT_NEW_TENANT_FEATURES,
   type ColorPreset,
 } from "../../config/tenants/constants";
 import {
-  COMMON_TIMEZONES,
   inferTimezoneFromLocation,
   getTimezoneOffsetString,
   getTimezoneAbbreviation,
 } from "../../utils/timezone";
 import { inferCurrencyFromCountry } from "../../utils/currency";
+import {
+  FacilityDetailsStep,
+  FacilityScheduleStep,
+  DoctorCredentialsStep,
+  FacilityGovernanceStep,
+  FacilityBrandingStep,
+  type OnboardFormState,
+  type OnboardHospitalModalProps,
+} from "./onboard";
 
-export interface OnboardHospitalModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  existingSlugs: string[];
-  onOnboard: (
-    tenant: HospitalTenantConfig,
-    doctor: HospitalDoctor,
-    features: HospitalFeatures
-  ) => Promise<{ inviteUrl: string; emailDelivery?: any } | void>;
-}
-
-export interface OnboardFormState {
-  hospitalName: string;
-  hospitalSlug: string;
-  tagline: string;
-  phone: string;
-  email: string;
-  country: string;
-  state: string;
-  city: string;
-  street: string;
-  pincode: string;
-  timezone: string;
-  timezoneManualOverride: boolean;
-  primaryColor: string;
-  accentColor: string;
-  doctorName: string;
-  doctorEmail: string;
-  doctorPhone: string;
-  doctorTitle: string;
-  doctorQual: string;
-  doctorRegNo: string;
-  doctorExp: number;
-  doctorSpecialties: string;
-  doctorBio: string;
-  doctorFee: number;
-  morningHours: string;
-  eveningHours: string;
-  availableDays: string;
-  sundayPolicy: "Prior Appointment Only" | "Walk-in OPD" | "Closed";
-  features: HospitalFeatures;
-}
+export type { OnboardFormState, OnboardHospitalModalProps };
 
 const getInitialFormState = (): OnboardFormState => ({
   hospitalName: "",
@@ -85,6 +50,9 @@ const getInitialFormState = (): OnboardFormState => ({
   timezoneManualOverride: false,
   primaryColor: DEFAULT_FACILITY_CONFIG.defaultPrimaryColor,
   accentColor: DEFAULT_FACILITY_CONFIG.defaultAccentColor,
+  logoUrl: DEFAULT_FACILITY_CONFIG.defaultLogoUrl || "/generic-clinic-logo.svg",
+  bannerUrl: DEFAULT_FACILITY_CONFIG.defaultBannerUrl || "/assets/banner.jpg",
+  aboutClinicText: "",
   doctorName: "",
   doctorEmail: "",
   doctorPhone: DEFAULT_DOCTOR_CONFIG.defaultPhone,
@@ -129,6 +97,15 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
     };
   }, [form.timezone, detectedTz]);
 
+  const cleanSlug = useMemo(() => {
+    return sanitizeAlphanumeric(form.hospitalSlug.toLowerCase(), true, 50).replace(/_/g, "-");
+  }, [form.hospitalSlug]);
+
+  const slugError = useMemo(() => {
+    if (!cleanSlug) return null;
+    return existingSlugs.includes(cleanSlug) ? "A hospital with this slug already exists" : null;
+  }, [cleanSlug, existingSlugs]);
+
   const updateField = <K extends keyof OnboardFormState>(key: K, value: OnboardFormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
@@ -172,20 +149,24 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
   };
 
   const handleFeatureToggle = (key: keyof HospitalFeatures, value: boolean) => {
-    setForm((prev) => ({
-      ...prev,
-      features: {
-        ...prev.features,
-        [key]: value,
-      },
-    }));
+    setForm((prev) => {
+      const nextFeatures = { ...prev.features, [key]: value };
+      if (key === "enableOnlinePayments") {
+        nextFeatures.enableCustomerPayments = value;
+      } else if (key === "enableCustomerPayments") {
+        nextFeatures.enableOnlinePayments = value;
+      }
+      return {
+        ...prev,
+        features: nextFeatures,
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const cleanHospitalName = sanitizeText(form.hospitalName, 120);
-    const cleanSlug = sanitizeAlphanumeric(form.hospitalSlug.toLowerCase(), true, 50).replace(/_/g, "-");
     const cleanDocName = sanitizeText(form.doctorName, 120);
     const cleanDocEmail = sanitizeEmail(form.doctorEmail);
 
@@ -266,12 +247,13 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
           neutralBg: "#fafaf9",
           cardRadius: DEFAULT_FACILITY_CONFIG.defaultCardRadius,
           buttonRadius: DEFAULT_FACILITY_CONFIG.defaultButtonRadius,
-          logoUrl: DEFAULT_FACILITY_CONFIG.defaultLogoUrl,
+          logoUrl: form.logoUrl.trim() || DEFAULT_FACILITY_CONFIG.defaultLogoUrl,
+          bannerUrl: form.bannerUrl.trim() || DEFAULT_FACILITY_CONFIG.defaultBannerUrl,
           fontSans: DEFAULT_FACILITY_CONFIG.defaultFontSans,
           aboutDocText: doctorConfig.aboutText,
-          aboutClinicText: sanitizeText(form.tagline, 150)
+          aboutClinicText: sanitizeText(form.aboutClinicText, 500) || (sanitizeText(form.tagline, 150)
             ? `${cleanHospitalName} — ${sanitizeText(form.tagline, 150)}`
-            : `${cleanHospitalName} provides comprehensive patient consultations and evidence-based clinical care.`,
+            : `${cleanHospitalName} provides comprehensive patient consultations and evidence-based clinical care.`),
         },
         features: form.features,
       };
@@ -292,470 +274,41 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
       subtitle="Configure hospital branding, lead physician credentials, and access permissions."
     >
       <form onSubmit={handleSubmit} className="space-y-6 py-2">
-        {/* 1. Facility Details */}
-        <div className="space-y-3">
-          <p className="text-[11px] font-black text-stone-700 uppercase tracking-wider">
-            1. Facility Details &amp; Location
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] font-bold text-stone-500 uppercase">Hospital Name *</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Manipal Integrative Health"
-                value={form.hospitalName}
-                onChange={(e) => updateField("hospitalName", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-500 uppercase">Tenant Slug / ID *</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. manipal-care"
-                value={form.hospitalSlug}
-                onChange={(e) => updateField("hospitalSlug", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
-              />
-            </div>
-          </div>
+        <FacilityDetailsStep
+          form={form}
+          updateField={updateField}
+          handleLocationChange={handleLocationChange}
+          handleTimezoneChange={handleTimezoneChange}
+          handleResetTimezoneToAuto={handleResetTimezoneToAuto}
+          detectedTz={detectedTz}
+          detectedCurrency={detectedCurrency}
+          activeTimezoneDetails={activeTimezoneDetails}
+          slugError={slugError}
+        />
 
-          <div>
-            <label className="text-[10px] font-bold text-stone-500 uppercase">Hospital Tagline</label>
-            <input
-              type="text"
-              placeholder="e.g. Advanced Integrative Care & Lasting Wellness"
-              value={form.tagline}
-              onChange={(e) => updateField("tagline", e.target.value)}
-              className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
-            />
-          </div>
+        <FacilityScheduleStep
+          form={form}
+          updateField={updateField}
+          activeTimezoneDetails={activeTimezoneDetails}
+        />
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-            <div>
-              <label className="text-[10px] font-bold text-stone-500 uppercase">Country *</label>
-              <input
-                type="text"
-                list="country-suggestions"
-                required
-                value={form.country}
-                onChange={(e) => handleLocationChange("country", e.target.value)}
-                placeholder="e.g. India"
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
-              />
-              <datalist id="country-suggestions">
-                <option value="India" />
-                <option value="United States" />
-                <option value="United Kingdom" />
-                <option value="United Arab Emirates" />
-                <option value="Singapore" />
-                <option value="Australia" />
-                <option value="Canada" />
-                <option value="Germany" />
-                <option value="France" />
-              </datalist>
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-500 uppercase">State / Province *</label>
-              <input
-                type="text"
-                required
-                value={form.state}
-                onChange={(e) => handleLocationChange("state", e.target.value)}
-                placeholder="e.g. Karnataka"
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-500 uppercase">City *</label>
-              <input
-                type="text"
-                required
-                value={form.city}
-                onChange={(e) => handleLocationChange("city", e.target.value)}
-                placeholder="e.g. Bengaluru"
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-500 uppercase">Postal / Pincode</label>
-              <input
-                type="text"
-                value={form.pincode}
-                onChange={(e) => updateField("pincode", e.target.value)}
-                placeholder="e.g. 560003"
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
-              />
-            </div>
-          </div>
+        <DoctorCredentialsStep
+          form={form}
+          updateField={updateField}
+          activeTimezoneDetails={activeTimezoneDetails}
+          detectedCurrency={detectedCurrency}
+        />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="text-[10px] font-bold text-stone-500 uppercase">Street Address</label>
-              <input
-                type="text"
-                placeholder="e.g. 123 Healthcare Blvd, Medical Wing"
-                value={form.street}
-                onChange={(e) => updateField("street", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-500 uppercase">Contact Phone *</label>
-              <input
-                type="text"
-                required
-                value={form.phone}
-                onChange={(e) => updateField("phone", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-500 uppercase">Facility Admin Email *</label>
-              <input
-                type="email"
-                required
-                value={form.email}
-                onChange={(e) => updateField("email", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-stone-50 focus:bg-white outline-none"
-              />
-            </div>
-          </div>
+        <FacilityGovernanceStep
+          form={form}
+          handleFeatureToggle={handleFeatureToggle}
+        />
 
-          {/* Operational Timezone Auto-Calculation Card */}
-          <div className="p-3 bg-blue-50/70 rounded-xl border border-blue-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-            <div className="space-y-0.5">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs">🌐</span>
-                <span className="text-[11px] font-black text-blue-950 uppercase tracking-wide">
-                  Facility Timezone
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-blue-200/80 text-blue-900">
-                  {activeTimezoneDetails.label} ({activeTimezoneDetails.offset})
-                </span>
-                {form.timezoneManualOverride ? (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">
-                    Manual Selection
-                  </span>
-                ) : (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-medium">
-                    Auto-Detected from {detectedTz.matchedLocation}
-                  </span>
-                )}
-              </div>
-              <p className="text-[11px] text-blue-800">
-                Operating and doctor hours entered below are scheduled under{" "}
-                <span className="font-semibold text-blue-950">{activeTimezoneDetails.timeZone}</span> ({activeTimezoneDetails.label}).
-                Patients globally will see slots converted accurately to their local times.
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5 shrink-0 w-full sm:w-auto">
-              <select
-                value={form.timezone}
-                onChange={(e) => handleTimezoneChange(e.target.value)}
-                className="border border-blue-300 rounded-lg px-2.5 py-1 text-xs bg-white text-blue-950 font-medium shadow-sm outline-none"
-              >
-                {COMMON_TIMEZONES.map((tz) => (
-                  <option key={tz.timeZone} value={tz.timeZone}>
-                    {tz.label}
-                  </option>
-                ))}
-              </select>
-              {form.timezoneManualOverride && (
-                <button
-                  type="button"
-                  onClick={handleResetTimezoneToAuto}
-                  title="Reset to auto-detected timezone based on location"
-                  className="px-2 py-1 text-[10px] font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors whitespace-nowrap"
-                >
-                  ↺ Reset
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Location Currency Indicator */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 bg-emerald-50/70 rounded-xl border border-emerald-200/80 text-xs gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-base">💰</span>
-              <div>
-                <span className="font-bold text-emerald-950">Local Billing Currency:</span>{" "}
-                <span className="font-mono font-bold text-emerald-900 bg-white px-2 py-0.5 rounded border border-emerald-300">
-                  {detectedCurrency.name} ({detectedCurrency.symbol})
-                </span>
-              </div>
-            </div>
-            <span className="text-[10px] text-emerald-800 font-medium">
-              Bills, patient invoices &amp; doctor fees will be raised in this location currency
-            </span>
-          </div>
-        </div>
-
-        {/* 2. Facility Operational Hours & Scheduling */}
-        <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-200/70 space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-[11px] font-black text-amber-950 uppercase tracking-wider">
-              2. Facility Consultation Hours &amp; Operating Schedule
-            </p>
-            <span className="text-[10px] bg-amber-200/90 text-amber-950 font-bold px-2.5 py-0.5 rounded-full">
-              In {activeTimezoneDetails.label} ({activeTimezoneDetails.timeZone})
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">
-                Morning Session (Prior Appointment Only)
-              </label>
-              <input
-                type="text"
-                placeholder="10:00 AM – 01:30 PM"
-                value={form.morningHours}
-                onChange={(e) => updateField("morningHours", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-white outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">
-                Evening Session (Walk-in OPD)
-              </label>
-              <input
-                type="text"
-                placeholder="05:00 PM – 08:30 PM"
-                value={form.eveningHours}
-                onChange={(e) => updateField("eveningHours", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-white outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">Operating Days</label>
-              <input
-                type="text"
-                placeholder="e.g. Monday – Saturday"
-                value={form.availableDays}
-                onChange={(e) => updateField("availableDays", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">Sunday Consultation Policy</label>
-              <select
-                value={form.sundayPolicy}
-                onChange={(e) => updateField("sundayPolicy", e.target.value as any)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
-              >
-                <option value="Prior Appointment Only">Prior Appointment Only (Online Booking Confirmed)</option>
-                <option value="Walk-in OPD">Walk-in OPD Open</option>
-                <option value="Closed">Closed on Sunday</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. Lead Doctor Section */}
-        <div className="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-[11px] font-black text-indigo-950 uppercase tracking-wider">
-              3. Lead Consulting Doctor (Google Login &amp; Credentials)
-            </p>
-            <span className="text-[10px] bg-indigo-200 text-indigo-900 font-bold px-2 py-0.5 rounded-full">
-              Operates in {activeTimezoneDetails.label}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">Doctor Name *</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Dr. Rajesh Sharma"
-                value={form.doctorName}
-                onChange={(e) => updateField("doctorName", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-white outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">
-                Doctor Login Email * (For Google Sign-In)
-              </label>
-              <input
-                type="email"
-                required
-                placeholder="e.g. doctor.sharma@hospital.org"
-                value={form.doctorEmail}
-                onChange={(e) => updateField("doctorEmail", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-white outline-none font-medium text-indigo-900"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">Doctor Designation</label>
-              <input
-                type="text"
-                placeholder="e.g. Chief Medical Director"
-                value={form.doctorTitle}
-                onChange={(e) => updateField("doctorTitle", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">Medical Reg. Number</label>
-              <input
-                type="text"
-                placeholder="e.g. MCI-2012-8841"
-                value={form.doctorRegNo}
-                onChange={(e) => updateField("doctorRegNo", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">Experience (Years)</label>
-              <input
-                type="number"
-                min={1}
-                max={60}
-                value={form.doctorExp}
-                onChange={(e) => updateField("doctorExp", Number(e.target.value))}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-[10px] font-bold text-stone-600 uppercase">Qualifications &amp; Degrees</label>
-            <input
-              type="text"
-              placeholder="e.g. MD, MBBS, Fellowship in Telemedicine"
-              value={form.doctorQual}
-              onChange={(e) => updateField("doctorQual", e.target.value)}
-              className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">Doctor Direct Phone</label>
-              <input
-                type="text"
-                placeholder="+91 98450 12345"
-                value={form.doctorPhone}
-                onChange={(e) => updateField("doctorPhone", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">Consultation Fee ({detectedCurrency.code} {detectedCurrency.symbol})</label>
-              <input
-                type="number"
-                min={0}
-                max={50000}
-                placeholder="750"
-                value={form.doctorFee}
-                onChange={(e) => updateField("doctorFee", Number(e.target.value) || 0)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-600 uppercase">Specialties</label>
-              <input
-                type="text"
-                placeholder="e.g. Classical Homeopathy, Pathology"
-                value={form.doctorSpecialties}
-                onChange={(e) => updateField("doctorSpecialties", e.target.value)}
-                className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-[10px] font-bold text-stone-600 uppercase">Doctor Clinical Bio / Philosophy</label>
-            <textarea
-              rows={2}
-              placeholder="Clinical background, special focus, and patient healing approach..."
-              value={form.doctorBio}
-              onChange={(e) => updateField("doctorBio", e.target.value)}
-              className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
-            />
-          </div>
-        </div>
-
-        {/* 4. Functionality Governance */}
-        <div className="space-y-3">
-          <p className="text-[11px] font-black text-stone-700 uppercase tracking-wider">
-            4. Layout &amp; Functionality Governance (Super Admin Control)
-          </p>
-          <FeatureToggleGroup features={form.features} onChange={handleFeatureToggle} category="all" />
-        </div>
-
-        {/* 5. Brand Color Palette */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-stone-500 uppercase">5. Choose Brand Color Palette</label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {DEFAULT_COLOR_PRESETS.map((p) => {
-              const isSelected = form.primaryColor === p.primary;
-              return (
-                <button
-                  key={p.label}
-                  type="button"
-                  onClick={() => handleApplyPreset(p)}
-                  className={`p-2 rounded-xl border text-left flex items-center gap-2 cursor-pointer transition-all ${
-                    isSelected
-                      ? "border-indigo-600 ring-2 ring-indigo-500/20 bg-indigo-50/30"
-                      : "border-stone-200 hover:bg-stone-50"
-                  }`}
-                >
-                  <div className="w-5 h-5 rounded-md shadow-xs shrink-0" style={{ background: p.primary }} />
-                  <span className="text-[11px] font-bold text-stone-800 leading-tight">{p.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <div>
-              <label className="text-[10px] font-bold text-stone-500 uppercase">Primary Color (Hex)</label>
-              <div className="flex items-center gap-2 mt-1">
-                <input
-                  type="color"
-                  value={form.primaryColor}
-                  onChange={(e) => updateField("primaryColor", e.target.value)}
-                  className="w-8 h-8 rounded-lg cursor-pointer border border-stone-300"
-                />
-                <input
-                  type="text"
-                  value={form.primaryColor}
-                  onChange={(e) => updateField("primaryColor", e.target.value)}
-                  className="flex-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs font-mono"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-stone-500 uppercase">Accent Color (Hex)</label>
-              <div className="flex items-center gap-2 mt-1">
-                <input
-                  type="color"
-                  value={form.accentColor}
-                  onChange={(e) => updateField("accentColor", e.target.value)}
-                  className="w-8 h-8 rounded-lg cursor-pointer border border-stone-300"
-                />
-                <input
-                  type="text"
-                  value={form.accentColor}
-                  onChange={(e) => updateField("accentColor", e.target.value)}
-                  className="flex-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs font-mono"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        <FacilityBrandingStep
+          form={form}
+          updateField={updateField}
+          handleApplyPreset={handleApplyPreset}
+        />
 
         {/* Actions */}
         <div className="pt-4 border-t border-stone-100 flex items-center justify-end gap-2">
@@ -766,7 +319,7 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
             type="submit"
             variant="primary"
             size="md"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !!slugError}
             className="bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer"
           >
             {isSubmitting ? "Provisioning & Emailing..." : "Provision Hospital & Email Doctor →"}
@@ -776,4 +329,3 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
     </Modal>
   );
 };
-

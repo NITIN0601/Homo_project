@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, Suspense, lazy } from "react";
+import React, { useState, useMemo } from "react";
 import { useApp, useRequireRole, MEDICINE_CATALOGUE } from "../context/AppContext";
 import { useTenant } from "../context/ThemeProvider";
 import { Button } from "../components/ui";
@@ -7,16 +7,13 @@ import { MOCK_ACCOUNTS } from "../data/mocks";
 import type {
   AdminTab,
   PatientClinicalMedia,
-  ConsultationInvoice,
-  InventoryItem,
   UserProfile,
 } from "../types";
-import { CLINIC, DEFAULT_DOCTOR_TODOS, INVENTORY as INV_CONFIG, USE_MOCK_DATA } from "../config";
-import { formatTimeShort, formatDateISO, formatDateTime } from "../utils/format";
+import { CLINIC, DEFAULT_DOCTOR_TODOS, USE_MOCK_DATA } from "../config";
+import { formatDateTime } from "../utils/format";
 import { getClinicTimeInfo } from "../utils/timezone";
 import { api } from "../services/api";
 
-// Modular Sub-components under src/pages/admin/
 import {
   OverviewTab,
   AppointmentsTab,
@@ -26,27 +23,12 @@ import {
   DispatchesTab,
   CalendarTab,
   CustomizationTab,
-  AppointmentBookingModal,
-  AppointmentCancellationModal,
-  PrescribeRemedyModal,
-  PostConsultationFeeModal,
-  DoctorPrescriptionUploadModal,
-  CustomPOModal,
-  ConsolidatedBatchOrderModal,
-  LogisticsTimelineModal,
-  ClinicalMediaUploadModal,
-  ClinicalMediaLightboxModal,
-  UtrReconciliationModal,
+  AdminModalOrchestrator,
+  useAdminModals,
+  useRequisitionBatch,
   INITIAL_PATIENT_MEDIA,
-  INITIAL_PHARMACY_ORDERS,
-  type BatchOrderItem,
-  type PharmacyPurchaseOrder,
   type DoctorTodoItem,
 } from "./admin";
-
-// Lazy-loaded heavy components for optimal chunk size & fast initial paint
-const ExcelSyncModal = lazy(() => import("./admin/modals/ExcelSyncModal"));
-const AdminVoiceStudioModal = lazy(() => import("./admin/modals/AdminVoiceStudioModal"));
 
 export const AdminDashboard: React.FC = () => {
   // Enforce RBAC security boundary — throws RbacAccessError if role !== 'admin'
@@ -85,13 +67,34 @@ export const AdminDashboard: React.FC = () => {
   const [uploadPrescriptionSuccessMsg, setUploadPrescriptionSuccessMsg] = useState<string | null>(null);
   const [batchOrderSuccessMsg, setBatchOrderSuccessMsg] = useState<string | null>(null);
 
+  const showBatchOrderSuccess = (msg: string) => {
+    setBatchOrderSuccessMsg(msg);
+    setTimeout(() => setBatchOrderSuccessMsg(null), 4000);
+  };
+
+  // ── Requisition & Logistics Management Hook ──────────────────────────────────
+  const {
+    requisitionBatch,
+    setRequisitionBatch,
+    pharmacyOrders,
+    setPharmacyOrders,
+    toggleAddToBatch,
+    updateBatchQuantity,
+    addAllLowStockToBatch,
+    handleSimulateLogisticsScan,
+    handleMarkDeliveredImmediately,
+  } = useRequisitionBatch({
+    inventory,
+    updateInventory,
+    onSuccessMsg: showBatchOrderSuccess,
+  });
+
+  // ── Modal State Orchestration Hook ───────────────────────────────────────────
+  const modals = useAdminModals();
+
   // ── Patients & Clinical Media State ──────────────────────────────────────────
   const [patientMedia, setPatientMedia] = useState<PatientClinicalMedia[]>(INITIAL_PATIENT_MEDIA);
   const [expandedPatientIds, setExpandedPatientIds] = useState<Set<string>>(() => new Set(["usr-001"]));
-  const [viewingMedia, setViewingMedia] = useState<PatientClinicalMedia | null>(null);
-  const [voiceStudioPatient, setVoiceStudioPatient] = useState<UserProfile | null>(null);
-  const [isMediaUploadModalOpen, setIsMediaUploadModalOpen] = useState(false);
-  const [mediaTargetPatientId, setMediaTargetPatientId] = useState("usr-001");
 
   // Sorted registered patient list (dynamically aggregated from live appointments, visit summaries, and accounts)
   const patientList = useMemo(() => {
@@ -136,178 +139,6 @@ export const AdminDashboard: React.FC = () => {
   // ── Doctor's To-Do List State ────────────────────────────────────────────────
   const [todoList, setTodoList] = useState<DoctorTodoItem[]>([...DEFAULT_DOCTOR_TODOS]);
 
-  // ── Requisitions, Inventory & PO Logistics State ──────────────────────────────
-  const [requisitionBatch, setRequisitionBatch] = useState<BatchOrderItem[]>([]);
-  const [pharmacyOrders, setPharmacyOrders] = useState<PharmacyPurchaseOrder[]>(INITIAL_PHARMACY_ORDERS);
-  const [inspectingOrder, setInspectingOrder] = useState<PharmacyPurchaseOrder | null>(null);
-
-  // ── Modal Visibility States ──────────────────────────────────────────────────
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [cancellingAppointmentId, setCancellingAppointmentId] = useState<string | null>(null);
-  const [prescribeModalPatient, setPrescribeModalPatient] = useState<UserProfile | null>(null);
-  const [postFeeModalPatient, setPostFeeModalPatient] = useState<UserProfile | null>(null);
-  const [isUploadPrescriptionOpen, setIsUploadPrescriptionOpen] = useState(false);
-  const [uploadTargetPatientId, setUploadTargetPatientId] = useState<string>("usr-001");
-  const [uploadChiefDiagnosis, setUploadChiefDiagnosis] = useState<string>("");
-  const [isCreatePOModalOpen, setIsCreatePOModalOpen] = useState(false);
-  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
-  const [isExcelSyncModalOpen, setIsExcelSyncModalOpen] = useState(false);
-  const [reconcilingInvoice, setReconcilingInvoice] = useState<ConsultationInvoice | null>(null);
-
-  // ── Auto-Progression Real-Time Logistics Simulation Timer ────────────────────
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setPharmacyOrders((prevOrders) =>
-        prevOrders.map((order) => {
-          if (order.status === "in_transit" && order.currentCheckpointIdx < 3) {
-            const nextIdx = order.currentCheckpointIdx + 1;
-            const nowTime = formatTimeShort(new Date());
-            const updatedCheckpoints = order.checkpoints.map((cp, idx) => {
-              if (idx === nextIdx) {
-                return { ...cp, completed: true, current: true, time: `Just now (${nowTime})` };
-              }
-              if (idx < nextIdx) {
-                return { ...cp, completed: true, current: false };
-              }
-              return cp;
-            });
-            const newStatus = nextIdx === 3 ? "out_for_delivery" : "in_transit";
-            return {
-              ...order,
-              status: newStatus,
-              currentCheckpointIdx: nextIdx,
-              checkpoints: updatedCheckpoints,
-            };
-          }
-          return order;
-        })
-      );
-    }, 45000); // 45s pulse
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // ── Multi-Medicine Batch Requisition Helpers ─────────────────────────────────
-  const toggleAddToBatch = (item: InventoryItem, qty: number = 50) => {
-    setRequisitionBatch((prev) => {
-      const exists = prev.find((b) => b.item.id === item.id);
-      if (exists) {
-        return prev.filter((b) => b.item.id !== item.id);
-      }
-      return [...prev, { item, quantity: qty }];
-    });
-  };
-
-  const updateBatchQuantity = (itemId: string, qty: number) => {
-    if (qty <= 0) {
-      setRequisitionBatch((prev) => prev.filter((b) => b.item.id !== itemId));
-    } else {
-      setRequisitionBatch((prev) =>
-        prev.map((b) => (b.item.id === itemId ? { ...b, quantity: qty } : b))
-      );
-    }
-  };
-
-  const addAllLowStockToBatch = () => {
-    const lowItems = inventory.filter((i) => i.stockQty <= INV_CONFIG.LOW_STOCK_THRESHOLD);
-    setRequisitionBatch((prev) => {
-      const next = [...prev];
-      lowItems.forEach((low) => {
-        const idx = next.findIndex((b) => b.item.id === low.id);
-        if (idx === -1) {
-          next.push({ item: low, quantity: 50 });
-        }
-      });
-      return next;
-    });
-  };
-
-  // ── Logistics Checkpoint Handlers ────────────────────────────────────────────
-  const handleSimulateLogisticsScan = (orderId: string) => {
-    setPharmacyOrders((prevOrders) =>
-      prevOrders.map((order) => {
-        if (order.id !== orderId) return order;
-        if (order.currentCheckpointIdx >= order.checkpoints.length - 1) return order;
-
-        const nextIdx = order.currentCheckpointIdx + 1;
-        const nowTime = formatTimeShort(new Date());
-        const updatedCheckpoints = order.checkpoints.map((cp, idx) => {
-          if (idx === nextIdx) {
-            return { ...cp, completed: true, current: true, time: `Live Scan (${nowTime})` };
-          }
-          if (idx < nextIdx) {
-            return { ...cp, completed: true, current: false };
-          }
-          return cp;
-        });
-
-        const newStatus =
-          nextIdx >= 4 ? "delivered" : nextIdx === 3 ? "out_for_delivery" : "in_transit";
-
-        if (newStatus === "delivered" && order.status !== "delivered") {
-          order.items.forEach((item) => {
-            const existing = inventory.find((i) => i.id === item.medicineId);
-            if (existing) {
-              updateInventory({
-                ...existing,
-                stockQty: existing.stockQty + item.quantity,
-                lastRestocked: formatDateISO(),
-              });
-            }
-          });
-        }
-
-        return {
-          ...order,
-          status: newStatus,
-          currentCheckpointIdx: nextIdx,
-          checkpoints: updatedCheckpoints,
-        };
-      })
-    );
-  };
-
-  const handleMarkDeliveredImmediately = (order: PharmacyPurchaseOrder) => {
-    setPharmacyOrders((prev) =>
-      prev.map((o) => {
-        if (o.id !== order.id) return o;
-        const deliveredCheckpoints = o.checkpoints.map((cp) => ({
-          ...cp,
-          completed: true,
-          current: false,
-        }));
-        deliveredCheckpoints[deliveredCheckpoints.length - 1].current = true;
-        deliveredCheckpoints[deliveredCheckpoints.length - 1].time = `Delivered Just Now`;
-        return {
-          ...o,
-          status: "delivered",
-          currentCheckpointIdx: 4,
-          checkpoints: deliveredCheckpoints,
-        };
-      })
-    );
-
-    order.items.forEach((item) => {
-      const existing = inventory.find((i) => i.id === item.medicineId);
-      if (existing) {
-        updateInventory({
-          ...existing,
-          stockQty: existing.stockQty + item.quantity,
-          lastRestocked: formatDateISO(),
-        });
-      }
-    });
-
-    setBatchOrderSuccessMsg(`✓ Order #${order.id} delivered and stock inventory updated!`);
-    setTimeout(() => setBatchOrderSuccessMsg(null), 4000);
-  };
-
-  const handleOpenUploadForPatient = (patientId: string, chiefDiagnosis?: string) => {
-    setUploadTargetPatientId(patientId);
-    if (chiefDiagnosis) setUploadChiefDiagnosis(chiefDiagnosis);
-    setIsUploadPrescriptionOpen(true);
-  };
-
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* ── CLINIC SSOT BRAND & DOCTOR HEADER ──────────────────────────── */}
@@ -334,14 +165,14 @@ export const AdminDashboard: React.FC = () => {
             <Button
               variant="primary"
               size="sm"
-              onClick={() => handleOpenUploadForPatient("usr-001")}
+              onClick={() => modals.openUploadForPatient("usr-001")}
             >
               <span>📄</span> Upload Doctor Prescription
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsExcelSyncModalOpen(true)}
+              onClick={() => modals.setIsExcelSyncModalOpen(true)}
               className="bg-stone-800/90 hover:bg-stone-700 text-emerald-300 border-stone-600"
               title="Open Excel Spreadsheet Sync"
             >
@@ -382,140 +213,137 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ── ACTIVE TAB RENDERING (MODULAR SUB-COMPONENTS WITH ISOLATED ERROR BOUNDARY) ── */}
+      {/* ── ACTIVE TAB RENDERING ── */}
       <DashboardErrorBoundary dashboardName="Doctor Admin Portal" tabName={activeTab} key={activeTab}>
-      {activeTab === "dashboard" && (
-        <OverviewTab
-          appointments={appointments}
-          patientList={patientList}
-          inventory={inventory}
-          pharmacyOrders={pharmacyOrders}
-          blockedDates={blockedDates}
-          todoList={todoList}
-          visitSummaries={visitSummaries}
-          todayYMD={clinicTime.todayYMD}
-          formattedDate={clinicTime.formattedDate}
-          onSetActiveTab={setActiveTab}
-          onOpenUploadForPatient={handleOpenUploadForPatient}
-          onOpenBatchModalWithLowStock={() => {
-            addAllLowStockToBatch();
-            setIsBatchModalOpen(true);
-          }}
-          onOpenCreatePOModal={() => setIsCreatePOModalOpen(true)}
-          onOpenRequisitionBatchSingle={(item, qty) => {
-            setRequisitionBatch([{ item, quantity: qty }]);
-            setIsBatchModalOpen(true);
-          }}
-          onStartConsultation={(apptId) => updateAppointmentStatus(apptId, "In Consultation")}
-          onOpenVoiceStudioForUser={(user) => setVoiceStudioPatient(user)}
-          onToggleTodo={(id) =>
-            setTodoList((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)))
-          }
-          onAddTodo={(item) => setTodoList((prev) => [item, ...prev])}
-          onDeleteTodo={(id) => setTodoList((prev) => prev.filter((t) => t.id !== id))}
-          onSelectPatientInEhr={(patientId) => setExpandedPatientIds(new Set([patientId]))}
-        />
-      )}
+        {activeTab === "dashboard" && (
+          <OverviewTab
+            appointments={appointments}
+            patientList={patientList}
+            inventory={inventory}
+            pharmacyOrders={pharmacyOrders}
+            blockedDates={blockedDates}
+            todoList={todoList}
+            visitSummaries={visitSummaries}
+            todayYMD={clinicTime.todayYMD}
+            formattedDate={clinicTime.formattedDate}
+            onSetActiveTab={setActiveTab}
+            onOpenUploadForPatient={modals.openUploadForPatient}
+            onOpenBatchModalWithLowStock={() => {
+              addAllLowStockToBatch();
+              modals.setIsBatchModalOpen(true);
+            }}
+            onOpenCreatePOModal={() => modals.setIsCreatePOModalOpen(true)}
+            onOpenRequisitionBatchSingle={(item, qty) => {
+              setRequisitionBatch([{ item, quantity: qty }]);
+              modals.setIsBatchModalOpen(true);
+            }}
+            onStartConsultation={(apptId) => updateAppointmentStatus(apptId, "In Consultation")}
+            onOpenVoiceStudioForUser={(user) => modals.setVoiceStudioPatient(user)}
+            onToggleTodo={(id) =>
+              setTodoList((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)))
+            }
+            onAddTodo={(item) => setTodoList((prev) => [item, ...prev])}
+            onDeleteTodo={(id) => setTodoList((prev) => prev.filter((t) => t.id !== id))}
+            onSelectPatientInEhr={(patientId) => setExpandedPatientIds(new Set([patientId]))}
+          />
+        )}
 
-      {activeTab === "appointments" && (
-        <AppointmentsTab
-          appointments={appointments}
-          todayYMD={clinicTime.todayYMD}
-          onStatusChange={updateAppointmentStatus}
-          onOpenBookingModal={() => setIsBookingModalOpen(true)}
-          onOpenCancelModal={(id) => setCancellingAppointmentId(id)}
-          onOpenUploadPrescription={handleOpenUploadForPatient}
-          onNavigateToPatient={(patientId) => {
-            setExpandedPatientIds(new Set([patientId]));
-            setActiveTab("patients");
-          }}
-        />
-      )}
+        {activeTab === "appointments" && (
+          <AppointmentsTab
+            appointments={appointments}
+            todayYMD={clinicTime.todayYMD}
+            onStatusChange={updateAppointmentStatus}
+            onOpenBookingModal={() => modals.setIsBookingModalOpen(true)}
+            onOpenCancelModal={(id) => modals.setCancellingAppointmentId(id)}
+            onOpenUploadPrescription={modals.openUploadForPatient}
+            onNavigateToPatient={(patientId) => {
+              setExpandedPatientIds(new Set([patientId]));
+              setActiveTab("patients");
+            }}
+          />
+        )}
 
-      {activeTab === "patients" && (
-        <PatientRecordsTab
-          patientList={patientList}
-          visitSummaries={visitSummaries}
-          consultationInvoices={consultationInvoices}
-          patientMedia={patientMedia}
-          expandedPatientIds={expandedPatientIds}
-          onToggleExpand={(id) => {
-            setExpandedPatientIds((prev) => {
-              const next = new Set(prev);
-              if (next.has(id)) next.delete(id);
-              else next.add(id);
-              return next;
-            });
-          }}
-          onExpandAll={() => setExpandedPatientIds(new Set(patientList.map((p) => p.id)))}
-          onCollapseAll={() => setExpandedPatientIds(new Set())}
-          onOpenPrescribeModal={(patient) => setPrescribeModalPatient(patient)}
-          onOpenVoiceStudio={(patient) => setVoiceStudioPatient(patient)}
-          onOpenPostFeeModal={(patient) => setPostFeeModalPatient(patient)}
-          onOpenUploadPrescription={(patientId) => handleOpenUploadForPatient(patientId)}
-          onOpenMediaUploadModal={(patientId) => {
-            setMediaTargetPatientId(patientId);
-            setIsMediaUploadModalOpen(true);
-          }}
-          onViewMedia={(media) => setViewingMedia(media)}
-          onOpenReconcileModal={(inv) => setReconcilingInvoice(inv)}
-          onConfirmPayment={confirmConsultationPayment}
-          onUpdateInvoiceStatus={updateInvoiceStatus}
-        />
-      )}
+        {activeTab === "patients" && (
+          <PatientRecordsTab
+            patientList={patientList}
+            visitSummaries={visitSummaries}
+            consultationInvoices={consultationInvoices}
+            patientMedia={patientMedia}
+            expandedPatientIds={expandedPatientIds}
+            onToggleExpand={(id) => {
+              setExpandedPatientIds((prev) => {
+                const next = new Set(prev);
+                if (next.has(id)) next.delete(id);
+                else next.add(id);
+                return next;
+              });
+            }}
+            onExpandAll={() => setExpandedPatientIds(new Set(patientList.map((p) => p.id)))}
+            onCollapseAll={() => setExpandedPatientIds(new Set())}
+            onOpenPrescribeModal={(patient) => modals.setPrescribeModalPatient(patient)}
+            onOpenVoiceStudio={(patient) => modals.setVoiceStudioPatient(patient)}
+            onOpenPostFeeModal={(patient) => modals.setPostFeeModalPatient(patient)}
+            onOpenUploadPrescription={(patientId) => modals.openUploadForPatient(patientId)}
+            onOpenMediaUploadModal={(patientId) => modals.openMediaUpload(patientId)}
+            onViewMedia={(media) => modals.setViewingMedia(media)}
+            onOpenReconcileModal={(inv) => modals.setReconcilingInvoice(inv)}
+            onConfirmPayment={confirmConsultationPayment}
+            onUpdateInvoiceStatus={updateInvoiceStatus}
+          />
+        )}
 
-      {activeTab === "billing" && (
-        <BillingInvoicesTab
-          invoices={consultationInvoices || []}
-          patientList={patientList}
-          onOpenReconcileModal={(inv) => setReconcilingInvoice(inv)}
-          onConfirmPayment={confirmConsultationPayment}
-          onUpdateStatus={updateInvoiceStatus}
-          onOpenPostFeeModal={(patient) => setPostFeeModalPatient(patient)}
-        />
-      )}
+        {activeTab === "billing" && (
+          <BillingInvoicesTab
+            invoices={consultationInvoices || []}
+            patientList={patientList}
+            onOpenReconcileModal={(inv) => modals.setReconcilingInvoice(inv)}
+            onConfirmPayment={confirmConsultationPayment}
+            onUpdateStatus={updateInvoiceStatus}
+            onOpenPostFeeModal={(patient) => modals.setPostFeeModalPatient(patient)}
+          />
+        )}
 
-      {activeTab === "inventory" && (
-        <DispensaryInventoryTab
-          inventory={inventory}
-          requisitionBatch={requisitionBatch}
-          onToggleAddToBatch={toggleAddToBatch}
-          onUpdateBatchQuantity={updateBatchQuantity}
-          onClearBatch={() => setRequisitionBatch([])}
-          onOpenBatchModal={() => setIsBatchModalOpen(true)}
-          onOpenExcelModal={() => setIsExcelSyncModalOpen(true)}
-          onOpenCreatePOModal={() => setIsCreatePOModalOpen(true)}
-          onAddAllLowStock={addAllLowStockToBatch}
-        />
-      )}
+        {activeTab === "inventory" && (
+          <DispensaryInventoryTab
+            inventory={inventory}
+            requisitionBatch={requisitionBatch}
+            onToggleAddToBatch={toggleAddToBatch}
+            onUpdateBatchQuantity={updateBatchQuantity}
+            onClearBatch={() => setRequisitionBatch([])}
+            onOpenBatchModal={() => modals.setIsBatchModalOpen(true)}
+            onOpenExcelModal={() => modals.setIsExcelSyncModalOpen(true)}
+            onOpenCreatePOModal={() => modals.setIsCreatePOModalOpen(true)}
+            onAddAllLowStock={addAllLowStockToBatch}
+          />
+        )}
 
-      {activeTab === "dispatches" && (
-        <DispatchesTab
-          orders={pharmacyOrders}
-          onOpenBatchModal={() => setIsBatchModalOpen(true)}
-          onInspectOrder={(order) => setInspectingOrder(order)}
-          onSimulateLogisticsScan={handleSimulateLogisticsScan}
-          onMarkDeliveredImmediately={handleMarkDeliveredImmediately}
-        />
-      )}
+        {activeTab === "dispatches" && (
+          <DispatchesTab
+            orders={pharmacyOrders}
+            onOpenBatchModal={() => modals.setIsBatchModalOpen(true)}
+            onInspectOrder={(order) => modals.setInspectingOrder(order)}
+            onSimulateLogisticsScan={handleSimulateLogisticsScan}
+            onMarkDeliveredImmediately={handleMarkDeliveredImmediately}
+          />
+        )}
 
-      {activeTab === "calendar" && (
-        <CalendarTab
-          blockedDates={blockedDates as any}
-          onBlockDate={(d, r, t, tc) => blockDate(d, r, t, tc)}
-          onBlockDateRange={(s, e, r, t, tc) => blockDateRange(s, e, r, t, tc)}
-          onUnblockDate={(id, date) => unblockDate(id, date)}
-          onUpdateBlockedDate={(id, date, updates) => updates && updateBlockedDate({ id, date }, updates)}
-        />
-      )}
+        {activeTab === "calendar" && (
+          <CalendarTab
+            blockedDates={blockedDates as any}
+            onBlockDate={(d, r, t, tc) => blockDate(d, r, t, tc)}
+            onBlockDateRange={(s, e, r, t, tc) => blockDateRange(s, e, r, t, tc)}
+            onUnblockDate={(id, date) => unblockDate(id, date)}
+            onUpdateBlockedDate={(id, date, updates) => updates && updateBlockedDate({ id, date }, updates)}
+          />
+        )}
 
-      {activeTab === "customization" && <CustomizationTab />}
+        {activeTab === "customization" && <CustomizationTab />}
       </DashboardErrorBoundary>
 
-      {/* ── MODALS (ISOLATED & MODULAR) ─────────────────────────────────── */}
-      <AppointmentBookingModal
-        isOpen={isBookingModalOpen}
-        onClose={() => setIsBookingModalOpen(false)}
+      {/* ── MODAL ORCHESTRATION LAYER ── */}
+      <AdminModalOrchestrator
+        isBookingModalOpen={modals.isBookingModalOpen}
+        onCloseBookingModal={() => modals.setIsBookingModalOpen(false)}
         onBookAppointment={async (apt) => {
           bookAppointment(apt);
           setBookingSuccessMsg(`✓ Booked ${apt.type} for ${apt.patientName} on ${apt.date} at ${apt.time}`);
@@ -532,27 +360,21 @@ export const AdminDashboard: React.FC = () => {
             console.warn("Backend sync notice for admin booking:", err);
           }
         }}
-      />
 
-      <AppointmentCancellationModal
-        isOpen={!!cancellingAppointmentId}
-        appointmentId={cancellingAppointmentId}
-        onClose={() => setCancellingAppointmentId(null)}
-        onConfirmCancel={async (id) => {
+        cancellingAppointmentId={modals.cancellingAppointmentId}
+        onCloseCancelModal={() => modals.setCancellingAppointmentId(null)}
+        onConfirmCancelAppointment={async (id) => {
           cancelAppointment(id);
-          setCancellingAppointmentId(null);
+          modals.setCancellingAppointmentId(null);
           try {
             await api.appointments.updateStatus(id, "Cancelled");
           } catch (err) {
             console.warn("Backend sync notice for appointment cancellation:", err);
           }
         }}
-      />
 
-      <PrescribeRemedyModal
-        isOpen={!!prescribeModalPatient}
-        patient={prescribeModalPatient}
-        onClose={() => setPrescribeModalPatient(null)}
+        prescribeModalPatient={modals.prescribeModalPatient}
+        onClosePrescribeModal={() => modals.setPrescribeModalPatient(null)}
         onPrescribeRemedy={(patientId, newVisit, medicineId, customDosageNote) => {
           const medObj = MEDICINE_CATALOGUE.find((m) => m.id === medicineId);
           if (medObj) {
@@ -564,12 +386,9 @@ export const AdminDashboard: React.FC = () => {
           }
           addVisitSummary(patientId, newVisit);
         }}
-      />
 
-      <PostConsultationFeeModal
-        isOpen={!!postFeeModalPatient}
-        patient={postFeeModalPatient}
-        onClose={() => setPostFeeModalPatient(null)}
+        postFeeModalPatient={modals.postFeeModalPatient}
+        onClosePostFeeModal={() => modals.setPostFeeModalPatient(null)}
         onPostInvoice={async (newInvoice) => {
           postConsultationInvoice(newInvoice);
           try {
@@ -578,14 +397,11 @@ export const AdminDashboard: React.FC = () => {
             console.warn("Backend sync notice for new invoice:", err);
           }
         }}
-      />
 
-      <DoctorPrescriptionUploadModal
-        isOpen={isUploadPrescriptionOpen}
-        onClose={() => setIsUploadPrescriptionOpen(false)}
-        patientList={patientList}
-        initialPatientId={uploadTargetPatientId}
-        initialChiefDiagnosis={uploadChiefDiagnosis}
+        isUploadPrescriptionOpen={modals.isUploadPrescriptionOpen}
+        onCloseUploadPrescription={() => modals.setIsUploadPrescriptionOpen(false)}
+        uploadTargetPatientId={modals.uploadTargetPatientId}
+        uploadChiefDiagnosis={modals.uploadChiefDiagnosis}
         onSavePrescription={(patientId, newVisit, attachment) => {
           addVisitSummary(patientId, newVisit);
           if (attachment) {
@@ -606,70 +422,48 @@ export const AdminDashboard: React.FC = () => {
           setUploadPrescriptionSuccessMsg(`✓ Doctor Prescription issued for #${patientId}!`);
           setTimeout(() => setUploadPrescriptionSuccessMsg(null), 4000);
         }}
-      />
 
-      <CustomPOModal
-        isOpen={isCreatePOModalOpen}
-        onClose={() => setIsCreatePOModalOpen(false)}
+        isCreatePOModalOpen={modals.isCreatePOModalOpen}
+        onCloseCreatePOModal={() => modals.setIsCreatePOModalOpen(false)}
         onDispatchPO={(newOrder) => {
           setPharmacyOrders((prev) => [newOrder, ...prev]);
-          setBatchOrderSuccessMsg(`✓ PO #${newOrder.id} dispatched via WhatsApp to ${newOrder.supplierSummary}!`);
-          setTimeout(() => setBatchOrderSuccessMsg(null), 4000);
+          showBatchOrderSuccess(`✓ PO #${newOrder.id} dispatched via WhatsApp to ${newOrder.supplierSummary}!`);
         }}
-      />
 
-      <ConsolidatedBatchOrderModal
-        isOpen={isBatchModalOpen}
-        onClose={() => setIsBatchModalOpen(false)}
+        isBatchModalOpen={modals.isBatchModalOpen}
+        onCloseBatchModal={() => modals.setIsBatchModalOpen(false)}
         requisitionBatch={requisitionBatch}
         onUpdateBatchQuantity={updateBatchQuantity}
         onToggleAddToBatch={toggleAddToBatch}
-        onDispatchOrder={(newOrder) => {
+        onDispatchBatchOrder={(newOrder) => {
           setPharmacyOrders((prev) => [newOrder, ...prev]);
           setRequisitionBatch([]);
-          setBatchOrderSuccessMsg(`✓ Consolidated PO #${newOrder.id} dispatched successfully!`);
-          setTimeout(() => setBatchOrderSuccessMsg(null), 4000);
+          showBatchOrderSuccess(`✓ Consolidated PO #${newOrder.id} dispatched successfully!`);
         }}
-      />
 
-      <LogisticsTimelineModal
-        isOpen={!!inspectingOrder}
-        order={inspectingOrder}
-        onClose={() => setInspectingOrder(null)}
-      />
+        inspectingOrder={modals.inspectingOrder}
+        onCloseInspectingOrder={() => modals.setInspectingOrder(null)}
 
-      <ClinicalMediaUploadModal
-        isOpen={isMediaUploadModalOpen}
-        onClose={() => setIsMediaUploadModalOpen(false)}
-        patientList={patientList}
-        initialPatientId={mediaTargetPatientId}
+        isMediaUploadModalOpen={modals.isMediaUploadModalOpen}
+        onCloseMediaUploadModal={() => modals.setIsMediaUploadModalOpen(false)}
+        mediaTargetPatientId={modals.mediaTargetPatientId}
         onUploadMedia={(media) => {
           setPatientMedia((prev) => [media, ...prev]);
           setMediaSuccessMsg(`✓ Clinical ${media.category} attached to patient #${media.patientId}!`);
           setTimeout(() => setMediaSuccessMsg(null), 3500);
         }}
-      />
 
-      <ClinicalMediaLightboxModal
-        isOpen={!!viewingMedia}
-        media={viewingMedia}
-        onClose={() => setViewingMedia(null)}
-      />
+        viewingMedia={modals.viewingMedia}
+        onCloseViewingMedia={() => modals.setViewingMedia(null)}
 
-      <UtrReconciliationModal
-        isOpen={!!reconcilingInvoice}
-        invoice={reconcilingInvoice}
-        onClose={() => setReconcilingInvoice(null)}
+        reconcilingInvoice={modals.reconcilingInvoice}
+        onCloseReconcilingInvoice={() => modals.setReconcilingInvoice(null)}
         onConfirmReconciliation={async (invoiceId, utrRef, isPaid) => {
           const timestamp = formatDateTime();
           if (isPaid) {
             updateInvoiceTransactionRef(invoiceId, utrRef);
           } else {
-            confirmConsultationPayment(
-              invoiceId,
-              timestamp,
-              utrRef
-            );
+            confirmConsultationPayment(invoiceId, timestamp, utrRef);
           }
           try {
             await api.invoices.update(invoiceId, {
@@ -681,29 +475,19 @@ export const AdminDashboard: React.FC = () => {
             console.warn("Backend sync notice for invoice reconciliation:", err);
           }
         }}
+
+        isExcelSyncModalOpen={modals.isExcelSyncModalOpen}
+        onCloseExcelSyncModal={() => modals.setIsExcelSyncModalOpen(false)}
+        inventory={inventory}
+        onSyncInventory={(updatedInventory) => {
+          dispatch({ type: "SET_INVENTORY", payload: updatedInventory });
+        }}
+
+        voiceStudioPatient={modals.voiceStudioPatient}
+        onCloseVoiceStudio={() => modals.setVoiceStudioPatient(null)}
+
+        patientList={patientList}
       />
-
-      {/* Lazy-Loaded Modals wrapped in Suspense */}
-      <Suspense fallback={null}>
-        {isExcelSyncModalOpen && (
-          <ExcelSyncModal
-            isOpen={isExcelSyncModalOpen}
-            onClose={() => setIsExcelSyncModalOpen(false)}
-            inventory={inventory}
-            onSyncInventory={(updatedInventory) => {
-              dispatch({ type: "SET_INVENTORY", payload: updatedInventory });
-            }}
-          />
-        )}
-
-        {voiceStudioPatient && (
-          <AdminVoiceStudioModal
-            isOpen={!!voiceStudioPatient}
-            patient={voiceStudioPatient}
-            onClose={() => setVoiceStudioPatient(null)}
-          />
-        )}
-      </Suspense>
     </div>
   );
 };

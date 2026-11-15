@@ -12,6 +12,10 @@ export * from "./DispatchesTab";
 export * from "./CalendarTab";
 export * from "./CustomizationTab";
 
+// Hooks & Orchestrator
+export * from "./hooks";
+export * from "./modals/AdminModalOrchestrator";
+
 // Modals (ExcelSyncModal and AdminVoiceStudioModal are dynamically imported directly by consumers for chunk isolation)
 export * from "./modals/AppointmentBookingModal";
 export * from "./modals/AppointmentCancellationModal";
