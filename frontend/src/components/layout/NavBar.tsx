@@ -550,7 +550,7 @@ const NavBar: React.FC = () => {
             {/* Right side location & live clinic clock */}
             <div className="hidden md:flex items-center gap-2">
               <span className="text-[11px] font-bold text-stone-500 bg-white border border-stone-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1">
-                <span>📍</span> {CLINIC.BRANCHES.MALLESHWARAM} · {clinicTime.label} ({clinicTime.formattedTime})
+                <span>📍</span> {tenant.contact.address.city || "Clinic"} · {clinicTime.label} ({clinicTime.formattedTime})
               </span>
             </div>
           </div>

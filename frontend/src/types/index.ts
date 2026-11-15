@@ -311,6 +311,12 @@ export interface BookedAppointment {
   date: string;
   time: string;
   slot: string;
+  clinicDate?: string;
+  clinicSlot?: string;
+  clinicTime?: string;
+  userDate?: string;
+  userTime?: string;
+  timeZone?: string;
   type: "In-Person Clinic Visit" | "Online Tele-Consultation";
   chiefReason: string;
   status: "Confirmed" | "In Consultation" | "Completed" | "Pending" | "Cancelled";

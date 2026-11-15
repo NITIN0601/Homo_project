@@ -1,4 +1,29 @@
-import type { HospitalTenantConfig } from "../../types/tenant";
+import type { HospitalTenantConfig, HospitalDoctor } from "../../types/tenant";
+
+const APOLLO_DOCTORS: HospitalDoctor[] = [
+  {
+    id: "doc-apollo-01",
+    name: "Dr. Rajesh Sharma",
+    title: "Dr. Rajesh Sharma, MD, MBBS, Fellowship in Telemedicine",
+    regNo: "MCI-2012-8841",
+    experienceYears: 14,
+    qualifications: "Chief Consultant Physician | Telehealth Director",
+    aboutText:
+      "Senior Telehealth physician pioneering integrative outpatient tele-consultations, preventive medicine, and comprehensive digital care pathways across India.",
+    specialties: ["Tele-Medicine", "Internal Medicine", "Preventive Care"],
+  },
+  {
+    id: "doc-apollo-02",
+    name: "Dr. Anita Nair",
+    title: "Dr. Anita Nair, MD, DNB, Consultant Pulmonologist",
+    regNo: "MCI-2015-4421",
+    experienceYears: 9,
+    qualifications: "Consultant Pulmonologist & Allergy Specialist",
+    aboutText:
+      "Specialist in respiratory disorders, pulmonary health, allergic conditions, and chronic asthma management with personalized care plans.",
+    specialties: ["Pulmonology", "Allergies"],
+  },
+];
 
 export const APOLLO_DEMO_TENANT: HospitalTenantConfig = {
   id: "apollo",
@@ -8,37 +33,15 @@ export const APOLLO_DEMO_TENANT: HospitalTenantConfig = {
   name: "Apollo TeleCare & Integrative Health",
   shortName: "Apollo Care",
   tagline: "Accessible Clinical Excellence Everywhere",
-  doctor: {
-    id: "doc-apollo-01",
-    name: "Dr. Rajesh Sharma",
-    title: "Dr. Rajesh Sharma, MD, MBBS, Fellowship in Telemedicine",
-    regNo: "MCI-2012-8841",
-    experienceYears: 14,
-    qualifications: "Chief Consultant Physician | Telehealth Director",
-    aboutText: "Senior Telehealth physician pioneering integrative outpatient tele-consultations across India.",
-    specialties: ["Tele-Medicine", "Internal Medicine", "Preventive Care"],
-  },
-  doctors: [
-    {
-      id: "doc-apollo-01",
-      name: "Dr. Rajesh Sharma",
-      title: "Dr. Rajesh Sharma, MD, MBBS, Fellowship in Telemedicine",
-      regNo: "MCI-2012-8841",
-      experienceYears: 14,
-      qualifications: "Chief Consultant Physician | Telehealth Director",
-      aboutText: "Senior Telehealth physician pioneering integrative outpatient tele-consultations across India.",
-      specialties: ["Tele-Medicine", "Internal Medicine", "Preventive Care"],
-    },
-    {
-      id: "doc-apollo-02",
-      name: "Dr. Anita Nair",
-      title: "Dr. Anita Nair, MD, DNB, Consultant Pulmonologist",
-      regNo: "MCI-2015-4421",
-      experienceYears: 9,
-      qualifications: "Consultant Pulmonologist & Allergy Specialist",
-      aboutText: "Specialist in respiratory disorders and chronic asthma management.",
-      specialties: ["Pulmonology", "Allergies"],
-    },
+  doctor: APOLLO_DOCTORS[0],
+  doctors: APOLLO_DOCTORS,
+  specialties: [
+    "Tele-Medicine",
+    "Internal Medicine",
+    "Preventive Care",
+    "Pulmonology",
+    "Allergies",
+    "Chronic Disease Management",
   ],
   contact: {
     phone: "+918049001122",
@@ -63,8 +66,9 @@ export const APOLLO_DEMO_TENANT: HospitalTenantConfig = {
     fontSans: '"Inter", sans-serif',
     logoUrl: "/favicon.ico",
     bannerUrl: "/assets/banner.jpg",
-    aboutDocText: "Senior Telehealth physician pioneering integrative outpatient tele-consultations across India.",
-    aboutClinicText: "Apollo TeleCare brings tertiary healthcare directly into patient homes.",
+    aboutDocText: APOLLO_DOCTORS[0].aboutText,
+    aboutClinicText:
+      "Apollo TeleCare brings tertiary healthcare, multi-specialty clinical consultations, and continuous health monitoring directly into patient homes.",
   },
   features: {
     enableECommerce: false,       // Pure teleconsultation hospital (no eCommerce)
@@ -77,7 +81,7 @@ export const APOLLO_DEMO_TENANT: HospitalTenantConfig = {
     enableGoogleReviews: true,
     displayDoctorDetails: true,
     enablePatientMedicalRecords: true,
-    enableBillingHistory: false, // Apollo demo has payments disabled
+    enableBillingHistory: false,  // Apollo demo has payments disabled
     enableFollowupFeedback: true,
     enableAgastyaBot: true,
     enablePatientProfileEdit: true,

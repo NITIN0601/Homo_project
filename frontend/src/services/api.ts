@@ -526,4 +526,17 @@ export const api = {
       });
     },
   },
+
+  // ── Automated IP & Geo-Location Detection ─────────────────────────────────
+  geo: {
+    detect: async (): Promise<{ timezone: string; country?: string; ip?: string }> => {
+      try {
+        const res = await serverFetch<{ status: string; timezone: string; country?: string; ip?: string }>("/api/geo/detect");
+        if (res && res.timezone) return res;
+      } catch {}
+      return {
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
+      };
+    },
+  },
 };

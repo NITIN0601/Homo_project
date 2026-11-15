@@ -1,6 +1,8 @@
 import React, { Component, type ErrorInfo, type ReactNode } from "react";
-import { RbacAccessError } from "../../context/AppContext";
-import { THEME_GRADIENTS, THEME_COLORS } from "../../config";
+import { RbacAccessError, useApp } from "../../context/AppContext";
+import { useTenant } from "../../context/ThemeProvider";
+import { THEME_GRADIENTS, THEME_COLORS, USE_MOCK_DATA, DEMO_CREDENTIALS } from "../../config";
+import { MOCK_ACCOUNTS } from "../../data/mocks";
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 interface ProtectedRouteProps {
@@ -51,13 +53,11 @@ class RbacErrorBoundary extends Component<
   }
 }
 
-import { useApp } from "../../context/AppContext";
-import { MOCK_ACCOUNTS } from "../../data/mocks";
-import { DEMO_CREDENTIALS, USE_MOCK_DATA } from "../../config";
-
 // ─── Generic RBAC Denial Screen ───────────────────────────────────────────────
 const AccessDeniedScreen: React.FC = () => {
   const { navigateTo, openAuthModal, login } = useApp();
+  const { tenant } = useTenant();
+  const doctorDisplayName = tenant.doctor?.name || "the attending physician";
 
   return (
     <div
@@ -93,7 +93,7 @@ const AccessDeniedScreen: React.FC = () => {
         Doctor Admin Console Protected
       </h1>
       <p className="text-stone-500 text-sm leading-relaxed mb-6">
-        This area is restricted to authorized clinic medical staff. If you are Dr. Bramarambha K or a clinic administrator, please sign in with your administrative credentials.
+        This area is restricted to authorized clinic medical staff. If you are {doctorDisplayName} or a clinic administrator, please sign in with your administrative credentials.
       </p>
 
       <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-center">
@@ -122,7 +122,7 @@ const AccessDeniedScreen: React.FC = () => {
             }}
             className="text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
           >
-            🩺 Instant Login as Dr. Bramarambha K (Admin)
+            🩺 Instant Login as {doctorDisplayName} (Admin)
           </button>
         </div>
       )}

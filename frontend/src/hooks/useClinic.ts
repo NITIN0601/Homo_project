@@ -25,11 +25,13 @@ export interface ClinicFacade {
   };
   doctor: HospitalDoctor;
   doctors: HospitalDoctor[];
+  specialties: string[];
   primaryDoctorName: string;
   primaryDoctorTitle: string;
   primaryDoctorQualifications: string;
   primaryDoctorExperience: string;
   primaryDoctorAbout: string;
+  aboutClinicText: string;
   branding: HospitalTenantConfig["branding"];
   features: HospitalTenantConfig["features"];
   legal?: HospitalTenantConfig["legal"];
@@ -44,6 +46,8 @@ export function useClinic(): ClinicFacade {
     const hasTenantDoctor = Boolean(tenant.doctor && tenant.doctor.name);
     const primaryDoctor: HospitalDoctor = hasTenantDoctor
       ? tenant.doctor
+      : tenant.doctors && tenant.doctors.length > 0
+      ? tenant.doctors[0]
       : {
           id: "doc-default",
           name: DOCTOR.NAME,
@@ -52,14 +56,26 @@ export function useClinic(): ClinicFacade {
           experienceYears: 6,
           regNo: "MED-001",
           aboutText: DOCTOR.BIO_SUMMARY,
-          specialties: ["Homoeopathic Medicine", "Chronic Care"],
+          specialties: ["General Medicine", "Holistic Health"],
         };
+
+    const doctorsList: HospitalDoctor[] =
+      tenant.doctors && tenant.doctors.length > 0 ? tenant.doctors : [primaryDoctor];
+
+    const specialtiesList: string[] =
+      tenant.specialties && tenant.specialties.length > 0
+        ? tenant.specialties
+        : Array.from(new Set(doctorsList.flatMap((d) => d.specialties || [])));
 
     const street = tenant.contact.address.street || CLINIC.ADDRESS.STREET;
     const city = tenant.contact.address.city || CLINIC.ADDRESS.CITY;
     const state = tenant.contact.address.state || CLINIC.ADDRESS.STATE;
     const pincode = tenant.contact.address.pincode || CLINIC.ADDRESS.PINCODE;
     const country = tenant.contact.address.country || CLINIC.ADDRESS.COUNTRY;
+
+    const aboutClinicText =
+      tenant.branding.aboutClinicText ||
+      `${tenant.name || CLINIC.FULL_NAME} provides personalized clinical consultations, comprehensive outpatient evaluations, and dedicated continuing care.`;
 
     return {
       tenant,
@@ -82,12 +98,14 @@ export function useClinic(): ClinicFacade {
         mapsUrl: tenant.contact.mapsUrl || CLINIC.ADDRESS.MAPS_URL,
       },
       doctor: primaryDoctor,
-      doctors: tenant.doctors && tenant.doctors.length > 0 ? tenant.doctors : [primaryDoctor],
+      doctors: doctorsList,
+      specialties: specialtiesList,
       primaryDoctorName: primaryDoctor.name,
       primaryDoctorTitle: primaryDoctor.title,
       primaryDoctorQualifications: primaryDoctor.qualifications,
       primaryDoctorExperience: `${primaryDoctor.experienceYears} Years`,
       primaryDoctorAbout: primaryDoctor.aboutText || "",
+      aboutClinicText,
       branding: tenant.branding,
       features: tenant.features,
       legal: tenant.legal,

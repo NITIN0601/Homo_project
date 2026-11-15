@@ -30,28 +30,38 @@ export function formatDateShort(dateInput: Date | string | number): string {
  * Format a date into a full readable string with day name (e.g., "Thursday, 1 October, 2026")
  */
 export function formatDateFull(dateInput: Date | string | number): string {
-  const date = typeof dateInput === "string" || typeof dateInput === "number" ? new Date(dateInput) : dateInput;
-  if (isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(COMMERCE_CONFIG.CURRENCY_LOCALE, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  if (!dateInput) return "";
+  try {
+    const date = typeof dateInput === "string" || typeof dateInput === "number" ? new Date(dateInput) : dateInput;
+    if (!date || isNaN(date.getTime())) return "";
+    return date.toLocaleDateString(COMMERCE_CONFIG.CURRENCY_LOCALE, {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return "";
+  }
 }
 
 /**
  * Format a date with abbreviated weekday (e.g., "Thu, 1 Oct 2026")
  */
 export function formatDateWithWeekday(dateInput: Date | string | number): string {
-  const date = typeof dateInput === "string" || typeof dateInput === "number" ? new Date(dateInput) : dateInput;
-  if (isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(COMMERCE_CONFIG.CURRENCY_LOCALE, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  if (!dateInput) return "";
+  try {
+    const date = typeof dateInput === "string" || typeof dateInput === "number" ? new Date(dateInput) : dateInput;
+    if (!date || isNaN(date.getTime())) return "";
+    return date.toLocaleDateString(COMMERCE_CONFIG.CURRENCY_LOCALE, {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return "";
+  }
 }
 
 /**

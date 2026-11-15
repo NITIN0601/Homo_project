@@ -149,14 +149,18 @@ function getBotResponse(
 
   // ── 5. Areas We Treat / Specialisations ──
   if (/treat|special|condition|disease|problem|respiratory|skin|pcos|digest|migraine|allergy|hair|pediatric/.test(q)) {
+    const specsList = tenant?.specialties && tenant.specialties.length > 0
+      ? tenant.specialties.map((s) => `• *${s}*`).join("\n")
+      : `• *Respiratory & Allergies:* Allergic rhinitis, bronchitis, asthma, sinusitis.\n` +
+        `• *Dermatology & Hair:* Eczema, psoriasis, urticaria, adult/teen acne, alopecia.\n` +
+        `• *Women's & Chronic Health:* PCOS, thyroid dysfunction, migraine, gastric disorders.\n` +
+        `• *Pediatric Care:* Childhood immunity, recurrent infections, and growth support.`;
+
     return {
       text:
-        `🩺 *Specialised Clinical Practice at ${CLINIC.FULL_NAME}:*\n\n` +
-        `• *Respiratory & Allergies:* Allergic rhinitis, bronchitis, asthma, sinusitis, and dust allergies.\n` +
-        `• *Dermatology & Hair:* Eczema, psoriasis, urticaria, adult/teen acne, alopecia, and hair fall.\n` +
-        `• *Women's & Chronic Health:* PCOS, thyroid dysfunction, migraine, gastric disorders, and arthritis.\n` +
-        `• *Pediatric Care:* Childhood immunity, recurrent infections, and behavioral/developmental support.\n\n` +
-        `Treatment is planned through individualized constitutional case assessment.`,
+        `🩺 *Specialised Clinical Practice at ${clinicName}:*\n\n` +
+        `${specsList}\n\n` +
+        `Treatment is planned through individualized case assessment and continuing care.`,
       actions: [
         { label: "🩺 View All Specialisations on Page", page: "about", scrollTo: "specialisations" },
         { label: "📅 Book Consultation Slot",          page: "appointments" },
@@ -169,11 +173,11 @@ function getBotResponse(
   if (/^(about\s*(us|clinic)|clinic\s*(story|overview|philosophy)|who\s*we\s*are)$/.test(q) || q === "about us" || q === "about clinic") {
     return {
       text:
-        `🌿 *About ${CLINIC.FULL_NAME}:*\n\n` +
-        `• *Holistic & Classical:* A dedicated classical homoeopathy clinic providing individualized, root-cause healing without toxic side-effects.\n` +
-        `• *Expert Leadership:* Led by **${DOCTOR.TITLE}**, ${DOCTOR.QUALIFICATIONS} (${DOCTOR.COLLEGE}).\n` +
-        `• *Patient Care:* Comprehensive in-clinic assessments in ${CLINIC.ADDRESS.AREA}, secure video tele-care, and direct remedy dispensing.\n` +
-        `• *Gentle Philosophy:* Healing guided by natural law and classical totality evaluation tailored to each patient.`,
+        `🌿 *About ${clinicName}:*\n\n` +
+        `• *Holistic & Individualized:* A dedicated clinic providing root-cause, compassionate healthcare tailored to each patient.\n` +
+        `• *Expert Leadership:* Led by **${doctorTitle}**, ${tenant?.doctor?.qualifications || "Consulting Physician"}.\n` +
+        `• *Patient Care:* In-clinic assessments in ${tenant?.contact?.address?.city || "our facility"}, secure video tele-care, and direct remedy dispensing.\n` +
+        `• *Gentle Philosophy:* ${tenant?.tagline || "Patient-centered healthcare and lasting wellness."}`,
       actions: [
         { label: "🌿 Read About Us & Clinic Story", page: "about" },
         { label: "📅 Book Consultation Slot",       page: "appointments" },
@@ -183,14 +187,14 @@ function getBotResponse(
   }
 
   // ── 6b. About the Doctor & Clinic Profile ──
-  if (/about\s*doctor|doctor|physician|who\s*(is|are)|bio|biography|profile|qualification|credentials?|alma\s*mater|background|philosophy|bramarambha/.test(q) || q === "about doctor") {
+  if (/about\s*doctor|doctor|physician|who\s*(is|are)|bio|biography|profile|qualification|credentials?|alma\s*mater|background|philosophy/.test(q) || q === "about doctor") {
     return {
       text:
-        `👩‍⚕️ *About ${DOCTOR.TITLE}:*\n\n` +
-        `• *Qualifications:* ${DOCTOR.QUALIFICATIONS} (${DOCTOR.ALMA_MATER}, ${DOCTOR.RANK}).\n` +
-        `• *Faculty & Experience:* ${DOCTOR.DESIGNATION} at ${DOCTOR.COLLEGE} with ${DOCTOR.EXPERIENCE_DESC}.\n` +
-        `• *Classical Methodology:* Strict adherence to constitutional case-taking, totality evaluation, and gentle healing.\n` +
-        `• *Certification:* ${DOCTOR.CERTIFICATION}.`,
+        `👩‍⚕️ *About ${doctorTitle}:*\n\n` +
+        `• *Qualifications:* ${tenant?.doctor?.qualifications || DOCTOR.QUALIFICATIONS}.\n` +
+        `• *Clinical Practice:* Dedicated patient consultations and evidence-based personalized care.\n` +
+        `• *Methodology:* Strict adherence to holistic totality evaluation, symptom analysis, and gentle healing.\n` +
+        (tenant?.doctor?.experienceYears ? `• *Experience:* ${tenant.doctor.experienceYears} Years of clinical experience.` : ""),
       actions: [
         { label: "👩‍⚕️ View Doctor Profile & Credentials", page: "about", scrollTo: "doctor-profile" },
         { label: "🩺 View Services & Specialisations",  page: "about", scrollTo: "specialisations" },
@@ -203,10 +207,10 @@ function getBotResponse(
   if (/online|tele|video|remote|virtual|distance|zoom|call\s*consult|video\s*consult/.test(q)) {
     return {
       text:
-        `💻 *Consultation Modes at ${CLINIC.FULL_NAME}:*\n\n` +
-        `• *🌿 In-Person Clinic Visits:* In-depth constitutional case-taking at our ${CLINIC.ADDRESS.AREA} clinic with physical assessment.\n` +
-        `• *💻 Online Video Consultations:* Secure, comprehensive tele-consultations for outstation, national, and international patients.\n` +
-        `• *📦 Courier Medicine Dispatch:* Prescribed remedies are prepared in accredited potencies and shipped via ${LOGISTICS.DEFAULT_PARTNER} directly to your home.`,
+        `💻 *Consultation Modes at ${clinicName}:*\n\n` +
+        `• *🌿 In-Person Clinic Visits:* In-depth constitutional case-taking at our ${tenant?.contact?.address?.city || "clinic"} location with physical assessment.\n` +
+        `• *💻 Online Video Consultations:* Secure, comprehensive tele-consultations for remote and outstation patients.\n` +
+        `• *📦 Courier Medicine Dispatch:* Prescribed remedies prepared and dispatched directly to your home.`,
       actions: [
         { label: "📅 Book Tele or Clinic Slot", page: "appointments" },
         { label: "🕒 View Clinic Timings",      page: "about", scrollTo: "clinic-schedule" },
@@ -253,10 +257,10 @@ function getBotResponse(
   if (/classical|how\s*it\s*works|side\s*effects?|safe|gentle|holistic|principles?|natural/.test(q)) {
     return {
       text:
-        `🌿 *Classical Homoeopathy Principles at ${CLINIC.FULL_NAME}:*\n\n` +
-        `• *Gentle & Non-Toxic:* Classical remedies stimulate your innate vital force without chemical side effects, organ toxicity, or dependency.\n` +
-        `• *Constitutional Totality:* We evaluate your physical symptoms, emotional characteristics, and medical history rather than isolated disease labels.\n` +
-        `• *Official Pharmacopoeia:* All dispensed remedies conform to accredited homeopathic pharmacopoeia standards and highest quality potencies.`,
+        `🌿 *Clinical Practice Principles at ${clinicName}:*\n\n` +
+        `• *Gentle & Non-Toxic:* Remedies stimulate your innate vital health without toxic side effects or chemical dependency.\n` +
+        `• *Constitutional Totality:* We evaluate physical symptoms, health history, and individual characteristics.\n` +
+        `• *Quality Assurance:* All prescribed remedies and medicines conform to accredited pharmacopoeia standards.`,
       actions: [
         { label: "👩‍⚕️ Read Doctor Philosophy",    page: "about", scrollTo: "doctor-profile" },
         { label: "🩺 View Treated Conditions",   page: "about", scrollTo: "specialisations" },
@@ -269,8 +273,8 @@ function getBotResponse(
   if (/medicine|remedy|remedies|order|prescription|prescribed|buy|purchase|cart/.test(q)) {
     return {
       text:
-        `💊 *Remedy Dispensing & Prescriptions at ${CLINIC.FULL_NAME}:*\n\n` +
-        `• *In-Clinic Classical Dispensary:* Customized remedies and potencies are dispensed directly after ${DOCTOR.TITLE}'s case analysis.\n` +
+        `💊 *Remedy Dispensing & Prescriptions at ${clinicName}:*\n\n` +
+        `• *Clinical Dispensary:* Customized remedies and prescriptions are prepared directly after ${doctorTitle}'s case analysis.\n` +
         `• *Clear Instructions:* Dosage frequency, administration guidelines, and lifestyle advice are recorded in your clinical notes.\n` +
         `• *Verified Summary:* Review your current remedies, dosage, and case history anytime in your Visit Summary.\n` +
         `• *Home Dispatch:* Prescriptions for tele-consultation patients are packaged safely and shipped via courier.`,
@@ -319,10 +323,10 @@ function getBotResponse(
   if (/contact|phone|call|reach|support|help|reception|email|helpline|desk/.test(q)) {
     return {
       text:
-        `📞 *Contact ${CLINIC.FULL_NAME}:*\n\n` +
-        `• *Phone / WhatsApp:* ${CLINIC.PHONE_DISPLAY} (Direct reception assistance).\n` +
-        `• *Clinic Address:* ${CLINIC.ADDRESS.FULL}\n` +
-        `• *Email:* ${CLINIC.SUPPORT_EMAIL} (Official queries & record requests)\n` +
+        `📞 *Contact ${clinicName}:*\n\n` +
+        `• *Phone / WhatsApp:* ${clinicPhone} (Direct reception assistance).\n` +
+        `• *Clinic Address:* ${clinicAddress}\n` +
+        `• *Email:* ${clinicEmail} (Official queries & record requests)\n` +
         `• *Assistance:* Our front desk is happy to help with bookings, timings, and directions during clinic hours.`,
       actions: [
         { label: "📍 View Location & Map on Page", page: "about", scrollTo: "clinic-location" },
@@ -338,8 +342,8 @@ function getBotResponse(
       text:
         `💳 *Consultation Fees & Invoicing:* \n\n` +
         `• *Transparent Settlement:* Consultation and remedy fees are settled at the clinic reception desk upon arrival or appointment confirmation.\n` +
-        `• *Payment Methods:* UPI (${DOCTOR.UPI_ID}), cash, and digital payments are accepted.\n` +
-        `• *Verified Receipts:* Download official GST-compliant tax invoices and track payment reconciliation directly in your Visit Summary.\n` +
+        `• *Payment Methods:* UPI, cash, and digital payments are accepted.\n` +
+        `• *Verified Receipts:* Download official tax invoices and track payment reconciliation directly in your Visit Summary.\n` +
         `• *Portal Security:* No card numbers or banking passwords are collected or stored on this portal.`,
       actions: [
         { label: "📋 View Invoices & Payment Status", page: "visit-summary" },
@@ -354,9 +358,9 @@ function getBotResponse(
     return {
       text:
         `🚨 *Emergency Medical Notice:*\n\n` +
-        `• *Outpatient Facility:* ${CLINIC.FULL_NAME} is an outpatient classical homoeopathy clinic and does not operate emergency casualty or ICU units.\n` +
-        `• *Immediate Action:* If you or someone in your care experiences severe chest pain, breathing distress, sudden weakness, or major trauma, please immediately dial **112 / 108** or go to the nearest multi-specialty emergency hospital.\n` +
-        `• *Non-Urgent Queries:* For acute homeopathic consultations during clinic hours, contact our desk directly.`,
+        `• *Outpatient Facility:* ${clinicName} is an outpatient clinical facility and does not operate emergency casualty or ICU units.\n` +
+        `• *Immediate Action:* If you or someone in your care experiences severe chest pain, breathing distress, sudden weakness, or major trauma, please immediately dial emergency medical services or go to the nearest emergency hospital.\n` +
+        `• *Non-Urgent Queries:* For acute consultations during clinic hours, contact our desk directly.`,
       actions: [
         { label: "📍 Clinic Address & Location", page: "about", scrollTo: "clinic-location" },
         { label: "🕒 Check Clinic Hours",        page: "about", scrollTo: "clinic-schedule" },
@@ -368,8 +372,8 @@ function getBotResponse(
   // ── 17. Fallback ──
   return {
     text:
-      `🌿 *${CLINIC.FULL_NAME} — Patient Assistance:*\n\n` +
-      `• *Consultation Booking:* Reserve an in-clinic or video tele-consultation with ${DOCTOR.TITLE}.\n` +
+      `🌿 *${clinicName} — Patient Assistance:*\n\n` +
+      `• *Consultation Booking:* Reserve an in-clinic or video tele-consultation with ${doctorTitle}.\n` +
       `• *Records & Care:* Review your clinical visit summaries, remedies, diet precautions, and invoices.\n` +
       `• *Clinic Info:* View clinic timings, address, directions, and areas of specialization.\n\n` +
       `Please tap an option below to navigate directly, or message our front desk.`,

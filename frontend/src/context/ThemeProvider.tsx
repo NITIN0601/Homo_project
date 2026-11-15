@@ -23,16 +23,27 @@ function getSavedTenantOverride(base: HospitalTenantConfig): HospitalTenantConfi
     const raw = localStorage.getItem(`${STORAGE_CUSTOM_PREFIX}${base.id}`);
     if (raw) {
       const parsed = JSON.parse(raw);
+      const activeDoctor = { ...base.doctor, ...(parsed.doctor || (parsed.doctors?.[0] || {})) };
+      const activeDoctors = parsed.doctors && parsed.doctors.length > 0
+        ? parsed.doctors
+        : (base.doctors && base.doctors.length > 0 ? [{ ...base.doctors[0], ...activeDoctor }, ...base.doctors.slice(1)] : [activeDoctor]);
+
       return {
         ...base,
         ...parsed,
-        doctor: { ...base.doctor, ...(parsed.doctor || {}) },
+        doctor: activeDoctor,
+        doctors: activeDoctors,
+        specialties: parsed.specialties || base.specialties || Array.from(new Set(activeDoctors.flatMap((d: any) => d.specialties || []))),
         contact: {
           ...base.contact,
           ...(parsed.contact || {}),
           address: { ...base.contact.address, ...(parsed.contact?.address || {}) },
         },
-        branding: { ...base.branding, ...(parsed.branding || {}) },
+        branding: {
+          ...base.branding,
+          ...(parsed.branding || {}),
+          aboutDocText: activeDoctor.aboutText || parsed.branding?.aboutDocText || base.branding.aboutDocText,
+        },
         features: {
           ...base.features,
           ...(parsed.features ?? {}),
@@ -61,10 +72,22 @@ export const ThemeProvider: React.FC<{
 
   const updateTenant = useCallback((updates: Partial<HospitalTenantConfig>) => {
     setTenant((prev) => {
+      const updatedDoctor = updates.doctor
+        ? { ...prev.doctor, ...updates.doctor }
+        : (updates.doctors?.[0] ? { ...prev.doctor, ...updates.doctors[0] } : prev.doctor);
+
+      const updatedDoctors = updates.doctors
+        ? updates.doctors
+        : (prev.doctors && prev.doctors.length > 0
+            ? [{ ...prev.doctors[0], ...updatedDoctor }, ...prev.doctors.slice(1)]
+            : [updatedDoctor]);
+
       const merged: HospitalTenantConfig = {
         ...prev,
         ...updates,
-        doctor: updates.doctor ? { ...prev.doctor, ...updates.doctor } : prev.doctor,
+        doctor: updatedDoctor,
+        doctors: updatedDoctors,
+        specialties: updates.specialties || prev.specialties || Array.from(new Set(updatedDoctors.flatMap((d) => d.specialties || []))),
         contact: updates.contact
           ? {
               ...prev.contact,
@@ -72,7 +95,16 @@ export const ThemeProvider: React.FC<{
               address: { ...prev.contact.address, ...(updates.contact.address || {}) },
             }
           : prev.contact,
-        branding: updates.branding ? { ...prev.branding, ...updates.branding } : prev.branding,
+        branding: updates.branding
+          ? {
+              ...prev.branding,
+              ...updates.branding,
+              aboutDocText: updatedDoctor.aboutText || updates.branding.aboutDocText || prev.branding.aboutDocText,
+            }
+          : {
+              ...prev.branding,
+              aboutDocText: updatedDoctor.aboutText || prev.branding.aboutDocText,
+            },
         features: updates.features ? { ...prev.features, ...updates.features } : prev.features,
       };
       if (typeof window !== "undefined") {

@@ -1,4 +1,16 @@
-import type { HospitalTenantConfig } from "../../types/tenant";
+import type { HospitalTenantConfig, HospitalDoctor } from "../../types/tenant";
+
+const PRIMARY_DOCTOR: HospitalDoctor = {
+  id: "doc-default",
+  name: "Dr. Primary Physician",
+  title: "Primary Consulting Physician, MD",
+  regNo: "MED-GEN-2020-001",
+  experienceYears: 10,
+  qualifications: "MD, MBBS",
+  aboutText:
+    "Experienced clinical practitioner dedicated to holistic patient wellness, evidence-based diagnostic evaluations, and compassionate clinical medicine.",
+  specialties: ["General Medicine", "Holistic Health", "Preventive Care"],
+};
 
 export const VANILLA_DEFAULT_TENANT: HospitalTenantConfig = {
   id: "default",
@@ -8,27 +20,14 @@ export const VANILLA_DEFAULT_TENANT: HospitalTenantConfig = {
   name: "General Healthcare Clinic",
   shortName: "General Clinic",
   tagline: "Patient-centered healthcare with clinical precision",
-  doctor: {
-    id: "doc-default",
-    name: "Dr. Primary Physician",
-    title: "Primary Consulting Physician, MD",
-    regNo: "MED-GEN-2020-001",
-    experienceYears: 10,
-    qualifications: "MD, MBBS",
-    aboutText: "Experienced clinical practitioner dedicated to holistic patient wellness and evidence-based clinical care.",
-    specialties: ["General Medicine", "Holistic Health", "Preventive Care"],
-  },
-  doctors: [
-    {
-      id: "doc-default",
-      name: "Dr. Primary Physician",
-      title: "Primary Consulting Physician, MD",
-      regNo: "MED-GEN-2020-001",
-      experienceYears: 10,
-      qualifications: "MD, MBBS",
-      aboutText: "Experienced clinical practitioner dedicated to holistic patient wellness and evidence-based clinical care.",
-      specialties: ["General Medicine", "Holistic Health", "Preventive Care"],
-    },
+  doctor: PRIMARY_DOCTOR,
+  doctors: [PRIMARY_DOCTOR],
+  specialties: [
+    "General Medicine",
+    "Holistic Health",
+    "Preventive Care",
+    "Chronic Disease Management",
+    "Family Wellness",
   ],
   contact: {
     phone: "+1 555-0100",
@@ -52,8 +51,11 @@ export const VANILLA_DEFAULT_TENANT: HospitalTenantConfig = {
     neutralBg: "#fafaf9",
     cardRadius: "1.25rem",
     buttonRadius: "0.75rem",
-    logoUrl: "/logo.png",
+    logoUrl: "/generic-clinic-logo.svg",
     fontSans: '"Inter", sans-serif',
+    aboutDocText: PRIMARY_DOCTOR.aboutText,
+    aboutClinicText:
+      "General Healthcare Clinic provides comprehensive outpatient clinical consultations, individualized preventive assessments, and evidence-based patient-centered care.",
   },
   features: {
     enableECommerce: true,

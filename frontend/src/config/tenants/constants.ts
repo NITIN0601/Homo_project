@@ -16,28 +16,28 @@ export const DEFAULT_COLOR_PRESETS: readonly ColorPreset[] = [
 ] as const;
 
 export const DEFAULT_FACILITY_CONFIG = {
-  defaultPhone: "+91 98450 00000",
-  defaultEmail: "admin@newclinic.com",
-  defaultCity: "Bengaluru",
-  defaultState: "Karnataka",
-  defaultCountry: "India",
-  defaultPincode: "560001",
-  defaultStreet: "123 Healthcare Blvd",
-  defaultPrimaryColor: "#0d9488",
-  defaultAccentColor: "#14b8a6",
-  defaultDarkColor: "#0f172a",
+  defaultPhone: "+1 555-0100",
+  defaultEmail: "admin@example.com",
+  defaultCity: "Metropolis",
+  defaultState: "State",
+  defaultCountry: "Country",
+  defaultPincode: "10001",
+  defaultStreet: "100 Medical Center Way",
+  defaultPrimaryColor: "#1b4332",
+  defaultAccentColor: "#40916c",
+  defaultDarkColor: "#081c15",
   defaultCardRadius: "1.25rem",
   defaultButtonRadius: "0.75rem",
   defaultFontSans: '"Inter", sans-serif',
-  defaultLogoUrl: "/logo.png",
+  defaultLogoUrl: "/generic-clinic-logo.svg",
 } as const;
 
 export const DEFAULT_DOCTOR_CONFIG = {
-  defaultTitle: "Consulting Physician, MD",
+  defaultTitle: "Primary Consulting Physician, MD",
   defaultQualifications: "MD, MBBS",
-  defaultExperienceYears: 8,
-  defaultPhone: "+91 98450 12345",
-  defaultSpecialties: "General Medicine, Holistic Health",
+  defaultExperienceYears: 10,
+  defaultPhone: "+1 555-0100",
+  defaultSpecialties: "General Medicine, Holistic Health, Preventive Care",
 } as const;
 
 export const DEFAULT_NEW_TENANT_FEATURES: HospitalFeatures = {

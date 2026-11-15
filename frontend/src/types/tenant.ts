@@ -114,8 +114,9 @@ export interface HospitalTenantConfig {
   name: string;                    // Official Hospital / Clinic Name
   shortName: string;
   tagline: string;
-  doctor: HospitalDoctor;          // Primary / default doctor
+  doctor: HospitalDoctor;          // Primary / default attending physician
   doctors?: HospitalDoctor[];      // Multi-doctor roster for scalable multi-physician clinics
+  specialties?: string[];          // Hospital-level clinical specialties & treated care areas
   contact: HospitalContact;
   branding: HospitalBranding;
   features: HospitalFeatures;

@@ -100,7 +100,7 @@ const HomePage: React.FC = () => {
             <span className="text-xl">📍</span>
             <div>
               <p className="font-extrabold text-stone-800 text-xs uppercase tracking-wider">Clinic Location &amp; Contact</p>
-              <p className="text-stone-400 text-[10px]">{CLINIC.BRANCHES.MALLESHWARAM}</p>
+              <p className="text-stone-400 text-[10px]">{clinic.name}</p>
             </div>
           </div>
 

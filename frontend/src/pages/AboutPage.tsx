@@ -66,11 +66,7 @@ const AboutPage: React.FC = () => {
           </p>
 
           <p className="text-stone-200 text-sm sm:text-base leading-relaxed font-normal text-justify sm:text-left">
-            Welcome to <strong>{clinic.name}</strong>. {shouldDisplayDoctors && (
-              <>
-                Led by <strong>{clinic.primaryDoctorName}</strong>, {clinic.primaryDoctorQualifications}.
-              </>
-            )} We provide individualised clinical consultations with detailed case assessment, personalised treatment, and dedicated follow-up care based on each patient’s health history, lifestyle, and individual needs.
+            {clinic.aboutClinicText}
           </p>
 
           <div className="pt-4 flex flex-wrap items-center gap-3">
@@ -105,8 +101,12 @@ const AboutPage: React.FC = () => {
           <p className="text-xl sm:text-2xl font-black" style={{ color: clinic.branding.primaryColor }}>
             {clinic.doctors.length}
           </p>
-          <p className="text-xs font-bold text-stone-700">Specialist Clinicians</p>
-          <p className="text-[10px] text-stone-400 font-medium">Affiliated Medical Staff</p>
+          <p className="text-xs font-bold text-stone-700">
+            {clinic.doctors.length === 1 ? "Attending Physician" : "Specialist Clinicians"}
+          </p>
+          <p className="text-[10px] text-stone-400 font-medium">
+            {clinic.doctors.length === 1 ? "Clinical Lead" : "Affiliated Medical Staff"}
+          </p>
         </div>
 
         <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs text-center space-y-1">
@@ -134,18 +134,20 @@ const AboutPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Hospital Medical Team Section (Multi-Doctor Architecture) ──────── */}
+      {/* ── Hospital Medical Team Section (Single & Multi-Doctor Dynamic Support) ──────── */}
       {shouldDisplayDoctors ? (
         <div id="doctor-profile" className="space-y-6 scroll-mt-24">
           <div className="text-center space-y-1 max-w-xl mx-auto">
             <span className="text-xs font-extrabold uppercase tracking-wider text-stone-400">
-              {clinic.shortName} Medical Faculty
+              {clinic.doctors.length === 1 ? "Attending Physician" : `${clinic.shortName} Medical Faculty`}
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-stone-800">
-              Meet Our Specialist Doctors
+              {clinic.doctors.length === 1 ? "Meet Our Consulting Physician" : "Meet Our Specialist Doctors"}
             </h2>
             <p className="text-stone-500 text-xs sm:text-sm">
-              Certified medical practitioners dedicated to compassionate, root-cause patient healing.
+              {clinic.doctors.length === 1
+                ? `Individualized clinical consultations and compassionate care led by ${clinic.primaryDoctorName}.`
+                : "Certified medical practitioners dedicated to compassionate, root-cause patient healing."}
             </p>
           </div>
 
@@ -286,6 +288,19 @@ const AboutPage: React.FC = () => {
           <p className="text-stone-600 text-xs sm:text-sm leading-relaxed text-justify sm:text-center">
             {clinic.name} provides individualised consultations, with detailed case assessment, personalised treatment, and follow-up care based on each patient’s health history and individual needs.
           </p>
+
+          {clinic.specialties && clinic.specialties.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              {clinic.specialties.map((spec) => (
+                <span
+                  key={spec}
+                  className="px-3.5 py-1.5 rounded-full bg-white border border-stone-200/90 text-stone-800 text-xs font-bold shadow-2xs flex items-center gap-1.5"
+                >
+                  <span className="text-emerald-600">✦</span> {spec}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

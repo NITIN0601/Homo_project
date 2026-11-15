@@ -633,6 +633,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const [clockTick, setClockTick] = React.useState(0);
 
+  // Automated IP & Geo-Location Detection (Zero user configuration)
+  useEffect(() => {
+    api.geo.detect().then((geo) => {
+      if (geo?.timezone && geo.timezone !== state.userTimezone) {
+        dispatch({ type: "SET_USER_TIMEZONE", payload: geo.timezone });
+      }
+    }).catch(() => {});
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setClockTick((c) => c + 1);

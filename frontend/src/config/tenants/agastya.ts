@@ -1,50 +1,49 @@
-import type { HospitalTenantConfig } from "../../types/tenant";
-import { CLINIC, DOCTOR } from "../clinic";
+import type { HospitalTenantConfig, HospitalDoctor } from "../../types/tenant";
 import { THEME_COLORS, THEME_FONTS } from "../theme";
+
+const PRIMARY_DOCTOR: HospitalDoctor = {
+  id: "doc-001",
+  name: "Dr. Bramarambha K",
+  title: "Dr. Bramarambha K, MD (Homeopathic Materia Medica), SCPH",
+  regNo: "KAR-HOM-2018-0492",
+  experienceYears: 6,
+  qualifications: "Homoeopathic Physician | MD in Materia Medica | SCPH-Certified",
+  aboutText:
+    "Dr. Bramarambha K. is a Homoeopathic Physician with postgraduate specialisation in Homeopathic Materia Medica. She completed her undergraduate and postgraduate studies at Government Homoeopathic Medical College & Hospital, Bengaluru, securing 3rd rank in MD from Rajiv Gandhi University of Health Sciences (RGUHS). She is SCPH-certified with extensive clinical expertise in chronic pathology, paediatric immunity, and individualised constitutional homoeopathic care.",
+  specialties: ["Classical Homeopathy", "Chronic Pathology", "Paediatric Immunity"],
+};
 
 export const AGASTYA_TENANT: HospitalTenantConfig = {
   id: "agastya",
   slug: "agastya",
   domain: "agastyahomoeopathy.com",
   subdomains: ["agastya", "clinic", "ehr"],
-  name: CLINIC.FULL_NAME,
-  shortName: CLINIC.NAME,
-  tagline: CLINIC.TAGLINE,
-  doctor: {
-    id: "doc-001",
-    name: DOCTOR.NAME,
-    title: DOCTOR.TITLE,
-    regNo: "KAR-HOM-2018-0492",
-    experienceYears: 6,
-    qualifications: DOCTOR.QUALIFICATIONS,
-    aboutText: DOCTOR.BIO_SUMMARY,
-    specialties: ["Classical Homeopathy", "Chronic Pathology", "Paediatric Immunity"],
-  },
-  doctors: [
-    {
-      id: "doc-001",
-      name: DOCTOR.NAME,
-      title: DOCTOR.TITLE,
-      regNo: "KAR-HOM-2018-0492",
-      experienceYears: 6,
-      qualifications: DOCTOR.QUALIFICATIONS,
-      aboutText: DOCTOR.BIO_SUMMARY,
-      specialties: ["Classical Homeopathy", "Chronic Pathology", "Paediatric Immunity"],
-    },
+  name: "Agastya Homoeopathy Clinic",
+  shortName: "Agastya",
+  tagline: "Gentle Healing, Lasting Wellness",
+  doctor: PRIMARY_DOCTOR,
+  doctors: [PRIMARY_DOCTOR],
+  specialties: [
+    "Classical Homeopathy",
+    "Chronic Pathology",
+    "Paediatric Immunity",
+    "Allergies & Respiratory",
+    "Women's Health",
+    "Skin & Dermatological Care",
   ],
   contact: {
-    phone: CLINIC.PHONE_TEL,
-    phoneDisplay: CLINIC.PHONE_DISPLAY,
-    email: CLINIC.SUPPORT_EMAIL,
-    emergencyPhone: CLINIC.PHONE_TEL,
+    phone: "+919845012345",
+    phoneDisplay: "+91 98450 12345",
+    email: "doctor@agastyahomoeo.com",
+    emergencyPhone: "+919845012345",
     address: {
-      street: CLINIC.ADDRESS.STREET,
-      city: CLINIC.ADDRESS.CITY,
-      state: CLINIC.ADDRESS.STATE,
-      pincode: CLINIC.ADDRESS.PINCODE,
-      country: CLINIC.ADDRESS.COUNTRY,
+      street: "No. 10/2, 2nd Temple Road, 16th Cross, Malleshwaram",
+      city: "Bengaluru",
+      state: "Karnataka",
+      pincode: "560003",
+      country: "India",
     },
-    mapsUrl: CLINIC.ADDRESS.MAPS_URL,
+    mapsUrl: "https://maps.google.com/?q=No.+10/2,+2nd+Temple+Road,+16th+Cross,+Malleshwaram,+Bengaluru,+Karnataka+560003",
     googleReviewUrl: "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4",
   },
   branding: {
@@ -55,10 +54,11 @@ export const AGASTYA_TENANT: HospitalTenantConfig = {
     cardRadius: "1.25rem",
     buttonRadius: "0.75rem",
     fontSans: THEME_FONTS.FAMILY_SANS,
-    logoUrl: "/favicon.ico",
+    logoUrl: "/agastya-logo.png",
     bannerUrl: "/assets/banner.jpg",
-    aboutDocText: DOCTOR.BIO_SUMMARY,
-    aboutClinicText: "Holistic Classical Homoeopathy practice serving patients globally with clinical precision and compassionate care.",
+    aboutDocText: PRIMARY_DOCTOR.aboutText,
+    aboutClinicText:
+      "Agastya Homoeopathy Clinic provides gentle, individualised classical homoeopathic healthcare serving patients globally with comprehensive case assessments, personalised treatment plans, and continuous clinical follow-up.",
   },
   features: {
     enableECommerce: true,

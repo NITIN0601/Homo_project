@@ -1,4 +1,5 @@
 import React from "react";
+import { useTenant } from "../../../../context/ThemeProvider";
 import type { UserProfile, HomeopathicRemedySuggestion } from "../../../../types";
 import { DOCTOR, CLINIC } from "../../../../config";
 import {
@@ -104,6 +105,7 @@ export const VoiceStudioReviewStep: React.FC<VoiceStudioReviewStepProps> = ({
   onClose,
   onApprove,
 }) => {
+  const { tenant } = useTenant();
   return (
     <div className="space-y-6">
       {/* Telemetry & Quality Evals Bar */}
@@ -444,7 +446,7 @@ export const VoiceStudioReviewStep: React.FC<VoiceStudioReviewStepProps> = ({
               <div className="text-[9px] text-stone-400 bg-black/40 p-2 rounded-xl border border-white/5 flex items-start gap-1.5">
                 <span className="text-xs">⚖️</span>
                 <span>
-                  <strong>Clinical Privacy Notice:</strong> Audio watermarked under Digital Personal Data Protection Act (DPDPA 2023) and DISHA guidelines. Non-repudiation signature binds recording to {DOCTOR.TITLE} &amp; {CLINIC.FULL_NAME}.
+                  <strong>Clinical Privacy Notice:</strong> Audio watermarked under Digital Personal Data Protection Act (DPDPA 2023) and DISHA guidelines. Non-repudiation signature binds recording to {tenant.doctor?.title || DOCTOR.TITLE} &amp; {tenant.name || CLINIC.FULL_NAME}.
                 </span>
               </div>
             </div>

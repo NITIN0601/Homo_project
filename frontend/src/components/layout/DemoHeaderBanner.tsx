@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useApp } from "../../context/AppContext";
+import { useTenant } from "../../context/ThemeProvider";
 import { MOCK_ACCOUNTS } from "../../data/mocks";
 import { DEMO_CREDENTIALS, DEV_PORTS } from "../../config";
 
 export const DemoHeaderBanner: React.FC = () => {
   const { state, login, logout, navigateTo } = useApp();
+  const { tenant } = useTenant();
   const { authUser, activePage } = state;
   const [collapsed, setCollapsed] = useState(false);
 
@@ -12,6 +14,7 @@ export const DemoHeaderBanner: React.FC = () => {
   const isAdminPort = port === DEV_PORTS.ADMIN;
   const isPatientPort = port === DEV_PORTS.PATIENT;
   const isAdminRole = authUser?.role === "admin";
+  const doctorShortName = tenant.doctor?.name ? tenant.doctor.name.replace(/^Dr\.\s*/, "") : "Doctor";
 
   if (collapsed) {
     return (
@@ -75,7 +78,7 @@ export const DemoHeaderBanner: React.FC = () => {
               }`}
               title="Switch identity to Admin Doctor"
             >
-              🩺 Admin (Dr. Bramarambha)
+              🩺 Admin ({doctorShortName})
             </button>
 
             <button

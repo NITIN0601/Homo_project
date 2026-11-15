@@ -325,7 +325,7 @@ export const AdminDashboard: React.FC = () => {
                 </span>
               </div>
               <p className="text-emerald-200/90 text-xs mt-0.5">
-                {tenant.doctor.title || CLINIC.DOCTOR_TITLE} · {CLINIC.BRANCHES.MALLESHWARAM}
+                {tenant.doctor.title || CLINIC.DOCTOR_TITLE} · {tenant.name || CLINIC.NAME}
               </p>
             </div>
           </div>
@@ -560,7 +560,7 @@ export const AdminDashboard: React.FC = () => {
             if (!medObj.prescribedToPatientIds.includes(patientId)) {
               medObj.prescribedToPatientIds.push(patientId);
             }
-            medObj.doctorNote = `Prescribed by ${CLINIC.DOCTOR_NAME}: ${customDosageNote}`;
+            medObj.doctorNote = `Prescribed by ${tenant.doctor?.name || CLINIC.DOCTOR_NAME}: ${customDosageNote}`;
           }
           addVisitSummary(patientId, newVisit);
         }}

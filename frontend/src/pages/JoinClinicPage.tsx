@@ -53,7 +53,11 @@ export const JoinClinicPage: React.FC = () => {
         dispatch({ type: "LOGIN", payload: res.profile });
         setSuccess(true);
         setTimeout(() => {
-          navigateTo("visit-summary");
+          if (res.profile.role === "doctor" || res.profile.role === "admin" || res.profile.role === "super_admin") {
+            navigateTo("admin-dashboard");
+          } else {
+            navigateTo("visit-summary");
+          }
         }, 1500);
       } else {
         setError("Failed to claim invitation. Please request a new invite link from your doctor.");
@@ -82,7 +86,11 @@ export const JoinClinicPage: React.FC = () => {
         dispatch({ type: "LOGIN", payload: res.profile });
         setSuccess(true);
         setTimeout(() => {
-          navigateTo("visit-summary");
+          if (res.profile.role === "doctor" || res.profile.role === "admin" || res.profile.role === "super_admin") {
+            navigateTo("admin-dashboard");
+          } else {
+            navigateTo("visit-summary");
+          }
         }, 1500);
       } else {
         setError("Failed to claim invitation with Google.");

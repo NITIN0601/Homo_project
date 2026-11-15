@@ -1,36 +1,36 @@
 import { THEME_COLORS } from "./theme";
 
-// ─── Doctor Profile (SSOT) ────────────────────────────────────────────────────
+// ─── Doctor Profile (SSOT Baseline Placeholders) ──────────────────────────────
 export const DOCTOR = {
-  NAME:            "Dr. Bramarambha K",
-  FULL_NAME_WITH_DOT: "Dr. Bramarambha K.",
-  TITLE:           "Dr. Bramarambha K, MD (Homeopathic Materia Medica), SCPH",
-  QUALIFICATIONS:  "Homoeopathic Physician | MD in Materia Medica | SCPH-Certified",
-  DESIGNATION:     "Assistant Professor & Consultant Homoeopath",
-  COLLEGE:         "Anuradha Homoeopathic Medical College & Hospital, Bengaluru",
-  COLLEGE_SHORT:   "Anuradha HMC",
-  ALMA_MATER:      "Government Homoeopathic Medical College & Hospital, Bengaluru",
-  RANK:            "3rd Rank in MD (Homeopathic Materia Medica), RGUHS",
-  CERTIFICATION:   "SCPH-Certified",
-  EXPERIENCE_YEARS: "6 Years",
-  EXPERIENCE_DESC: "6 years of dedicated clinical experience providing individualised homoeopathic care",
-  EMAIL:           "doctor@agastyahomoeo.com",
-  UPI_ID:          "bramarambha.k@okicici",
+  NAME:            "Dr. Primary Physician",
+  FULL_NAME_WITH_DOT: "Dr. Primary Physician, MD",
+  TITLE:           "Primary Consulting Physician, MD",
+  QUALIFICATIONS:  "MD, MBBS",
+  DESIGNATION:     "Consulting Physician",
+  COLLEGE:         "Medical College & Hospital",
+  COLLEGE_SHORT:   "Medical College",
+  ALMA_MATER:      "Medical College & Hospital",
+  RANK:            "Clinical Excellence",
+  CERTIFICATION:   "Board Certified",
+  EXPERIENCE_YEARS: "10 Years",
+  EXPERIENCE_DESC: "10 years of dedicated clinical experience providing individualised healthcare",
+  EMAIL:           "doctor@example.com",
+  UPI_ID:          "clinic@upi",
 
   BIO_SUMMARY:
-    "Dr. Bramarambha K. is a Homoeopathic Physician with a postgraduate specialisation in Homeopathic Materia Medica. She completed her undergraduate and postgraduate studies at Government Homoeopathic Medical College & Hospital, Bengaluru, and secured 3rd rank in MD (Homeopathic Materia Medica) from Rajiv Gandhi University of Health Sciences (RGUHS). She is also SCPH-certified.",
+    "Experienced clinical practitioner dedicated to holistic patient wellness, compassionate care, and evidence-based clinical medicine.",
 
   APPROACH:
-    "My approach to care is centred on understanding each patient’s health history, lifestyle, and individual concerns, so that treatment can be planned according to their specific needs. Each consultation is individualised, with treatment planned according to the patient’s symptoms, medical history, and overall health.",
+    "My approach to care is centred on understanding each patient’s health history, lifestyle, and individual concerns, so that treatment can be planned according to their specific needs.",
 
   EXPERIENCE_DETAIL:
-    "Currently works as an Assistant Professor at Anuradha Homoeopathic Medical College & Hospital, Bengaluru, actively involved in teaching and academic activities. Alongside academic experience, she brings 6 years of dedicated clinical experience providing individualised homoeopathic care and managing patients with a diverse range of chronic and acute health concerns.",
+    "Extensive clinical experience providing comprehensive patient consultations and managing a diverse range of chronic and acute health concerns.",
 
   CREDENTIAL_CHIPS: [
-    { label: "Clinical Experience",   value: "6 Years",         sub: "Individualised Homoeopathic Care" },
-    { label: "Postgraduate Rank",     value: "3rd Rank MD",     sub: "RGUHS (Homeopathic Materia Medica)" },
-    { label: "Academic Faculty",      value: "Assistant Prof.", sub: "Anuradha Homoeopathic Medical College" },
-    { label: "Clinical Certification", value: "SCPH-Certified",  sub: "Advanced Homoeopathic Practice" },
+    { label: "Clinical Experience",   value: "10 Years",        sub: "Patient-Centered Care" },
+    { label: "Medical Credentials",   value: "MD, MBBS",        sub: "Clinical Medicine" },
+    { label: "Faculty & Practice",    value: "Consultant",      sub: "General & Holistic Practice" },
+    { label: "Board Certification",   value: "Certified",       sub: "Advanced Clinical Practice" },
   ],
 } as const;
 
@@ -43,13 +43,13 @@ export const DOCTOR_BIO = {
   experience: DOCTOR.EXPERIENCE_DETAIL,
 } as const;
 
-// ─── Clinic Identity (SSOT) ──────────────────────────────────────────────────
+// ─── Clinic Identity (SSOT Baseline Placeholders) ────────────────────────────
 export const CLINIC = {
-  NAME:              "Agastya",
-  FULL_NAME:         "Agastya Homoeopathy Clinic",
-  TAGLINE:           "Gentle Healing, Lasting Wellness",
+  NAME:              "General Clinic",
+  FULL_NAME:         "General Healthcare Clinic",
+  TAGLINE:           "Patient-Centered Healthcare & Lasting Wellness",
   SECONDARY_TAGLINE: "Your Health • Our Priority",
-  WEBSITE:           "https://agastyahomoeopathy.com",
+  WEBSITE:           "https://clinic.example.com",
   TIMEZONE:          "Asia/Kolkata",
   TIMEZONE_LABEL:    "IST (Indian Standard Time, UTC+5:30)",
   TIMEZONE_OFFSET:   "+05:30",
@@ -76,35 +76,35 @@ export const CLINIC = {
   DOCTOR_UPI_ID:          DOCTOR.UPI_ID,
 
   // Contact
-  PHONE_DISPLAY:   "+91 98450 12345",
-  PHONE_TEL:       "+919845012345",
-  SUPPORT_EMAIL:   "admin@agastyahomoeo.com",
-  PHARMACY_EMAIL:  "pharmacy@agastyahomoeopathy.com",
+  PHONE_DISPLAY:   "+1 555-0100",
+  PHONE_TEL:       "+15550100",
+  SUPPORT_EMAIL:   "admin@example.com",
+  PHARMACY_EMAIL:  "pharmacy@example.com",
 
   // Assets
-  LOGO_PATH:       "/logo.png",
-  LOGO_ALT:        "Agastya Homoeopathy Clinic — Gentle Healing, Lasting Wellness",
+  LOGO_PATH:       "/generic-clinic-logo.svg",
+  LOGO_ALT:        "General Healthcare Clinic — Patient-Centered Healthcare",
 
   // Address (SSOT)
   ADDRESS: {
-    STREET:            "No. 10/2, 2nd Temple Road, 16th Cross, Malleshwaram",
-    AREA:              "Malleshwaram",
-    CITY:              "Bengaluru",
-    STATE:             "Karnataka",
-    PINCODE:           "560003",
-    COUNTRY:           "India",
-    CITY_STATE:        "Bengaluru, Karnataka",
-    SHORT:             "Malleshwaram, Bengaluru",
-    FULL:              "No. 10/2, 2nd Temple Road, 16th Cross, Malleshwaram, Bengaluru, Karnataka – 560003",
-    FULL_WITH_COUNTRY: "No. 10/2, 2nd Temple Road, 16th Cross, Malleshwaram, Bengaluru, Karnataka – 560003, India",
-    MAPS_URL:          "https://maps.google.com/?q=No.+10/2,+2nd+Temple+Road,+16th+Cross,+Malleshwaram,+Bengaluru,+Karnataka+560003",
+    STREET:            "100 Medical Center Way",
+    AREA:              "Medical Center",
+    CITY:              "Metropolis",
+    STATE:             "State",
+    PINCODE:           "10001",
+    COUNTRY:           "Country",
+    CITY_STATE:        "Metropolis, State",
+    SHORT:             "Metropolis, State",
+    FULL:              "100 Medical Center Way, Metropolis, State – 10001",
+    FULL_WITH_COUNTRY: "100 Medical Center Way, Metropolis, State – 10001, Country",
+    MAPS_URL:          "https://maps.google.com/?q=Medical+Center",
   },
 
   // Branches
   BRANCHES: {
-    MALLESHWARAM: "Agastya Central Clinic, Malleshwaram",
-    TELE:         "Agastya Tele-Consultation Hub",
-    OPD:          "Agastya OPD Clinic, Malleshwaram",
+    MALLESHWARAM: "Main Medical Center",
+    TELE:         "Virtual Consultation Care Hub",
+    OPD:          "Outpatient Medical Clinic",
   },
 
   // Trust Badges
@@ -146,7 +146,7 @@ export const OFFICE_HOURS = {
   SATURDAY:  { label: "Saturday",  hours: "10:00 AM – 1:00 PM (Prior Appt) & 5:30 PM – 8:00 PM (Walk-ins Welcome)" },
   SUMMARY:   "Mon – Sat: 10:00 AM – 1:00 PM (Prior Appt) & 5:30 PM – 8:00 PM (Walk-ins & Appointments) · Sunday: By prior appt only",
   WALKIN_POLICY: "Walk-ins are welcomed Monday through Saturday during Evening OPD (5:30 PM – 8:00 PM). Morning sessions (10:00 AM – 1:00 PM) and Sundays are strictly by prior appointment.",
-  EMERGENCY: "For appointments, walk-in inquiries and queries, call or WhatsApp +91 98450 12345.",
+  EMERGENCY: "For appointments, walk-in inquiries and queries, call or WhatsApp +1 555-0100.",
 } as const;
 
 // ─── Consultation Appointment Time Slots (SSOT) ──────────────────────────────

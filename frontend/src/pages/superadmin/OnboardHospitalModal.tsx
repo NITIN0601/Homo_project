@@ -154,6 +154,7 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
         tagline: sanitizeText(form.tagline, 150) || "Compassionate Healthcare with Clinical Precision",
         doctor: doctorConfig,
         doctors: [doctorConfig],
+        specialties: doctorConfig.specialties,
         contact: {
           phone: sanitizePhone(form.phone),
           phoneDisplay: sanitizePhone(form.phone),
@@ -178,6 +179,10 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
           buttonRadius: DEFAULT_FACILITY_CONFIG.defaultButtonRadius,
           logoUrl: DEFAULT_FACILITY_CONFIG.defaultLogoUrl,
           fontSans: DEFAULT_FACILITY_CONFIG.defaultFontSans,
+          aboutDocText: doctorConfig.aboutText,
+          aboutClinicText: sanitizeText(form.tagline, 150)
+            ? `${cleanHospitalName} — ${sanitizeText(form.tagline, 150)}`
+            : `${cleanHospitalName} provides comprehensive patient consultations and evidence-based clinical care.`,
         },
         features: form.features,
       };

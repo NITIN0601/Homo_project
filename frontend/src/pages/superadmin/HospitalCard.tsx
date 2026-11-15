@@ -75,9 +75,16 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
 
         {/* Lead Doctor Info */}
         <div className="text-xs space-y-1 bg-indigo-50/50 p-3 rounded-2xl border border-indigo-100 text-indigo-950">
-          <p className="font-bold flex items-center gap-1">
-            <span aria-hidden="true">🩺</span> Lead Physician: <strong>{hospital.doctor.name}</strong>
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="font-bold flex items-center gap-1">
+              <span aria-hidden="true">🩺</span> Lead Physician: <strong>{hospital.doctor.name}</strong>
+            </p>
+            {hospital.doctors && hospital.doctors.length > 1 && (
+              <span className="text-[10px] font-extrabold bg-indigo-200 text-indigo-900 px-2 py-0.5 rounded-full">
+                {hospital.doctors.length} Doctors
+              </span>
+            )}
+          </div>
           <p className="text-[11px] text-stone-500 pl-4">{hospital.doctor.title}</p>
           <p className="text-[10px] text-stone-400 pl-4">
             {hospital.doctor.qualifications} • {hospital.doctor.experienceYears} yrs exp
