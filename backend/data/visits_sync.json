@@ -45,6 +45,120 @@
         "followUpDate": "In 14 Days"
       },
       {
+        "id": "vis-1794762068856",
+        "visitDate": "15 Nov 2026",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m2",
+            "medicineName": "Belladonna",
+            "potency": "200C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/rx_1794762068.jpg"
+      },
+      {
+        "id": "vis-e2e-demo-1",
+        "patientId": "usr-001",
+        "patientName": "John Doe",
+        "visitDate": "Nov 03, 2026",
+        "chiefDiagnosis": "Allergic Rhinitis with Migraine Aura",
+        "symptomsObserved": [
+          "Sneezing in mornings",
+          "Photophobia",
+          "Throbbing right temporal pain"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineName": "Arsenicum Album",
+            "potency": "200C",
+            "dosage": "4 pills morning",
+            "duration": "10 days"
+          },
+          {
+            "medicineName": "Belladonna",
+            "potency": "30C",
+            "dosage": "4 pills SOS for acute headache",
+            "duration": "5 days"
+          }
+        ],
+        "clinicalNotes": "Patient responded favorably to initial constitutional treatment.",
+        "lifestyleAdvice": "Avoid direct cold air exposure and sour curds.",
+        "followUpDate": "In 14 Days"
+      },
+      {
+        "id": "vis-1794761732895",
+        "visitDate": "15 Nov 2026",
+        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "symptomsObserved": [
+          "Patient Uploaded Prescription Photo"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineId": "m1",
+            "medicineName": "Arnica Montana",
+            "potency": "30C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          },
+          {
+            "medicineId": "m2",
+            "medicineName": "Belladonna",
+            "potency": "200C",
+            "dosage": "4 globules twice daily after meals",
+            "duration": "10 days"
+          }
+        ],
+        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
+        "followUpDate": "In 14 Days",
+        "prescriptionImageUri": "/uploads/rx_1794761732.jpg"
+      },
+      {
+        "id": "vis-e2e-demo-1",
+        "patientId": "usr-001",
+        "patientName": "John Doe",
+        "visitDate": "Nov 03, 2026",
+        "chiefDiagnosis": "Allergic Rhinitis with Migraine Aura",
+        "symptomsObserved": [
+          "Sneezing in mornings",
+          "Photophobia",
+          "Throbbing right temporal pain"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineName": "Arsenicum Album",
+            "potency": "200C",
+            "dosage": "4 pills morning",
+            "duration": "10 days"
+          },
+          {
+            "medicineName": "Belladonna",
+            "potency": "30C",
+            "dosage": "4 pills SOS for acute headache",
+            "duration": "5 days"
+          }
+        ],
+        "clinicalNotes": "Patient responded favorably to initial constitutional treatment.",
+        "lifestyleAdvice": "Avoid direct cold air exposure and sour curds.",
+        "followUpDate": "In 14 Days"
+      },
+      {
         "id": "vis-1794761396906",
         "visitDate": "15 Nov 2026",
         "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",

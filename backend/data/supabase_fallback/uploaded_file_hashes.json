@@ -1531,5 +1531,23 @@
     "uploaded_by": "mobile_worker_test",
     "uploaded_at": "2026-11-15T16:49:57.216879+00:00",
     "_synced": false
+  },
+  {
+    "id": "2105e86e-062c-413c-8c8a-b372c9e4c481",
+    "file_hash": "sha256_test_hash_4a7e03ba386c4cec907d5892ecbf87f5",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-15T16:55:33.217687+00:00",
+    "_synced": false
+  },
+  {
+    "id": "8154b84a-0b88-42d7-bf24-f52ddee8754b",
+    "file_hash": "sha256_test_hash_13b7126de2d848cba07d8fc4a9572efe",
+    "file_name": "rx_snapshot.jpg",
+    "file_size_bytes": 1024,
+    "uploaded_by": "mobile_worker_test",
+    "uploaded_at": "2026-11-15T17:01:09.185105+00:00",
+    "_synced": false
   }
 ]
