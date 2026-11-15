@@ -41,14 +41,14 @@ export const NavUserControls: React.FC<NavUserControlsProps> = ({
         </span>
       )}
 
-      {/* Hospital Tenant Selector (Visible to Super Admin or in Dev/Demo mode) */}
-      {(isSuperAdmin || USE_MOCK_DATA) && (
+      {/* Hospital Tenant Selector (Visible to Super Admin, Hospital Admin, or in Dev/Demo mode) */}
+      {(isSuperAdmin || authUser?.role === "admin" || USE_MOCK_DATA) && (
         <div className="hidden sm:flex items-center gap-1 bg-stone-100 hover:bg-stone-200/80 border border-stone-300 rounded-full px-2 py-1 text-xs transition-colors">
           <span className="text-xs">🏥</span>
           <select
             value={tenant.id}
             onChange={(e) => onSetTenantId(e.target.value)}
-            className="bg-transparent text-stone-800 text-[11px] font-bold outline-none cursor-pointer max-w-[120px] truncate"
+            className="bg-transparent text-stone-800 text-[11px] font-bold outline-none cursor-pointer max-w-[130px] truncate"
             title="Switch Active Hospital Tenant"
             aria-label="Active Hospital Facility"
           >
