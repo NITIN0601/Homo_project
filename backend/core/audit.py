@@ -32,12 +32,11 @@ _AUDIT_WRITE_LOCK = threading.Lock()   # in-process guard
 _audit_logger = logging.getLogger("ehr.audit")
 _audit_logger.setLevel(logging.INFO)
 if not _audit_logger.handlers:
-    _audit_handler = logging.handlers.TimedRotatingFileHandler(
+    _audit_handler = logging.handlers.RotatingFileHandler(
         filename=str(AUDIT_LOG_FILE),
-        when="midnight",
-        backupCount=30,          # 30-day local retention
+        maxBytes=500_000,        # Cap active log file at 500 KB
+        backupCount=2,           # Keep at most 2 backup rotations
         encoding="utf-8",
-        utc=True,
     )
     _audit_handler.setFormatter(logging.Formatter("%(message)s"))
     _audit_logger.addHandler(_audit_handler)
