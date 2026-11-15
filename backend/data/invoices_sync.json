@@ -1,5 +1,14 @@
 [
   {
+    "patientId": "pat-001",
+    "patientName": "John Doe",
+    "doctorName": "Dr. Sarah",
+    "amountINR": 500.0,
+    "status": "pending",
+    "description": "General consultation",
+    "id": "INV-1794700671885"
+  },
+  {
     "id": "inv-e2e-demo-rec",
     "patientId": "usr-001",
     "patientName": "John Doe",
