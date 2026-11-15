@@ -59,3 +59,11 @@ node_modules/.vite/
 backend/data/*.lock
 backend/data/audit_traces.jsonl.*
 
+# Analysis, Audit & Review Markdown Reports
+*_REPORT.md
+*REPORT*.md
+*AUDIT*.md
+FRONTEND_ENTERPRISE_AUDIT_REPORT.md
+PROJECT_REVIEW_REPORT.md
+
+
