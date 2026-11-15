@@ -21,6 +21,8 @@ import {
   getClinicTimeInfo,
   isSlotPassed,
   mapClinicSlotToUserTime,
+  isUserSlotPassed,
+  type LocalizedUserSlot,
 } from "../utils/timezone";
 import type {
   AppointmentFormValues,
@@ -33,6 +35,7 @@ import type {
 import { AppointmentSlotPicker } from "./appointments/AppointmentSlotPicker";
 import { AppointmentConfirmationBanner } from "./appointments/AppointmentConfirmationBanner";
 import { PatientDoctorContinuityBanner } from "./appointments/PatientDoctorContinuityBanner";
+import { DashboardErrorBoundary } from "../components/common/DashboardErrorBoundary";
 
 // ─── Time slots (Imported from Central Config SSOT) ──────────────────────────
 export { MORNING_SLOTS, EVENING_SLOTS, ALL_TIME_SLOTS };
@@ -97,20 +100,6 @@ function validate(
   if (!v.selectedDate) e.selectedDate = VALIDATION_MESSAGES.DATE_REQUIRED;
   if (!v.selectedSlot || !TIME_SLOTS.includes(v.selectedSlot)) {
     e.selectedSlot = VALIDATION_MESSAGES.SLOT_REQUIRED;
-  } else if (v.selectedDate) {
-    const mapping = mapClinicSlotToUserTime(v.selectedDate, v.selectedSlot);
-    if (isSlotPassed(v.selectedDate, v.selectedSlot)) {
-      const clinicTime = getClinicTimeInfo();
-      const localDesc = mapping.isDifferentTimezone ? ` (${mapping.userTime12} in your timezone)` : "";
-      e.selectedSlot = `The ${mapping.clinicTime12}${localDesc} slot has already elapsed for today (Clinic operational clock: ${clinicTime.formattedTime}). Please select an upcoming slot or future date.`;
-    } else if (isSlotBookedFn && isSlotBookedFn(v.selectedDate, v.selectedSlot)) {
-      e.selectedSlot = `The ${mapping.clinicTime12} time slot has already been reserved by another patient. Please choose an available time slot.`;
-    } else if (isSlotBlockedFn) {
-      const blk = isSlotBlockedFn(v.selectedDate, v.selectedSlot);
-      if (blk) {
-        e.selectedSlot = `The ${mapping.clinicTime12} time slot is currently blocked by doctor schedule (${blk.reason}). Please choose an available time slot.`;
-      }
-    }
   }
   return e;
 }
@@ -132,7 +121,7 @@ function validate(
  * The frontend NEVER holds OAuth tokens.
  */
 const AppointmentsPage: React.FC = () => {
-  const { state, isSlotBooked, isSlotBlocked, bookAppointment, userTzInfo, sessionHours } = useApp();
+  const { state, isSlotBooked, isSlotBlocked, bookAppointment, userTzInfo, clinicTimeInfo, sessionHours } = useApp();
   const { tenant } = useTenant();
   const { authUser } = state;
 
@@ -179,6 +168,7 @@ const AppointmentsPage: React.FC = () => {
   const [continuity, setContinuity] = useState<ContinuityPreferenceResponse | null>(null);
   const [continuityLoading, setContinuityLoading] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorSummary | null>(null);
+  const [selectedLocalizedSlot, setSelectedLocalizedSlot] = useState<LocalizedUserSlot | null>(null);
 
   // Automatically evaluate previous physician continuity when email, phone, or date changes
   useEffect(() => {
@@ -267,35 +257,50 @@ const AppointmentsPage: React.FC = () => {
   }, [form.email]);
 
   const handleSelectSlot = useCallback(
-    (s: string) => update("selectedSlot", s),
+    (s: string, localizedSlot?: LocalizedUserSlot) => {
+      update("selectedSlot", s);
+      if (localizedSlot) {
+        setSelectedLocalizedSlot(localizedSlot);
+      }
+    },
     [update]
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const errs = validate(form, isSlotBooked, isSlotBlocked);
+    const errs = validate(form);
     if (Object.keys(errs).length) {
       setErrors(errs);
       document.getElementById(Object.keys(errs)[0])?.focus();
       return;
     }
 
-    // Defensive check against real-time expiration (e.g. crossing 6:00 PM in India while form is open)
-    if (isSlotPassed(form.selectedDate, form.selectedSlot)) {
-      const clinicTime = getClinicTimeInfo();
-      const mapping = mapClinicSlotToUserTime(form.selectedDate, form.selectedSlot);
-      const localText = mapping.isDifferentTimezone ? ` (${mapping.userTime12} in your local timezone)` : "";
-      setErrors({
-        selectedSlot: `The ${mapping.clinicTime12}${localText} slot has elapsed for today in India (Clinic operational clock: ${clinicTime.formattedTime}). Please select an upcoming slot.`,
-      });
-      return;
-    }
+    // Defensive check against real-time expiration or scheduling conflict
+    if (selectedLocalizedSlot) {
+      if (isUserSlotPassed(selectedLocalizedSlot.isoTimestamp)) {
+        setErrors({
+          selectedSlot: `The ${selectedLocalizedSlot.userTime12} consultation slot has elapsed. Please select an upcoming slot.`,
+        });
+        return;
+      }
 
-    // Defensive check against double-booking / conflict allocation
-    if (isSlotBooked(form.selectedDate, form.selectedSlot)) {
-      const mapping = mapClinicSlotToUserTime(form.selectedDate, form.selectedSlot);
+      if (isSlotBooked(selectedLocalizedSlot.clinicDateYMD, selectedLocalizedSlot.clinicSlot24)) {
+        setErrors({
+          selectedSlot: `The ${selectedLocalizedSlot.userTime12} consultation slot has already been reserved by another patient. Please choose an available time slot.`,
+        });
+        return;
+      }
+
+      const blk = isSlotBlocked(selectedLocalizedSlot.clinicDateYMD, selectedLocalizedSlot.clinicSlot24);
+      if (blk) {
+        setErrors({
+          selectedSlot: `The ${selectedLocalizedSlot.userTime12} time slot is currently blocked by doctor schedule (${blk.reason}). Please choose an available time slot.`,
+        });
+        return;
+      }
+    } else if (isSlotPassed(form.selectedDate, form.selectedSlot)) {
       setErrors({
-        selectedSlot: `The ${mapping.clinicTime12} time slot has already been reserved by another patient. Please choose an available time slot.`,
+        selectedSlot: "The selected consultation slot has elapsed. Please select an upcoming slot.",
       });
       return;
     }
@@ -304,7 +309,6 @@ const AppointmentsPage: React.FC = () => {
 
     const userTz = userTzInfo;
     const isOverseasPatient = !userTz.isClinicTimezone;
-    const mapping = mapClinicSlotToUserTime(form.selectedDate, form.selectedSlot, userTz.timeZone);
 
     const chosenDoctorName = selectedDoctor?.name || tenant.doctor.name || CLINIC.DOCTOR_NAME;
     const chosenDoctorId = selectedDoctor?.id || tenant.doctor.id || "doc-default";
@@ -314,6 +318,18 @@ const AppointmentsPage: React.FC = () => {
           ? `Transferred from ${continuity.previous_doctor_name}`
           : (continuity?.previous_doctor_name ? `Alternate for ${continuity.previous_doctor_name}` : "New Patient"));
 
+    const aptDate = selectedLocalizedSlot ? selectedLocalizedSlot.userDateYMD : form.selectedDate;
+    const aptTime = selectedLocalizedSlot ? selectedLocalizedSlot.userTime12 : form.selectedSlot;
+    const clinicDate = selectedLocalizedSlot ? selectedLocalizedSlot.clinicDateYMD : form.selectedDate;
+    const clinicSlot = selectedLocalizedSlot ? selectedLocalizedSlot.clinicSlot24 : form.selectedSlot;
+    const clinicTime = selectedLocalizedSlot ? selectedLocalizedSlot.clinicTime12 : form.selectedSlot;
+    const isoStartTime = selectedLocalizedSlot
+      ? selectedLocalizedSlot.isoTimestamp
+      : toISO(form.selectedDate, form.selectedSlot);
+    const isoEndTime = selectedLocalizedSlot
+      ? new Date(new Date(selectedLocalizedSlot.isoTimestamp).getTime() + 30 * 60000).toISOString()
+      : toISO(form.selectedDate, addMinutes(form.selectedSlot, 30));
+
     // 1. Immediately persist to global SSOT and localStorage to lock slot for all patients
     const newAppointment: BookedAppointment = {
       id: `apt-${Date.now()}`,
@@ -321,9 +337,15 @@ const AppointmentsPage: React.FC = () => {
       patientName: form.name.trim(),
       patientPhone: form.phone.trim(),
       patientEmail: form.email.trim().toLowerCase(),
-      date: form.selectedDate,
-      time: mapping.userTime12,
-      slot: form.selectedSlot,
+      date: aptDate,
+      time: aptTime,
+      slot: clinicSlot,
+      clinicDate,
+      clinicSlot,
+      clinicTime,
+      userDate: aptDate,
+      userTime: aptTime,
+      timeZone: userTzInfo.timeZone,
       doctorId: chosenDoctorId,
       doctorName: chosenDoctorName,
       hospitalId: tenant.id,
@@ -342,8 +364,8 @@ const AppointmentsPage: React.FC = () => {
         email: form.email.trim().toLowerCase(),
         phone: form.phone.trim(),
       },
-      startTime: toISO(form.selectedDate, form.selectedSlot),
-      endTime:   toISO(form.selectedDate, addMinutes(form.selectedSlot, 30)),
+      startTime: isoStartTime,
+      endTime:   isoEndTime,
       providerCalendarId:      selectedDoctor?.calendar_id || CLINIC.DOCTOR_EMAIL,
       patientCalendarSyncRequested: form.syncToPatientCal,
       doctorId: chosenDoctorId,
@@ -368,7 +390,7 @@ const AppointmentsPage: React.FC = () => {
     await api.email.sendNotification({
       email: payload.patientDetails.email,
       subject: `Appointment Booking Confirmed — ${tenant.name}`,
-      body: `Dear ${payload.patientDetails.name},\nYour appointment with ${chosenDoctorName} at ${tenant.name} (${tenant.contact.address.street}, ${tenant.contact.address.city}) has been confirmed.\nDate & Time: ${mapping.userDateWithTime}\nContinuity: ${contStatus}\nConsultation Type: ${newAppointment.type}\nPhone / WhatsApp: ${tenant.contact.phone}`,
+      body: `Dear ${payload.patientDetails.name},\nYour appointment with ${chosenDoctorName} at ${tenant.name} (${tenant.contact.address.street}, ${tenant.contact.address.city}) has been confirmed.\nDate & Time: ${aptDate} at ${aptTime} (${userTzInfo.label || userTzInfo.timeZone})\nContinuity: ${contStatus}\nConsultation Type: ${newAppointment.type}\nPhone / WhatsApp: ${tenant.contact.phone}`,
     });
 
     await new Promise((r) => setTimeout(r, 1200));
@@ -522,23 +544,53 @@ const AppointmentsPage: React.FC = () => {
           }}
         />
 
+        {/* ── Auto-Detected Local Timezone Indicator ── */}
+        <div className="bg-white rounded-2xl border border-stone-200 card-shadow p-3.5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xl">🌐</span>
+            <div>
+              <p className="font-bold text-stone-900 text-xs sm:text-sm">
+                Consultation Availability in Your Local Time
+              </p>
+              <p className="text-stone-500 text-[11px]">
+                Times and calendar are automatically synced to your detected location ({userTzInfo.label || userTzInfo.regionName}).
+              </p>
+            </div>
+          </div>
+          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/80 px-2.5 py-1 rounded-full border border-emerald-200 flex-shrink-0">
+            📍 {userTzInfo.label || userTzInfo.regionName}
+          </span>
+        </div>
+
         {/* ── Calendar picker ────────────────────────── */}
         <div>
           <CalendarPicker
             selectedDate={form.selectedDate}
-            onSelectDate={(d) => { update("selectedDate", d); update("selectedSlot", ""); }}
+            onSelectDate={(d) => {
+              update("selectedDate", d);
+              update("selectedSlot", "");
+              setSelectedLocalizedSlot(null);
+            }}
             bookedDates={fullyBookedDates}
             error={errors.selectedDate}
           />
         </div>
 
         {/* ── Time slot grid ─────────────────────────── */}
-        <AppointmentSlotPicker
-          selectedDate={form.selectedDate}
-          selectedSlot={form.selectedSlot}
-          onSelectSlot={handleSelectSlot}
-          error={errors.selectedSlot}
-        />
+        <DashboardErrorBoundary featureName="Consultation Time Slot Selector">
+          <AppointmentSlotPicker
+            selectedDate={form.selectedDate}
+            selectedSlot={form.selectedSlot}
+            onSelectSlot={handleSelectSlot}
+            onSelectDate={(d) => {
+              update("selectedDate", d);
+              update("selectedSlot", "");
+              setSelectedLocalizedSlot(null);
+            }}
+            selectedLocalizedSlotKey={selectedLocalizedSlot?.slotKey}
+            error={errors.selectedSlot}
+          />
+        </DashboardErrorBoundary>
 
         {/* ── Calendar sync toggle ───────────────────── */}
         <label

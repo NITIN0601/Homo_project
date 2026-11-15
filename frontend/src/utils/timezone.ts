@@ -5,7 +5,7 @@
  * and dynamic mapping to the patient's local timezone (USA, UK, UAE, etc.).
  */
 
-import { CLINIC, OFFICE_HOURS } from "../config/clinic";
+import { CLINIC, OFFICE_HOURS, ALL_TIME_SLOTS } from "../config/clinic";
 
 export interface ClinicTimeInfo {
   /** ISO date in clinic timezone: "YYYY-MM-DD" */
@@ -269,16 +269,17 @@ export function getUserTimezone(customTz?: string): UserTimezoneInfo {
 
   const common = COMMON_TIMEZONES.find((c) => c.timeZone === timeZone);
   const regionName = common ? common.label : timeZone.replace(/_/g, " ");
+  const isClinicTimezone = timeZone === clinicTz || timeZone === "Asia/Calcutta" || timeZone === "Asia/Kolkata";
 
   return {
     timeZone,
-    label: label || (timeZone === clinicTz ? "IST" : timeZone),
+    label: isClinicTimezone ? "IST" : (label || timeZone),
     formattedTime,
     formattedDate,
     todayYMD,
     offset,
     regionName,
-    isClinicTimezone: timeZone === clinicTz || timeZone === "Asia/Calcutta",
+    isClinicTimezone,
   };
 }
 
@@ -692,4 +693,173 @@ export function formatDualDateTime(
     clinicDateTime,
     isDifferentTimezone: true,
   };
+}
+
+// ─── Localized Internal Availability Engine ──────────────────────────────────
+
+export interface LocalizedUserSlot {
+  /** Unique key combining clinic date & clinic slot: e.g. "2026-11-15_10:00" */
+  slotKey: string;
+  /** Patient's local date: "YYYY-MM-DD" */
+  userDateYMD: string;
+  /** Patient's local time formatted (12-hr): e.g. "07:00 AM" or "11:30 PM" */
+  userTime12: string;
+  /** Patient's local time short: e.g. "7:00 AM" */
+  userShortLabel: string;
+  /** Patient's local 24-hr time: e.g. "07:00" */
+  userTime24: string;
+  /** Patient's local hour (0-23) */
+  userHour24: number;
+  /** Patient's local minute (0-59) */
+  userMinute: number;
+  /** Clinic operational date: e.g. "2026-11-14" */
+  clinicDateYMD: string;
+  /** Clinic operational slot (24-hr): e.g. "17:30" */
+  clinicSlot24: string;
+  /** Clinic operational time (12-hr with IST): e.g. "05:30 PM IST" */
+  clinicTime12: string;
+  /** ISO timestamp: e.g. "2026-11-14T17:30:00+05:30" */
+  isoTimestamp: string;
+  /** Milliseconds epoch timestamp for reliable sorting */
+  epochMs: number;
+  /** Diurnal period in patient's local timezone */
+  period: TimeOfDayPeriod;
+  /** Emoji for the diurnal period */
+  periodEmoji: string;
+}
+
+/**
+ * Calculates doctor consultation availability mapped strictly to the patient's local calendar date.
+ *
+ * When a patient in New York views Friday 2026-11-14:
+ * The clinic in India (Asia/Kolkata) operates on IST slots.
+ * We internally evaluate candidate clinic dates [-1, 0, +1] around the patient's date,
+ * convert each clinic slot into the patient's timezone, and return ONLY the slots
+ * that fall on the patient's selected local date.
+ * No dual clocks, no "IST" badges, no day offset warnings are shown to the patient.
+ */
+export function getLocalizedSlotsForDate(
+  userDateYMD: string,
+  userTz?: string
+): LocalizedUserSlot[] {
+  if (!userDateYMD) return [];
+
+  const clinicTz = CLINIC.TIMEZONE || "Asia/Kolkata";
+  let targetTz = userTz;
+  if (!targetTz) {
+    try {
+      targetTz = Intl.DateTimeFormat().resolvedOptions().timeZone || clinicTz;
+    } catch {
+      targetTz = clinicTz;
+    }
+  }
+
+  // Parse patient's selected local date components
+  const [yStr, mStr, dStr] = userDateYMD.split("-");
+  const year = parseInt(yStr, 10);
+  const month = parseInt(mStr, 10);
+  const day = parseInt(dStr, 10);
+
+  if (!year || !month || !day) return [];
+
+  // Reusable formatters for target timezone
+  const ymdFormatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: targetTz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  const timeFormatter12 = new Intl.DateTimeFormat("en-US", {
+    timeZone: targetTz,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  const timeFormatter24 = new Intl.DateTimeFormat("en-US", {
+    timeZone: targetTz,
+    hour: "numeric",
+    minute: "numeric",
+    hourCycle: "h23",
+  });
+
+  const results: LocalizedUserSlot[] = [];
+  const seenSlotKeys = new Set<string>();
+
+  // Evaluate candidate clinic dates [-1, 0, 1] relative to userDateYMD
+  const offsets = [-1, 0, 1];
+
+  for (const offset of offsets) {
+    const candDate = new Date(Date.UTC(year, month - 1, day + offset));
+    const candY = candDate.getUTCFullYear();
+    const candM = String(candDate.getUTCMonth() + 1).padStart(2, "0");
+    const candD = String(candDate.getUTCDate()).padStart(2, "0");
+    const clinicDateYMD = `${candY}-${candM}-${candD}`;
+
+    for (const slot24 of ALL_TIME_SLOTS) {
+      const [h24, m24] = slot24.split(":");
+      const isoTimestamp = `${clinicDateYMD}T${h24.padStart(2, "0")}:${m24.padStart(2, "0")}:00+05:30`;
+      const dateObj = new Date(isoTimestamp);
+      const epochMs = dateObj.getTime();
+
+      // What calendar date is this in the patient's local timezone?
+      const ymdParts = ymdFormatter.formatToParts(dateObj);
+      const getP = (t: string) => ymdParts.find((p) => p.type === t)?.value || "";
+      const slotUserDateYMD = `${getP("year")}-${getP("month")}-${getP("day")}`;
+
+      // Only include slots that fall on the patient's selected local date!
+      if (slotUserDateYMD !== userDateYMD) {
+        continue;
+      }
+
+      const slotKey = `${clinicDateYMD}_${slot24}`;
+      if (seenSlotKeys.has(slotKey)) {
+        continue;
+      }
+      seenSlotKeys.add(slotKey);
+
+      // Patient local time
+      const userTime12 = timeFormatter12.format(dateObj);
+      const userShortLabel = userTime12;
+
+      const time24Parts = timeFormatter24.formatToParts(dateObj);
+      const userHour24 = parseInt(time24Parts.find((p) => p.type === "hour")?.value || "0", 10);
+      const userMinute = parseInt(time24Parts.find((p) => p.type === "minute")?.value || "0", 10);
+      const userTime24 = `${String(userHour24).padStart(2, "0")}:${String(userMinute).padStart(2, "0")}`;
+
+      const period = getTimeOfDayPeriod(userHour24, userMinute);
+      const periodEmoji = getTimeOfDayEmoji(period);
+      const clinicTime12 = normalizeSlotToTime(slot24) + " IST";
+
+      results.push({
+        slotKey,
+        userDateYMD,
+        userTime12,
+        userShortLabel,
+        userTime24,
+        userHour24,
+        userMinute,
+        clinicDateYMD,
+        clinicSlot24: slot24,
+        clinicTime12,
+        isoTimestamp,
+        epochMs,
+        period,
+        periodEmoji,
+      });
+    }
+  }
+
+  // Sort slots chronologically in the patient's day
+  results.sort((a, b) => a.epochMs - b.epochMs);
+  return results;
+}
+
+/**
+ * Checks whether a localized appointment slot has already passed in absolute real time.
+ */
+export function isUserSlotPassed(isoTimestamp: string): boolean {
+  if (!isoTimestamp) return false;
+  return new Date(isoTimestamp).getTime() <= Date.now();
 }

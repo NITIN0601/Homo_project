@@ -58,15 +58,24 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({
   onSelectRange,
   onDateClick,
 }) => {
-  const { state, clinicTimeInfo } = useApp();
+  const { state, clinicTimeInfo, userTzInfo } = useApp();
   const { tenant } = useTenant();
   const blockedDatesList = state.blockedDates;
-  const clinicTime = clinicTimeInfo;
-  const [clinicYear, clinicMonth] = clinicTime.todayYMD.split("-").map(Number);
+  const effectiveTodayYMD = adminMode ? clinicTimeInfo.todayYMD : (userTzInfo?.todayYMD || clinicTimeInfo.todayYMD);
+  const [effYear, effMonth] = effectiveTodayYMD.split("-").map(Number);
 
-  // Start view at clinic's current month
-  const [viewYear,  setViewYear]  = useState(clinicYear);
-  const [viewMonth, setViewMonth] = useState(clinicMonth - 1);
+  // Start view at current month
+  const [viewYear,  setViewYear]  = useState(effYear);
+  const [viewMonth, setViewMonth] = useState(effMonth - 1);
+
+  // Keep view aligned if user switches timezone
+  useEffect(() => {
+    if (!adminMode && userTzInfo?.todayYMD) {
+      const [y, m] = userTzInfo.todayYMD.split("-").map(Number);
+      setViewYear(y);
+      setViewMonth(m - 1);
+    }
+  }, [adminMode, userTzInfo?.todayYMD]);
 
   // Dynamic Indian holidays fetched from Google Calendar public feed
   const [dynamicHolidays, setDynamicHolidays] = useState<DynamicHoliday[]>([]);
@@ -120,10 +129,10 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({
     }
   };
 
-  // Year range: current clinic year ± 2
+  // Year range: current year ± 2
   const yearOptions = useMemo(() => {
-    return Array.from({ length: 5 }, (_, i) => clinicYear - 1 + i);
-  }, [clinicYear]);
+    return Array.from({ length: 5 }, (_, i) => effYear - 1 + i);
+  }, [effYear]);
 
   const daysInMonth   = getDaysInMonth(viewYear, viewMonth);
   const firstDayOfWeek = getFirstDayOfWeek(viewYear, viewMonth);
@@ -221,7 +230,7 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({
       return;
     }
 
-    const past = isDatePastClinicTime(ymd);
+    const past = adminMode ? isDatePastClinicTime(ymd) : (ymd < effectiveTodayYMD);
     if (past || !isClinicOpen(date) || isBlocked || bookedDates.includes(ymd)) return;
     if (onSelectDate) {
       onSelectDate(ymd);
@@ -349,7 +358,7 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({
 
           const dateObj           = new Date(viewYear, viewMonth, day);
           const ymd               = toYMD(dateObj);
-          const past              = isDatePastClinicTime(ymd);
+          const past              = adminMode ? isDatePastClinicTime(ymd) : (ymd < effectiveTodayYMD);
           const isSunday          = dateObj.getDay() === 0;
           const booked            = bookedDates.includes(ymd);
           const dayBlockedEntries = blockedDatesList.filter((b) => b.date === ymd);
@@ -368,7 +377,7 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({
 
           const disabled     = adminMode ? false : (past || booked || isBlocked);
           const selected     = adminMode ? isRangeSelected : (ymd === selectedDate);
-          const isToday      = clinicTime.todayYMD === ymd;
+          const isToday      = effectiveTodayYMD === ymd;
           const festival     = holidaysMap.get(ymd);
 
           let cellBg = "white";
@@ -615,8 +624,8 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({
         )}
       </div>
 
-      {/* ── Indian Calendar Festivals & Holidays in View Month ───────────────────── */}
-      {monthFestivals.length > 0 && (
+      {/* ── Indian Calendar Festivals & Holidays in View Month (Admin Mode Only) ── */}
+      {adminMode && monthFestivals.length > 0 && (
         <div className="mx-5 my-2.5 p-3 rounded-xl bg-orange-50/80 border border-orange-200/90 text-xs animate-fadeIn">
           <div className="flex items-center justify-between gap-1 mb-1.5 flex-wrap">
             <div className="flex items-center gap-1.5 font-black text-orange-950">
@@ -675,8 +684,8 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({
         </div>
       )}
 
-      {/* ── Doctor OOO Announcements for View Month ───────────────────── */}
-      {monthBlockedDates.length > 0 && (
+      {/* ── Doctor OOO Announcements for View Month (Admin Mode Only) ── */}
+      {adminMode && monthBlockedDates.length > 0 && (
         <div className="mx-5 my-2.5 p-3 rounded-xl bg-rose-50 border border-rose-200/90 text-xs animate-fadeIn">
           <div className="flex items-center gap-1.5 font-black text-rose-950 mb-1">
             <span>🏖️</span>

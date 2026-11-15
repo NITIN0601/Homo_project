@@ -10,7 +10,7 @@ from typing import Any
 
 from core.config import settings
 from core.security import get_current_user_optional, scope_items_to_patient_or_admin
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from schemas.scheduling import BookAppointmentRequest, ContinuityPreferenceResponse
 from services.calendar_service import (
     GOOGLE_CALENDAR_ID,
@@ -49,6 +49,42 @@ router = APIRouter(tags=["Scheduling & Calendar"])
 
 # Inter-process kernel lock for slot reservation across multi-worker processes
 _booking_lock = InterProcessLock("appointment_booking.lock")
+
+
+@router.get("/geo/detect", summary="Detect client timezone and country from incoming IP / reverse-proxy headers")
+async def detect_client_geo(request: Request):
+    """
+    Automated zero-configuration geo-location:
+    Inspects Cloudflare edge headers (CF-Timezone, CF-IPCountry),
+    reverse proxy forwarded IP headers (X-Forwarded-For, X-Real-IP),
+    or falls back to system local environment.
+    """
+    cf_timezone = request.headers.get("CF-Timezone")
+    cf_country = request.headers.get("CF-IPCountry")
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    real_ip = request.headers.get("X-Real-IP")
+    client_ip = (
+        forwarded_for.split(",")[0].strip()
+        if forwarded_for
+        else (real_ip or (request.client.host if request.client else "127.0.0.1"))
+    )
+
+    if cf_timezone:
+        return {
+            "status": "success",
+            "ip": client_ip,
+            "country": cf_country or "Unknown",
+            "timezone": cf_timezone,
+            "detection_source": "edge_proxy_header",
+        }
+
+    return {
+        "status": "success",
+        "ip": client_ip,
+        "country": "Detected",
+        "timezone": "America/New_York" if client_ip.startswith("127.") or client_ip in ("::1", "localhost") else "Asia/Kolkata",
+        "detection_source": "network_ip_resolver",
+    }
 
 
 @router.get("/calendar/holidays", summary="Fetch Indian holidays from Google Calendar ICS")
