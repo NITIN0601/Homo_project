@@ -250,8 +250,54 @@ npm run dev:all
 ```
 
 This starts:
-- FastAPI Backend on `http://localhost:8000` (auto-detects virtual environment in `backend/venv/`)
-- Vite React SPA on `http://localhost:5173` (proxies `/api/v1` to `http://localhost:8000`)
+- **FastAPI Backend** on `http://localhost:8000` (auto-detects virtual environment in `backend/venv/`)
+  - Health endpoint: `http://localhost:8000/health`
+  - Swagger API docs: `http://localhost:8000/docs`
+- **Vite React SPA** on `http://localhost:5173` (proxies `/api/v1` to `http://localhost:8000`)
+
+---
+
+### 🖥️ Accessing the 3 Core Dashboards
+
+Once `npm run dev:all` is running, open **`http://localhost:5173`** in your browser. You can seamlessly switch between all 3 platform tiers:
+
+#### 1. 🏥 Patient & Customer Portal (Public / Consumer)
+- **URL**: `http://localhost:5173/`
+- **Default View**: Public clinic landing page, doctor credentials card, and consultation slot booking.
+- **Guest / Registered Access**:
+  - Book as guest directly without prior sign-in.
+  - Or sign in as demo patient: **`john@example.com`** / password: **`patient123`** (or click **"👤 Patient"** on the top demo header).
+- **Core Capabilities**:
+  - Auto-detected local timezone clock & candidate slot mapping.
+  - Interactive multi-month calendar with Sunday *Prior Appointment Only* policy.
+  - Pre-consultation symptom triage & doctor continuous care preference matching.
+  - Personal Health Records (PHR), visit summary timeline, and remedy prescriptions.
+
+#### 2. 🩺 Doctor / Clinic Admin Console (Hospital Admin & Clinical Lead)
+- **URL**: `http://localhost:5173/` $\rightarrow$ Click **"🩺 Doctor Admin"** on the top demo banner, or log in via the avatar menu.
+- **Direct Credentials**:
+  - **Agastya Lead Doctor**: **`admin@agastyahomoeo.com`** / password: **`admin123`**
+  - **General Clinic Admin**: **`admin@example.com`** / password: **`admin123`**
+- **Core Capabilities**:
+  - **Dashboard Overview**: Today's roster, active consultation status, stock alerts, and daily metrics.
+  - **Appointments Hub**: Schedule and manage daily patient consultations and walk-in OPD tokens.
+  - **Doctor Calendar & OOO**: Block out-of-office days, set morning/evening hours, and sync Indian festival feeds.
+  - **Patient Medical Records (EHR)**: Clinical case records, remedy prescription slips, and clinical media uploads.
+  - **Dispensary & Inventory**: Medicine stock levels, multi-medicine batch ordering, and real-time logistics tracking.
+  - **Billing & Invoices**: Generate invoices, enter UTR bank transaction references, and confirm payment status.
+  - **Customization**: Doctor profile, clinic details, feedback moderation, and security passcodes (patient feature toggles are locked to Super Admin).
+
+#### 3. ⚡ Super Admin Dashboard (Cross-Hospital Multi-Tenant Governance)
+- **URL**: Click the **"⚡ Super Admin"** badge in the top navigation bar, or log in.
+- **Direct Credentials**: **`superadmin@platform.ehr`** (or `superadmin@platform.internal`) / password: **`admin123`**
+- **Core Capabilities**:
+  - **Platform Statistics**: Total active hospitals, onboarded physicians, platform-wide appointments, and patient volume.
+  - **Multi-Tenant Hospital Fleet**: Live facility cards with real-time badges (Online Payments, Google Reviews, AI Bot).
+  - **3-Tier Master Switchboard**: Granular feature enablement partitioned into:
+    1. *Hospital Platform Features* (Dispensary E-Commerce, Telemedicine OPD, Google Review Prompts).
+    2. *Doctor Portal Features* (AI VoiceStudio, Prescription Scan, Classical Case JSON, Contact Policies).
+    3. *Patient Portal Features* (Clinical Records, Billing History, Payment Gateway, Bot, Profile Edit).
+  - **Dynamic "+ Onboard Hospital" Wizard**: Decomposed 5-step modal for provisioning new hospital facilities, lead doctors, branding (logo, banner, theme colors), and custom domain slugs.
 
 ---
 
