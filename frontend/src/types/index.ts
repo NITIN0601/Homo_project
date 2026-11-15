@@ -102,6 +102,8 @@ export interface PrescribedRemedyItem {
   duration: string; // e.g. "14 days"
 }
 
+export type PrescribedRemedy = PrescribedRemedyItem;
+
 export interface HomeopathicRemedySuggestion {
   remedy_name: string;
   potency: string;
@@ -404,6 +406,8 @@ export interface BlockedCalendarDate {
   reason: string;
   type: "ooo" | "holiday" | "leave";
   createdAt: string;
+  doctorId?: string;
+  hospitalId?: string;
   allDay?: boolean;
   startTime?: string;
   endTime?: string;

@@ -54,7 +54,7 @@ export interface CrashReportOptions {
   error: Error | string | unknown;
   componentStack?: string;
   source?: string;
-  userAction?: "report_and_reload" | "auto_captured" | "manual_report";
+  userAction?: "report_and_reload" | "report_and_retry" | "auto_captured" | "manual_report";
   route?: string;
 }
 

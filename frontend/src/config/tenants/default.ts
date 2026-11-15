@@ -10,6 +10,20 @@ const PRIMARY_DOCTOR: HospitalDoctor = {
   aboutText:
     "Experienced clinical practitioner dedicated to holistic patient wellness, evidence-based diagnostic evaluations, and compassionate clinical medicine.",
   specialties: ["General Medicine", "Holistic Health", "Preventive Care"],
+  consultationFee: 500,
+  availability: {
+    days: "Mon - Fri",
+    morningHours: "09:00 AM – 1:00 PM",
+    eveningHours: "3:00 PM – 6:00 PM",
+    consultationFee: 500,
+    schedule: {
+      appointmentOnlyDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      walkinDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      offDays: ["Saturday", "Sunday"],
+      holidays: [],
+    },
+    telemedicineOnly: false,
+  },
 };
 
 export const VANILLA_DEFAULT_TENANT: HospitalTenantConfig = {
@@ -29,6 +43,21 @@ export const VANILLA_DEFAULT_TENANT: HospitalTenantConfig = {
     "Chronic Disease Management",
     "Family Wellness",
   ],
+  hours: {
+    timezone: "Asia/Kolkata",
+    morningDisplay: "09:00 AM – 1:00 PM",
+    morningStart: "09:00",
+    morningEnd: "13:00",
+    eveningDisplay: "3:00 PM – 6:00 PM",
+    eveningStart: "15:00",
+    eveningEnd: "18:00",
+    availableDays: "Mon – Fri",
+    sundayPolicy: "Closed",
+    consultationSlotMinutes: 20,
+    walkinAllowed: true,
+    walkinDaysSummary: "Mon – Fri (3:00 PM – 6:00 PM)",
+    appointmentDaysSummary: "Mon – Fri (09:00 AM – 1:00 PM)",
+  },
   contact: {
     phone: "+1 555-0100",
     phoneDisplay: "+1 555-0100",

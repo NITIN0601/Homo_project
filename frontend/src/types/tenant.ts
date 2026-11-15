@@ -25,6 +25,26 @@ export interface DoctorSharingPreferences {
   shareDirectPhone?: boolean;
 }
 
+export interface DoctorWeeklySchedule {
+  /** Days strictly requiring prior appointment (e.g. ["Sunday", "Wednesday"] or ["All Days"]) */
+  appointmentOnlyDays?: string[];
+  /** Days with open walk-in OPD (e.g. ["Monday", "Tuesday", "Thursday", "Friday", "Saturday"] or [] for pure tele-health) */
+  walkinDays?: string[];
+  /** Days doctor is off / weekly holiday (e.g. ["Sunday"] or ["Tuesday"]) */
+  offDays?: string[];
+  /** Specific holidays or leave dates in "YYYY-MM-DD" format */
+  holidays?: string[];
+}
+
+export interface DoctorAvailability {
+  days?: string;
+  morningHours?: string;
+  eveningHours?: string;
+  consultationFee?: number;
+  schedule?: DoctorWeeklySchedule;
+  telemedicineOnly?: boolean;
+}
+
 export interface HospitalDoctor {
   id?: string;
   name: string;
@@ -37,6 +57,8 @@ export interface HospitalDoctor {
   avatarUrl?: string;
   phone?: string;
   email?: string;
+  consultationFee?: number;
+  availability?: DoctorAvailability;
   sharingPreferences?: DoctorSharingPreferences;
 }
 
@@ -106,6 +128,23 @@ export interface CustomizationAuditLogEntry {
   details: string;
 }
 
+export interface HospitalHoursConfig {
+  timezone?: string;
+  morningDisplay?: string;
+  morningStart?: string;
+  morningEnd?: string;
+  eveningDisplay?: string;
+  eveningStart?: string;
+  eveningEnd?: string;
+  availableDays?: string;
+  sundayPolicy?: "Prior Appointment Only" | "Walk-in OPD" | "Closed";
+  consultationSlotMinutes?: number;
+  walkinAllowed?: boolean;
+  walkinDaysSummary?: string;
+  appointmentDaysSummary?: string;
+  emergencyNotice?: string;
+}
+
 export interface HospitalTenantConfig {
   id: string;                      // Unique internal tenant ID (e.g., "agastya", "citycare")
   slug: string;                    // URL slug
@@ -117,6 +156,7 @@ export interface HospitalTenantConfig {
   doctor: HospitalDoctor;          // Primary / default attending physician
   doctors?: HospitalDoctor[];      // Multi-doctor roster for scalable multi-physician clinics
   specialties?: string[];          // Hospital-level clinical specialties & treated care areas
+  hours?: HospitalHoursConfig;     // Operating hours, session windows & Sunday consultation policy
   contact: HospitalContact;
   branding: HospitalBranding;
   features: HospitalFeatures;

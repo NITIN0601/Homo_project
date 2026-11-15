@@ -5,18 +5,19 @@
  * Reusable across Patient Appointments, Admin/Doctor Calendar, and Slot Picker.
  */
 
-import { CLINIC, ALL_TIME_SLOTS, OFFICE_HOURS } from "../config/clinic";
+import { ALL_TIME_SLOTS } from "../config/clinic";
 import {
   getClinicTimeInfo,
   getUserTimezone,
   normalizeSlotToTime,
+  normalizeTimeToSlot,
   getTimeOfDayPeriod,
   getTimeOfDayEmoji,
   type TimeOfDayPeriod,
   type ClinicTimeInfo,
-  type UserTimezoneInfo,
 } from "./timezone";
-import type { BlockedCalendarDate } from "../types";
+import type { BlockedCalendarDate, DoctorSummary } from "../types";
+import type { HospitalHoursConfig, HospitalDoctor, DoctorAvailability } from "../types/tenant";
 
 export interface LocalizedConsultationSlot {
   /** Unique composite key: `${clinicDateYMD}_${clinicSlot24}` */
@@ -51,8 +52,12 @@ export interface LocalizedConsultationSlot {
   isBooked: boolean;
   /** Reason string if doctor has blocked this slot */
   blockedReason?: string;
+  /** Reason string if doctor has blocked this slot (alias for blockedReason) */
+  unavailableReason?: string;
   /** Whether the slot cannot be booked */
   disabled: boolean;
+  /** Whether the slot cannot be booked (alias for disabled) */
+  isUnavailable?: boolean;
   /** True if this slot originates from a Sunday in India (scheduled by prior appointment only) */
   isSundayPriorAppt?: boolean;
 }
@@ -82,10 +87,98 @@ export interface ClinicDateOperatingStatus {
 }
 
 /**
+ * Parses time range string (e.g. "10:00 AM – 01:30 PM", "10:00 - 13:30", "17:30 to 20:00")
+ * into normalized 24-hr start and end slots.
+ */
+function parseHourRange(rangeStr?: string): { startSlot: string; endSlot: string } | null {
+  if (!rangeStr || !rangeStr.trim()) return null;
+  const parts = rangeStr.split(/[–—-]| to /i);
+  if (parts.length < 2) return null;
+  const startSlot = normalizeTimeToSlot(parts[0].trim());
+  const endSlot = normalizeTimeToSlot(parts[1].trim());
+  if (startSlot && endSlot && startSlot < endSlot) {
+    return { startSlot, endSlot };
+  }
+  return null;
+}
+
+/**
+ * Generates discrete 24-hr time slots between start and end times at specified minute intervals.
+ */
+function generateSlotsBetween(startSlot: string, endSlot: string, stepMinutes: number = 30): string[] {
+  const [sH, sM] = startSlot.split(":").map(Number);
+  const [eH, eM] = endSlot.split(":").map(Number);
+  let curTotal = sH * 60 + sM;
+  const endTotal = eH * 60 + eM;
+  const slots: string[] = [];
+  while (curTotal < endTotal) {
+    const h = Math.floor(curTotal / 60);
+    const m = curTotal % 60;
+    slots.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+    curTotal += stepMinutes;
+  }
+  return slots;
+}
+
+/**
+ * Verifies whether a given day of the week (e.g. "Monday", "Sunday") is allowed by the doctor's
+ * availability or clinic's operating days definition.
+ */
+export function isDayAllowed(dayName: string, availableDaysStr?: string): boolean {
+  if (!availableDaysStr || !availableDaysStr.trim()) return true;
+  const clean = availableDaysStr.toLowerCase();
+  const d3 = dayName.toLowerCase().slice(0, 3); // "mon", "sun", etc.
+
+  // All days / Daily
+  if (clean.includes("all days") || clean.includes("every day") || clean.includes("daily")) {
+    return true;
+  }
+
+  // Mon - Sat
+  if (clean.includes("mon – sat") || clean.includes("monday – saturday") || clean.includes("mon - sat") || clean.includes("monday to saturday")) {
+    if (d3 === "sun") {
+      // Check if Sunday has an explicit exception (e.g. "Sun by Prior Appt")
+      return clean.includes("sun");
+    }
+    return true;
+  }
+
+  return clean.includes(d3);
+}
+
+/**
+ * Dynamically resolves operational 24-hr consultation slots for a clinic/doctor.
+ * Takes hospital session windows and physician availability into account.
+ */
+export function resolveOperationalSlots(
+  hoursConfig?: HospitalHoursConfig,
+  doctorAvailability?: DoctorAvailability
+): readonly string[] {
+  const stepMinutes = hoursConfig?.consultationSlotMinutes || 30;
+
+  // Resolve Morning Range
+  const morningRangeStr = doctorAvailability?.morningHours || hoursConfig?.morningDisplay;
+  const morningParsed = parseHourRange(morningRangeStr);
+  const morningSlots = morningParsed
+    ? generateSlotsBetween(morningParsed.startSlot, morningParsed.endSlot, stepMinutes)
+    : ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30"];
+
+  // Resolve Evening Range
+  const eveningRangeStr = doctorAvailability?.eveningHours || hoursConfig?.eveningDisplay;
+  const eveningParsed = parseHourRange(eveningRangeStr);
+  const eveningSlots = eveningParsed
+    ? generateSlotsBetween(eveningParsed.startSlot, eveningParsed.endSlot, stepMinutes)
+    : ["17:30", "18:00", "18:30", "19:00", "19:30"];
+
+  const combined = [...morningSlots, ...eveningSlots];
+  return combined.length > 0 ? combined : ALL_TIME_SLOTS;
+}
+
+/**
  * Checks if a given date's clinic operational hours have concluded in India (IST).
  * When clinic is on Nov 15 06:00 AM IST, Nov 14 operations in India have ended.
  */
-export function isClinicDateConcluded(dateYMD: string, clinicTime?: ClinicTimeInfo): boolean {
+export function isClinicDateConcluded(dateYMD: string, clinicTime?: ClinicTimeInfo, customSlots?: readonly string[]): boolean {
   if (!dateYMD) return true;
   const clinic = clinicTime || getClinicTimeInfo();
 
@@ -95,11 +188,11 @@ export function isClinicDateConcluded(dateYMD: string, clinicTime?: ClinicTimeIn
   }
 
   // If date is today in India, check if clinic operating hours have closed for the day
-  // Evening OPD closes at 8:00 PM IST (20:00 = 1200 minutes)
   if (clinic.todayYMD === dateYMD) {
-    const lastSlot = ALL_TIME_SLOTS[ALL_TIME_SLOTS.length - 1]; // "19:30"
+    const slots = customSlots && customSlots.length > 0 ? customSlots : ALL_TIME_SLOTS;
+    const lastSlot = slots[slots.length - 1];
     const [lastH, lastM] = lastSlot.split(":").map(Number);
-    const clinicCloseMinutes = lastH * 60 + lastM; // 19:30
+    const clinicCloseMinutes = lastH * 60 + lastM;
     return clinic.currentTotalMinutes >= clinicCloseMinutes;
   }
 
@@ -108,21 +201,15 @@ export function isClinicDateConcluded(dateYMD: string, clinicTime?: ClinicTimeIn
 
 /**
  * Computes complete modular operating status and localized slots for any calendar date.
- * Reusable across CalendarPicker, AppointmentSlotPicker, AppointmentsPage, and Doctor Dashboard.
- *
- * Cross-Timezone Invariant:
- * When a patient in America/New_York (EST, UTC-5) selects date D (e.g. Saturday, Nov 14):
- * - Candidate clinic slots are evaluated across adjacent clinic dates in India (D-1, D, D+1).
- * - Slots are strictly filtered by slotUserDateYMD === dateYMD so no cross-day bleeding occurs.
- * - Nov 15 10:00 AM IST maps to Nov 14 11:30 PM EST. At 8:00 PM EST, it is upcoming and bookable!
- * - Nov 15 10:30 AM – 12:30 PM IST maps to Nov 15 12:00 AM – 2:00 AM EST (Sunday Late Night).
- * - Every slot correctly respects its origin clinic day rules (Sunday: Prior Appointment Only).
+ * Dynamically customizable per hospital facility and consulting physician.
  */
 export function getClinicDateOperatingStatus(
   dateYMD: string,
   userTz?: string,
   bookedSlots: string[] = [],
-  blockedDates: BlockedCalendarDate[] = []
+  blockedDates: BlockedCalendarDate[] = [],
+  hoursConfig?: HospitalHoursConfig,
+  doctorConfig?: HospitalDoctor | DoctorSummary | null
 ): ClinicDateOperatingStatus {
   // Defensive guard: invalid or empty date strings
   if (!dateYMD || !dateYMD.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(dateYMD.trim())) {
@@ -139,7 +226,6 @@ export function getClinicDateOperatingStatus(
     };
   }
 
-  const clinic = getClinicTimeInfo();
   const userTzInfo = getUserTimezone(userTz);
   const targetTz = userTzInfo.timeZone;
 
@@ -187,14 +273,42 @@ export function getClinicDateOperatingStatus(
     const candD = String(candDate.getUTCDate()).padStart(2, "0");
     const clinicDateYMD = `${candY}-${candM}-${candD}`;
 
+    // Resolve dynamic operational slots for this clinic & doctor
+    const docAvailability = (doctorConfig as any)?.availability;
+    const operationalSlots = resolveOperationalSlots(hoursConfig, docAvailability);
+
+    // Day of week in clinic timezone
+    const dayOfWeek = candDate.toLocaleDateString("en-US", { weekday: "long", timeZone: "Asia/Kolkata" });
+    const docSchedule = docAvailability?.schedule;
+    const offDays = docSchedule?.offDays || [];
+    const isExplicitOffDay = offDays.some((d: string) => d.toLowerCase() === dayOfWeek.toLowerCase());
+    const isDocDayOff = isExplicitOffDay || (docAvailability?.days ? !isDayAllowed(dayOfWeek, docAvailability.days) : false);
+
+    // Specific doctor holiday date match (e.g. "YYYY-MM-DD")
+    const isDocHolidayDate = docSchedule?.holidays?.includes(clinicDateYMD);
+
     // Sunday in clinic timezone (UTC day 0)
     const isSundayInClinic = candDate.getUTCDay() === 0;
+    const isSundayClosed = isSundayInClinic && hoursConfig?.sundayPolicy === "Closed";
 
-    // Doctor blocks for this clinic date
-    const dayBlocks = blockedDates.filter((b) => b.date === clinicDateYMD);
+    // Doctor blocks for this clinic date (scoped to doctor if specified)
+    const activeDocId = doctorConfig?.id;
+    const dayBlocks = blockedDates.filter((b) => {
+      if (b.date !== clinicDateYMD) return false;
+      // If block has a specific doctorId, only block that doctor
+      if (b.doctorId && activeDocId) {
+        return b.doctorId === activeDocId;
+      }
+      return true; // Hospital-wide block
+    });
     const fullDayBlocked = dayBlocks.find((b) => b.allDay !== false);
 
-    for (const slot24 of ALL_TIME_SLOTS) {
+    // Appointment-only day check
+    const isDocApptOnly = docSchedule?.appointmentOnlyDays?.some(
+      (d: string) => d.toLowerCase() === dayOfWeek.toLowerCase() || d.toLowerCase() === "all days"
+    );
+
+    for (const slot24 of operationalSlots) {
       const [h24, m24] = slot24.split(":");
       const isoTimestamp = `${clinicDateYMD}T${h24.padStart(2, "0")}:${m24.padStart(2, "0")}:00+05:30`;
       const dateObj = new Date(isoTimestamp);
@@ -234,9 +348,18 @@ export function getClinicDateOperatingStatus(
       // Double-booking check
       const isBooked = bookedSlots.includes(slot24) || bookedSlots.includes(slotKey);
 
-      // Blocked check
-      let blockedReason: string | undefined = fullDayBlocked ? fullDayBlocked.reason : undefined;
-      if (!blockedReason) {
+      // Blocked / Availability check
+      let blockedReason: string | undefined;
+
+      if (isDocHolidayDate) {
+        blockedReason = `${doctorConfig?.name ? doctorConfig.name.split(",")[0] : "Doctor"} is on scheduled leave / holiday on this date`;
+      } else if (isDocDayOff) {
+        blockedReason = `${doctorConfig?.name ? doctorConfig.name.split(",")[0] : "Doctor"} does not consult on ${dayOfWeek}s`;
+      } else if (isSundayClosed) {
+        blockedReason = "Facility is closed on Sundays";
+      } else if (fullDayBlocked) {
+        blockedReason = fullDayBlocked.reason || "Doctor Out of Office";
+      } else {
         const partial = dayBlocks.find((b) => {
           if (b.slots && b.slots.includes(slot24)) return true;
           if (b.startTime && b.endTime) {
@@ -248,6 +371,9 @@ export function getClinicDateOperatingStatus(
       }
 
       const disabled = hasPassed || isBooked || !!blockedReason;
+      const isSundayPriorAppt =
+        (isSundayInClinic && !isSundayClosed && hoursConfig?.sundayPolicy !== "Walk-in OPD") ||
+        !!isDocApptOnly;
 
       slots.push({
         slotKey,
@@ -266,8 +392,10 @@ export function getClinicDateOperatingStatus(
         hasPassed,
         isBooked,
         blockedReason,
+        unavailableReason: blockedReason,
         disabled,
-        isSundayPriorAppt: isSundayInClinic,
+        isUnavailable: disabled,
+        isSundayPriorAppt,
       });
     }
   }
@@ -287,7 +415,6 @@ export function getClinicDateOperatingStatus(
 
   const availableSlotsCount = slots.filter((s) => !s.disabled).length;
   const allSlotsUnavailable = availableSlotsCount === 0;
-  const hasSundaySlots = slots.some((s) => s.isSundayPriorAppt);
 
   // Clinic day ended check for this local date
   const isClinicDayEnded = (isTodayInUserTz && allSlotsUnavailable) || isPastInUserTz;
@@ -309,7 +436,12 @@ export function getClinicDateOperatingStatus(
   } else if (isPastInUserTz) {
     unavailabilityReason = `This date has already elapsed. Please select an upcoming consultation date.`;
   } else if (allSlotsUnavailable) {
-    unavailabilityReason = `All consultation slots for this date have already been reserved or blocked. Please choose an upcoming date.`;
+    const commonBlockedReason = slots.find((s) => s.blockedReason)?.blockedReason;
+    if (commonBlockedReason && slots.every((s) => s.blockedReason === commonBlockedReason)) {
+      unavailabilityReason = `${commonBlockedReason}. Please choose another date.`;
+    } else {
+      unavailabilityReason = `All consultation slots for this date have already been reserved or blocked. Please choose an upcoming date.`;
+    }
   }
 
   return {

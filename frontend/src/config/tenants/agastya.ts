@@ -11,6 +11,20 @@ const PRIMARY_DOCTOR: HospitalDoctor = {
   aboutText:
     "Dr. Bramarambha K. is a Homoeopathic Physician with postgraduate specialisation in Homeopathic Materia Medica. She completed her undergraduate and postgraduate studies at Government Homoeopathic Medical College & Hospital, Bengaluru, securing 3rd rank in MD from Rajiv Gandhi University of Health Sciences (RGUHS). She is SCPH-certified with extensive clinical expertise in chronic pathology, paediatric immunity, and individualised constitutional homoeopathic care.",
   specialties: ["Classical Homeopathy", "Chronic Pathology", "Paediatric Immunity"],
+  consultationFee: 750,
+  availability: {
+    days: "Mon - Sun",
+    morningHours: "10:30 AM – 1:30 PM",
+    eveningHours: "6:00 PM – 8:30 PM",
+    consultationFee: 750,
+    schedule: {
+      appointmentOnlyDays: ["Sunday"],
+      walkinDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      offDays: [],
+      holidays: [],
+    },
+    telemedicineOnly: false,
+  },
 };
 
 export const AGASTYA_TENANT: HospitalTenantConfig = {
@@ -31,6 +45,21 @@ export const AGASTYA_TENANT: HospitalTenantConfig = {
     "Women's Health",
     "Skin & Dermatological Care",
   ],
+  hours: {
+    timezone: "Asia/Kolkata",
+    morningDisplay: "10:30 AM – 1:30 PM",
+    morningStart: "10:30",
+    morningEnd: "13:30",
+    eveningDisplay: "6:00 PM – 8:30 PM",
+    eveningStart: "18:00",
+    eveningEnd: "20:30",
+    availableDays: "Mon – Sat (Walk-in & Appt) | Sun (Prior Appt Only)",
+    sundayPolicy: "Prior Appointment Only",
+    consultationSlotMinutes: 15,
+    walkinAllowed: true,
+    walkinDaysSummary: "Mon – Sat (6:00 PM – 8:30 PM)",
+    appointmentDaysSummary: "Mon – Sat Morning (10:30 AM – 1:30 PM) & All Day Sunday",
+  },
   contact: {
     phone: "+919845012345",
     phoneDisplay: "+91 98450 12345",

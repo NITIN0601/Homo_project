@@ -3,8 +3,6 @@ import {
   getLocalizedSlotsForDate,
   isUserSlotPassed,
   getUserTimezone,
-  COMMON_TIMEZONES,
-  getClinicTimeInfo,
 } from "../utils/timezone";
 import {
   isClinicDateConcluded,
@@ -104,5 +102,83 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
     expect(pastStatus.allSlotsUnavailable).toBe(true);
     expect(pastStatus.availableSlotsCount).toBe(0);
   });
+
+  it("handles doctor-specific weekly off days dynamically", () => {
+    // 2026-11-17 is a Tuesday
+    const doctorWithTuesdayOff = {
+      name: "Dr. Rajesh Sharma",
+      title: "Consultant Physician",
+      regNo: "MCI-1234",
+      experienceYears: 10,
+      qualifications: "MD, MBBS",
+      availability: {
+        schedule: {
+          offDays: ["Tuesday"],
+          appointmentOnlyDays: ["Monday", "Wednesday", "Thursday", "Friday"],
+        },
+      },
+    };
+
+    const status = getClinicDateOperatingStatus("2026-11-17", "Asia/Kolkata", [], [], undefined, doctorWithTuesdayOff);
+    expect(status.allSlotsUnavailable).toBe(true);
+    expect(status.unavailabilityReason).toContain("Dr. Rajesh Sharma does not consult on Tuesdays");
+    for (const slot of status.slots) {
+      expect(slot.isUnavailable).toBe(true);
+      expect(slot.unavailableReason).toContain("Dr. Rajesh Sharma does not consult on Tuesdays");
+    }
+  });
+
+  it("handles doctor-specific scheduled holidays/leave dates", () => {
+    const doctorOnHoliday = {
+      name: "Dr. Anita Nair",
+      title: "Consultant Pulmonologist",
+      regNo: "MCI-5678",
+      experienceYears: 8,
+      qualifications: "MD, DNB",
+      availability: {
+        schedule: {
+          holidays: ["2026-12-25"],
+          offDays: ["Sunday"],
+        },
+      },
+    };
+
+    const status = getClinicDateOperatingStatus("2026-12-25", "Asia/Kolkata", [], [], undefined, doctorOnHoliday);
+    expect(status.allSlotsUnavailable).toBe(true);
+    expect(status.unavailabilityReason).toContain("Dr. Anita Nair is on scheduled leave / holiday on this date");
+    for (const slot of status.slots) {
+      expect(slot.isUnavailable).toBe(true);
+      expect(slot.unavailableReason).toContain("Dr. Anita Nair is on scheduled leave");
+    }
+  });
+
+  it("respects custom hospital hours and Sunday policies", () => {
+    // 2026-11-22 is a Sunday
+    const customHoursClosedSunday = {
+      timezone: "Asia/Kolkata",
+      morningDisplay: "09:00 AM – 12:00 PM",
+      morningStart: "09:00",
+      morningEnd: "12:00",
+      sundayPolicy: "Closed" as const,
+    };
+
+    const statusClosed = getClinicDateOperatingStatus("2026-11-22", "Asia/Kolkata", [], [], customHoursClosedSunday);
+    expect(statusClosed.allSlotsUnavailable).toBe(true);
+    expect(statusClosed.unavailabilityReason).toContain("Facility is closed on Sundays");
+
+    const customHoursApptSunday = {
+      timezone: "Asia/Kolkata",
+      morningDisplay: "09:00 AM – 12:00 PM",
+      morningStart: "09:00",
+      morningEnd: "12:00",
+      sundayPolicy: "Prior Appointment Only" as const,
+    };
+
+    const statusAppt = getClinicDateOperatingStatus("2026-11-22", "Asia/Kolkata", [], [], customHoursApptSunday);
+    expect(statusAppt.allSlotsUnavailable).toBe(false);
+    expect(statusAppt.slots.length).toBeGreaterThan(0);
+    expect(statusAppt.slots[0].isSundayPriorAppt).toBe(true);
+  });
 });
+
 

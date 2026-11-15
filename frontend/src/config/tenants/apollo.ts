@@ -11,6 +11,20 @@ const APOLLO_DOCTORS: HospitalDoctor[] = [
     aboutText:
       "Senior Telehealth physician pioneering integrative outpatient tele-consultations, preventive medicine, and comprehensive digital care pathways across India.",
     specialties: ["Tele-Medicine", "Internal Medicine", "Preventive Care"],
+    consultationFee: 600,
+    availability: {
+      days: "Mon - Fri",
+      morningHours: "09:00 AM – 1:00 PM",
+      eveningHours: "4:00 PM – 7:00 PM",
+      consultationFee: 600,
+      schedule: {
+        appointmentOnlyDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        walkinDays: [],
+        offDays: ["Saturday", "Sunday"],
+        holidays: [],
+      },
+      telemedicineOnly: true,
+    },
   },
   {
     id: "doc-apollo-02",
@@ -22,6 +36,20 @@ const APOLLO_DOCTORS: HospitalDoctor[] = [
     aboutText:
       "Specialist in respiratory disorders, pulmonary health, allergic conditions, and chronic asthma management with personalized care plans.",
     specialties: ["Pulmonology", "Allergies"],
+    consultationFee: 800,
+    availability: {
+      days: "Mon, Wed, Fri, Sat",
+      morningHours: "10:00 AM – 2:00 PM",
+      eveningHours: "5:00 PM – 8:00 PM",
+      consultationFee: 800,
+      schedule: {
+        appointmentOnlyDays: ["Monday", "Wednesday", "Friday", "Saturday"],
+        walkinDays: [],
+        offDays: ["Tuesday", "Thursday", "Sunday"],
+        holidays: [],
+      },
+      telemedicineOnly: true,
+    },
   },
 ];
 
@@ -43,6 +71,21 @@ export const APOLLO_DEMO_TENANT: HospitalTenantConfig = {
     "Allergies",
     "Chronic Disease Management",
   ],
+  hours: {
+    timezone: "Asia/Kolkata",
+    morningDisplay: "09:00 AM – 2:00 PM",
+    morningStart: "09:00",
+    morningEnd: "14:00",
+    eveningDisplay: "4:00 PM – 8:00 PM",
+    eveningStart: "16:00",
+    eveningEnd: "20:00",
+    availableDays: "Mon – Sat (100% Tele-consultation by Prior Appointment)",
+    sundayPolicy: "Closed",
+    consultationSlotMinutes: 20,
+    walkinAllowed: false,
+    walkinDaysSummary: "Pure Telemedicine — In-person walk-ins not available",
+    appointmentDaysSummary: "Mon – Sat: Online Video & Phone Appointments Only",
+  },
   contact: {
     phone: "+918049001122",
     phoneDisplay: "+91 80 4900 1122",
