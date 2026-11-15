@@ -6,6 +6,7 @@ export interface HospitalCardProps {
   isActive: boolean;
   onSwitch: (hospital: HospitalTenantConfig) => void;
   onEditHospital: (hospital: HospitalTenantConfig) => void;
+  onEditDoctor: (hospital: HospitalTenantConfig) => void;
   onOpenFeatures: (hospital: HospitalTenantConfig) => void;
   onPreviewPatient: (hospital: HospitalTenantConfig) => void;
   onPreviewDoctor: (hospital: HospitalTenantConfig) => void;
@@ -16,6 +17,7 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
   isActive,
   onSwitch,
   onEditHospital,
+  onEditDoctor,
   onOpenFeatures,
   onPreviewPatient,
   onPreviewDoctor,
@@ -133,37 +135,51 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
 
       {/* Actions */}
       <div className="pt-3 border-t border-stone-100 flex flex-col gap-2">
-        <div className="grid grid-cols-3 gap-1.5">
+        {/* Core Controls */}
+        <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => onSwitch(hospital)}
-            className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               isActive
-                ? "bg-indigo-100 text-indigo-950 font-black cursor-default"
+                ? "bg-indigo-100 text-indigo-950 font-black cursor-default border border-indigo-200"
                 : "bg-stone-100 hover:bg-stone-200 text-stone-800"
             }`}
           >
-            <span>{isActive ? "✓ Active" : "🎯 Switch"}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onEditHospital(hospital)}
-            className="py-2 px-2 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
-            title="Edit hospital details, branding, doctors, and hours"
-          >
-            <span>✏️ Edit</span>
+            <span>{isActive ? "✓ Active Preview" : "🎯 Switch Tenant"}</span>
           </button>
           <button
             type="button"
             onClick={() => onOpenFeatures(hospital)}
-            className="py-2 px-2 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
-            title="Manage what Doctor and Patient can view/do"
+            className="py-2 px-3 rounded-xl text-xs font-bold bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            title="Manage enabled features, modules, and role visibility"
           >
-            <span>⚙️ Access</span>
+            <span>⚙️ Features</span>
           </button>
         </div>
 
+        {/* Update Controls (Hospital & Doctor) */}
         <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => onEditHospital(hospital)}
+            className="py-2 px-2 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+            title="Update hospital branding, details, contact, and hours"
+          >
+            <span>🏥 Update Hospital</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onEditDoctor(hospital)}
+            className="py-2 px-2 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+            title="Update doctor credentials, qualifications, fees, and bio"
+          >
+            <span>🩺 Update Doc</span>
+          </button>
+        </div>
+
+        {/* Preview Links */}
+        <div className="grid grid-cols-2 gap-2 pt-0.5">
           <button
             type="button"
             onClick={() => onPreviewPatient(hospital)}
@@ -174,7 +190,7 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
           <button
             type="button"
             onClick={() => onPreviewDoctor(hospital)}
-            className="py-1.5 px-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 rounded-xl text-[11px] font-bold transition-colors cursor-pointer text-center"
+            className="py-1.5 px-2 bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200 rounded-xl text-[11px] font-bold transition-colors cursor-pointer text-center"
           >
             🩺 Doctor View
           </button>

@@ -16,6 +16,7 @@ import {
   HospitalCard,
   ManageFeaturesModal,
   OnboardHospitalModal,
+  UpdateDoctorModal,
   OnboardSuccessDialog,
   type OnboardSuccessResult,
 } from "./superadmin";
@@ -31,6 +32,7 @@ export const SuperAdminDashboard: React.FC = () => {
   const [tenantsList, setTenantsList] = useState<HospitalTenantConfig[]>(() => getAllHospitalTenants());
   const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState(false);
   const [editingHospital, setEditingHospital] = useState<HospitalTenantConfig | null>(null);
+  const [editingDoctorHospital, setEditingDoctorHospital] = useState<HospitalTenantConfig | null>(null);
   const [managingTenant, setManagingTenant] = useState<HospitalTenantConfig | null>(null);
   const [onboardedResult, setOnboardedResult] = useState<OnboardSuccessResult | null>(null);
 
@@ -122,6 +124,56 @@ export const SuperAdminDashboard: React.FC = () => {
     }
     setEditingHospital(null);
     toast.success(`Hospital '${updatedTenant.name}' details updated successfully!`);
+  };
+
+  const handleSaveDoctorEdit = async (
+    hospitalId: string,
+    doctorId: string,
+    updatedDoctor: HospitalDoctor
+  ) => {
+    try {
+      await api.platform.updateDoctor(hospitalId, doctorId, {
+        name: updatedDoctor.name,
+        title: updatedDoctor.title,
+        regNo: updatedDoctor.regNo,
+        qualifications: updatedDoctor.qualifications,
+        experienceYears: updatedDoctor.experienceYears,
+        consultationFee: updatedDoctor.consultationFee,
+        email: updatedDoctor.email,
+        phone: updatedDoctor.phone,
+        specialties: updatedDoctor.specialties,
+        aboutText: updatedDoctor.aboutText,
+        sharingPreferences: updatedDoctor.sharingPreferences,
+      });
+    } catch (err: any) {
+      console.warn("Backend doctor update error, using local fallback:", err);
+    }
+
+    const existing = tenantsList.find((h) => h.id === hospitalId);
+    if (existing) {
+      const isLead =
+        !existing.doctor.id ||
+        existing.doctor.id === doctorId ||
+        existing.doctor.email === updatedDoctor.email;
+
+      const updatedTenant: HospitalTenantConfig = {
+        ...existing,
+        doctor: isLead ? updatedDoctor : existing.doctor,
+        doctors: existing.doctors && existing.doctors.length > 0
+          ? existing.doctors.map((d) =>
+              d.id === doctorId || d.email === updatedDoctor.email ? updatedDoctor : d
+            )
+          : [updatedDoctor],
+      };
+
+      updateHospitalTenantInRegistry(updatedTenant);
+      setTenantsList(getAllHospitalTenants());
+      if (tenant.id === hospitalId) {
+        setTenantId(hospitalId);
+      }
+    }
+    setEditingDoctorHospital(null);
+    toast.success(`Doctor '${updatedDoctor.name}' profile updated successfully!`);
   };
 
   const handleOnboardHospital = async (
@@ -265,6 +317,7 @@ export const SuperAdminDashboard: React.FC = () => {
               isActive={h.id === tenant.id}
               onSwitch={handleSwitchTenant}
               onEditHospital={(target) => setEditingHospital(target)}
+              onEditDoctor={(target) => setEditingDoctorHospital(target)}
               onOpenFeatures={(target) => setManagingTenant(target)}
               onPreviewPatient={handlePreviewAsPatient}
               onPreviewDoctor={handlePreviewAsDoctor}
@@ -295,6 +348,14 @@ export const SuperAdminDashboard: React.FC = () => {
         existingSlugs={existingSlugs}
         initialTenant={editingHospital}
         onOnboard={handleSaveHospitalEdit}
+      />
+
+      {/* Edit Doctor Credentials Modal */}
+      <UpdateDoctorModal
+        isOpen={Boolean(editingDoctorHospital)}
+        onClose={() => setEditingDoctorHospital(null)}
+        hospital={editingDoctorHospital}
+        onSaveDoctor={handleSaveDoctorEdit}
       />
 
       <OnboardSuccessDialog

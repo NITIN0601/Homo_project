@@ -116,6 +116,43 @@ async def update_hospital_details_endpoint(
     }
 
 
+@router.put("/super-admin/hospitals/{hospital_id}/doctors/{doctor_id}", summary="Update doctor details (Super Admin only)")
+@router.put("/doctors/{doctor_id}", summary="Update doctor details")
+async def update_doctor_endpoint(
+    doctor_id: str,
+    payload: dict,
+    hospital_id: str | None = None,
+    user: dict = Depends(require_admin_role),
+):
+    """Updates a doctor's credentials, qualifications, fees, and bio."""
+    doc = get_doctor(doctor_id, hospital_id=hospital_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail=f"Doctor '{doctor_id}' not found.")
+
+    for k, v in payload.items():
+        if k != "id":
+            doc[k] = v
+    doc["updatedAt"] = datetime.now(timezone.utc).isoformat()
+    save_doctor(doc)
+
+    # Sync to hospital tenant metadata if lead/primary
+    h_id = hospital_id or doc.get("hospitalId")
+    if h_id:
+        h = get_hospital(h_id)
+        if h:
+            primary_doc = h.get("doctor") or {}
+            if primary_doc.get("id") == doctor_id or primary_doc.get("email") == doc.get("email"):
+                primary_doc.update(doc)
+                h["doctor"] = primary_doc
+                save_hospital(h)
+
+    return {
+        "status": "success",
+        "message": f"Doctor '{doc.get('name')}' updated successfully.",
+        "doctor": doc,
+    }
+
+
 @router.post("/hospitals", summary="Create a new hospital tenant (Super Admin only)")
 async def create_hospital_endpoint(
     req: HospitalCreateRequest,
