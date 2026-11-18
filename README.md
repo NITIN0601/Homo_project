@@ -5,7 +5,7 @@
 [![Maintainer](https://img.shields.io/badge/Maintainer-NITIN0601-green?logo=github)](https://github.com/NITIN0601)
 [![Python Version](https://img.shields.io/badge/Python-%3E%3D3.10%20(up%20to%203.14)-blue?logo=python)](https://www.python.org/)
 [![Node Version](https://img.shields.io/badge/Node-%3E%3D20-green?logo=node.js)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/Tests-220%20Passed%20(132%20BE%20%2B%2088%20FE)-brightgreen?logo=vitest)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-280%20Passed%20(132%20BE%20%2B%20148%20FE)-brightgreen?logo=vitest)](https://vitest.dev/)
 [![License](https://img.shields.io/badge/License-MIT-purple)]()
 
 A multi-tenant, cloud-and-edge Electronic Health Records (EHR) and clinical management platform designed for classical homeopathy practices. Maintained by [NITIN0601](https://github.com/NITIN0601) under the [Homo_project](https://github.com/NITIN0601/Homo_project) repository. Built on a decoupled microservice architecture to support independent horizontal and vertical scaling across frontend, backend, database, and API gateway services.
@@ -44,7 +44,13 @@ A multi-tenant, cloud-and-edge Electronic Health Records (EHR) and clinical mana
 ### Modular Microservices
 
 1. **Frontend Service (`frontend/`)**:
-   - Single-Page Application (SPA) powered by React 19, TypeScript, Vite, and Tailwind CSS v4.
+   - Modern Single-Page Application (SPA) powered by React 19, TypeScript, Vite, and Tailwind CSS v4.
+   - Built on enterprise **Feature-Sliced Domain Architecture**:
+     - `src/app/`: Application composition, AppRouter with code-splitting, root store (`AppContext`), practice admin shell, and layout chrome.
+     - `src/core/`: Multi-tenant configuration, timezone engine, HTTP client, session security, telemetry, and shared contracts.
+     - `src/domains/`: 7 decoupled business domains (`billing-finance`, `clinical-ehr`, `dispensary-pharmacy`, `iam-auth`, `patient-engagement`, `scheduling`, `tenant-governance`).
+     - `src/shared/`: Design system UI primitives (`Button`, `Modal`, `Toast`, `Badge`, `Card`, etc.) and formatting utilities.
+     - `src/mocks/`: Canonical mock datasets for offline development and testing.
    - Dynamic multi-tenant branding, role-based views (Patient Portal & Doctor/Admin Console), and offline state caching.
    - **Horizontal Scaling**: Stateless static assets served globally via CDN or containerized Nginx Alpine instances.
 
@@ -115,10 +121,16 @@ The platform provides two dedicated, role-tailored web interfaces backed by modu
 
 ```
 Homo_project/
-├── frontend/                  # React 19 + TypeScript + Vite Workspace
-│   ├── src/                   # Components, contexts, pages, hooks, services, types
+├── frontend/                  # React 19 + TypeScript + Vite Workspace (Feature-Sliced Architecture)
+│   ├── src/                   # Modular architecture layers
+│   │   ├── app/               # Application composition (AppRouter, AppContext, practice admin, shell)
+│   │   ├── core/              # Enterprise core (tenancy, timezone, api client, observability, types)
+│   │   ├── domains/           # 7 isolated business domains (ehr, pharmacy, scheduling, auth, billing, etc.)
+│   │   ├── shared/            # Design system UI primitives and formatting utilities
+│   │   ├── mocks/             # Canonical mock datasets for offline dev & tests
+│   │   └── test/ & tests/     # 16 Vitest test suites (148 tests) & boundary tests
 │   ├── public/                # Static assets, branding logos, banners
-│   ├── vite.config.ts         # Vite build configuration & local API reverse proxy
+│   ├── vite.config.ts         # Vite build configuration & path alias resolution
 │   ├── .env.example           # Frontend Vite client environment template
 │   └── package.json           # Frontend dependency manifest
 ├── backend/                   # FastAPI Asynchronous Core Engine (Python 3.14)
@@ -359,18 +371,21 @@ docker compose -f infra/docker-compose.yml down
 
 ## 🧪 Testing & Code Quality
 
-Run tests and linters across the entire stack from the root directory:
+Run tests, linters, and architectural checks across the entire stack from the root directory:
 
 ```bash
-# Run ALL 220 tests (Backend 132 + Frontend 88)
+# Run ALL 280 tests (Backend 132 + Frontend 148)
 npm run test:all
 
 # Run only Python Backend Tests (132 test cases across 8 suites)
 npm run test:backend
 # Or directly: ./test/run_tests.sh
 
-# Run only Frontend Vitest Suite (88 test cases across 8 suites)
+# Run only Frontend Vitest Suite (148 test cases across 16 test files)
 npm run test:frontend
+
+# Enforce Feature-Sliced Architecture Boundaries & Dependency Direction
+node frontend/scripts/check-architecture.mjs
 
 # Run Fast Frontend Linter (oxlint)
 npm run lint
@@ -394,7 +409,7 @@ The platform features strict multi-tenant isolation with zero hardcoded sensitiv
 2. **Decoupled Tenant Schemas**:
    - Hospital configurations: `backend/data/hospitals.json`
    - Doctor rosters: `backend/data/doctors.json`
-   - Frontend tenant definitions: `frontend/src/config/tenants/`
+   - Frontend tenant definitions: `frontend/src/core/config/tenants/` & `@core/tenancy`
 
 3. **Tailored Bio vs Hospital Summary**:
    - Doctor bio is tailored to the physician's clinical degrees, experience, and certifications.
@@ -421,7 +436,7 @@ Homeopathic consultations operate on a unified single source of truth in clinic 
 ## 🛡️ Zero-PHI Crash Telemetry & Error Boundary
 
 - **Client Error Boundary**: React 19 `DashboardErrorBoundary` catches unhandled rendering errors and displays a user-friendly recovery UI with retry and report buttons.
-- **Zero-PHI Sanitization**: The telemetry client (`frontend/src/utils/telemetry.ts`) aggressively scrubs patient names, emails, phone numbers, UUIDs, and JWTs from stack traces and URLs before transmission.
+- **Zero-PHI Sanitization**: The telemetry client (`frontend/src/core/observability/telemetry.ts`) aggressively scrubs patient names, emails, phone numbers, UUIDs, and JWTs from stack traces and URLs before transmission.
 - **Telemetry Ingestion API**: Backend route `POST /api/telemetry/report` captures sanitized error telemetry into the forensic audit trail (`audit_traces.jsonl`) with unique incident IDs (`#inc-XXXXXX`).
 
 ---
