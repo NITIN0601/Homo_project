@@ -3,19 +3,19 @@ Tests for Multi-Tenant Social Media & 3rd-Party Messaging Service.
 Verifies per-hospital WhatsApp, Instagram, and social integration capabilities.
 """
 
-import os
+import copy
 import sys
-from pathlib import Path
 import unittest
+from pathlib import Path
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-from fastapi.testclient import TestClient
-from main import app
-from services.hospital_service import get_hospital
-from services.social_media_service import (
+from fastapi.testclient import TestClient  # noqa: E402
+from main import app  # noqa: E402
+from services.hospital_service import get_hospital, save_hospital  # noqa: E402
+from services.social_media_service import (  # noqa: E402
     get_hospital_social_config,
     send_hospital_instagram_dm,
     send_hospital_whatsapp_message,
@@ -27,6 +27,12 @@ class TestSocialMediaService(unittest.IsolatedAsyncioTestCase):
 
     def setUp(self):
         self.client = TestClient(app)
+        raw_agastya = get_hospital("agastya")
+        self.orig_agastya = copy.deepcopy(raw_agastya) if raw_agastya else None
+
+    def tearDown(self):
+        if self.orig_agastya:
+            save_hospital(self.orig_agastya)
 
     async def test_get_hospital_social_config(self):
         """Verifies that hospital social config loads correctly from tenant registry."""
