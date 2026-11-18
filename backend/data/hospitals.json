@@ -279,6 +279,42 @@
         "companyName": ""
       }
     },
+    "socialMedia": {
+      "whatsapp": {
+        "enabled": true,
+        "businessAccountId": "WABA_AGASTYA_01",
+        "phoneNumberId": "PHONE_AGASTYA_01",
+        "apiToken": "",
+        "displayNumber": "+91 98450 12345",
+        "customGreeting": "Namaste from Agastya Classical Homeopathy Clinic! How can we assist your healing journey?",
+        "chatUrl": "https://wa.me/919845012345"
+      },
+      "instagram": {
+        "enabled": true,
+        "handle": "@agastyahomoeo",
+        "profileUrl": "https://instagram.com/agastyahomoeo",
+        "accountId": "ig_agastya_homeopathy",
+        "accessToken": "",
+        "autoReplyEnabled": false,
+        "directBookingEnabled": true
+      },
+      "facebook": {
+        "enabled": true,
+        "pageUrl": "https://facebook.com/agastyahomoeo",
+        "pageId": "fb_agastya_clinic",
+        "accessToken": ""
+      },
+      "youtube": {
+        "enabled": false,
+        "channelUrl": "",
+        "channelName": ""
+      },
+      "linkedin": {
+        "enabled": false,
+        "companyUrl": "",
+        "companyName": ""
+      }
+    },
     "isActive": true,
     "updatedAt": "2026-11-18T23:14:09.777371+00:00"
   },
