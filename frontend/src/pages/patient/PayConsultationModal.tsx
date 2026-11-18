@@ -6,6 +6,7 @@ import { HOSPITAL, DOCTOR, INDIAN_BANKS } from "../../config";
 import { formatCurrency, formatDateTime } from "../../utils/format";
 import { sanitizeText } from "../../utils/sanitize";
 import { Button, Modal, Input } from "../../components/ui";
+import { paymentGatewayService } from "../../services/paymentGatewayService";
 
 interface PayConsultationModalProps {
   payingInvoice: ConsultationInvoice | null;
@@ -37,6 +38,7 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
   const [cardExpiry, setCardExpiry] = useState<string>("12/28");
   const [cardCvv, setCardCvv] = useState<string>("•••");
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const displayCurrency = payingInvoice?.currency || tenant.currency;
   const displaySymbol = payingInvoice?.currencySymbol || tenant.currencySymbol || "₹";
@@ -50,28 +52,33 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
     );
   }, [bankSearchQuery]);
 
-  const handlePayInvoice = (e: React.FormEvent) => {
+  const handlePayInvoice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!payingInvoice) return;
     setIsProcessingPayment(true);
+    setPaymentError(null);
 
-    setTimeout(() => {
-      const txRef = paymentMethodTab === "upi"
-        ? `UPI-${Math.floor(100000000 + Math.random() * 900000000)}-IN`
-        : paymentMethodTab === "card"
-          ? `CARD-AUTH-${Math.floor(100000 + Math.random() * 900000)}`
-          : `NB-${selectedBank.replace(/[^A-Za-z0-9]/g, "").toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`;
+    try {
+      const cleanUpi = sanitizeText(customPatientUpi, 100);
+      const cleanBank = paymentMethodTab === "netbanking" ? sanitizeText(selectedBank, 80) : undefined;
+
+      const result = await paymentGatewayService.processPayment({
+        invoice: payingInvoice,
+        paymentMethod: paymentMethodTab,
+        patientUpiId: cleanUpi || authUser?.savedUpiId,
+        selectedBank: cleanBank,
+        currency: displayCurrency,
+        amount: displayAmount,
+      });
 
       const submittedAt = formatDateTime();
-
-      const cleanUpi = sanitizeText(customPatientUpi, 100);
       submitConsultationPayment(
         payingInvoice.id,
         paymentMethodTab,
-        txRef,
+        result.transactionRef,
         submittedAt,
         cleanUpi || authUser?.savedUpiId,
-        paymentMethodTab === "netbanking" ? sanitizeText(selectedBank, 80) : undefined
+        cleanBank
       );
 
       setIsProcessingPayment(false);
@@ -80,17 +87,20 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
           ...payingInvoice,
           status: "processing",
           paymentMethod: paymentMethodTab,
-          transactionRef: txRef,
+          transactionRef: result.transactionRef,
           submittedAt,
-          patientUpiId: customPatientUpi.trim() || authUser?.savedUpiId,
-          selectedBank: paymentMethodTab === "netbanking" ? selectedBank : undefined,
+          patientUpiId: cleanUpi || authUser?.savedUpiId,
+          selectedBank: cleanBank,
         },
-        txRef,
+        txRef: result.transactionRef,
         submittedAt,
         method: paymentMethodTab.toUpperCase(),
       });
       onClose();
-    }, 1100);
+    } catch (err: any) {
+      setIsProcessingPayment(false);
+      setPaymentError(err?.message || "Payment could not be processed. Please try again.");
+    }
   };
 
   return (
@@ -143,6 +153,13 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
               <span className="text-xl font-black text-stone-900">{formatCurrency(displayAmount, displayCurrency, displaySymbol)}</span>
             </div>
           </div>
+
+          {paymentError && (
+            <div className="mx-6 mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center gap-2">
+              <span>⚠️</span>
+              <span>{paymentError}</span>
+            </div>
+          )}
 
           {/* Payment Method Selector Tabs */}
           <div className="px-6 pt-4 pb-2 border-b border-stone-100 flex items-center gap-2 bg-stone-50/50">

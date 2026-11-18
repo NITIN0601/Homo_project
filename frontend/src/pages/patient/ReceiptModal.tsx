@@ -4,6 +4,7 @@ import type { ConsultationInvoice } from "../../types";
 import { HOSPITAL, DOCTOR } from "../../config";
 import { formatCurrency } from "../../utils/format";
 import { Button, Modal } from "../../components/ui";
+import { auditService } from "../../services/auditService";
 
 interface ReceiptModalProps {
   invoice: ConsultationInvoice | null;
@@ -22,6 +23,18 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   const currencySymbol = invoice.currencySymbol || tenant.currencySymbol || "₹";
   const amount = invoice.amount ?? invoice.amountINR;
 
+  const handlePrint = () => {
+    auditService.logAction("PRINTED_RECEIPT", {
+      targetPatientId: invoice.patientId,
+      details: {
+        invoiceId: invoice.id,
+        amount,
+        currency: currencyCode,
+      },
+    });
+    window.print();
+  };
+
   return (
     <Modal
       isOpen={Boolean(invoice)}
@@ -30,11 +43,11 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
       subtitle="Official Healthcare Tax-Exempt Receipt"
       size="lg"
       footer={
-        <div className="flex justify-end gap-2 w-full">
+        <div className="flex justify-end gap-2 w-full no-print">
           <Button
             variant="primary"
             size="sm"
-            onClick={() => window.print()}
+            onClick={handlePrint}
           >
             <span>🖨️</span> Print / Save Receipt
           </Button>
@@ -49,7 +62,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
       }
     >
       {invoice && (
-        <div className="space-y-4 text-xs">
+        <div id="print-target" className="space-y-4 text-xs bg-white p-2">
           {/* Doctor & Patient Info Block */}
           <div className="grid grid-cols-2 gap-4 pb-4 border-b border-stone-200">
             <div className="space-y-1">

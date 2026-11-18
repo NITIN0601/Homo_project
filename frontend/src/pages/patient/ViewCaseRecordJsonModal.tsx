@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import type { VisitSummaryRecord } from "../../types";
 import { getPatientVisibleCaseRecord } from "../../services/voiceStudio";
 import { Button, Modal } from "../../components/ui";
+import { auditService } from "../../services/auditService";
 
 interface ViewCaseRecordJsonModalProps {
   visit: VisitSummaryRecord | null;
@@ -17,6 +18,12 @@ export const ViewCaseRecordJsonModal: React.FC<ViewCaseRecordJsonModalProps> = (
   const handleCopyPatientJson = (record: any) => {
     navigator.clipboard.writeText(JSON.stringify(record, null, 2));
     setCopiedJson(true);
+    auditService.logAction("EXPORTED_CASE_JSON", {
+      details: {
+        interactionId: caseRecord?.metadata?.interaction_id,
+        patientName: visit?.patientName,
+      },
+    });
     setTimeout(() => setCopiedJson(false), 2000);
   };
 

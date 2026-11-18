@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useMemo, useCall
 import type { HospitalTenantConfig, HospitalFeatures, HospitalBranding, HospitalLegal } from "../types/tenant";
 import { DEFAULT_HOSPITAL_TENANT, getHospitalTenantById } from "../config/tenants";
 import { resolveActiveHospitalTenant } from "../services/tenantResolver";
+import { broadcastSessionEvent } from "../utils/sessionSync";
 import { api } from "../services/api";
 
 const STORAGE_CUSTOM_PREFIX = "hospital_tenant_custom_v1_";
@@ -75,6 +76,10 @@ export const ThemeProvider: React.FC<{
   const setTenantId = (id: string) => {
     const nextBase = getHospitalTenantById(id);
     setTenant(getSavedTenantOverride(nextBase));
+    broadcastSessionEvent({ type: "TENANT_SWITCH", tenantId: id });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("hospital_tenant_switched", { detail: { tenantId: id } }));
+    }
   };
 
   const updateTenant = useCallback((updates: Partial<HospitalTenantConfig>) => {

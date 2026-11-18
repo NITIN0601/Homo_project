@@ -410,6 +410,16 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, consultationInvoices: action.payload };
     }
 
+    case "RESET_CLINICAL_STATE": {
+      return {
+        ...state,
+        appointments: [],
+        blockedDates: [],
+        visitSummaries: {},
+        consultationInvoices: [],
+      };
+    }
+
     default:
       return state;
   }

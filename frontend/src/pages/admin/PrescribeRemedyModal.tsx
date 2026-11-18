@@ -4,7 +4,8 @@ import { MEDICINE_CATALOGUE } from "../../context/AppContext";
 import { useTenant } from "../../context/ThemeProvider";
 import { HOSPITAL } from "../../config";
 import { formatINR, formatDateShort } from "../../utils/format";
-import { Modal, Select, Textarea, Button } from "../../components/ui";
+import { Modal, Select, Textarea, Button, Input } from "../../components/ui";
+import { auditService } from "../../services/auditService";
 
 interface PrescribeRemedyModalProps {
   isOpen: boolean;
@@ -21,10 +22,14 @@ export const PrescribeRemedyModal: React.FC<PrescribeRemedyModalProps> = ({
 }) => {
   const { tenant } = useTenant();
   const [selectedMedicineId, setSelectedMedicineId] = useState<string>("m1");
-  const [customDosageNote, setCustomDosageNote] = useState<string>("Take 4 globules twice daily post meals for 14 days");
+  const [dosageQuantity, setDosageQuantity] = useState<string>("4");
+  const [dosageUnit, setDosageUnit] = useState<string>("globules");
+  const [customDosageNote, setCustomDosageNote] = useState<string>("twice daily post meals for 14 days");
   const [success, setSuccess] = useState(false);
 
   if (!patient) return null;
+
+  const fullInstructions = `Take ${dosageQuantity} ${dosageUnit} ${customDosageNote}`.trim();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,16 +48,27 @@ export const PrescribeRemedyModal: React.FC<PrescribeRemedyModalProps> = ({
           medicineId: medObj.id,
           medicineName: medObj.name,
           potency: medObj.potency,
-          dosage: customDosageNote,
+          dosage: fullInstructions,
           duration: "14 days",
         },
       ],
-      clinicalNotes: `Direct prescription assigned via Admin Dashboard: ${customDosageNote}`,
+      clinicalNotes: `Direct prescription assigned via Admin Dashboard: ${fullInstructions}`,
       lifestyleAdvice: "Follow prescribed diet and dosage intervals.",
       followUpDate: "In 14 Days",
     };
 
-    onPrescribeRemedy(patient.id, newVisit, medObj.id, customDosageNote);
+    onPrescribeRemedy(patient.id, newVisit, medObj.id, fullInstructions);
+    auditService.logAction("PRESCRIBED_REMEDY", {
+      targetPatientId: patient.id,
+      details: {
+        medicineId: medObj.id,
+        medicineName: medObj.name,
+        dosageQuantity,
+        dosageUnit,
+        instructions: fullInstructions,
+      },
+    });
+
     setSuccess(true);
     setTimeout(() => {
       setSuccess(false);
@@ -107,11 +123,35 @@ export const PrescribeRemedyModal: React.FC<PrescribeRemedyModalProps> = ({
           options={medicineOptions}
         />
 
+        <div className="grid grid-cols-2 gap-3">
+          <Input
+            label="Dosage Amount"
+            type="number"
+            min="1"
+            max="100"
+            value={dosageQuantity}
+            onChange={(e) => setDosageQuantity(e.target.value)}
+            required
+          />
+          <Select
+            label="Clinical Unit"
+            value={dosageUnit}
+            onChange={(e) => setDosageUnit(e.target.value)}
+            options={[
+              { value: "globules", label: "globules (standard pills)" },
+              { value: "drops", label: "drops (liquid dilution)" },
+              { value: "tablets", label: "tablets (trituration)" },
+              { value: "ml", label: "ml (mother tincture)" },
+              { value: "powder packets", label: "powder packets" },
+            ]}
+          />
+        </div>
+
         <Textarea
-          label="Doctor Dosage & Administration Instructions"
+          label="Doctor Administration Instructions"
           value={customDosageNote}
           onChange={(e) => setCustomDosageNote(e.target.value)}
-          rows={3}
+          rows={2}
           required
         />
       </form>

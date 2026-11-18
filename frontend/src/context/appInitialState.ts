@@ -26,46 +26,21 @@ import { getUserTimezone } from "../utils/timezone";
 import { parseRouteFromLocation } from "../router/routeParser";
 
 export const getInitialAuthUser = (): AuthUser => {
-  if (typeof window !== "undefined" && sessionStorage.getItem(STORAGE_KEYS.EXPLICIT_LOGOUT) === "true") {
+  if (typeof sessionStorage !== "undefined" && sessionStorage.getItem(STORAGE_KEYS.EXPLICIT_LOGOUT) === "true") {
     return null;
   }
 
-  // In local mock sandbox mode, prioritize explicit URL routes and query overrides
-  if (typeof window !== "undefined" && USE_MOCK_DATA && !import.meta.env.PROD) {
-    const params = new URLSearchParams(window.location.search);
-    const roleParam = params.get("role");
-    const port = window.location.port;
-    const pathname = window.location.pathname.toLowerCase();
-
-    // Explicit super admin override via path or role param
-    if (roleParam === "super_admin" || roleParam === "superadmin" || pathname.includes("super-admin")) {
-      return MOCK_ACCOUNTS[DEMO_CREDENTIALS.SUPER_ADMIN.email]?.profile ?? null;
-    }
-    // Explicit developer dev-port (5174) or explicit ?role=admin or /admin path
-    if (roleParam === "admin" || port === "5174" || pathname.startsWith("/admin")) {
-      return MOCK_ACCOUNTS[DEMO_CREDENTIALS.ADMIN.email]?.profile ?? null;
-    }
-  }
-
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.AUTH_PROFILE);
-    if (raw) return JSON.parse(raw);
+    if (typeof localStorage !== "undefined") {
+      const raw = localStorage.getItem(STORAGE_KEYS.AUTH_PROFILE);
+      if (raw) return JSON.parse(raw);
+    }
   } catch {
     // ignore
   }
 
-  // Default demo patient assignment for dev ports (5173) or mock sandbox fallback
-  if (typeof window !== "undefined" && USE_MOCK_DATA && !import.meta.env.PROD) {
-    const params = new URLSearchParams(window.location.search);
-    const roleParam = params.get("role");
-    const port = window.location.port;
-
-    if (roleParam === "patient" || roleParam === "user" || port === "5173") {
-      return MOCK_ACCOUNTS[DEMO_CREDENTIALS.PATIENT.email]?.profile ?? null;
-    }
-  }
-
-  // Default for production hosted single-app: unauthenticated guest
+  // Security Hardening: Never derive roles from port numbers (e.g. 5174) or ?role= URL queries.
+  // Auth state must strictly come from validated user session or server JWT.
   return null;
 };
 
@@ -89,11 +64,10 @@ export const getInitialPage = (user: AuthUser): Page => {
     const pageParam = params.get("page") as Page | null;
     if (pageParam) return pageParam;
 
-    const port = window.location.port;
-    if (user?.role === "super_admin" || (USE_MOCK_DATA && !import.meta.env.PROD && params.get("role") === "super_admin")) {
+    if (user?.role === "super_admin") {
       return "super-admin-dashboard";
     }
-    if (user?.role === "admin" || (USE_MOCK_DATA && !import.meta.env.PROD && (port === "5174" || params.get("role") === "admin"))) {
+    if (user?.role === "admin") {
       return "admin-dashboard";
     }
   }

@@ -17,12 +17,16 @@ export interface TenantResolutionContext {
  */
 export function resolveActiveHospitalTenant(ctx?: TenantResolutionContext): HospitalTenantConfig {
   // ── 0. Query Parameter Override (?tenant=... or ?hospital=...) ───────────────
-  const queryTenant =
-    ctx?.queryParamTenant ||
-    (typeof window !== "undefined" && window.location?.search
+  // Security Hardening: In production builds, disable reading ?tenant= from window.location
+  // to prevent tenant-spoofing and phishing vectors.
+  const allowWindowQuery = !import.meta.env.PROD;
+  const windowQueryTenant =
+    allowWindowQuery && typeof window !== "undefined" && window.location?.search
       ? new URLSearchParams(window.location.search).get("tenant") ||
         new URLSearchParams(window.location.search).get("hospital")
-      : null);
+      : null;
+
+  const queryTenant = ctx?.queryParamTenant || windowQueryTenant;
   if (queryTenant && HOSPITAL_TENANTS[queryTenant.toLowerCase()]) {
     return HOSPITAL_TENANTS[queryTenant.toLowerCase()];
   }
