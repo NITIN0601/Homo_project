@@ -5,8 +5,11 @@ with robust local disk fallback, reconciliation against split-brain persistence,
 and active administrator alerting on network connection drops and malformed queries.
 """
 
+import fcntl
 import json
 import logging
+import os
+import tempfile
 import uuid
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -104,7 +107,14 @@ def _load_fallback(file_path: Path) -> list[dict[str, Any]]:
         return []
     try:
         with open(file_path, encoding="utf-8") as f:
-            return json.load(f)
+            try:
+                fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+                return json.load(f)
+            finally:
+                try:
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+                except OSError:
+                    pass
     except Exception as exc:
         record_admin_alert(
             level="ERROR",
@@ -117,8 +127,20 @@ def _load_fallback(file_path: Path) -> list[dict[str, Any]]:
 
 def _save_fallback(file_path: Path, data: list[dict[str, Any]]) -> None:
     try:
-        with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, default=str)
+        dir_name = file_path.parent
+        with tempfile.NamedTemporaryFile("w", dir=dir_name, delete=False, encoding="utf-8") as tf:
+            temp_name = tf.name
+            try:
+                fcntl.flock(tf.fileno(), fcntl.LOCK_EX)
+                json.dump(data, tf, indent=2, default=str)
+                tf.flush()
+                os.fsync(tf.fileno())
+            finally:
+                try:
+                    fcntl.flock(tf.fileno(), fcntl.LOCK_UN)
+                except OSError:
+                    pass
+        os.replace(temp_name, file_path)
     except Exception as exc:
         record_admin_alert(
             level="CRITICAL",

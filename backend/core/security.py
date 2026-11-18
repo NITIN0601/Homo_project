@@ -73,8 +73,11 @@ def hash_password(password: str, salt: str | None = None) -> tuple[str, str]:
 
 
 def verify_password(password: str, stored_hash: str, stored_salt: str) -> bool:
-    calc_hash, _ = hash_password(password, stored_salt)
-    return hmac.compare_digest(calc_hash, stored_hash)
+    try:
+        calc_hash, _ = hash_password(password, stored_salt)
+        return hmac.compare_digest(calc_hash, stored_hash)
+    except ValueError:
+        return False
 
 
 def create_access_token(payload: dict[str, Any], expires_days: int = settings.ACCESS_TOKEN_EXPIRE_DAYS) -> str:
