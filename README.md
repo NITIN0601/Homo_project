@@ -22,23 +22,37 @@ A multi-tenant, cloud-and-edge Electronic Health Records (EHR) and clinical mana
                                   │   Clients / Web View   │
                                   │ (Desktop, Tablet, iOS) │
                                   └───────────┬────────────┘
-                                              │
-                      ┌───────────────────────┴───────────────────────┐
-                      │                                               │
-                      ▼                                               ▼
-          ┌───────────────────────┐                       ┌───────────────────────┐
-          │   Frontend Service    │                       │  API Gateway / Proxy  │
-          │    (Port 5173/80)     │                       │     (Port 54321)      │
-          │  React 19 + TypeScript│                       │     Kong / Nginx      │
-          └───────────────────────┘                       └───────────┬───────────┘
-                                                                      │
-                                          ┌───────────────────────────┴───────────────────────────┐
-                                          ▼                                                       ▼
-                              ┌───────────────────────┐                               ┌───────────────────────┐
-                              │  Backend API Service  │                               │   Database Service    │
-                              │      (Port 8000)      │◀─────────────────────────────▶│      (Port 5432)      │
-                              │ FastAPI + Python 3.14 │                               │ PostgreSQL 15 / GIN   │
-                              └───────────────────────┘                               └───────────────────────┘
+                                              │ 1. Loads SPA Assets (HTML/JS/CSS)
+                                              ▼
+                                  ┌────────────────────────┐
+                                  │    Frontend Service    │
+                                  │ (Port 5173 / Port 80)  │
+                                  │  React 19 + TypeScript │
+                                  └───────────┬────────────┘
+                                              │ 2. API Requests (/api/v1, /rest/v1)
+                                              ▼
+                                  ┌────────────────────────┐
+                                  │  API Gateway / Proxy   │
+                                  │      (Port 54321)      │
+                                  │      Kong / Nginx      │
+                                  └─────┬────────────┬─────┘
+                                        │            │
+                   3a. Clinical & AI    │            │ 3b. Auth / Storage / REST
+                       Business Logic   │            │     (GoTrue, PostgREST, Storage)
+                                        ▼            ▼
+                            ┌────────────────────┐   │
+                            │  FastAPI Backend   │   │
+                            │    (Port 8000)     │   │
+                            │    Python 3.14     │   │
+                            └─────────┬──────────┘   │
+                                      │              │
+                                      │ 4. Queries   │ 4. Queries
+                                      ▼              ▼
+                            ┌────────────────────────────────┐
+                            │        Database Service        │
+                            │          (Port 5432)           │
+                            │      PostgreSQL 15 / GIN       │
+                            └────────────────────────────────┘
 ```
 
 ### Modular Microservices
@@ -134,15 +148,17 @@ Homo_project/
 │   ├── .env.example           # Frontend Vite client environment template
 │   └── package.json           # Frontend dependency manifest
 ├── backend/                   # FastAPI Asynchronous Core Engine (Python 3.14)
-│   ├── routes/                # Modular REST endpoints (/api/v1/...)
-│   ├── services/              # Business logic (doctor, hospital, auth, appointments, sync)
-│   ├── models/                # Pydantic validation models
-│   ├── data/                  # Dynamic tenant datastores (hospitals.json, doctors.json)
+│   ├── core/                  # Core settings, database connectors, security & audit tracing
+│   ├── routes/                # Modular domain REST endpoints (/api/v1/...)
+│   ├── schemas/               # Pydantic v2 data validation contracts & schemas
+│   ├── services/              # Domain business logic (doctor, hospital, auth, appointments, sync)
+│   ├── shared/                # Concurrency locks, persistence utilities & fallbacks
+│   ├── data/                  # Dynamic tenant datastores & append-only audit traces
+│   ├── tests/                 # Backend pytest test suites (132 test cases)
 │   ├── main.py                # FastAPI app bootstrap & middleware pipeline
 │   ├── Dockerfile             # Python 3.14-slim production container
 │   ├── requirements.txt       # Pinned Python dependencies
-│   ├── .env.example           # Backend FastAPI server environment template
-│   └── venv/                  # Python 3.14 virtual environment
+│   └── .env.example           # Backend FastAPI server environment template
 ├── db/                        # Database Schemas, Migrations & Seed Data
 │   ├── schema.sql             # Consolidated PostgreSQL / Supabase DDL
 │   ├── migrations/            # Versioned migration files (001_initial_schema.sql)
