@@ -20,8 +20,18 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    /* Path aliases */
+    "paths": {
+      "@app/*": ["./src/app/*"],
+      "@core/*": ["./src/core/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@domains/*": ["./src/domains/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@mocks/*": ["./src/mocks/*"]
+    }
   },
   "include": ["src"],
-  "exclude": ["src/test"]
+  "exclude": ["src/test", "src/tests"]
 }

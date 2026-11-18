@@ -9,7 +9,9 @@
     "dev:admin": "vite --port 5174",
     "dev:both": "vite --port 5173 & vite --port 5174",
     "build": "tsc -b && vite build",
+    "typecheck": "tsc -b --pretty",
     "lint": "oxlint",
+    "check:arch": "node scripts/check-architecture.mjs",
     "test": "vitest run",
     "preview": "vite preview"
   },
