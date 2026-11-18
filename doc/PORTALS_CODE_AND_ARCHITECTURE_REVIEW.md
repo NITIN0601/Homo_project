@@ -1,6 +1,6 @@
 # Comprehensive Code & Architecture Review: Customer & Admin Portals
-**Agastya Homoeopathy Clinic EHR (Project Suspense)**
-*System Version: 2.4.0 • Multi-Tenant Healthcare Architecture • HIPAA & DPDP Compliant*
+**Enterprise Multi-Hospital Healthcare & EHR Platform (Homo_project)**
+*System Version: 2.4.0 • Multi-Tenant Healthcare Architecture • Featuring Agastya Classical Homeopathy as Onboarded Reference Tenant • HIPAA & DPDP Compliant*
 
 ---
 

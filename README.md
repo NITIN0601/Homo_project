@@ -8,10 +8,10 @@
 [![Tests](https://img.shields.io/badge/Tests-280%20Passed%20(132%20BE%20%2B%20148%20FE)-brightgreen?logo=vitest)](https://vitest.dev/)
 [![License](https://img.shields.io/badge/License-MIT-purple)]()
 
-A multi-tenant, cloud-and-edge Electronic Health Records (EHR) and clinical management platform designed for classical homeopathy practices. Maintained by [NITIN0601](https://github.com/NITIN0601) under the [Homo_project](https://github.com/NITIN0601/Homo_project) repository. Built on a decoupled microservice architecture to support independent horizontal and vertical scaling across frontend, backend, database, and API gateway services.
+An enterprise multi-hospital, multi-tenant Electronic Health Records (EHR) and clinical operating platform. Maintained by [NITIN0601](https://github.com/NITIN0601) under the [Homo_project](https://github.com/NITIN0601/Homo_project) repository. Built on a decoupled microservice architecture to support independent horizontal and vertical scaling across frontend, backend, database, and API gateway services. The platform natively supports multiple concurrent hospital organizations, featuring **Agastya Classical Homeopathy** as a production-grade reference onboarded tenant alongside base templates and network medical centers.
 
 > [!TIP]
-> **Client Onboarding & Human Evaluation**: See **[EVALUATION_GUIDE.md](EVALUATION_GUIDE.md)** for a rapid step-by-step walkthrough to run the platform on a client laptop, switch between the vanilla template and Agastya clinic branding, and test the Super Admin, Admin, and Customer portals with live sync.
+> **Client Onboarding & Human Evaluation**: See **[EVALUATION_GUIDE.md](EVALUATION_GUIDE.md)** for a rapid step-by-step walkthrough to run the platform on a client laptop, evaluate the multi-tenant architecture, switch between the vanilla template and Agastya clinic branding, and test the Super Admin, Admin, and Customer portals with live sync.
 
 ---
 
