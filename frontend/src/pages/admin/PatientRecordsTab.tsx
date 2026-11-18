@@ -7,6 +7,7 @@ import { useTenant } from "../../context/ThemeProvider";
 import { Badge, Button } from "../../components/ui";
 import { PrescribedRemediesList } from "../../components/common";
 import { PatientInviteModal } from "./PatientInviteModal";
+import { useBarcodeScanner } from "../../hooks/useBarcodeScanner";
 
 interface PatientRecordsTabProps {
   patientList: UserProfile[];
@@ -51,6 +52,14 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [inviteModalPatient, setInviteModalPatient] = useState<UserProfile | null>(null);
 
+  const PAGE_SIZE = 20;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    setCurrentPage(1);
+  };
+
   const filteredPatients = useMemo(() => {
     return patientList.filter((p) => {
       const q = searchQuery.toLowerCase();
@@ -63,6 +72,23 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
     });
   }, [patientList, searchQuery]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredPatients.length / PAGE_SIZE));
+  const paginatedPatients = useMemo(() => {
+    return filteredPatients.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  }, [filteredPatients, currentPage]);
+
+  // Hardware USB Barcode / QR Scanner Support (HIPAA Wristband ID lookup)
+  useBarcodeScanner({
+    onScan: (code) => {
+      setSearchQuery(code);
+      setCurrentPage(1);
+      const match = patientList.find((p) => p.id.toLowerCase() === code.toLowerCase());
+      if (match) {
+        onToggleExpand(match.id);
+      }
+    },
+  });
+
   return (
     <div className="space-y-4 animate-fadeIn">
       {/* Controls: Search and Expand/Collapse All */}
@@ -72,14 +98,14 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
             type="search"
             placeholder="Search by Patient ID (#usr-001), Name, or Email…"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full rounded-xl border border-stone-200 px-3.5 py-2 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none"
           />
         </div>
 
         <div className="flex items-center gap-2 text-xs">
           <span className="text-stone-400 font-semibold text-[11px]">
-            {filteredPatients.length} Registered Patients (Sorted by ID)
+            {filteredPatients.length} Registered Patients (Page {currentPage}/{totalPages})
           </span>
           <button
             onClick={onExpandAll}
@@ -96,9 +122,9 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
         </div>
       </div>
 
-      {/* Accordion List of Patients */}
+      {/* Accordion List of Patients (Paginated to protect UI thread) */}
       <div className="space-y-3">
-        {filteredPatients.map((patient) => {
+        {paginatedPatients.map((patient) => {
           const isExpanded = expandedPatientIds.has(patient.id);
           const pFile = visitSummaries[patient.id];
           const visits = pFile?.visits || [];
@@ -539,6 +565,34 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
           );
         })}
       </div>
+
+      {/* Pagination Controls for High-Patient Load (HIPAA/Enterprise Concurrency) */}
+      {totalPages > 1 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-white border border-stone-200 px-4 py-3 rounded-2xl text-xs font-semibold">
+          <span className="text-stone-500">
+            Showing {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredPatients.length)} of {filteredPatients.length} patients
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 rounded-lg border border-stone-200 text-stone-700 font-bold hover:bg-stone-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              ← Previous
+            </button>
+            <span className="text-stone-700 font-mono">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 rounded-lg border border-stone-200 text-stone-700 font-bold hover:bg-stone-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
 
       <PatientInviteModal
         patient={inviteModalPatient}

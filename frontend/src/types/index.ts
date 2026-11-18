@@ -207,6 +207,9 @@ export interface HomeopathicCaseRecord {
   };
 }
 
+export type HomeopathicChiefComplaint = HomeopathicCaseRecord["homeopathic_case_analysis"]["chief_complaints"][number];
+export type HomeopathicPrescribedRemedy = HomeopathicCaseRecord["treatment_plan"]["medicines_suggested"][number];
+
 export interface VisitSummaryRecord {
   id: string;
   visitDate: string;
@@ -500,6 +503,7 @@ export type AppAction =
   | { type: "UPDATE_INVOICE_TRANSACTION_REF"; payload: { invoiceId: string; transactionRef: string } }
   | { type: "PAY_CONSULTATION_INVOICE"; payload: { invoiceId: string; paymentMethod: ConsultationInvoice["paymentMethod"]; transactionRef?: string; paidAt?: string } }
   | { type: "SET_CONSULTATION_INVOICES"; payload: ConsultationInvoice[] }
-  | { type: "SET_VISIT_SUMMARIES"; payload: Record<string, PatientMedicalFile> };
+  | { type: "SET_VISIT_SUMMARIES"; payload: Record<string, PatientMedicalFile> }
+  | { type: "RESET_CLINICAL_STATE" };
 
 

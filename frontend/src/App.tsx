@@ -22,6 +22,10 @@ import { TrackingModal } from "./components/modals/TrackingModal";
 import { OrdersModal } from "./components/modals/OrdersModal";
 import ChatbotWidget from "./components/widgets/ChatbotWidget";
 import CookieConsentBanner from "./components/widgets/CookieConsentBanner";
+import IdleTimeoutModal from "./components/common/IdleTimeoutModal";
+import ConnectionStatusBar from "./components/common/ConnectionStatusBar";
+import { useIdleTimer } from "./hooks/useIdleTimer";
+import { broadcastSessionEvent } from "./utils/sessionSync";
 
 // ─── Critical Pages (eager — above the fold) ──────────────────────────────────
 import HomePage from "./pages/HomePage";
@@ -107,10 +111,21 @@ const PageRouter: React.FC = () => {
 
 // ─── App shell ────────────────────────────────────────────────────────────────
 const AppShell: React.FC = () => {
-  const { state } = useApp();
+  const { state, logout } = useApp();
   const { tenant } = useTenant();
   const isSuperAdmin = state.authUser?.role === "super_admin" || state.activePage === "super-admin-dashboard";
   const isAdmin = state.authUser?.role === "admin" || state.activePage === "admin-dashboard";
+
+  // HIPAA §164.312(a)(2)(iii): 15-minute idle session auto-lockout
+  const { isWarning, remainingSeconds, resetTimer } = useIdleTimer({
+    timeoutMs: 15 * 60 * 1000,
+    warningMs: 60 * 1000,
+    enabled: Boolean(state.authUser),
+    onIdle: () => {
+      logout();
+      broadcastSessionEvent({ type: "AUTH_LOGOUT" });
+    },
+  });
 
   // Scroll to top whenever page navigation occurs
   useEffect(() => {
@@ -123,6 +138,9 @@ const AppShell: React.FC = () => {
 
   return (
     <div className="min-h-dvh bg-stone-50 flex flex-col">
+      {/* ── Offline Network Status Bar ─────────────────── */}
+      <ConnectionStatusBar />
+
       {/* ── Mock Sandbox Multi-Port Navigation Banner ───── */}
       {USE_MOCK_DATA && <DemoHeaderBanner />}
 
@@ -143,6 +161,17 @@ const AppShell: React.FC = () => {
 
       {/* ── GDPR / DPDP Cookie Consent Banner ──────────── */}
       <CookieConsentBanner />
+
+      {/* ── HIPAA Inactivity Lockout Warning Modal ───── */}
+      <IdleTimeoutModal
+        isOpen={isWarning}
+        remainingSeconds={remainingSeconds}
+        onStaySignedIn={resetTimer}
+        onLogoutNow={() => {
+          logout();
+          broadcastSessionEvent({ type: "AUTH_LOGOUT" });
+        }}
+      />
 
       {/* ── Main page content area ────────────────────── */}
       <main

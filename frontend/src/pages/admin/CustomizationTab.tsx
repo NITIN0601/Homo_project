@@ -9,6 +9,7 @@ import { USE_MOCK_DATA } from "../../config";
 import { FeatureToggleGroup } from "../../components/common/FeatureToggleGroup";
 import { Button } from "../../components/ui";
 import { api } from "../../services/api";
+import { auditService } from "../../services/auditService";
 
 import PasscodesSection from "./PasscodesSection";
 import HospitalProfileSection from "./HospitalProfileSection";
@@ -18,6 +19,8 @@ import FeedbackModerationSection from "./FeedbackModerationSection";
 
 import ChangePasscodeModal from "./ChangePasscodeModal";
 import AddPasscodeModal from "./AddPasscodeModal";
+import ConfirmDialogModal from "../../components/common/ConfirmDialogModal";
+import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 
 const PASSCODES_STORAGE_KEY = "ehr_admin_security_passcodes";
 const AUDIT_LOG_STORAGE_KEY = "ehr_customization_audit_log";
@@ -122,6 +125,17 @@ export const CustomizationTab: React.FC = () => {
         localStorage.setItem(AUDIT_LOG_STORAGE_KEY, JSON.stringify(next));
       } catch { }
       return next;
+    });
+    auditService.logAction("CUSTOMIZATION_CHANGED", {
+      actorId: currentAdminId,
+      actorRole: "admin",
+      details: {
+        action,
+        targetKey,
+        oldValue,
+        newValue,
+        details,
+      },
     });
   };
 
@@ -240,37 +254,48 @@ export const CustomizationTab: React.FC = () => {
     setTimeout(() => setSaveSuccessMsg(null), 4000);
   };
 
-  const handleDeletePasscode = (id: string, label: string) => {
+  const { confirm, dialogState } = useConfirmDialog();
+
+  const handleDeletePasscode = async (id: string, label: string) => {
     if (passcodes.length <= 1) {
       toast.error("At least one master security passcode must remain active.");
       return;
     }
-    const entered = window.prompt("Enter an active admin passcode to authorize deletion:");
-    if (!entered || !passcodes.some((p) => p.code.trim() === entered.trim())) {
-      toast.error("Passcode verification failed. Deletion aborted.");
-      return;
-    }
 
-    const updated = passcodes.filter((p) => p.id !== id);
-    setPasscodes(updated);
-    try {
-      localStorage.setItem(PASSCODES_STORAGE_KEY, JSON.stringify(updated));
-    } catch { }
+    const accepted = await confirm({
+      title: "Delete Security Passcode",
+      message: `Are you sure you want to permanently revoke passcode "${label}"? This action is immediate and non-reversible.`,
+      confirmLabel: "Delete Passcode",
+      variant: "danger",
+      onConfirm: () => {
+        const updated = passcodes.filter((p) => p.id !== id);
+        setPasscodes(updated);
+        try {
+          localStorage.setItem(PASSCODES_STORAGE_KEY, JSON.stringify(updated));
+        } catch { }
 
-    appendAuditLog(
-      "DELETE_PASSCODE",
-      `Admin "${currentAdminName}" deleted passcode: "${label}"`
-    );
-    setSaveSuccessMsg(`✓ Deleted passcode "${label}".`);
-    setTimeout(() => setSaveSuccessMsg(null), 3500);
+        appendAuditLog(
+          "DELETE_PASSCODE",
+          `Admin "${currentAdminName}" deleted passcode: "${label}"`
+        );
+        setSaveSuccessMsg(`✓ Deleted passcode "${label}".`);
+        setTimeout(() => setSaveSuccessMsg(null), 3500);
+      },
+    });
   };
 
-  const handleReset = () => {
-    if (window.confirm("Are you sure you want to reset this tenant to default hospital settings?")) {
-      resetTenantToDefaults();
-      setSaveSuccessMsg("✓ Restored factory hospital default settings.");
-      setTimeout(() => setSaveSuccessMsg(null), 3500);
-    }
+  const handleReset = async () => {
+    await confirm({
+      title: "Reset Hospital Tenant Defaults",
+      message: "Are you sure you want to reset this tenant to default hospital settings? All custom branding and feature flags will be reverted to factory defaults.",
+      confirmLabel: "Restore Defaults",
+      variant: "danger",
+      onConfirm: () => {
+        resetTenantToDefaults();
+        setSaveSuccessMsg("✓ Restored factory hospital default settings.");
+        setTimeout(() => setSaveSuccessMsg(null), 3500);
+      },
+    });
   };
 
   const handleApproveFeedback = (id: string) => {
@@ -494,6 +519,9 @@ export const CustomizationTab: React.FC = () => {
         currentAdminName={currentAdminName}
         onPasscodeAdded={handlePasscodeAdded}
       />
+
+      {/* ── Confirmation Modal for Destructive Actions ── */}
+      <ConfirmDialogModal {...dialogState} />
     </div>
   );
 };

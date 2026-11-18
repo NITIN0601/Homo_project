@@ -1,6 +1,7 @@
 import { apiFetch, serverFetch, USE, BASE } from "./httpClient";
 import { HOSPITAL } from "../config";
 import { formatDateShort } from "../utils/format";
+import { clinicalStorageService } from "./clinicalStorageService";
 import type { PatientMedicalFile, VisitSummaryRecord, Medicine } from "../types";
 
 export const clinicalService = {
@@ -44,6 +45,7 @@ export const clinicalService = {
     },
 
     uploadPrescription: async (patientId: string, imageUri: string): Promise<VisitSummaryRecord> => {
+      const storedImageUri = await clinicalStorageService.uploadClinicalImage(imageUri, patientId);
       if (USE) {
         const formData = new FormData();
         formData.append("prescription_file", imageUri);
@@ -66,7 +68,7 @@ export const clinicalService = {
         clinicalNotes:   "Prescription document uploaded by patient. Parsed remedies automatically added to cart recommendation.",
         lifestyleAdvice: "Avoid caffeine & camphor 30 mins before remedies.",
         followUpDate:    "In 14 Days",
-        prescriptionImageUri: imageUri,
+        prescriptionImageUri: storedImageUri,
       };
     },
   },

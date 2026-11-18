@@ -12,7 +12,10 @@ import type {
 import { HOSPITAL, DEFAULT_DOCTOR_TODOS, USE_MOCK_DATA } from "../config";
 import { formatDateTime } from "../utils/format";
 import { getHospitalTimeInfo } from "../utils/timezone";
+import { useHospitalClock } from "../hooks/useHospitalClock";
 import { api } from "../services/api";
+import { auditService } from "../services/auditService";
+import { sendCrashReport } from "../utils/telemetry";
 
 import {
   OverviewTab,
@@ -55,7 +58,7 @@ export const AdminDashboard: React.FC = () => {
 
   const { visitSummaries, inventory, adminTab, blockedDates, appointments, consultationInvoices } = state;
   const { tenant } = useTenant();
-  const hospitalTime = useMemo(() => getHospitalTimeInfo(), []);
+  const hospitalTime = useHospitalClock(tenant.hours?.timezone, tenant.locale);
 
   // Active Tab synchronized with AppContext (URL query param support)
   const activeTab: AdminTab = adminTab || "dashboard";
@@ -273,12 +276,27 @@ export const AdminDashboard: React.FC = () => {
             onToggleExpand={(id) => {
               setExpandedPatientIds((prev) => {
                 const next = new Set(prev);
-                if (next.has(id)) next.delete(id);
-                else next.add(id);
+                if (next.has(id)) {
+                  next.delete(id);
+                } else {
+                  next.add(id);
+                  auditService.logAction("VIEWED_PATIENT_CHART", {
+                    actorId: state.authUser?.id,
+                    actorRole: state.authUser?.role,
+                    targetPatientId: id,
+                  });
+                }
                 return next;
               });
             }}
-            onExpandAll={() => setExpandedPatientIds(new Set(patientList.map((p) => p.id)))}
+            onExpandAll={() => {
+              setExpandedPatientIds(new Set(patientList.map((p) => p.id)));
+              auditService.logAction("EXPAND_ALL_PATIENTS", {
+                actorId: state.authUser?.id,
+                actorRole: state.authUser?.role,
+                details: { totalPatients: patientList.length },
+              });
+            }}
             onCollapseAll={() => setExpandedPatientIds(new Set())}
             onOpenPrescribeModal={(patient) => modals.setPrescribeModalPatient(patient)}
             onOpenVoiceStudio={(patient) => modals.setVoiceStudioPatient(patient)}
@@ -357,7 +375,10 @@ export const AdminDashboard: React.FC = () => {
               description: apt.chiefReason,
             });
           } catch (err) {
-            console.warn("Backend sync notice for admin booking:", err);
+            sendCrashReport(err instanceof Error ? err : new Error(String(err)));
+            if (import.meta.env.DEV) {
+              console.warn("Backend sync notice for admin booking:", err);
+            }
           }
         }}
 
@@ -369,7 +390,10 @@ export const AdminDashboard: React.FC = () => {
           try {
             await api.appointments.updateStatus(id, "Cancelled");
           } catch (err) {
-            console.warn("Backend sync notice for appointment cancellation:", err);
+            sendCrashReport(err instanceof Error ? err : new Error(String(err)));
+            if (import.meta.env.DEV) {
+              console.warn("Backend sync notice for appointment cancellation:", err);
+            }
           }
         }}
 
@@ -472,7 +496,10 @@ export const AdminDashboard: React.FC = () => {
               transactionRef: utrRef,
             });
           } catch (err) {
-            console.warn("Backend sync notice for invoice reconciliation:", err);
+            sendCrashReport(err instanceof Error ? err : new Error(String(err)));
+            if (import.meta.env.DEV) {
+              console.warn("Backend sync notice for invoice reconciliation:", err);
+            }
           }
         }}
 
