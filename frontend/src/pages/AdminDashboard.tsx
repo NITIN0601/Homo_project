@@ -9,9 +9,9 @@ import type {
   PatientClinicalMedia,
   UserProfile,
 } from "../types";
-import { CLINIC, DEFAULT_DOCTOR_TODOS, USE_MOCK_DATA } from "../config";
+import { HOSPITAL, DEFAULT_DOCTOR_TODOS, USE_MOCK_DATA } from "../config";
 import { formatDateTime } from "../utils/format";
-import { getClinicTimeInfo } from "../utils/timezone";
+import { getHospitalTimeInfo } from "../utils/timezone";
 import { api } from "../services/api";
 
 import {
@@ -55,7 +55,7 @@ export const AdminDashboard: React.FC = () => {
 
   const { visitSummaries, inventory, adminTab, blockedDates, appointments, consultationInvoices } = state;
   const { tenant } = useTenant();
-  const clinicTime = useMemo(() => getClinicTimeInfo(), []);
+  const hospitalTime = useMemo(() => getHospitalTimeInfo(), []);
 
   // Active Tab synchronized with AppContext (URL query param support)
   const activeTab: AdminTab = adminTab || "dashboard";
@@ -141,7 +141,7 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* ── CLINIC SSOT BRAND & DOCTOR HEADER ──────────────────────────── */}
+      {/* ── HOSPITAL SSOT BRAND & DOCTOR HEADER ──────────────────────────── */}
       <div className="bg-gradient-to-r from-emerald-950 via-stone-900 to-emerald-900 text-white rounded-3xl p-6 card-shadow border border-emerald-800/40">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
@@ -150,13 +150,13 @@ export const AdminDashboard: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black tracking-tight">{tenant.name || CLINIC.NAME} Doctor Console</h1>
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight">{tenant.name || HOSPITAL.NAME} Doctor Console</h1>
                 <span className="bg-emerald-500/30 text-emerald-200 border border-emerald-400/50 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
                   Doctor Admin Access
                 </span>
               </div>
               <p className="text-emerald-200/90 text-xs mt-0.5">
-                {tenant.doctor.title || CLINIC.DOCTOR_TITLE} · {tenant.name || CLINIC.NAME}
+                {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE} · {tenant.name || HOSPITAL.NAME}
               </p>
             </div>
           </div>
@@ -179,10 +179,10 @@ export const AdminDashboard: React.FC = () => {
               <span>📊</span> Excel Sync
             </Button>
             <div className="bg-stone-800/80 px-3 py-1.5 rounded-xl border border-stone-700 text-stone-300">
-              <span className="text-stone-400">📍 Location:</span> <strong>{tenant.contact.address.city || CLINIC.ADDRESS.CITY}</strong> ({tenant.contact.address.pincode || CLINIC.ADDRESS.PINCODE})
+              <span className="text-stone-400">📍 Location:</span> <strong>{tenant.contact.address.city || HOSPITAL.ADDRESS.CITY}</strong> ({tenant.contact.address.pincode || HOSPITAL.ADDRESS.PINCODE})
             </div>
             <div className="bg-stone-800/80 px-3 py-1.5 rounded-xl border border-stone-700 text-stone-300">
-              <span className="text-stone-400">📞 Phone:</span> <strong>{tenant.contact.phoneDisplay || CLINIC.PHONE_DISPLAY}</strong>
+              <span className="text-stone-400">📞 Phone:</span> <strong>{tenant.contact.phoneDisplay || HOSPITAL.PHONE_DISPLAY}</strong>
             </div>
           </div>
         </div>
@@ -224,8 +224,8 @@ export const AdminDashboard: React.FC = () => {
             blockedDates={blockedDates}
             todoList={todoList}
             visitSummaries={visitSummaries}
-            todayYMD={clinicTime.todayYMD}
-            formattedDate={clinicTime.formattedDate}
+            todayYMD={hospitalTime.todayYMD}
+            formattedDate={hospitalTime.formattedDate}
             onSetActiveTab={setActiveTab}
             onOpenUploadForPatient={modals.openUploadForPatient}
             onOpenBatchModalWithLowStock={() => {
@@ -251,7 +251,7 @@ export const AdminDashboard: React.FC = () => {
         {activeTab === "appointments" && (
           <AppointmentsTab
             appointments={appointments}
-            todayYMD={clinicTime.todayYMD}
+            todayYMD={hospitalTime.todayYMD}
             onStatusChange={updateAppointmentStatus}
             onOpenBookingModal={() => modals.setIsBookingModalOpen(true)}
             onOpenCancelModal={(id) => modals.setCancellingAppointmentId(id)}
@@ -382,7 +382,7 @@ export const AdminDashboard: React.FC = () => {
             if (!medObj.prescribedToPatientIds.includes(patientId)) {
               medObj.prescribedToPatientIds.push(patientId);
             }
-            medObj.doctorNote = `Prescribed by ${tenant.doctor?.name || CLINIC.DOCTOR_NAME}: ${customDosageNote}`;
+            medObj.doctorNote = `Prescribed by ${tenant.doctor?.name || HOSPITAL.DOCTOR_NAME}: ${customDosageNote}`;
           }
           addVisitSummary(patientId, newVisit);
         }}

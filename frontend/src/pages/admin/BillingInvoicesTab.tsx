@@ -80,7 +80,7 @@ export const BillingInvoicesTab: React.FC<BillingInvoicesTabProps> = ({
             </span>
             <div>
               <h2 className="text-base font-extrabold tracking-tight">
-                Clinic Billing &amp; Consultation Invoices Hub
+                Hospital Billing &amp; Consultation Invoices Hub
               </h2>
               <p className="text-xs text-stone-300 mt-0.5">
                 Centralized financial reconciliation, 12-digit UPI UTR audit, and payment settlements
@@ -282,7 +282,7 @@ export const BillingInvoicesTab: React.FC<BillingInvoicesTabProps> = ({
                       size="sm"
                       variant="primary"
                       onClick={() => onOpenReconcileModal(inv)}
-                      title="Verify funds received in clinic account and record 12-digit UTR"
+                      title="Verify funds received in hospital account and record 12-digit UTR"
                     >
                       <span>✓</span> Confirm &amp; Enter UTR
                     </Button>

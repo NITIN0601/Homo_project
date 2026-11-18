@@ -13,18 +13,19 @@ export * from "./CalendarTab";
 export * from "./CustomizationTab";
 
 // Hooks & Orchestrator
-export * from "./hooks";
-export * from "./modals/AdminModalOrchestrator";
+export * from "./useAdminModals";
+export * from "./useRequisitionBatch";
+export * from "./AdminModalOrchestrator";
 
 // Modals (ExcelSyncModal and AdminVoiceStudioModal are dynamically imported directly by consumers for chunk isolation)
-export * from "./modals/AppointmentBookingModal";
-export * from "./modals/AppointmentCancellationModal";
-export * from "./modals/PrescribeRemedyModal";
-export * from "./modals/PostConsultationFeeModal";
-export * from "./modals/DoctorPrescriptionUploadModal";
-export * from "./modals/CustomPOModal";
-export * from "./modals/ConsolidatedBatchOrderModal";
-export * from "./modals/LogisticsTimelineModal";
-export * from "./modals/ClinicalMediaUploadModal";
-export * from "./modals/ClinicalMediaLightboxModal";
-export * from "./modals/UtrReconciliationModal";
+export * from "./AppointmentBookingModal";
+export * from "./AppointmentCancellationModal";
+export * from "./PrescribeRemedyModal";
+export * from "./PostConsultationFeeModal";
+export * from "./DoctorPrescriptionUploadModal";
+export * from "./CustomPOModal";
+export * from "./ConsolidatedBatchOrderModal";
+export * from "./LogisticsTimelineModal";
+export * from "./ClinicalMediaUploadModal";
+export * from "./ClinicalMediaLightboxModal";
+export * from "./UtrReconciliationModal";

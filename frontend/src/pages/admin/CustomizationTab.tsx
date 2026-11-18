@@ -8,15 +8,16 @@ import { type CustomerFeedback, INITIAL_CUSTOMER_FEEDBACKS } from "../../types/f
 import { USE_MOCK_DATA } from "../../config";
 import { FeatureToggleGroup } from "../../components/common/FeatureToggleGroup";
 import { Button } from "../../components/ui";
+import { api } from "../../services/api";
 
-import PasscodesSection from "./customization/PasscodesSection";
-import ClinicProfileSection from "./customization/ClinicProfileSection";
-import DoctorProfileSection from "./customization/DoctorProfileSection";
-import BrandingSection from "./customization/BrandingSection";
-import FeedbackModerationSection from "./customization/FeedbackModerationSection";
+import PasscodesSection from "./PasscodesSection";
+import HospitalProfileSection from "./HospitalProfileSection";
+import DoctorProfileSection from "./DoctorProfileSection";
+import BrandingSection from "./BrandingSection";
+import FeedbackModerationSection from "./FeedbackModerationSection";
 
-import ChangePasscodeModal from "./customization/modals/ChangePasscodeModal";
-import AddPasscodeModal from "./customization/modals/AddPasscodeModal";
+import ChangePasscodeModal from "./ChangePasscodeModal";
+import AddPasscodeModal from "./AddPasscodeModal";
 
 const PASSCODES_STORAGE_KEY = "ehr_admin_security_passcodes";
 const AUDIT_LOG_STORAGE_KEY = "ehr_customization_audit_log";
@@ -61,7 +62,7 @@ export const CustomizationTab: React.FC = () => {
       try {
         const raw = localStorage.getItem(PASSCODES_STORAGE_KEY);
         if (raw) return JSON.parse(raw);
-      } catch {}
+      } catch { }
     }
     return DEFAULT_PASSCODES;
   });
@@ -72,7 +73,7 @@ export const CustomizationTab: React.FC = () => {
       try {
         const raw = localStorage.getItem(AUDIT_LOG_STORAGE_KEY);
         if (raw) return JSON.parse(raw);
-      } catch {}
+      } catch { }
     }
     return INITIAL_AUDIT_LOGS;
   });
@@ -87,7 +88,7 @@ export const CustomizationTab: React.FC = () => {
       try {
         const raw = localStorage.getItem("ehr_customer_feedbacks") || localStorage.getItem("agastya_customer_feedbacks");
         if (raw) return JSON.parse(raw);
-      } catch {}
+      } catch { }
     }
     return INITIAL_CUSTOMER_FEEDBACKS;
   });
@@ -119,12 +120,18 @@ export const CustomizationTab: React.FC = () => {
       const next = [entry, ...prev];
       try {
         localStorage.setItem(AUDIT_LOG_STORAGE_KEY, JSON.stringify(next));
-      } catch {}
+      } catch { }
       return next;
     });
   };
 
-  const handleSaveAllFeatures = () => {
+  const handleSaveAllFeatures = async () => {
+    try {
+      await api.platform.updateHospitalFeatures(formData.id, formData.features as any);
+    } catch {
+      // offline / local fallback
+    }
+
     updateTenant({
       features: formData.features,
     });
@@ -138,37 +145,66 @@ export const CustomizationTab: React.FC = () => {
     setTimeout(() => setSaveSuccessMsg(null), 4000);
   };
 
-  const handleSaveHospitalInfo = () => {
-    updateTenant({
+  const handleSaveHospitalInfo = async () => {
+    const payload = {
       name: formData.name,
       shortName: formData.shortName,
+      facilityType: formData.facilityType,
       tagline: formData.tagline,
       contact: formData.contact,
+      legal: formData.legal,
       branding: {
         ...formData.branding,
-        aboutClinicText: formData.branding.aboutClinicText,
+        aboutHospitalText: formData.branding.aboutHospitalText,
       },
-    });
-    setSaveSuccessMsg("✓ Hospital & Clinic Information saved and applied live!");
+    };
+
+    try {
+      await api.platform.updateHospitalCustomization(formData.id, payload);
+    } catch {
+      // offline fallback
+    }
+
+    updateTenant(payload);
+    appendAuditLog("UPDATE_PROFILE", `Updated hospital profile details for '${formData.name}'`);
+    setSaveSuccessMsg("✓ Hospital Information saved and applied live!");
     setTimeout(() => setSaveSuccessMsg(null), 3500);
   };
 
-  const handleSaveDoctorProfile = () => {
-    updateTenant({
+  const handleSaveDoctorProfile = async () => {
+    const payload = {
       doctor: formData.doctor,
       branding: {
         ...formData.branding,
         aboutDocText: formData.doctor.aboutText || formData.branding.aboutDocText,
       },
-    });
+    };
+
+    try {
+      await api.platform.updateHospitalCustomization(formData.id, payload);
+    } catch {
+      // offline fallback
+    }
+
+    updateTenant(payload);
+    appendAuditLog("UPDATE_PROFILE", `Updated doctor profile for '${formData.doctor.name}'`);
     setSaveSuccessMsg("✓ Attending Physician credentials & profile saved and applied live!");
     setTimeout(() => setSaveSuccessMsg(null), 3500);
   };
 
-  const handleSaveBranding = () => {
-    updateTenant({
+  const handleSaveBranding = async () => {
+    const payload = {
       branding: formData.branding,
-    });
+    };
+
+    try {
+      await api.platform.updateHospitalCustomization(formData.id, payload);
+    } catch {
+      // offline fallback
+    }
+
+    updateTenant(payload);
+    appendAuditLog("UPDATE_PROFILE", `Updated branding & colors for '${formData.name}'`);
     setSaveSuccessMsg("✓ Branding, Media, Logo & Banner saved and applied live!");
     setTimeout(() => setSaveSuccessMsg(null), 3500);
   };
@@ -177,7 +213,7 @@ export const CustomizationTab: React.FC = () => {
     setPasscodes(updatedPasscodes);
     try {
       localStorage.setItem(PASSCODES_STORAGE_KEY, JSON.stringify(updatedPasscodes));
-    } catch {}
+    } catch { }
 
     appendAuditLog(
       "CHANGE_PASSCODE",
@@ -193,7 +229,7 @@ export const CustomizationTab: React.FC = () => {
     setPasscodes(updatedPasscodes);
     try {
       localStorage.setItem(PASSCODES_STORAGE_KEY, JSON.stringify(updatedPasscodes));
-    } catch {}
+    } catch { }
 
     appendAuditLog(
       "ADD_PASSCODE",
@@ -219,7 +255,7 @@ export const CustomizationTab: React.FC = () => {
     setPasscodes(updated);
     try {
       localStorage.setItem(PASSCODES_STORAGE_KEY, JSON.stringify(updated));
-    } catch {}
+    } catch { }
 
     appendAuditLog(
       "DELETE_PASSCODE",
@@ -230,9 +266,9 @@ export const CustomizationTab: React.FC = () => {
   };
 
   const handleReset = () => {
-    if (window.confirm("Are you sure you want to reset this tenant to default clinic settings?")) {
+    if (window.confirm("Are you sure you want to reset this tenant to default hospital settings?")) {
       resetTenantToDefaults();
-      setSaveSuccessMsg("✓ Restored factory clinic default settings.");
+      setSaveSuccessMsg("✓ Restored factory hospital default settings.");
       setTimeout(() => setSaveSuccessMsg(null), 3500);
     }
   };
@@ -240,17 +276,17 @@ export const CustomizationTab: React.FC = () => {
   const handleApproveFeedback = (id: string) => {
     setFeedbackList((prev) => {
       const next = prev.map((f) => (f.id === id ? { ...f, status: "approved" as const } : f));
-      try { localStorage.setItem("ehr_customer_feedbacks", JSON.stringify(next)); } catch {}
+      try { localStorage.setItem("ehr_customer_feedbacks", JSON.stringify(next)); } catch { }
       return next;
     });
-    setSaveSuccessMsg("✓ Feedback approved and featured on clinic public showcase!");
+    setSaveSuccessMsg("✓ Feedback approved and featured on hospital public showcase!");
     setTimeout(() => setSaveSuccessMsg(null), 3500);
   };
 
   const handleHideFeedback = (id: string) => {
     setFeedbackList((prev) => {
       const next = prev.map((f) => (f.id === id ? { ...f, status: "hidden" as const } : f));
-      try { localStorage.setItem("ehr_customer_feedbacks", JSON.stringify(next)); } catch {}
+      try { localStorage.setItem("ehr_customer_feedbacks", JSON.stringify(next)); } catch { }
       return next;
     });
     setSaveSuccessMsg("✓ Feedback hidden from public listing.");
@@ -260,7 +296,7 @@ export const CustomizationTab: React.FC = () => {
   const handleDeleteFeedback = (id: string) => {
     setFeedbackList((prev) => {
       const next = prev.filter((f) => f.id !== id);
-      try { localStorage.setItem("ehr_customer_feedbacks", JSON.stringify(next)); } catch {}
+      try { localStorage.setItem("ehr_customer_feedbacks", JSON.stringify(next)); } catch { }
       return next;
     });
     setSaveSuccessMsg("✓ Feedback permanently deleted.");
@@ -279,7 +315,7 @@ export const CustomizationTab: React.FC = () => {
       const next = prev.map((f) =>
         f.id === feedback.id ? { ...f, publishedToGoogle: true, status: "approved" as const } : f
       );
-      try { localStorage.setItem("ehr_customer_feedbacks", JSON.stringify(next)); } catch {}
+      try { localStorage.setItem("ehr_customer_feedbacks", JSON.stringify(next)); } catch { }
       return next;
     });
 
@@ -300,13 +336,13 @@ export const CustomizationTab: React.FC = () => {
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl font-black tracking-tight">Hospital &amp; Feature Customization</h2>
                 <span className="bg-emerald-500/30 text-emerald-200 border border-emerald-400/50 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
-                  {isSuperAdmin ? "Multi-Tenant Super Admin" : "Doctor & Clinic Admin"}
+                  {isSuperAdmin ? "Multi-Tenant Super Admin" : "Doctor & Hospital Admin"}
                 </span>
               </div>
               <p className="text-emerald-200/90 text-xs mt-0.5">
                 {isSuperAdmin
-                  ? "Configure platform feature governance (Hospital, Doctor, Patient), clinic branding, and physician profiles."
-                  : "Customize physician credentials, clinical bio, branding, and clinic profile. Feature enablement is governed centrally by Super Admin."}
+                  ? "Configure platform feature governance (Hospital, Doctor, Patient), hospital branding, and physician profiles."
+                  : "Customize physician credentials, clinical bio, branding, and hospital profile. Feature enablement is governed centrally by Super Admin."}
               </p>
             </div>
           </div>
@@ -397,7 +433,7 @@ export const CustomizationTab: React.FC = () => {
               Feature Enablement &amp; Patient Portal Governance Policy
             </h4>
             <p className="text-xs text-stone-600 leading-relaxed">
-              Hospital platform modules, doctor clinical tools, and patient portal visibility settings are managed centrally by the <strong>Platform Super Administrator</strong>. Attending physicians cannot modify patient portal features. You may configure your clinical bio, contact sharing preferences, clinic hours, and branding below.
+              Hospital platform modules, doctor clinical tools, and patient portal visibility settings are managed centrally by the <strong>Platform Super Administrator</strong>. Attending physicians cannot modify patient portal features. You may configure your clinical bio, contact sharing preferences, hospital hours, and branding below.
             </p>
           </div>
         </div>
@@ -410,8 +446,8 @@ export const CustomizationTab: React.FC = () => {
         onSaveDoctorProfile={handleSaveDoctorProfile}
       />
 
-      {/* ── 2. HOSPITAL & CLINIC IDENTITY ── */}
-      <ClinicProfileSection
+      {/* ── 2. HOSPITAL IDENTITY ── */}
+      <HospitalProfileSection
         formData={formData}
         setFormData={setFormData}
         onSaveHospitalInfo={handleSaveHospitalInfo}

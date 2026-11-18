@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import type { BookedAppointment } from "../../types";
-import { CLINIC } from "../../config";
+import { HOSPITAL } from "../../config";
 import { useTenant } from "../../context/ThemeProvider";
 import { Badge, Button } from "../../components/ui";
 
@@ -58,7 +58,7 @@ export const AppointmentsTab: React.FC<AppointmentsTabProps> = ({
             <span>📅</span> Clinical Consultations &amp; Patient Appointments Hub
           </h2>
           <p className="text-xs text-emerald-200 mt-0.5">
-            Full roster of in-person clinic visits and tele-consultations ({appointments.length} total appointments)
+            Full roster of in-person hospital visits and tele-consultations ({appointments.length} total appointments)
           </p>
         </div>
 
@@ -220,7 +220,7 @@ export const AppointmentsTab: React.FC<AppointmentsTabProps> = ({
                   <span>📞</span> <strong>{apt.patientPhone}</strong>
                 </span>
                 <a
-                  href={`https://wa.me/91${apt.patientPhone.replace(/\D/g, "")}?text=Hello%20${encodeURIComponent(apt.patientName)},%20this%20is%20${encodeURIComponent(tenant.doctor.title || CLINIC.DOCTOR_TITLE)}%20from%20${encodeURIComponent(tenant.name || CLINIC.NAME)}%20regarding%20your%20consultation.`}
+                  href={`https://wa.me/91${apt.patientPhone.replace(/\D/g, "")}?text=Hello%20${encodeURIComponent(apt.patientName)},%20this%20is%20${encodeURIComponent(tenant.doctor.title || HOSPITAL.DOCTOR_TITLE)}%20from%20${encodeURIComponent(tenant.name || HOSPITAL.NAME)}%20regarding%20your%20consultation.`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 cursor-pointer"
@@ -232,7 +232,7 @@ export const AppointmentsTab: React.FC<AppointmentsTabProps> = ({
               {/* Cancellation Reason alert if cancelled */}
               {apt.status === "Cancelled" && (
                 <div className="bg-rose-50 border border-rose-200 text-rose-900 p-2.5 rounded-xl text-xs flex items-center justify-between">
-                  <span><strong>Cancellation Reason:</strong> {apt.cancellationReason || "Appointment cancelled by clinic/patient."}</span>
+                  <span><strong>Cancellation Reason:</strong> {apt.cancellationReason || "Appointment cancelled by hospital/patient."}</span>
                   <button
                     onClick={() => onStatusChange(apt.id, "Confirmed")}
                     className="text-[11px] font-bold text-emerald-800 hover:underline cursor-pointer bg-white px-2 py-0.5 rounded border border-rose-200 ml-2"

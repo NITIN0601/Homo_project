@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from "react";
 import type { UserProfile, VisitSummaryRecord, ConsultationInvoice, PatientClinicalMedia } from "../../types";
-import { CLINIC } from "../../config";
+import { HOSPITAL } from "../../config";
 import { MEDICINE_CATALOGUE } from "../../context/AppContext";
 import { formatCurrency, formatDateTime, splitFullName } from "../../utils/format";
 import { useTenant } from "../../context/ThemeProvider";
 import { Badge, Button } from "../../components/ui";
 import { PrescribedRemediesList } from "../../components/common";
-import { PatientInviteModal } from "./modals/PatientInviteModal";
+import { PatientInviteModal } from "./PatientInviteModal";
 
 interface PatientRecordsTabProps {
   patientList: UserProfile[];
@@ -107,11 +107,11 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
           );
 
           const sendEmailNotification = () => {
-            const clinicName = tenant.name || CLINIC.FULL_NAME;
-            const doctorTitle = tenant.doctor.title || CLINIC.DOCTOR_TITLE;
-            const phoneDisplay = tenant.contact.phoneDisplay || CLINIC.PHONE_DISPLAY;
-            const subject = `Clinical Consultation Summary — ${clinicName}`;
-            const body = `Dear ${patient.name},\n\nYour clinical notes and follow-up consultation records have been updated by ${doctorTitle}.\n\nRecord ID: #${patient.id.toUpperCase()}\nClinic: ${clinicName}\nPhone: ${phoneDisplay}\n\nWarm regards,\n${doctorTitle}`;
+            const hospitalName = tenant.name || HOSPITAL.FULL_NAME;
+            const doctorTitle = tenant.doctor.title || HOSPITAL.DOCTOR_TITLE;
+            const phoneDisplay = tenant.contact.phoneDisplay || HOSPITAL.PHONE_DISPLAY;
+            const subject = `Clinical Consultation Summary — ${hospitalName}`;
+            const body = `Dear ${patient.name},\n\nYour clinical notes and follow-up consultation records have been updated by ${doctorTitle}.\n\nRecord ID: #${patient.id.toUpperCase()}\nHospital: ${hospitalName}\nPhone: ${phoneDisplay}\n\nWarm regards,\n${doctorTitle}`;
             window.open(
               `mailto:${patient.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
               "_blank"
@@ -326,7 +326,7 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
                               <div>
                                 <h5 className="font-extrabold text-stone-900 text-sm">{vis.chiefDiagnosis}</h5>
                                 <p className="text-[11px] text-stone-500">
-                                  {vis.visitDate} · {vis.clinicBranch} · Treating Doctor: {vis.doctorName}
+                                  {vis.visitDate} · {vis.hospitalBranch} · Treating Doctor: {vis.doctorName}
                                 </p>
                               </div>
                               <span className="font-mono text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">

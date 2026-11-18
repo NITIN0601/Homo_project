@@ -2,15 +2,13 @@ import React, { useState, useMemo } from "react";
 import { formatDateISO } from "../../utils/format";
 import { useApp } from "../../context/AppContext";
 import type { BlockedDateEntry } from "./types";
-import {
-  BLOCKING_REASON_TEMPLATES,
-  CalendarHeaderBanner,
-  CalendarMonthGrid,
-  BlockDateForm,
-  BlockedDateList,
-  InspectBlockedDateModal,
-  type BlockDateTimeConfig,
-} from "./calendar";
+import { BLOCKING_REASON_TEMPLATES } from "./calendarConstants";
+import { CalendarHeaderBanner } from "./CalendarHeaderBanner";
+import { CalendarMonthGrid } from "./CalendarMonthGrid";
+import { BlockDateForm } from "./BlockDateForm";
+import { BlockedDateList } from "./BlockedDateList";
+import { InspectBlockedDateModal } from "./InspectBlockedDateModal";
+import type { BlockDateTimeConfig } from "./BlockDateModal";
 
 export { BLOCKING_REASON_TEMPLATES };
 

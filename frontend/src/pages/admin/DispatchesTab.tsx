@@ -239,7 +239,7 @@ export const DispatchesTab: React.FC<DispatchesTabProps> = ({
                         <button
                           onClick={() => onMarkDeliveredImmediately(order)}
                           className="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition-all cursor-pointer shadow-xs active:scale-95"
-                          title="Instantly mark delivered and add units directly to live clinic stock inventory"
+                          title="Instantly mark delivered and add units directly to live hospital stock inventory"
                         >
                           ✓ Mark Delivered &amp; Restock
                         </button>
@@ -247,7 +247,7 @@ export const DispatchesTab: React.FC<DispatchesTabProps> = ({
                     )}
                     {order.status === "delivered" && (
                       <span className="text-emerald-700 font-bold text-xs flex items-center gap-1">
-                        <span>✓</span> Restocked into Clinic Dispensary
+                        <span>✓</span> Restocked into Hospital Dispensary
                       </span>
                     )}
                   </div>

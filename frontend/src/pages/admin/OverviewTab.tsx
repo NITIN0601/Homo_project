@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import type { BookedAppointment, InventoryItem, UserProfile, AdminTab, VisitSummaryRecord } from "../../types";
 import type { PharmacyPurchaseOrder, DoctorTodoItem } from "./types";
-import { CLINIC, INVENTORY as INV_CONFIG } from "../../config";
+import { HOSPITAL, INVENTORY as INV_CONFIG } from "../../config";
 import { MOCK_ACCOUNTS } from "../../data/mocks";
 import { useTenant } from "../../context/ThemeProvider";
 import { Badge, Button } from "../../components/ui";
@@ -119,7 +119,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         </div>
       </div>
 
-      {/* ── STATS SUMMARY CARDS (5 KEY CLINIC KPIS) ────────────────────── */}
+      {/* ── STATS SUMMARY CARDS (5 KEY HOSPITAL KPIS) ────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <div
           onClick={() => onSetActiveTab("appointments")}
@@ -237,7 +237,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               </div>
               <p className="text-xs text-amber-200/80 mt-0.5">
                 {lowStockItems.length > 0
-                  ? `${lowStockItems.length} essential clinic polycrests have reached critical dispensing thresholds. Reorder now to avoid treatment disruption.`
+                  ? `${lowStockItems.length} essential hospital polycrests have reached critical dispensing thresholds. Reorder now to avoid treatment disruption.`
                   : "All dispensary homeopathic remedies are currently at safe inventory thresholds."}
               </p>
             </div>
@@ -426,10 +426,10 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                     variant="secondary"
                     onClick={() => {
                       const phone = upcomingPatientRecord.appointment.patientPhone.replace(/\D/g, "");
-                      const clinicName = tenant.name || CLINIC.FULL_NAME;
+                      const hospitalName = tenant.name || HOSPITAL.FULL_NAME;
                       window.open(
                         `https://wa.me/91${phone}?text=${encodeURIComponent(
-                          `Hello ${upcomingPatientRecord.appointment.patientName}, this is ${clinicName} regarding your appointment today.`
+                          `Hello ${upcomingPatientRecord.appointment.patientName}, this is ${hospitalName} regarding your appointment today.`
                         )}`,
                         "_blank"
                       );
@@ -526,7 +526,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                 </p>
               </div>
               <Badge variant="success" size="sm">
-                {tenant.doctor.name || CLINIC.DOCTOR_NAME}
+                {tenant.doctor.name || HOSPITAL.DOCTOR_NAME}
               </Badge>
             </div>
 
