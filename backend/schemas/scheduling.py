@@ -2,7 +2,30 @@
 Scheduling & Appointment Request Schemas.
 """
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
+
+
+class AppointmentStatusUpdate(BaseModel):
+    status: Literal["Confirmed", "Pending", "Cancelled", "Completed", "No-Show"]
+
+
+class DirectAppointmentCreateRequest(BaseModel):
+    id: str | None = None
+    hospitalId: str | None = None
+    doctorId: str | None = None
+    patientId: str | None = None
+    patientName: str = Field(..., min_length=1)
+    patientEmail: str = Field(..., min_length=3)
+    patientPhone: str | None = None
+    date: str = Field(..., min_length=4)
+    slot: str = Field(..., min_length=1)
+    time: str | None = None
+    type: str | None = None
+    status: Literal["Confirmed", "Pending", "Cancelled", "Completed", "No-Show"] = "Confirmed"
+    chiefReason: str | None = None
+    description: str | None = None
 
 
 class BookAppointmentRequest(BaseModel):

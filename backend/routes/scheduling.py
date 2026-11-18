@@ -9,9 +9,14 @@ from datetime import datetime
 from typing import Any
 
 from core.config import settings
-from core.security import get_current_user_optional, scope_items_to_patient_or_admin
+from core.security import get_current_user_optional, require_admin_role, scope_items_to_patient_or_admin
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from schemas.scheduling import BookAppointmentRequest, ContinuityPreferenceResponse
+from schemas.scheduling import (
+    AppointmentStatusUpdate,
+    BookAppointmentRequest,
+    ContinuityPreferenceResponse,
+    DirectAppointmentCreateRequest,
+)
 from services.calendar_service import (
     GOOGLE_CALENDAR_ID,
     fetch_google_calendar_indian_holidays,
@@ -342,7 +347,13 @@ async def get_continuity_preference_endpoint(
 
 
 @router.get("/appointments", summary="List all booked appointments")
-async def list_appointments_endpoint(user: dict[str, Any] | None = Depends(get_current_user_optional)):
+async def list_appointments_endpoint(
+    request: Request,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    status_filter: str | None = Query(None, alias="status"),
+    user: dict[str, Any] | None = Depends(get_current_user_optional),
+):
     sb_appointments = await fetch_appointments_from_supabase()
     all_apts = sb_appointments if sb_appointments else get_all_appointments()
     if sb_appointments:
@@ -352,17 +363,25 @@ async def list_appointments_endpoint(user: dict[str, Any] | None = Depends(get_c
         except Exception as exc:
             logger.debug(f"Local appointment cache mirror notice: {exc}")
 
-    return scope_items_to_patient_or_admin(
+    hospital_id = getattr(request.state, "hospital_id", None)
+    scoped = scope_items_to_patient_or_admin(
         all_apts,
         user,
         id_fields=("patientId", "patientEmail", "user_email"),
+        hospital_id=hospital_id,
     )
+    if status_filter:
+        scoped = [a for a in scoped if (a.get("status") or "").lower() == status_filter.lower()]
+
+    # Return paginated items
+    return scoped[offset : offset + limit]
 
 
 @router.post("/appointments", summary="Create or persist appointment")
-async def create_appointment_endpoint(payload: dict[str, Any]):
-    date = payload.get("date")
-    slot = payload.get("slot") or payload.get("time")
+async def create_appointment_endpoint(payload: DirectAppointmentCreateRequest):
+    data = payload.model_dump(exclude_none=True)
+    date = data.get("date")
+    slot = data.get("slot") or data.get("time")
     if date and slot:
         with _booking_lock:
             existing = get_all_appointments()
@@ -376,18 +395,22 @@ async def create_appointment_endpoint(payload: dict[str, Any]):
                         status_code=status.HTTP_409_CONFLICT,
                         detail=f"Time slot {slot} on {date} is already booked.",
                     )
-            local_saved = save_appointment(payload)
-        sb_record = await sync_appointment_to_supabase(payload)
+            local_saved = save_appointment(data)
+        sb_record = await sync_appointment_to_supabase(data)
         return sb_record or local_saved
 
-    sb_record = await sync_appointment_to_supabase(payload)
-    local_saved = save_appointment(payload)
+    sb_record = await sync_appointment_to_supabase(data)
+    local_saved = save_appointment(data)
     return sb_record or local_saved
 
 
 @router.put("/appointments/{appointment_id}/status", summary="Update appointment status")
-async def update_appointment_status_endpoint(appointment_id: str, payload: dict[str, Any]):
-    new_status = payload.get("status", "Confirmed")
+async def update_appointment_status_endpoint(
+    appointment_id: str,
+    payload: AppointmentStatusUpdate,
+    user: dict[str, Any] = Depends(require_admin_role),
+):
+    new_status = payload.status
     sb_updated = await update_appointment_status_in_supabase(appointment_id, new_status)
     local_updated = update_appointment_status(appointment_id, new_status)
     if not sb_updated and not local_updated:
@@ -401,5 +424,8 @@ async def list_blocked_dates_endpoint():
 
 
 @router.post("/blocked-dates", summary="Save doctor blocked dates")
-async def save_blocked_dates_endpoint(payload: list[dict[str, Any]]):
+async def save_blocked_dates_endpoint(
+    payload: list[dict[str, Any]],
+    user: dict[str, Any] = Depends(require_admin_role),
+):
     return save_blocked_dates(payload)
