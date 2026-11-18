@@ -6,11 +6,11 @@ import {
   inferTimezoneFromLocation,
   getTimezoneOffsetString,
   getTimezoneAbbreviation,
-} from "../utils/timezone";
+} from "../core/timezone";
 import {
   isHospitalDateConcluded,
   getHospitalDateOperatingStatus,
-} from "../utils/schedulingEngine";
+} from "../domains/scheduling/engine/schedulingEngine";
 
 describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
   it("maps hospital IST schedule strictly to Asia/Kolkata local date without dual clock", () => {

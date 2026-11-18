@@ -11,7 +11,7 @@ import {
   useClinical,
   useRequireRole,
   RbacAccessError,
-} from "../context";
+} from "../app/store";
 
 describe("Domain-Specific Context Slices & Facade Integration", () => {
   it("provides useAuth hook inside AppProvider", () => {

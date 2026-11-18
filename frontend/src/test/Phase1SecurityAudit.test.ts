@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { tokenStorage } from "../services/tokenStorage";
-import { coreFetch, generateRequestId } from "../services/httpClient";
-import { getInitialAuthUser } from "../context/appInitialState";
-import { appReducer, INITIAL_STATE } from "../context/AppContext";
-import { resolveActiveHospitalTenant } from "../services/tenantResolver";
-import { auditService } from "../services/auditService";
-import { paymentGatewayService } from "../services/paymentGatewayService";
-import type { ConsultationInvoice } from "../types";
+import { tokenStorage } from "../core/security/tokenStorage";
+import { coreFetch, generateRequestId } from "../core/api/client/httpClient";
+import { getInitialAuthUser } from "../app/store/appInitialState";
+import { appReducer, INITIAL_STATE } from "../app/store";
+import { resolveActiveHospitalTenant } from "../core/tenancy/identity/tenantResolver";
+import { auditService } from "../core/observability";
+import { paymentGatewayService } from "../domains/billing-finance/api/paymentGatewayService";
+import type { ConsultationInvoice } from "../core/types";
 
 describe("Phase 1: Immediate Blockers & Security Hardening Verification", () => {
   beforeEach(() => {

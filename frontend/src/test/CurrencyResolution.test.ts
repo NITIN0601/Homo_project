@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { inferCurrencyFromCountry, formatCurrency, SUPPORTED_CURRENCIES } from "../utils/currency";
-import { formatINR } from "../utils/format";
-import * as timezone from "../utils/timezone";
+import { inferCurrencyFromCountry, formatCurrency, SUPPORTED_CURRENCIES } from "../domains/billing-finance/utils/currency";
+import { formatINR } from "../shared/utils/format";
+import * as timezone from "../core/timezone";
 
 describe("Location-Based Currency Resolution & Modular Timezone", () => {
   describe("inferCurrencyFromCountry", () => {

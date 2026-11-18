@@ -7,7 +7,7 @@ import {
   sanitizePhone,
   sanitizePincode,
   sanitizeArrayOfStrings,
-} from "../utils/sanitize";
+} from "../core/security/sanitize";
 
 describe("Enterprise Input Sanitization Utilities", () => {
   describe("sanitizeText", () => {

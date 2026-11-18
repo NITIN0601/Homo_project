@@ -1,20 +1,18 @@
 import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
-import { ThemeProvider } from "../context/ThemeProvider";
-import { AppProvider } from "../context/AppContext";
-import { AuthContext, type AuthContextValue } from "../context/AuthContext";
-import { SuperAdminDashboard } from "../pages/SuperAdminDashboard";
-import { AdminDashboard } from "../pages/AdminDashboard";
-import { VisitSummaryPage } from "../pages/VisitSummaryPage";
-import { CartPage } from "../pages/CartPage";
-import {
-  CalendarTab,
-  BillingInvoicesTab,
-  DispensaryInventoryTab,
-  DispatchesTab,
-  CustomizationTab,
-} from "../pages/admin";
+import { ThemeProvider } from "../core/tenancy/branding/ThemeProvider";
+import { AppProvider } from "../app/store/AppContext";
+import { AuthContext, type AuthContextValue } from "../domains/iam-auth/model/AuthContext";
+import { SuperAdminDashboard } from "../domains/tenant-governance/pages/SuperAdminDashboard";
+import { AdminDashboard } from "../app/admin/AdminDashboard";
+import { VisitSummaryPage } from "../domains/clinical-ehr/pages/VisitSummaryPage";
+import { CartPage } from "../domains/dispensary-pharmacy/pages/CartPage";
+import { CalendarTab } from "../domains/scheduling/pages/CalendarTab";
+import { BillingTab as BillingInvoicesTab } from "../domains/billing-finance/pages/BillingTab";
+import { DispensaryInventoryTab } from "../domains/dispensary-pharmacy/pages/DispensaryInventoryTab";
+import { DispatchesTab } from "../domains/dispensary-pharmacy/pages/DispatchesTab";
+import { CustomizationTab } from "../domains/tenant-governance/pages/CustomizationTab";
 
 const createMockAuth = (role: "super_admin" | "admin" | "patient" | null, name = "Test User"): AuthContextValue => ({
   authUser: role

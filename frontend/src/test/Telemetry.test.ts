@@ -4,7 +4,7 @@ import {
   generateIncidentId,
   getTechnicalDeviceContext,
   getTechnicalLocationContext,
-} from "../utils/telemetry";
+} from "../core/observability/telemetry";
 
 describe("Telemetry & Crash Reporting HIPAA Sanitizer", () => {
   it("scrubs email addresses from diagnostic strings", () => {

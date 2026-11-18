@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { renderToString } from "react-dom/server";
-import { cn } from "../utils/cn";
+import { cn } from "../shared/utils/cn";
 import {
   Button,
   Badge,
@@ -18,7 +18,7 @@ import {
   Text,
   Caption,
   MicroLabel,
-} from "../components/ui";
+} from "../shared/ui";
 
 describe("Phase 1: Enterprise UI Primitives & Design Tokens", () => {
   describe("cn Utility (Class Merging & Deduplication)", () => {

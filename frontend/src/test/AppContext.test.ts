@@ -12,8 +12,8 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { appReducer, INITIAL_STATE, MEDICINE_CATALOGUE } from "../context/AppContext";
-import type { AppState, BookedAppointment, ConsultationInvoice, AuthUser } from "../types";
+import { appReducer, INITIAL_STATE, MEDICINE_CATALOGUE } from "../app/store";
+import type { AppState, BookedAppointment, ConsultationInvoice, AuthUser } from "@core/types";
 
 describe("AppContext State Machine & Reducer Regression Suite", () => {
   let baseState: AppState;

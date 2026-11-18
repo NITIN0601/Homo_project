@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { clinicalStorageService } from "../services/clinicalStorageService";
+import { clinicalStorageService } from "../domains/clinical-ehr/api/clinicalStorageService";
 
 describe("Phase 3: Architecture & UI Ergonomics Verification", () => {
   beforeEach(() => {

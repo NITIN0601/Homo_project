@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { validateClinicalFile } from "../utils/fileValidation";
-import { getHospitalTimeInfo } from "../utils/timezone/hospitalClock";
-import { toISO } from "../pages/AppointmentsPage";
+import { validateClinicalFile } from "../shared/utils/fileValidation";
+import { getHospitalTimeInfo } from "../core/timezone/hospitalClock";
+import { toISO } from "../domains/scheduling/pages/AppointmentsPage";
 
 describe("Phase 2: Short-Term Fixes & Reliability Verification", () => {
   beforeEach(() => {

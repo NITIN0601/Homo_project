@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { resolveActiveHospitalTenant } from "../services/tenantResolver";
-import { HOSPITAL_TENANTS, DEFAULT_HOSPITAL_TENANT, getHospitalTenantById } from "../config/tenants";
+import { resolveActiveHospitalTenant } from "../core/tenancy/identity/tenantResolver";
+import { HOSPITAL_TENANTS, DEFAULT_HOSPITAL_TENANT, getHospitalTenantById } from "../core/config/tenants";
 
 describe("Phase 2: Multi-Hospital Tenant Resolution & Isolation", () => {
   describe("Option A: Domain / Subdomain Resolution", () => {

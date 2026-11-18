@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { generateDefaultLegalTemplates } from "../config/tenants/constants";
-import type { HospitalTenantConfig } from "../types/tenant";
-import { DEFAULT_HOSPITAL_TENANT } from "../config/tenants";
+import { generateDefaultLegalTemplates } from "../core/config/tenants/constants";
+import type { HospitalTenantConfig } from "../domains/tenant-governance/model/tenant";
+import { DEFAULT_HOSPITAL_TENANT } from "../core/config/tenants";
 
 describe("Dynamic Legal Policies & Facility Terminology Synchronization", () => {
   it("generates facility-specific legal templates with hospital terminology by default", () => {
