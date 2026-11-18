@@ -89,40 +89,40 @@ def _load_accounts() -> dict[str, Any]:
     admin_hash, admin_salt = hash_password("Admin@12345")
     patient_hash, patient_salt = hash_password("Patient@12345")
     initial_accounts = {
-        settings.CLINIC_ADMIN_EMAIL: {
+        settings.HOSPITAL_ADMIN_EMAIL: {
             "id": "usr-admin-001",
             "name": settings.DOCTOR_NAME,
-            "email": settings.CLINIC_ADMIN_EMAIL,
+            "email": settings.HOSPITAL_ADMIN_EMAIL,
             "role": "admin",
-            "phone": settings.CLINIC_PHONE,
+            "phone": settings.HOSPITAL_PHONE,
             "hash": admin_hash,
             "salt": admin_salt,
             "created_at": datetime.now(timezone.utc).isoformat(),
         },
-        f"superadmin@{settings.CLINIC_DOMAIN}": {
+        f"superadmin@{settings.HOSPITAL_DOMAIN}": {
             "id": "usr-super-001",
             "name": "Super Administrator",
-            "email": f"superadmin@{settings.CLINIC_DOMAIN}",
+            "email": f"superadmin@{settings.HOSPITAL_DOMAIN}",
             "role": "super_admin",
-            "phone": settings.CLINIC_PHONE,
+            "phone": settings.HOSPITAL_PHONE,
             "hash": admin_hash,
             "salt": admin_salt,
             "created_at": datetime.now(timezone.utc).isoformat(),
         },
-        f"admin@{settings.CLINIC_DOMAIN}": {
+        f"admin@{settings.HOSPITAL_DOMAIN}": {
             "id": "usr-admin-002",
             "name": settings.DOCTOR_NAME,
-            "email": f"admin@{settings.CLINIC_DOMAIN}",
+            "email": f"admin@{settings.HOSPITAL_DOMAIN}",
             "role": "admin",
-            "phone": settings.CLINIC_PHONE,
+            "phone": settings.HOSPITAL_PHONE,
             "hash": admin_hash,
             "salt": admin_salt,
             "created_at": datetime.now(timezone.utc).isoformat(),
         },
-        f"john@{settings.CLINIC_DOMAIN}": {
+        f"john@{settings.HOSPITAL_DOMAIN}": {
             "id": "usr-001",
             "name": "John Doe",
-            "email": f"john@{settings.CLINIC_DOMAIN}",
+            "email": f"john@{settings.HOSPITAL_DOMAIN}",
             "role": "patient",
             "phone": "+91 98765 43210",
             "hash": patient_hash,
@@ -434,10 +434,6 @@ def authenticate_or_register_google_user(
         or is_invited_as_doctor
     )
 
-    if portal_intent == "admin" and not is_authorized_admin:
-        raise ValueError("Access Denied: Your Google account is not recognized as a registered clinic administrator.")
-
-    assigned_role = "admin" if is_authorized_admin else "patient"
     assigned_hospital = (
         (
             hospital_id
@@ -449,6 +445,19 @@ def authenticate_or_register_google_user(
         .strip()
         .lower()
     )
+
+    from services.hospital_service import get_hospital
+
+    target_hosp = get_hospital(assigned_hospital)
+    facility_type = (target_hosp.get("facilityType") or "hospital").lower() if target_hosp else "hospital"
+    facility_label = "clinic" if facility_type == "clinic" else "hospital"
+
+    if portal_intent == "admin" and not is_authorized_admin:
+        raise ValueError(
+            f"Access Denied: Your Google account is not recognized as a registered {facility_label} administrator."
+        )
+
+    assigned_role = "admin" if is_authorized_admin else "patient"
 
     if matching_invite and matching_invite_token:
         matching_invite["is_claimed"] = True
@@ -509,7 +518,7 @@ def authenticate_or_register_google_user(
         "hospital_id": assigned_hospital,
         "phone": (matching_doctor.get("phone") if matching_doctor else None)
         or (matching_invite.get("phone") if matching_invite else "")
-        or (settings.CLINIC_PHONE if assigned_role == "admin" else ""),
+        or (settings.HOSPITAL_PHONE if assigned_role == "admin" else ""),
         "provider": "google",
         "has_password": False,
         "created_at": datetime.now(timezone.utc).isoformat(),

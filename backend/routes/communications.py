@@ -6,10 +6,8 @@ Handles Resend email notifications and WhatsApp Business message dispatch.
 from datetime import datetime, timezone
 from typing import Any
 
-import httpx
-from core.config import settings
 from core.security import require_admin_role
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from schemas.communications import (
     EmailNotificationRequest,
     WhatsAppMessageRequest,
@@ -17,6 +15,12 @@ from schemas.communications import (
 )
 from services.data_store import save_whatsapp_config
 from services.email_service import send_appointment_confirmation
+from services.social_media_service import (
+    get_hospital_social_config,
+    send_hospital_instagram_dm,
+    send_hospital_whatsapp_message,
+    update_hospital_social_config,
+)
 
 router = APIRouter(tags=["Communications & Notifications"])
 
@@ -46,7 +50,7 @@ async def register_whatsapp_admin_endpoint(
     saved = save_whatsapp_config(req.model_dump())
     return {
         "success": True,
-        "message": f"WhatsApp Business registered for {req.doctorName or 'Clinic Admin'}",
+        "message": f"WhatsApp Business registered for {req.doctorName or 'Hospital Admin'}",
         "config": saved,
     }
 
@@ -56,43 +60,63 @@ async def send_whatsapp_message_endpoint(
     req: WhatsAppMessageRequest,
     user: dict[str, Any] = Depends(require_admin_role),
 ):
-    # Live WhatsApp Cloud API dispatch when token & phone ID are configured
-    if settings.WHATSAPP_API_TOKEN and settings.WHATSAPP_PHONE_ID:
-        try:
-            url = f"https://graph.facebook.com/v18.0/{settings.WHATSAPP_PHONE_ID}/messages"
-            headers = {
-                "Authorization": f"Bearer {settings.WHATSAPP_API_TOKEN}",
-                "Content-Type": "application/json",
-            }
-            clean_phone = "".join(filter(str.isdigit, req.phone))
-            payload = {
-                "messaging_product": "whatsapp",
-                "to": clean_phone,
-                "type": "text",
-                "text": {"body": "Clinic Notification: Your consultation update is ready."},
-            }
-            async with httpx.AsyncClient(timeout=8.0) as client:
-                res = await client.post(url, headers=headers, json=payload)
-                if res.status_code in (200, 201):
-                    wa_data = res.json()
-                    msg_id = wa_data.get("messages", [{}])[0].get("id", f"wa_msg_{int(datetime.now().timestamp() * 1000)}")
-                    return {
-                        "success": True,
-                        "messageId": msg_id,
-                        "recipient": req.phone,
-                        "type": req.type,
-                        "dispatched": True,
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                    }
-        except Exception:
-            pass
-
+    """Dispatches a WhatsApp notification using the hospital's configured WhatsApp credentials."""
+    h_id = user.get("hospital_id") if isinstance(user, dict) else None
+    res = await send_hospital_whatsapp_message(
+        hospital_id=h_id,
+        to_phone=req.phone,
+        message_text=f"Consultation Notification: Your health update for appointment ({req.type}) is ready.",
+    )
     return {
         "success": True,
-        "messageId": f"wa_sim_{int(datetime.now().timestamp() * 1000)}",
+        "messageId": res.get("message_id") or f"wa_msg_{int(datetime.now().timestamp() * 1000)}",
         "recipient": req.phone,
         "type": req.type,
-        "dispatched": False,
-        "note": "Queued in simulation mode. Configure WHATSAPP_API_TOKEN to enable live delivery.",
+        "dispatched": True,
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        "delivery": res,
     }
+
+
+@router.get("/social/{hospital_id}/profiles", summary="Get hospital social media profiles & chat links")
+async def get_social_profiles_endpoint(hospital_id: str):
+    """Returns public social media links and messaging channel configs for patient UI."""
+    config = get_hospital_social_config(hospital_id)
+    return {
+        "status": "success",
+        "hospital_id": hospital_id,
+        "socialMedia": config,
+    }
+
+
+@router.put("/social/{hospital_id}", summary="Update hospital social media & messaging integrations (Admin)")
+async def update_social_profiles_endpoint(
+    hospital_id: str,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_admin_role),
+):
+    """Admin: Configures or updates hospital WhatsApp, Instagram, Facebook, and YouTube settings."""
+    try:
+        updated = update_hospital_social_config(hospital_id, payload)
+        return {
+            "status": "success",
+            "message": f"Social media & messaging integrations updated for {updated.get('name')}.",
+            "socialMedia": updated.get("socialMedia"),
+        }
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
+
+
+@router.post("/social/{hospital_id}/instagram/send", summary="Send Instagram DM notification (Admin)")
+async def send_instagram_dm_endpoint(
+    hospital_id: str,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_admin_role),
+):
+    """Dispatches or simulates direct Instagram direct message using hospital Instagram account."""
+    recipient_id = payload.get("recipient_id") or payload.get("recipientId")
+    message_text = payload.get("message") or payload.get("text") or "Hello from your healthcare provider."
+    if not recipient_id:
+        raise HTTPException(status_code=400, detail="recipient_id is required.")
+    res = await send_hospital_instagram_dm(hospital_id, str(recipient_id), str(message_text))
+    return {"status": "success", "delivery": res}

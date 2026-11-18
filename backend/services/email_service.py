@@ -24,7 +24,7 @@ logger = logging.getLogger("email_service")
 # Official Resend API endpoint
 RESEND_API_URL = "https://api.resend.com/emails"
 RESEND_API_KEY = settings.RESEND_API_KEY
-CLINIC_ADMIN_EMAIL = settings.CLINIC_ADMIN_EMAIL
+HOSPITAL_ADMIN_EMAIL = settings.HOSPITAL_ADMIN_EMAIL
 RESEND_FROM_EMAIL = settings.RESEND_FROM_EMAIL
 
 
@@ -33,7 +33,7 @@ async def send_appointment_confirmation(
     customer_name: str,
     appointment_time: str,
     doctor_name: str | None = None,
-    clinic_location: str | None = None,
+    hospital_location: str | None = None,
     hospital_id: str | None = None,
     doctor_id: str | None = None,
     api_key: str | None = None,
@@ -47,16 +47,16 @@ async def send_appointment_confirmation(
     doctor = get_doctor(doctor_id, hospital.get("id"))
 
     doc_name = doctor_name or doctor.get("name")
-    h_name = hospital.get("name", "Medical Clinic")
+    h_name = hospital.get("name", "Medical Center")
     h_city = hospital.get("contact", {}).get("address", {}).get("city", "Bengaluru")
-    clinic_loc = clinic_location or f"{h_name}, {h_city}"
-    admin_email = CLINIC_ADMIN_EMAIL or hospital.get("contact", {}).get("email")
-    clinic_phone = hospital.get("contact", {}).get("phone") or settings.CLINIC_PHONE
+    hosp_loc = hospital_location or f"{h_name}, {h_city}"
+    admin_email = HOSPITAL_ADMIN_EMAIL or hospital.get("contact", {}).get("email")
+    hospital_phone = hospital.get("contact", {}).get("phone") or settings.HOSPITAL_PHONE
     addr_dict = hospital.get("contact", {}).get("address", {})
     addr_str = (
         f"{addr_dict.get('street', '')}, {addr_dict.get('city', '')} – {addr_dict.get('pincode', '')}"
         if addr_dict
-        else settings.CLINIC_ADDRESS
+        else settings.HOSPITAL_ADDRESS
     )
 
     subject = f"Appointment Confirmed — {h_name}"
@@ -86,8 +86,8 @@ async def send_appointment_confirmation(
                   <td style="color: #15803d;">{doc_name}</td>
                 </tr>
                 <tr>
-                  <td style="color: #166534; font-weight: bold;">Clinic Location:</td>
-                  <td style="color: #15803d;">{clinic_loc}</td>
+                  <td style="color: #166534; font-weight: bold;">Hospital Location:</td>
+                  <td style="color: #15803d;">{hosp_loc}</td>
                 </tr>
               </table>
             </div>
@@ -96,7 +96,7 @@ async def send_appointment_confirmation(
               • A Google Calendar invitation has been attached to your calendar.
             </p>
             <p style="margin: 0 0 20px 0; font-size: 12px; color: #78716c;">
-              • For any reschedule or urgent queries, contact reception at <strong>{clinic_phone}</strong> or reply to this email.
+              • For any reschedule or urgent queries, contact reception at <strong>{hospital_phone}</strong> or reply to this email.
             </p>
 
             <hr style="border: none; border-top: 1px solid #e7e5e4; margin: 20px 0;" />

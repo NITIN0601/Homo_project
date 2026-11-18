@@ -4,7 +4,7 @@ Handles user registration, login, JWT token issuance, and OTP verification.
 """
 
 from core.config import settings
-from core.security import require_admin_role, verify_access_token
+from core.security import create_access_token, require_admin_role, revoke_token, verify_access_token
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from schemas.auth import (
     AcceptGoogleInviteRequest,
@@ -26,6 +26,8 @@ from services.auth_service import (
     register_user,
     verify_otp_code,
 )
+from services.hospital_service import get_hospital
+from services.notification_service import send_user_invite_notification
 
 router = APIRouter(prefix="/auth", tags=["Authentication & Identity"])
 
@@ -54,9 +56,12 @@ async def admin_login_endpoint(req: LoginRequest):
     try:
         profile, token = authenticate_user(req.email, req.password)
         if profile.get("role") not in ("admin", "super_admin"):
+            hospital = get_hospital(profile.get("hospital_id"))
+            facility_type = hospital.get("facilityType", "hospital")
+            facility_label = "Clinic" if facility_type == "clinic" else "Hospital"
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access Denied: This portal requires verified doctor administrative credentials.",
+                detail=f"Access Denied: This portal requires verified {facility_label.lower()} administrative credentials.",
             )
         return {
             "status": "success",
@@ -72,7 +77,7 @@ async def admin_login_endpoint(req: LoginRequest):
 async def google_auth_endpoint(req: GoogleAuthRequest):
     """
     Authenticates or provisions user via Google Identity without requiring password creation.
-    Admin privileges are strictly granted ONLY to pre-authorized clinic doctor emails.
+    Admin privileges are strictly granted ONLY to pre-authorized hospital doctor emails.
     """
     try:
         profile, token, assigned_role = authenticate_or_register_google_user(
@@ -107,6 +112,7 @@ async def register_user_endpoint(req: RegisterRequest):
         )
 
     try:
+        h_id = req.hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "default")
         profile, token = register_user(
             name=req.name,
             first_name=req.first_name,
@@ -116,11 +122,15 @@ async def register_user_endpoint(req: RegisterRequest):
             password=req.password,
             role="patient",
             phone=req.phone,
-            hospital_id=req.hospital_id or getattr(settings, "DEFAULT_HOSPITAL_ID", "default"),
+            hospital_id=h_id,
         )
+        hospital = get_hospital(h_id)
+        h_name = hospital.get("name", settings.HOSPITAL_NAME)
+        facility_type = hospital.get("facilityType", "hospital")
+        facility_label = "Clinic" if facility_type == "clinic" else "Hospital"
         return {
             "status": "success",
-            "message": "Patient registered successfully",
+            "message": f"Welcome to {h_name}. Your {facility_label.lower()} patient account has been registered successfully.",
             "token": token,
             "profile": profile,
         }
@@ -163,6 +173,11 @@ async def invite_user_endpoint(
 ):
     """Admin / Super Admin: Creates secure onboarding invite token for doctors, staff, or patients."""
     try:
+        hospital = get_hospital(req.hospital_id)
+        h_name = hospital.get("name", settings.HOSPITAL_NAME)
+        facility_type = hospital.get("facilityType", "hospital")
+        facility_label = "Clinic" if facility_type == "clinic" else "Hospital"
+
         invite = create_user_invite(
             email=req.email,
             name=req.name,
@@ -172,11 +187,27 @@ async def invite_user_endpoint(
             created_by=current_user.get("email", "admin"),
         )
         invite_url = f"{settings.FRONTEND_URL}/join?token={invite['token']}"
+        invite["invite_url"] = invite_url
+
+        # Dispatches tenant-customized dynamic email and SMS / WhatsApp notifications
+        delivery_res = await send_user_invite_notification(
+            email=req.email,
+            name=req.name,
+            role=req.role,
+            hospital_id=req.hospital_id,
+            invite_url=invite_url,
+            phone=req.phone,
+            custom_message=req.custom_message,
+            send_email=req.send_email if hasattr(req, "send_email") else req.send_notification,
+            send_sms=req.send_sms if hasattr(req, "send_sms") else bool(req.phone),
+        )
+
         return {
             "status": "success",
-            "message": f"Invite generated for {req.email}",
+            "message": f"Invitation for {req.name} to join {h_name} ({facility_label}) dispatched successfully.",
             "invite": invite,
             "invite_url": invite_url,
+            "delivery": delivery_res,
         }
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
@@ -187,9 +218,11 @@ async def accept_invite_endpoint(req: VerifyInviteRequest):
     """Claims an invite token, registers user password, and returns authenticated JWT session."""
     try:
         profile, token = accept_user_invite(token=req.token, password=req.password)
+        hospital = get_hospital(profile.get("hospital_id"))
+        h_name = hospital.get("name", settings.HOSPITAL_NAME)
         return {
             "status": "success",
-            "message": "Invite accepted. Welcome to the portal!",
+            "message": f"Invite accepted. Welcome to {h_name}!",
             "token": token,
             "profile": profile,
         }
@@ -206,9 +239,11 @@ async def accept_invite_google_endpoint(req: AcceptGoogleInviteRequest):
             email=req.email,
             name=req.name,
         )
+        hospital = get_hospital(profile.get("hospital_id"))
+        h_name = hospital.get("name", settings.HOSPITAL_NAME)
         return {
             "status": "success",
-            "message": "Invite claimed with Google. Welcome to the portal!",
+            "message": f"Invite claimed with Google. Welcome to {h_name}!",
             "token": token,
             "profile": profile,
         }
@@ -224,10 +259,43 @@ async def logout_endpoint(authorization: str | None = Header(None)):
     token = authorization.split("Bearer ", 1)[1].strip()
     payload = verify_access_token(token)
     if payload:
-        from core.security import revoke_token
-
         jti = payload.get("jti")
         exp = payload.get("exp")
         if jti:
             revoke_token(jti, exp)
     return {"status": "success", "message": "Token revoked successfully"}
+
+
+@router.post("/refresh", summary="Refresh active JWT session and rotate token")
+async def refresh_token_endpoint(authorization: str | None = Header(None)):
+    """
+    Refreshes an active JWT session.
+    Validates current token, issues a fresh rotated token, and invalidates the previous token's JTI.
+    """
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing or invalid Bearer authorization header.",
+        )
+    token = authorization.split("Bearer ", 1)[1].strip()
+    payload = verify_access_token(token)
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid, expired, or revoked access token.",
+        )
+
+    # Invalidate the previous token via token rotation
+    old_jti = payload.get("jti")
+    old_exp = payload.get("exp")
+    if old_jti:
+        revoke_token(old_jti, old_exp)
+
+    # Issue a fresh token retaining user claims
+    clean_claims = {k: v for k, v in payload.items() if k not in ("exp", "jti", "iss", "aud")}
+    new_token = create_access_token(clean_claims)
+    return {
+        "status": "success",
+        "token": new_token,
+        "token_type": "Bearer",
+    }

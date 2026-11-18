@@ -46,6 +46,13 @@ class InviteUserRequest(BaseModel):
     hospital_id: str = Field(default="default", example="default")
     phone: str | None = Field(default=None, example="+1234567890")
     send_notification: bool = Field(default=True, description="Send automated invite email")
+    send_email: bool = Field(default=True, description="Send automated invite email")
+    send_sms: bool = Field(default=True, description="Send automated invite SMS / WhatsApp")
+    custom_message: str | None = Field(
+        default=None,
+        description="Custom message from the hospital or clinic administrator to be included in the invitation",
+        example="Welcome to our healthcare family! Please activate your portal access.",
+    )
 
 
 class VerifyInviteRequest(BaseModel):
