@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
-import type { HospitalTenantConfig, HospitalFeatures, HospitalBranding } from "../types/tenant";
+import type { HospitalTenantConfig, HospitalFeatures, HospitalBranding, HospitalLegal } from "../types/tenant";
 import { DEFAULT_HOSPITAL_TENANT, getHospitalTenantById } from "../config/tenants";
 import { resolveActiveHospitalTenant } from "../services/tenantResolver";
+import { api } from "../services/api";
 
 const STORAGE_CUSTOM_PREFIX = "hospital_tenant_custom_v1_";
 
@@ -11,6 +12,7 @@ export interface TenantContextValue {
   updateTenant: (updates: Partial<HospitalTenantConfig>) => void;
   updateTenantFeatures: (features: Partial<HospitalFeatures>) => void;
   updateTenantBranding: (branding: Partial<HospitalBranding>) => void;
+  updateTenantLegal: (legal: Partial<HospitalLegal>) => void;
   resetTenantToDefaults: () => void;
   isFeatureEnabled: (featureKey: keyof HospitalFeatures) => boolean;
 }
@@ -47,6 +49,11 @@ function getSavedTenantOverride(base: HospitalTenantConfig): HospitalTenantConfi
         features: {
           ...base.features,
           ...(parsed.features ?? {}),
+        },
+        facilityType: parsed.facilityType || base.facilityType || "hospital",
+        legal: {
+          ...base.legal,
+          ...(parsed.legal || {}),
         },
       };
     }
@@ -106,12 +113,18 @@ export const ThemeProvider: React.FC<{
               aboutDocText: updatedDoctor.aboutText || prev.branding.aboutDocText,
             },
         features: updates.features ? { ...prev.features, ...updates.features } : prev.features,
+        facilityType: updates.facilityType !== undefined ? updates.facilityType : prev.facilityType,
+        legal: updates.legal
+          ? { ...prev.legal, ...updates.legal }
+          : prev.legal,
       };
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem(`${STORAGE_CUSTOM_PREFIX}${merged.id}`, JSON.stringify(merged));
           window.dispatchEvent(new Event("tenant_features_changed"));
         } catch {}
+        // Persist to backend server SSOT asynchronously
+        api.platform.updateHospitalCustomization(merged.id, updates as any).catch(() => {});
       }
       return merged;
     });
@@ -124,6 +137,10 @@ export const ThemeProvider: React.FC<{
   const updateTenantBranding = useCallback((branding: Partial<HospitalBranding>) => {
     updateTenant({ branding: { ...tenant.branding, ...branding } });
   }, [tenant.branding, updateTenant]);
+
+  const updateTenantLegal = useCallback((legal: Partial<HospitalLegal>) => {
+    updateTenant({ legal: { ...tenant.legal, ...legal } });
+  }, [tenant.legal, updateTenant]);
 
   const resetTenantToDefaults = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -179,10 +196,11 @@ export const ThemeProvider: React.FC<{
       updateTenant,
       updateTenantFeatures,
       updateTenantBranding,
+      updateTenantLegal,
       resetTenantToDefaults,
       isFeatureEnabled,
     }),
-    [tenant, isFeatureEnabled, updateTenant, updateTenantFeatures, updateTenantBranding, resetTenantToDefaults]
+    [tenant, isFeatureEnabled, updateTenant, updateTenantFeatures, updateTenantBranding, updateTenantLegal, resetTenantToDefaults]
   );
 
   return <TenantContext.Provider value={value}>{children}</TenantContext.Provider>;
@@ -197,6 +215,7 @@ export function useTenant(): TenantContextValue {
       updateTenant: () => {},
       updateTenantFeatures: () => {},
       updateTenantBranding: () => {},
+      updateTenantLegal: () => {},
       resetTenantToDefaults: () => {},
       isFeatureEnabled: () => true,
     };

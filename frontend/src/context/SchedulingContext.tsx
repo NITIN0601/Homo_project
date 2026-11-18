@@ -1,10 +1,10 @@
 import { createContext, useContext } from "react";
-import type { BlockedCalendarDate, BookedAppointment } from "../../types";
+import type { BlockedCalendarDate, BookedAppointment } from "../types";
 import type {
   UserTimezoneInfo,
-  ClinicTimeInfo,
+  HospitalTimeInfo,
   MappedSessionHours,
-} from "../../utils/timezone";
+} from "../utils/timezone";
 
 export interface SchedulingContextValue {
   blockedDates: BlockedCalendarDate[];
@@ -12,7 +12,7 @@ export interface SchedulingContextValue {
   userTimezone: string;
   setUserTimezone: (tz: string) => void;
   userTzInfo: UserTimezoneInfo;
-  clinicTimeInfo: ClinicTimeInfo;
+  hospitalTimeInfo: HospitalTimeInfo;
   sessionHours: MappedSessionHours;
   blockDate: (
     date: string,

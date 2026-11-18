@@ -5,7 +5,7 @@ import type {
   InventoryItem,
   ConsultationInvoice,
   ConsultationInvoiceStatus,
-} from "../../types";
+} from "../types";
 
 export interface ClinicalContextValue {
   visitSummaries: Record<string, PatientMedicalFile>;

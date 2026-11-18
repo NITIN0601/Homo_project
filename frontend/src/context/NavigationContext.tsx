@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { Page, AdminTab } from "../../types";
+import type { Page, AdminTab } from "../types";
 
 export interface NavigationContextValue {
   activePage: Page;

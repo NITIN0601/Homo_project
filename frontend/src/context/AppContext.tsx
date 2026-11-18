@@ -47,10 +47,10 @@ import {
   normalizeTimeToSlot,
   normalizeDateAlias,
   getUserTimezone,
-  getClinicTimeInfo,
+  getHospitalTimeInfo,
   getMappedSessionHours,
   type UserTimezoneInfo,
-  type ClinicTimeInfo,
+  type HospitalTimeInfo,
   type MappedSessionHours,
 } from "../utils/timezone";
 import { formatDateISO } from "../utils/format";
@@ -59,7 +59,11 @@ import { formatDateISO } from "../utils/format";
 export * from "../router/routeParser";
 export * from "./appInitialState";
 export * from "./appReducer";
-export * from "./slices";
+export * from "./AuthContext";
+export * from "./CartContext";
+export * from "./ClinicalContext";
+export * from "./NavigationContext";
+export * from "./SchedulingContext";
 
 import {
   parseRouteFromLocation,
@@ -67,20 +71,14 @@ import {
 } from "../router/routeParser";
 import { INITIAL_STATE } from "./appInitialState";
 import { appReducer } from "./appReducer";
+import { broadcastSessionEvent, subscribeToSessionEvents } from "../utils/sessionSync";
 
 // Domain Slice Contexts
-import {
-  AuthContext,
-  type AuthContextValue,
-  CartContext,
-  type CartContextValue,
-  NavigationContext,
-  type NavigationContextValue,
-  SchedulingContext,
-  type SchedulingContextValue,
-  ClinicalContext,
-  type ClinicalContextValue,
-} from "./slices";
+import { AuthContext, type AuthContextValue } from "./AuthContext";
+import { CartContext, type CartContextValue } from "./CartContext";
+import { NavigationContext, type NavigationContextValue } from "./NavigationContext";
+import { SchedulingContext, type SchedulingContextValue } from "./SchedulingContext";
+import { ClinicalContext, type ClinicalContextValue } from "./ClinicalContext";
 
 // ─── Consolidated Context Value Shape (Backwards Compatible Facade) ─────────
 export interface AppContextValue {
@@ -135,7 +133,7 @@ export interface AppContextValue {
   userTimezone:       string;
   setUserTimezone:    (tz: string) => void;
   userTzInfo:         UserTimezoneInfo;
-  clinicTimeInfo:     ClinicTimeInfo;
+  hospitalTimeInfo:   HospitalTimeInfo;
   sessionHours:       MappedSessionHours;
   postConsultationInvoice: (invoice: ConsultationInvoice) => void;
   submitConsultationPayment: (
@@ -178,8 +176,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const removeFromCart     = useCallback((id: string)         => dispatch({ type: "REMOVE_FROM_CART",  payload: id     }), []);
   const updateQty          = useCallback((id: string, q: number) => dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity: q } }), []);
   const clearCart          = useCallback(()                   => dispatch({ type: "CLEAR_CART"                        }), []);
-  const login              = useCallback((p: UserProfile)     => dispatch({ type: "LOGIN",             payload: p      }), []);
-  const logout             = useCallback(()                   => dispatch({ type: "LOGOUT"                            }), []);
+  const login = useCallback((p: UserProfile) => {
+    dispatch({ type: "LOGIN", payload: p });
+    broadcastSessionEvent({ type: "AUTH_LOGIN", role: p.role });
+  }, []);
+  const logout = useCallback(() => {
+    dispatch({ type: "LOGOUT" });
+    broadcastSessionEvent({ type: "AUTH_LOGOUT" });
+  }, []);
   const openAuthModal      = useCallback(()                   => dispatch({ type: "OPEN_AUTH_MODAL"                   }), []);
   const closeAuthModal     = useCallback(()                   => dispatch({ type: "CLOSE_AUTH_MODAL"                  }), []);
   const placeOrder         = useCallback((o: PlacedOrder)     => dispatch({ type: "PLACE_ORDER",       payload: o      }), []);
@@ -608,6 +612,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
   }, []);
 
+  // ── Multi-Tab Security & Session Sync (BroadcastChannel) ──────────────────────
+  useEffect(() => {
+    return subscribeToSessionEvents((msg) => {
+      if (msg.type === "AUTH_LOGOUT") {
+        dispatch({ type: "LOGOUT" });
+      } else if (msg.type === "AUTH_LOGIN") {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEYS.AUTH_PROFILE);
+          if (stored) {
+            dispatch({ type: "LOGIN", payload: JSON.parse(stored) });
+          }
+        } catch {}
+      }
+    });
+  }, []);
+
   // ── Synchronize Browser URL (<tab_name>) with activePage and adminTab ─────────
   useEffect(() => {
     syncUrlWithState(state.activePage, state.adminTab, false);
@@ -649,9 +669,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return () => clearInterval(timer);
   }, []);
 
-  const clinicTimeInfo = useMemo(() => {
+  const hospitalTimeInfo = useMemo(() => {
     void clockTick;
-    return getClinicTimeInfo();
+    return getHospitalTimeInfo();
   }, [clockTick]);
 
   const userTzInfo = useMemo(() => {
@@ -719,7 +739,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     userTimezone: state.userTimezone,
     setUserTimezone,
     userTzInfo,
-    clinicTimeInfo,
+    hospitalTimeInfo,
     sessionHours,
     blockDate,
     blockDateRange,
@@ -735,7 +755,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     isSlotBooked,
   }), [
     state.blockedDates, state.appointments, state.userTimezone, setUserTimezone,
-    userTzInfo, clinicTimeInfo, sessionHours, blockDate, blockDateRange,
+    userTzInfo, hospitalTimeInfo, sessionHours, blockDate, blockDateRange,
     unblockDate, updateBlockedDate, isDateBlocked, isSlotBlocked,
     getBlockedEntriesForDate, bookAppointment, cancelAppointment,
     updateAppointmentStatus, getBookedSlotsForDate, isSlotBooked,
@@ -803,7 +823,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     userTimezone: state.userTimezone,
     setUserTimezone,
     userTzInfo,
-    clinicTimeInfo,
+    hospitalTimeInfo,
     sessionHours,
     postConsultationInvoice,
     submitConsultationPayment,
@@ -821,7 +841,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     blockDate, blockDateRange, unblockDate, updateBlockedDate, isDateBlocked,
     isSlotBlocked, getBlockedEntriesForDate, bookAppointment, cancelAppointment,
     updateAppointmentStatus, getBookedSlotsForDate, isSlotBooked,
-    setUserTimezone, userTzInfo, clinicTimeInfo, sessionHours,
+    setUserTimezone, userTzInfo, hospitalTimeInfo, sessionHours,
     postConsultationInvoice, submitConsultationPayment, confirmConsultationPayment,
     updateInvoiceTransactionRef, payConsultationInvoice, updateInvoiceStatus,
   ]);
