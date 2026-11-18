@@ -29,6 +29,8 @@ AUTH_SECRET = settings.JWT_SECRET.encode("utf-8")
 
 # In-memory OTP storage for 2FA / Login verification: email -> {"otp": str, "expires_at": float}
 _OTP_CACHE: dict[str, dict[str, Any]] = {}
+_OTP_ATTEMPT_COUNTER: dict[str, int] = {}
+MAX_OTP_ATTEMPTS = 5
 
 
 def generate_otp(email: str) -> str:
@@ -37,26 +39,35 @@ def generate_otp(email: str) -> str:
     otp = str(secrets.randbelow(900000) + 100000)  # 100000–999999, CSPRNG
     expires_at = datetime.now(timezone.utc).timestamp() + 600
     _OTP_CACHE[clean_email] = {"otp": otp, "expires_at": expires_at}
+    _OTP_ATTEMPT_COUNTER[clean_email] = 0
     return otp
 
 
 def verify_otp_code(email: str, otp: str) -> bool:
-    """Verifies a 6-digit OTP. Demo bypass only allowed in mock/dev mode, never in production."""
+    """Verifies a 6-digit OTP with brute-force rate-limiting and timing-safe compare."""
     clean_email = validate_email(email)
     code = otp.strip()
 
-    is_mock = settings.USE_MOCK_DATA or not settings.IS_PRODUCTION
-    if not settings.IS_PRODUCTION and is_mock and code == "123456":
-        return True
+    attempts = _OTP_ATTEMPT_COUNTER.get(clean_email, 0)
+    if attempts >= MAX_OTP_ATTEMPTS:
+        _OTP_CACHE.pop(clean_email, None)
+        _OTP_ATTEMPT_COUNTER.pop(clean_email, None)
+        raise ValueError("OTP invalidated: maximum verification attempts exceeded. Please request a new code.")
 
     entry = _OTP_CACHE.get(clean_email)
     if not entry:
         return False
+
     if datetime.now(timezone.utc).timestamp() > entry.get("expires_at", 0):
         _OTP_CACHE.pop(clean_email, None)
+        _OTP_ATTEMPT_COUNTER.pop(clean_email, None)
         return False
+
+    _OTP_ATTEMPT_COUNTER[clean_email] = attempts + 1
+
     if hmac.compare_digest(entry.get("otp", ""), code):  # timing-safe compare
         _OTP_CACHE.pop(clean_email, None)
+        _OTP_ATTEMPT_COUNTER.pop(clean_email, None)
         return True
     return False
 
@@ -75,8 +86,8 @@ def _load_accounts() -> dict[str, Any]:
         return accounts
 
     # Seed default hospital admin and demo patient for first launch
-    admin_hash, admin_salt = hash_password("admin123")
-    patient_hash, patient_salt = hash_password("patient123")
+    admin_hash, admin_salt = hash_password("Admin@12345")
+    patient_hash, patient_salt = hash_password("Patient@12345")
     initial_accounts = {
         settings.CLINIC_ADMIN_EMAIL: {
             "id": "usr-admin-001",
@@ -99,7 +110,7 @@ def _load_accounts() -> dict[str, Any]:
             "created_at": datetime.now(timezone.utc).isoformat(),
         },
         f"admin@{settings.CLINIC_DOMAIN}": {
-            "id": "usr-admin-001",
+            "id": "usr-admin-002",
             "name": settings.DOCTOR_NAME,
             "email": f"admin@{settings.CLINIC_DOMAIN}",
             "role": "admin",
@@ -321,6 +332,50 @@ def accept_user_invite(token: str, password: str) -> tuple[dict[str, Any], str]:
     return user_view, jwt_token
 
 
+def verify_google_id_token(id_token_str: str | None) -> dict[str, Any]:
+    """Cryptographically verifies a Google OAuth ID token, returning verified claims."""
+    if not id_token_str or not id_token_str.strip():
+        raise ValueError("Google ID token is required for Google OAuth verification.")
+
+    token_str = id_token_str.strip()
+    if settings.USE_MOCK_DATA and token_str.startswith("mock-google-token:"):
+        mock_email = token_str.split("mock-google-token:", 1)[1].strip().lower()
+        return {"email": mock_email, "email_verified": True, "name": "Mock Google User"}
+
+    try:
+        from google.auth.transport import requests as google_requests
+        from google.oauth2 import id_token as google_id_token
+
+        idinfo = google_id_token.verify_oauth2_token(token_str, google_requests.Request())
+        if idinfo.get("iss") not in ["accounts.google.com", "https://accounts.google.com"]:
+            raise ValueError("Invalid Google token issuer")
+        return idinfo
+    except ImportError:
+        pass
+    except Exception as e:
+        raise ValueError(f"Google token verification failed: {e}")
+
+    try:
+        import httpx
+
+        resp = httpx.get(
+            f"https://oauth2.googleapis.com/tokeninfo?id_token={token_str}",
+            timeout=5.0,
+        )
+        if resp.status_code != 200:
+            raise ValueError("Invalid or expired Google ID token")
+        idinfo = resp.json()
+        if idinfo.get("iss") not in ["accounts.google.com", "https://accounts.google.com"]:
+            raise ValueError("Invalid Google token issuer")
+        if not idinfo.get("email_verified") or str(idinfo.get("email_verified")).lower() != "true":
+            raise ValueError("Google email address is not verified")
+        return idinfo
+    except Exception as e:
+        if isinstance(e, ValueError):
+            raise
+        raise ValueError(f"Google ID token verification failed: {e}")
+
+
 def authenticate_or_register_google_user(
     email: str,
     name: str = "Google User",
@@ -330,13 +385,23 @@ def authenticate_or_register_google_user(
 ) -> tuple[dict[str, Any], str, str]:
     """
     Authenticates or provisions a user via Google OAuth Identity without password creation.
-    - Zero password required (provider: 'google').
+    - Requires cryptographic Google ID token verification (never trusts client email parameter blindly).
     - Persistent profile saved in clinic accounts store.
     - Multi-tenant hospital affiliation and quota enforcement.
     - Security guardrail: Admin access strictly limited to AUTHORIZED_ADMIN_EMAILS.
     Returns (profile, token, assigned_role).
     """
-    clean_email = validate_email(email)
+    if not id_token:
+        if portal_intent == "admin" or not settings.USE_MOCK_DATA:
+            raise ValueError("Access Denied: Google authentication requires a verified Google ID token.")
+        clean_email = validate_email(email)
+    else:
+        verified_claims = verify_google_id_token(id_token)
+        verified_email = verified_claims.get("email")
+        if not verified_email:
+            raise ValueError("Google ID token did not contain a verified email address.")
+        clean_email = validate_email(verified_email)
+        name = verified_claims.get("name") or name
     authorized_admin_emails = {e.strip().lower() for e in settings.AUTHORIZED_ADMIN_EMAILS}
     accounts = _load_accounts()
     existing = accounts.get(clean_email)

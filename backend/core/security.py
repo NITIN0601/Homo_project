@@ -9,6 +9,7 @@ import hmac
 import json
 import logging
 import re
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -21,6 +22,31 @@ logger = logging.getLogger("security")
 # SSOT for email validation across auth and calendar services
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
 
+# In-memory revocation blocklist: jti -> expires_at_timestamp
+_REVOKED_TOKENS: dict[str, float] = {}
+
+
+def revoke_token(jti: str, expires_at: float | None = None) -> None:
+    """Revokes a JWT token by its unique identifier (JTI)."""
+    if not jti:
+        return
+    exp = expires_at if expires_at else (datetime.now(timezone.utc).timestamp() + 86400 * 7)
+    _REVOKED_TOKENS[jti] = exp
+
+
+def is_token_revoked(jti: str | None) -> bool:
+    """Checks if a token JTI has been revoked, pruning expired revocation records."""
+    if not jti:
+        return False
+    now = datetime.now(timezone.utc).timestamp()
+    exp = _REVOKED_TOKENS.get(jti)
+    if exp is None:
+        return False
+    if now > exp:
+        _REVOKED_TOKENS.pop(jti, None)
+        return False
+    return True
+
 
 def b64url_encode(data: bytes) -> str:
     return base64.urlsafe_b64encode(data).rstrip(b"=").decode("utf-8")
@@ -32,8 +58,10 @@ def b64url_decode(s: str) -> bytes:
 
 
 def hash_password(password: str, salt: str | None = None) -> tuple[str, str]:
-    if len(password) < 6:
-        raise ValueError("Password must be at least 6 characters.")
+    if len(password) < 8:
+        raise ValueError("Password must be at least 8 characters.")
+    if not re.search(r"[A-Za-z]", password) or not re.search(r"[0-9!@#$%^&*(),.?\":{}|<>]", password):
+        raise ValueError("Password must contain at least one letter and at least one number or symbol.")
     if salt is None:
         import os
 
@@ -50,9 +78,16 @@ def verify_password(password: str, stored_hash: str, stored_salt: str) -> bool:
 
 
 def create_access_token(payload: dict[str, Any], expires_days: int = settings.ACCESS_TOKEN_EXPIRE_DAYS) -> str:
-    header = {"alg": settings.JWT_ALGORITHM, "typ": "JWT"}
+    header = {"alg": "HS256", "typ": "JWT"}
     exp = datetime.now(timezone.utc) + timedelta(days=expires_days)
-    body = {**payload, "exp": int(exp.timestamp())}
+    token_jti = payload.get("jti") or uuid.uuid4().hex
+    body = {
+        **payload,
+        "iss": "ehr-platform",
+        "aud": "ehr-client",
+        "jti": token_jti,
+        "exp": int(exp.timestamp()),
+    }
 
     h_b64 = b64url_encode(json.dumps(header).encode("utf-8"))
     p_b64 = b64url_encode(json.dumps(body).encode("utf-8"))
@@ -70,6 +105,13 @@ def verify_access_token(token: str) -> dict[str, Any] | None:
         if len(parts) != 3:
             return None
         h_b64, p_b64, sig_b64 = parts
+
+        # Verify algorithm header strictly
+        header_bytes = b64url_decode(h_b64)
+        header = json.loads(header_bytes.decode("utf-8"))
+        if header.get("alg") != "HS256" or header.get("typ") != "JWT":
+            return None
+
         sig_input = f"{h_b64}.{p_b64}".encode()
         secret_bytes = settings.JWT_SECRET.encode("utf-8")
 
@@ -81,6 +123,12 @@ def verify_access_token(token: str) -> dict[str, Any] | None:
 
         body_bytes = b64url_decode(p_b64)
         payload = json.loads(body_bytes.decode("utf-8"))
+
+        # Check token revocation
+        jti = payload.get("jti")
+        if jti and is_token_revoked(jti):
+            logger.warning(f"Rejected revoked access token JTI {jti}")
+            return None
 
         # Check expiration
         exp = payload.get("exp")
@@ -170,23 +218,36 @@ def scope_items_to_patient_or_admin(
     items: list[dict[str, Any]],
     user: dict[str, Any] | None,
     id_fields: tuple[str, ...] = ("patientId", "patientEmail", "user_email"),
+    hospital_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """
     HIPAA / PHI Isolation SSOT Guard:
-    - If user is super_admin or admin, returns all items.
-    - If user has 'patient' role, strictly returns only items whose ID fields match the user's identity.
     - If user is None (unauthenticated), returns an empty list to prevent data leakage.
+    - If hospital_id is provided or user has hospital_id, filters items to that tenant.
+    - If user has 'patient' role, strictly returns only items whose ID fields match the user's identity.
+    - If user is admin/doctor, restricts to their assigned hospital unless super_admin.
     """
     if not user:
         return []
 
     role = user.get("role")
+    scoped_hospital = hospital_id or user.get("hospital_id")
+
+    filtered_items = items
+    if scoped_hospital and role != "super_admin":
+        target_hosp = scoped_hospital.strip().lower()
+        filtered_items = [
+            item
+            for item in items
+            if (item.get("hospitalId") or item.get("hospital_id") or "default").strip().lower() == target_hosp
+            or target_hosp in ("default", "")
+        ]
+
     if role in ("admin", "super_admin"):
-        return items
+        return filtered_items
 
     patient_ids = {val for val in (user.get("sub"), user.get("id"), user.get("email")) if val}
-
-    return [item for item in items if any(item.get(field) in patient_ids for field in id_fields)]
+    return [item for item in filtered_items if any(item.get(field) in patient_ids for field in id_fields)]
 
 
 # Alias for backward compatibility

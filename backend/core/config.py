@@ -49,6 +49,7 @@ class Settings:
     # Multi-Tenant & Domain Entity Pointers (Default SSOT)
     DEFAULT_HOSPITAL_ID: str = os.getenv("DEFAULT_HOSPITAL_ID", "default")
     DEFAULT_DOCTOR_ID: str = os.getenv("DEFAULT_DOCTOR_ID", "doc-default")
+    DEFAULT_TIMEZONE: str = os.getenv("DEFAULT_TIMEZONE", "Asia/Kolkata")
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
     # Phase 1 Platform Scaling Quotas
@@ -57,12 +58,24 @@ class Settings:
     MAX_CUSTOMERS_PER_HOSPITAL: int = int(os.getenv("MAX_CUSTOMERS_PER_HOSPITAL", "1000"))
 
     # Hospital & Facility Profile (Configurable via Environment or Tenant Registry)
-    HOSPITAL_NAME: str = os.getenv("HOSPITAL_NAME", "General Healthcare Hospital")
-    HOSPITAL_DOMAIN: str = os.getenv("HOSPITAL_DOMAIN", "example.com")
-    HOSPITAL_LOCATION: str = os.getenv("HOSPITAL_LOCATION", "Global")
-    HOSPITAL_ADDRESS: str = os.getenv("HOSPITAL_ADDRESS", "100 Medical Center Way")
-    HOSPITAL_PHONE: str = os.getenv("HOSPITAL_PHONE", "+1 555-0100")
-    HOSPITAL_ADMIN_EMAIL: str = os.getenv("HOSPITAL_ADMIN_EMAIL", "admin@example.com")
+    CLINIC_NAME: str = os.getenv("CLINIC_NAME", os.getenv("HOSPITAL_NAME", "General Healthcare Hospital"))
+    HOSPITAL_NAME: str = CLINIC_NAME
+
+    CLINIC_DOMAIN: str = os.getenv("CLINIC_DOMAIN", os.getenv("HOSPITAL_DOMAIN", "example.com"))
+    HOSPITAL_DOMAIN: str = CLINIC_DOMAIN
+
+    CLINIC_LOCATION: str = os.getenv("CLINIC_LOCATION", os.getenv("HOSPITAL_LOCATION", "Global"))
+    HOSPITAL_LOCATION: str = CLINIC_LOCATION
+
+    CLINIC_ADDRESS: str = os.getenv("CLINIC_ADDRESS", os.getenv("HOSPITAL_ADDRESS", "100 Medical Center Way"))
+    HOSPITAL_ADDRESS: str = CLINIC_ADDRESS
+
+    CLINIC_PHONE: str = os.getenv("CLINIC_PHONE", os.getenv("HOSPITAL_PHONE", "+1 555-0100"))
+    HOSPITAL_PHONE: str = CLINIC_PHONE
+
+    CLINIC_ADMIN_EMAIL: str = os.getenv("CLINIC_ADMIN_EMAIL", os.getenv("HOSPITAL_ADMIN_EMAIL", "admin@example.com"))
+    HOSPITAL_ADMIN_EMAIL: str = CLINIC_ADMIN_EMAIL
+
     DOCTOR_NAME: str = os.getenv("DOCTOR_NAME", "Dr. Primary Physician, MD")
     DOCTOR_SHORT_NAME: str = os.getenv("DOCTOR_SHORT_NAME", "Dr. Physician")
     DOCTOR_EMAIL: str = os.getenv("DOCTOR_EMAIL", "doctor@example.com")
@@ -117,9 +130,9 @@ class Settings:
     RATE_LIMIT_UPLOAD: str = os.getenv("RATE_LIMIT_UPLOAD", "20/minute")
 
     def __init__(self):
-        _insecure_patterns = ["agastya-local", "dummy", "super-secret", "example", "changeme"]
+        _insecure_patterns = ["agastya-local", "dummy", "super-secret", "example", "changeme", "ehr-platform"]
         if self.IS_PRODUCTION and (
-            not self.JWT_SECRET or any(p in self.JWT_SECRET.lower() for p in _insecure_patterns)
+            not self.JWT_SECRET or len(self.JWT_SECRET) < 32 or any(p in self.JWT_SECRET.lower() for p in _insecure_patterns)
         ):
             sys.exit(
                 "FATAL: JWT_SECRET must be a secure random value in production. "
@@ -131,11 +144,13 @@ class Settings:
         if not self.IS_PRODUCTION:
             return
         errors: list[str] = []
-        _weak_jwt = ["agastya-local", "dummy", "super-secret", "example", "changeme", ""]
-        if any(p in self.JWT_SECRET.lower() for p in _weak_jwt):
-            errors.append("JWT_SECRET is missing or uses a weak/default value")
+        _weak_jwt = ["agastya-local", "dummy", "super-secret", "example", "changeme", "ehr-platform", ""]
+        if any(p in self.JWT_SECRET.lower() for p in _weak_jwt) or len(self.JWT_SECRET) < 32:
+            errors.append("JWT_SECRET is missing or uses a weak/default value (<32 chars)")
         if not self.SUPABASE_ANON_KEY or "dummy" in self.SUPABASE_ANON_KEY:
             errors.append("SUPABASE_ANON_KEY is missing or uses a placeholder value")
+        if not self.CLINICAL_WATERMARK_SECRET or "replace_with" in self.CLINICAL_WATERMARK_SECRET.lower():
+            errors.append("CLINICAL_WATERMARK_SECRET is missing or uses a placeholder value")
         if not self.AUTHORIZED_ADMIN_EMAILS:
             errors.append("AUTHORIZED_ADMIN_EMAILS must have at least one entry")
         if self.USE_MOCK_DATA:

@@ -4,8 +4,8 @@ Handles user registration, login, JWT token issuance, and OTP verification.
 """
 
 from core.config import settings
-from core.security import require_admin_role
-from fastapi import APIRouter, Depends, HTTPException, status
+from core.security import require_admin_role, verify_access_token
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from schemas.auth import (
     AcceptGoogleInviteRequest,
     GoogleAuthRequest,
@@ -214,3 +214,20 @@ async def accept_invite_google_endpoint(req: AcceptGoogleInviteRequest):
         }
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
+
+
+@router.post("/logout", summary="Logout current session and revoke access token")
+async def logout_endpoint(authorization: str | None = Header(None)):
+    """Revokes the current bearer token by invalidating its JTI in the token blocklist."""
+    if not authorization or not authorization.startswith("Bearer "):
+        return {"status": "success", "message": "Logged out"}
+    token = authorization.split("Bearer ", 1)[1].strip()
+    payload = verify_access_token(token)
+    if payload:
+        from core.security import revoke_token
+
+        jti = payload.get("jti")
+        exp = payload.get("exp")
+        if jti:
+            revoke_token(jti, exp)
+    return {"status": "success", "message": "Token revoked successfully"}
