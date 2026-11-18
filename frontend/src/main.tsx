@@ -1,9 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.tsx'
-import { initGlobalTelemetryListeners } from './utils/telemetry.ts'
-import { initCacheReloadListeners } from './utils/cacheReload.ts'
+import App from './app/App'
+import { initGlobalTelemetryListeners } from './core/observability'
+import { initCacheReloadListeners } from './core/api/query/cacheReload'
 
 // Initialize HIPAA-compliant technical error telemetry
 initGlobalTelemetryListeners()
