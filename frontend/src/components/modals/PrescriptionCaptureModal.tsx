@@ -130,7 +130,7 @@ export const PrescriptionCaptureModal: React.FC<PrescriptionCaptureModalProps> =
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden animate-fadeIn"
+      className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-6 flex items-center justify-center animate-fadeIn"
     >
       <div
         className="fixed inset-0 bg-stone-900/80 backdrop-blur-md transition-opacity"
@@ -140,11 +140,10 @@ export const PrescriptionCaptureModal: React.FC<PrescriptionCaptureModalProps> =
         }}
         aria-hidden="true"
       />
-      <div className="min-h-full min-h-[100dvh] w-full flex flex-col justify-center items-center pt-16 sm:pt-20 pb-16 sm:pb-8 px-2 sm:px-4 md:px-6 pointer-events-none">
-        <div
-          className="relative z-10 bg-white rounded-2xl sm:rounded-3xl card-shadow w-full max-w-lg overflow-hidden border border-stone-100 flex flex-col my-auto max-h-[calc(100dvh-5rem)] sm:max-h-[calc(100dvh-6.5rem)] shadow-2xl pointer-events-auto animate-fadeInUp"
-          onClick={(e) => e.stopPropagation()}
-        >
+      <div
+        className="relative z-10 bg-white rounded-2xl sm:rounded-3xl card-shadow w-full max-w-lg overflow-hidden border border-stone-100 flex flex-col max-h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-3.5rem)] shadow-2xl pointer-events-auto animate-fadeInUp"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-stone-100 flex items-center justify-between bg-stone-50">
           <div className="flex items-center gap-2.5">
@@ -364,7 +363,6 @@ export const PrescriptionCaptureModal: React.FC<PrescriptionCaptureModalProps> =
         </div>
       </div>
     </div>
-  </div>
   );
 
   if (mounted && typeof document !== "undefined" && document.body) {

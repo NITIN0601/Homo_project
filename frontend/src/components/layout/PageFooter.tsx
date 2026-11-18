@@ -1,7 +1,7 @@
 import React from "react";
 import { useApp } from "../../context/AppContext";
 import { useTenant } from "../../context/ThemeProvider";
-import { CLINIC } from "../../config";
+import { HOSPITAL } from "../../config";
 
 /**
  * PageFooter — Clean footer strip structured with working hours on separate lines,
@@ -39,7 +39,7 @@ const PageFooter: React.FC = () => {
     );
   }
 
-  // 2. Dedicated Doctor / Clinic Admin Console Footer
+  // 2. Dedicated Doctor / Hospital Admin Console Footer
   if (activePage === "admin-dashboard" || authUser?.role === "admin") {
     return (
       <footer
@@ -58,7 +58,7 @@ const PageFooter: React.FC = () => {
     );
   }
 
-  // 3. Centralized Patient & Consumer Clinic Footer
+  // 3. Centralized Patient & Consumer Hospital Footer
   return (
     <footer
       className="mt-10 border-t border-stone-200 bg-white/70 backdrop-blur-sm"
@@ -70,11 +70,13 @@ const PageFooter: React.FC = () => {
           {/* Brand + copyright */}
           <div className="flex items-center gap-2.5">
             <img
-              src={tenant.branding.logoUrl || CLINIC.LOGO_PATH}
+              src={tenant.branding.logoUrl || HOSPITAL.LOGO_PATH}
               alt={`${tenant.name} Logo`}
               className="h-7 w-7 object-contain opacity-85"
               width={28}
               height={28}
+              loading="lazy"
+              decoding="async"
             />
             <div>
               <p className="text-xs font-extrabold text-stone-800 leading-none">
@@ -129,11 +131,11 @@ const PageFooter: React.FC = () => {
               <p>
                 <span className="font-medium">Location:</span>{" "}
                 <a
-                  href={tenant.contact.mapsUrl || CLINIC.ADDRESS.MAPS_URL}
+                  href={tenant.contact.mapsUrl || HOSPITAL.ADDRESS.MAPS_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-stone-700 hover:text-emerald-800 hover:underline inline-flex items-baseline gap-1"
-                  title="Open clinic location in Google Maps"
+                  title="Open hospital location in Google Maps"
                 >
                   <span>
                     {tenant.contact.address.street}, {tenant.contact.address.city}, {tenant.contact.address.state} – {tenant.contact.address.pincode}

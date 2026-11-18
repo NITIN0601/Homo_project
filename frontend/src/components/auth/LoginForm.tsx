@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { DEMO_CREDENTIALS, THEME_GRADIENTS } from "../../../config";
-import { validateEmail } from "../../../utils/validation";
+import { DEMO_CREDENTIALS, THEME_GRADIENTS } from "../../config";
+import { validateEmail } from "../../utils/validation";
 
 interface LoginFormProps {
   emailInputRef: React.RefObject<HTMLInputElement | null>;

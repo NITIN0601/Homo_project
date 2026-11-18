@@ -1,23 +1,23 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useApp } from "../../context/AppContext";
 import { useTenant } from "../../context/ThemeProvider";
-import { isDatePastClinicTime } from "../../utils/timezone";
+import { isDatePastHospitalTime } from "../../utils/timezone";
 import { fetchIndianHolidays, type DynamicHoliday } from "../../services/holidayService";
+import { CalendarHeader } from "./CalendarHeader";
+import { CalendarGrid } from "./CalendarGrid";
+import { CalendarLegend } from "./CalendarLegend";
+import { CalendarHolidaysBanner } from "./CalendarHolidaysBanner";
+import { CalendarDoctorOooBanner } from "./CalendarDoctorOooBanner";
+import { CalendarActiveSelectionBanner } from "./CalendarActiveSelectionBanner";
 import {
-  CalendarHeader,
-  CalendarGrid,
-  CalendarLegend,
-  CalendarHolidaysBanner,
-  CalendarDoctorOooBanner,
-  CalendarActiveSelectionBanner,
   toYMD,
   isClinicOpen,
   getDaysInMonth,
   getFirstDayOfWeek,
   type CalendarPickerProps,
-} from "./calendar";
+} from "./calendarTypes";
 
-export type { CalendarPickerProps };
+// export type { CalendarPickerProps };
 
 export const CalendarPicker: React.FC<CalendarPickerProps> = ({
   selectedDate = "",
@@ -30,10 +30,10 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
   onSelectRange,
   onDateClick,
 }) => {
-  const { state, clinicTimeInfo, userTzInfo } = useApp();
+  const { state, hospitalTimeInfo, userTzInfo } = useApp();
   const { tenant } = useTenant();
   const blockedDatesList = state.blockedDates;
-  const effectiveTodayYMD = adminMode ? clinicTimeInfo.todayYMD : (userTzInfo?.todayYMD || clinicTimeInfo.todayYMD);
+  const effectiveTodayYMD = adminMode ? hospitalTimeInfo.todayYMD : (userTzInfo?.todayYMD || hospitalTimeInfo.todayYMD);
   const [effYear, effMonth] = effectiveTodayYMD.split("-").map(Number);
 
   // Start view at current month
@@ -196,7 +196,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
       return;
     }
 
-    const past = adminMode ? isDatePastClinicTime(ymd) : (ymd < effectiveTodayYMD);
+    const past = adminMode ? isDatePastHospitalTime(ymd) : (ymd < effectiveTodayYMD);
     if (past || !isClinicOpen(date) || isBlocked || bookedDates.includes(ymd)) return;
     if (onSelectDate) {
       onSelectDate(ymd);
@@ -216,8 +216,8 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
         yearOptions={yearOptions}
         onPrevMonth={prevMonth}
         onNextMonth={nextMonth}
-        onSelectMonth={(m) => setViewMonth(m)}
-        onSelectYear={(y) => setViewYear(y)}
+        onSelectMonth={(m: number) => setViewMonth(m)}
+        onSelectYear={(y: number) => setViewYear(y)}
       />
 
       <CalendarGrid

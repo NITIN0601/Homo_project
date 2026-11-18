@@ -27,7 +27,7 @@ export const OrdersModal: React.FC = () => {
         </div>
       }
     >
-      <div className="p-3.5 sm:p-6 space-y-3 sm:space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {userOrders.length === 0 ? (
           <div className="text-center py-12 space-y-3">
             <span className="text-5xl block">🛍️</span>

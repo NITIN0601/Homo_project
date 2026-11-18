@@ -1,5 +1,5 @@
 import React from "react";
-import { useApp } from "../../context/AppContext";
+import { useCart } from "../../context";
 
 // ─── CartIcon ─────────────────────────────────────────────────────────────────
 /**
@@ -9,7 +9,7 @@ import { useApp } from "../../context/AppContext";
  * - Meets the 44×44px touch target requirement.
  */
 const CartIcon: React.FC = () => {
-  const { cartTotalItems, toggleCart } = useApp();
+  const { cartTotalItems, toggleCart } = useCart();
 
   return (
     <button

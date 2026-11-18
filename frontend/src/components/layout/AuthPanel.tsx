@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useApp } from "../../context/AppContext";
 import { useTenant } from "../../context/ThemeProvider";
 import { MOCK_ACCOUNTS } from "../../data/mocks";
-import { USE_MOCK_DATA, CLINIC } from "../../config";
+import { USE_MOCK_DATA, HOSPITAL } from "../../config";
 import { api } from "../../services/api";
 import type { UserProfile } from "../../types";
 import {
@@ -11,7 +11,7 @@ import {
   RegisterForm,
   type RegisterFormData,
   OtpVerificationView,
-} from "./auth";
+} from "../auth";
 
 const getInitials = (name: string): string => {
   const parts = name.trim().split(" ");
@@ -180,9 +180,9 @@ const AuthPanel: React.FC = () => {
       phone: pendingRegisterData.phone || "+91 98765 00000",
       address: {
         street: pendingRegisterData.street || "10 MG Road",
-        city: pendingRegisterData.city || CLINIC.ADDRESS.CITY,
-        state: CLINIC.ADDRESS.STATE,
-        pincode: pendingRegisterData.pincode || CLINIC.ADDRESS.PINCODE,
+        city: pendingRegisterData.city || HOSPITAL.ADDRESS.CITY,
+        state: HOSPITAL.ADDRESS.STATE,
+        pincode: pendingRegisterData.pincode || HOSPITAL.ADDRESS.PINCODE,
       },
       savedUpiId: pendingRegisterData.upi || undefined,
       savedCards: pendingRegisterData.card

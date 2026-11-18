@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Modal, Button, Badge } from "../ui";
 import { useTenant } from "../../context/ThemeProvider";
-import { CLINIC } from "../../config";
+import { HOSPITAL } from "../../config";
 
 interface TermsPrivacyModalProps {
   isOpen: boolean;
@@ -15,7 +15,7 @@ export const TermsPrivacyModal: React.FC<TermsPrivacyModalProps> = ({
   onAccept,
 }) => {
   const { tenant } = useTenant();
-  const hospitalName = tenant.name || CLINIC.FULL_NAME;
+  const hospitalName = tenant.name || HOSPITAL.FULL_NAME;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -89,7 +89,7 @@ export const TermsPrivacyModal: React.FC<TermsPrivacyModalProps> = ({
         </div>
       }
     >
-      <div className="p-4 sm:p-6 space-y-4 text-xs">
+      <div className="space-y-4 text-xs">
         {/* Document Header & Scroll Indicator */}
         <div className="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
@@ -133,18 +133,28 @@ export const TermsPrivacyModal: React.FC<TermsPrivacyModalProps> = ({
                 1
               </span>
               <h4 className="font-bold text-stone-900 text-sm">
-                Classical Homoeopathy &amp; Tele-Health Consultation Terms of Service
+                Terms &amp; Conditions of Service
               </h4>
             </div>
-            <p className="text-[11px]">
-              By creating a patient account with {hospitalName}, you understand and consent that Homoeopathic consultation is an individualised constitutional method of treatment. Consultations involve in-depth case elicitation of physical, mental, emotional, and lifestyle symptoms.
-            </p>
-            <ul className="list-disc pl-5 space-y-1 text-[11px] text-stone-600">
-              <li>Consultations are scheduled on a prior appointment basis with dedicated physician time slots.</li>
-              <li>Tele-consultations (video / phone) are intended for outpatient chronic care and non-emergency follow-ups.</li>
-              <li><strong>Acute Medical Emergencies:</strong> Homoeopathic tele-care does not replace immediate critical hospital ER care. In case of acute chest pain, severe breathlessness, or trauma, visit your nearest emergency room immediately.</li>
-              <li>Patient agrees to provide accurate personal medical history, drug allergies, and current medications during consultation intake.</li>
-            </ul>
+            {tenant.legal?.termsConditionsText ? (
+              <div className="text-[11px] whitespace-pre-line text-stone-700 leading-relaxed">
+                {tenant.legal.termsConditionsText}
+              </div>
+            ) : (
+              <>
+                <p className="text-[11px]">
+                  By creating a patient account with {hospitalName}, you understand and consent that consultation is an individualised constitutional method of treatment. Consultations involve in-depth case elicitation of physical, mental, emotional, and lifestyle symptoms.
+                </p>
+                <ul className="list-disc pl-5 space-y-1 text-[11px] text-stone-600">
+                  <li>Consultations are scheduled on a prior appointment basis with dedicated physician time slots.</li>
+                  <li>Tele-consultations (video / phone) are intended for outpatient chronic care and non-emergency follow-ups.</li>
+                  <li>
+                    <strong>Acute Medical Emergencies:</strong> {tenant.legal?.emergencyNotice || "Outpatient care does not replace immediate critical hospital ER care. In case of acute chest pain, severe breathlessness, or trauma, visit your nearest emergency room immediately."}
+                  </li>
+                  <li>Patient agrees to provide accurate personal medical history, drug allergies, and current medications during consultation intake.</li>
+                </ul>
+              </>
+            )}
           </div>
 
           {/* Section 2: Privacy Policy */}
@@ -157,15 +167,23 @@ export const TermsPrivacyModal: React.FC<TermsPrivacyModalProps> = ({
                 Protected Health Information (PHI), DPDP &amp; HIPAA Privacy Policy
               </h4>
             </div>
-            <p className="text-[11px]">
-              We adhere strictly to India’s <em>Digital Personal Data Protection (DPDP) Act</em> and international HIPAA data privacy principles:
-            </p>
-            <ul className="list-disc pl-5 space-y-1 text-[11px] text-stone-600">
-              <li><strong>Zero Data Monetization:</strong> Your medical records, prescriptions, tongue photographs, lab investigations, and case summaries are NEVER sold or shared with third-party advertisers or insurance aggregators.</li>
-              <li><strong>End-to-End Encryption:</strong> All patient data in transit and at rest is protected with AES-256 and PBKDF2 cryptography.</li>
-              <li><strong>Tenant &amp; Physician Isolation:</strong> Patient records are strictly scoped to {hospitalName}. If you visit multiple clinics, your clinical files remain completely isolated and are never co-mingled.</li>
-              <li><strong>Right to Erasure &amp; Portability:</strong> You may request an export or deletion of your digital clinical file at any time by contacting clinic compliance.</li>
-            </ul>
+            {tenant.legal?.privacyPolicyText ? (
+              <div className="text-[11px] whitespace-pre-line text-stone-700 leading-relaxed">
+                {tenant.legal.privacyPolicyText}
+              </div>
+            ) : (
+              <>
+                <p className="text-[11px]">
+                  We adhere strictly to data protection legislation, India&apos;s <em>Digital Personal Data Protection (DPDP) Act</em> and HIPAA privacy principles:
+                </p>
+                <ul className="list-disc pl-5 space-y-1 text-[11px] text-stone-600">
+                  <li><strong>Zero Data Monetization:</strong> Your medical records, prescriptions, photographs, lab investigations, and case summaries are NEVER sold or shared with third-party advertisers or insurance aggregators.</li>
+                  <li><strong>End-to-End Encryption:</strong> All patient data in transit and at rest is protected with AES-256 cryptography.</li>
+                  <li><strong>Tenant &amp; Physician Isolation:</strong> Patient records are strictly scoped to {hospitalName}. If you visit multiple healthcare facilities, your clinical files remain completely isolated and are never co-mingled.</li>
+                  <li><strong>Right to Erasure &amp; Portability:</strong> You may request an export or deletion of your digital clinical file at any time by contacting our compliance officer.</li>
+                </ul>
+              </>
+            )}
           </div>
         </div>
       </div>

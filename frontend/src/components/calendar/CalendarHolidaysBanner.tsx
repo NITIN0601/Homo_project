@@ -1,8 +1,8 @@
 import React from "react";
-import type { DynamicHoliday } from "../../../services/holidayService";
-import { MONTHS } from "./types";
-import { formatDateWithWeekday } from "../../../utils/format";
-import { isDatePastClinicTime } from "../../../utils/timezone";
+import type { DynamicHoliday } from "../../services/holidayService";
+import { MONTHS } from "./calendarTypes";
+import { formatDateWithWeekday } from "../../utils/format";
+import { isDatePastHospitalTime } from "../../utils/timezone";
 
 interface CalendarHolidaysBannerProps {
   monthFestivals: DynamicHoliday[];
@@ -58,7 +58,7 @@ export const CalendarHolidaysBanner: React.FC<CalendarHolidaysBannerProps> = ({
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px]">
         {monthFestivals.map((f) => {
-          const isPast = isDatePastClinicTime(f.date);
+          const isPast = isDatePastHospitalTime(f.date);
           return (
             <div
               key={f.date + f.name}

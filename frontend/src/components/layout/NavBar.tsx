@@ -1,38 +1,35 @@
 import React, { useRef, useMemo } from "react";
 import { useApp } from "../../context/AppContext";
 import { useTenant } from "../../context/ThemeProvider";
-import { useClinic } from "../../hooks/useClinic";
+import { useHospital } from "../../hooks/useHospital";
 import { MOCK_ACCOUNTS } from "../../data/mocks";
 import {
   USE_MOCK_DATA,
   THEME_SHADOWS,
   INVENTORY,
 } from "../../config";
-import { getClinicTimeInfo } from "../../utils/timezone";
+import { getHospitalTimeInfo } from "../../utils/timezone";
 import type { AdminTab } from "../../types";
-import {
-  NavBrand,
-  NavAdminLinks,
-  NavPatientLinks,
-  NavUserControls,
-  NavAdminSubBar,
-  type PrimaryAdminGroup,
-  type AdminNavStats,
-} from "./nav";
+import { NavBrand } from "./NavBrand";
+import { NavAdminLinks } from "./NavAdminLinks";
+import { NavPatientLinks } from "./NavPatientLinks";
+import { NavUserControls } from "./NavUserControls";
+import { NavAdminSubBar } from "./NavAdminSubBar";
+import type { PrimaryAdminGroup, AdminNavStats } from "./navTypes";
 
 export const NavBar: React.FC = () => {
   const { state, navigateTo, setAdminTab, openAuthModal } = useApp();
   const { tenant, setTenantId } = useTenant();
-  const clinic = useClinic();
+  const hospital = useHospital();
   const { activePage, authUser, isAuthModalOpen, adminTab, appointments, inventory, blockedDates } = state;
 
   const avatarRef = useRef<HTMLButtonElement>(null);
   const isSuperAdmin = authUser?.role === "super_admin" || activePage === "super-admin-dashboard";
   const isAdminPage = activePage === "admin-dashboard" || (authUser?.role === "admin" && !isSuperAdmin);
-  const clinicTime = useMemo(() => getClinicTimeInfo(), []);
+  const hospitalTime = useMemo(() => getHospitalTimeInfo(), []);
 
   const adminStats = useMemo<AdminNavStats>(() => {
-    const todayAppts = appointments.filter(a => a.date === "Today" || a.date === clinicTime.todayYMD).length;
+    const todayAppts = appointments.filter(a => a.date === "Today" || a.date === hospitalTime.todayYMD).length;
     const registeredPatients = new Set([
       ...Object.keys(state.visitSummaries),
       ...appointments.map((a) => a.patientId).filter(Boolean),
@@ -50,7 +47,7 @@ export const NavBar: React.FC = () => {
       dispatchesCount,
       blockedDays,
     };
-  }, [appointments, clinicTime.todayYMD, inventory, blockedDates, state.visitSummaries]);
+  }, [appointments, hospitalTime.todayYMD, inventory, blockedDates, state.visitSummaries]);
 
   const activePrimaryGroup: PrimaryAdminGroup = useMemo(() => {
     if (adminTab === "customization") return "customization";
@@ -81,7 +78,7 @@ export const NavBar: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center h-[60px] gap-4">
         {/* Brand */}
-        <NavBrand clinic={clinic} onBrandClick={handleBrandClick} />
+        <NavBrand hospital={hospital} onBrandClick={handleBrandClick} />
 
         {/* Navigation links (Desktop md:) */}
         <nav className="hidden md:flex items-center gap-1.5 ml-4 overflow-x-auto scrollbar-hide flex-shrink min-w-0" aria-label="Main navigation">
@@ -131,7 +128,7 @@ export const NavBar: React.FC = () => {
           adminTab={adminTab}
           adminStats={adminStats}
           tenant={tenant}
-          clinicTime={clinicTime}
+          hospitalTime={hospitalTime}
           onAdminNav={handleAdminNav}
         />
       )}

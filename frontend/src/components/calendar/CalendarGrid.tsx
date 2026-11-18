@@ -1,9 +1,9 @@
 import React from "react";
-import type { DynamicHoliday } from "../../../services/holidayService";
-import type { BlockedCalendarDate } from "../../../types";
-import { THEME_COLORS } from "../../../config";
-import { DAY_HEADERS, MONTHS, toYMD } from "./types";
-import { isDatePastClinicTime } from "../../../utils/timezone";
+import type { DynamicHoliday } from "../../services/holidayService";
+import type { BlockedCalendarDate } from "../../types";
+import { THEME_COLORS } from "../../config";
+import { DAY_HEADERS, MONTHS, toYMD } from "./calendarTypes";
+import { isDatePastHospitalTime } from "../../utils/timezone";
 
 interface CalendarGridProps {
   calendarCells: (number | null)[];
@@ -72,7 +72,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
 
           const dateObj = new Date(viewYear, viewMonth, day);
           const ymd = toYMD(dateObj);
-          const past = adminMode ? isDatePastClinicTime(ymd) : (ymd < effectiveTodayYMD);
+          const past = adminMode ? isDatePastHospitalTime(ymd) : (ymd < effectiveTodayYMD);
           const isSunday = dateObj.getDay() === 0;
           const booked = bookedDates.includes(ymd);
           const dayBlockedEntries = blockedDatesList.filter((b) => b.date === ymd);

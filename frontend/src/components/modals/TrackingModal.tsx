@@ -23,7 +23,7 @@ export const TrackingModal: React.FC = () => {
       }
     >
       {order && (
-        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Status summary banner */}
             <div className="bg-emerald-50 border border-emerald-200/60 rounded-2xl p-4 flex items-center justify-between">
               <div>

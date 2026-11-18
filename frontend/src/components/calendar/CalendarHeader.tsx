@@ -1,6 +1,6 @@
 import React from "react";
-import { THEME_GRADIENTS } from "../../../config";
-import { MONTHS } from "./types";
+import { THEME_GRADIENTS } from "../../config";
+import { MONTHS } from "./calendarTypes";
 
 interface CalendarHeaderProps {
   viewYear: number;

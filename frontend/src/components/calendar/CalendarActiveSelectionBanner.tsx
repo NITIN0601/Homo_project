@@ -1,6 +1,6 @@
 import React from "react";
-import type { DynamicHoliday } from "../../../services/holidayService";
-import { formatDateWithWeekday, formatDateFull } from "../../../utils/format";
+import type { DynamicHoliday } from "../../services/holidayService";
+import { formatDateWithWeekday, formatDateFull } from "../../utils/format";
 
 interface CalendarActiveSelectionBannerProps {
   adminMode?: boolean;

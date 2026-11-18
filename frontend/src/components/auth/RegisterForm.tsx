@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import PhoneInput from "../../forms/PhoneInput";
-import { TermsPrivacyModal } from "../../modals/TermsPrivacyModal";
+import PhoneInput from "../forms/PhoneInput";
+import { TermsPrivacyModal } from "../modals/TermsPrivacyModal";
 import {
   PHASE_CONFIG,
   PLACEHOLDERS,
   THEME_GRADIENTS,
-} from "../../../config";
-import { MOCK_ACCOUNTS } from "../../../data/mocks";
-import { validateEmail, validateFullName, validatePhone } from "../../../utils/validation";
+} from "../../config";
+import { MOCK_ACCOUNTS } from "../../data/mocks";
+import { validateEmail, validateFullName, validatePhone } from "../../utils/validation";
 
 export interface RegisterFormData {
   name: string;
@@ -262,7 +262,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             <label className="text-[10px] font-bold text-stone-500 uppercase">Contact Phone Number *</label>
             <PhoneInput
               value={regPhone}
-              onChange={(full) => setRegPhone(full)}
+              onChange={(full: string) => setRegPhone(full)}
               defaultIso="IND"
             />
           </div>

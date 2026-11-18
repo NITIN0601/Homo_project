@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { useApp } from "../../context/AppContext";
+import { useCart, useNavigation } from "../../context";
 import type { CartItem } from "../../types";
 import { THEME_GRADIENTS, THEME_COLORS, calculateOrderPricing } from "../../config";
 import { formatINR } from "../../utils/format";
@@ -7,7 +7,7 @@ import { Button, Badge } from "../ui";
 
 // ─── Single line item ─────────────────────────────────────────────────────────
 const DrawerItem: React.FC<{ item: CartItem }> = ({ item }) => {
-  const { updateQty, removeFromCart } = useApp();
+  const { updateQty, removeFromCart } = useCart();
   const { medicine, quantity } = item;
 
   return (
@@ -92,8 +92,8 @@ const DrawerItem: React.FC<{ item: CartItem }> = ({ item }) => {
  * - Closes on Escape key and backdrop click.
  */
 const CartDrawer: React.FC = () => {
-  const { state, cartSubtotalINR, closeCart, navigateTo } = useApp();
-  const { isCartOpen, cart } = state;
+  const { isCartOpen, cart, cartSubtotalINR, closeCart } = useCart();
+  const { navigateTo } = useNavigation();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const pricing = calculateOrderPricing(cartSubtotalINR);

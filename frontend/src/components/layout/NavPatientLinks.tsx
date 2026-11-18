@@ -1,6 +1,6 @@
 import React from "react";
-import type { Page, AuthUser } from "../../../types";
-import { PATIENT_NAV_ITEMS, THEME_COLORS } from "../../../config";
+import type { Page, AuthUser } from "../../types";
+import { PATIENT_NAV_ITEMS, THEME_COLORS } from "../../config";
 
 interface NavPatientLinksProps {
   activePage: Page;

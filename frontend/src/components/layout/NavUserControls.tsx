@@ -1,11 +1,11 @@
 import React from "react";
-import type { AuthUser, Page } from "../../../types";
-import type { HospitalTenantConfig } from "../../../types/tenant";
-import { getAllHospitalTenants } from "../../../config/tenants";
-import { USE_MOCK_DATA, PHASE_CONFIG, THEME_COLORS, THEME_GRADIENTS } from "../../../config";
-import { api } from "../../../services/api";
-import CartIcon from "../CartIcon";
-import AuthPanel from "../AuthPanel";
+import type { AuthUser, Page } from "../../types";
+import type { HospitalTenantConfig } from "../../types/tenant";
+import { getAllHospitalTenants } from "../../config/tenants";
+import { USE_MOCK_DATA, PHASE_CONFIG, THEME_COLORS, THEME_GRADIENTS } from "../../config";
+import { api } from "../../services/api";
+import CartIcon from "./CartIcon";
+import AuthPanel from "./AuthPanel";
 
 interface NavUserControlsProps {
   authUser: AuthUser | null;

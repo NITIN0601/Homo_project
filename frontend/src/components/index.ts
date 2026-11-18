@@ -33,10 +33,11 @@ export * from "./widgets/CookieConsentBanner";
 export { default as CookieConsentBanner } from "./widgets/CookieConsentBanner";
 
 // Form Controls
-export * from "./forms/CalendarPicker";
-export { default as CalendarPicker } from "./forms/CalendarPicker";
+export * from "./calendar";
+export { default as CalendarPicker } from "./calendar";
 export * from "./forms/PhoneInput";
 export { default as PhoneInput } from "./forms/PhoneInput";
+export * from "./forms";
 
 // Common & Security Guards
 export * from "./common/CaseRecordCard";

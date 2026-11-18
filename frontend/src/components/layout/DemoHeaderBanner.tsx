@@ -66,7 +66,7 @@ export const DemoHeaderBanner: React.FC = () => {
               {isSuperAdminPage
                 ? "⚡ Platform Super Admin Console"
                 : isAdminPage
-                ? "🩺 Clinic Doctor Admin Console"
+                ? "🩺 Hospital Doctor Admin Console"
                 : "👤 Patient Client Portal"}
             </strong>
             <span className="text-stone-400">
@@ -172,9 +172,9 @@ export const DemoHeaderBanner: React.FC = () => {
                     navigateTo("admin-dashboard");
                   }}
                   className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all cursor-pointer"
-                  title="Jump to Clinic Doctor Admin Console"
+                  title="Jump to Hospital Doctor Admin Console"
                 >
-                  <span>🩺 Clinic Admin</span>
+                  <span>🩺 Hospital Admin</span>
                 </button>
                 <button
                   onClick={() => {

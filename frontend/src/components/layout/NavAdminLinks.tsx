@@ -1,6 +1,6 @@
 import React from "react";
-import type { AdminTab, Page } from "../../../types";
-import type { PrimaryAdminGroup, AdminNavStats } from "./types";
+import type { AdminTab, Page } from "../../types";
+import type { PrimaryAdminGroup, AdminNavStats } from "./navTypes";
 
 interface NavAdminLinksProps {
   activePage: Page;

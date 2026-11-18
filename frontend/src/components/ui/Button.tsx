@@ -29,10 +29,10 @@ const variantStyles: Record<ButtonVariant, string> = {
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: "px-3 py-1.5 text-xs font-semibold rounded-lg min-h-[36px]",
+  sm: "px-3 py-1.5 text-xs font-semibold rounded-lg min-h-[36px] sm:min-h-[36px] active:scale-98",
   md: "px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl min-h-[44px]",
   lg: "px-6 py-3.5 text-sm sm:text-base font-extrabold rounded-2xl min-h-[48px]",
-  icon: "w-10 h-10 p-0 flex items-center justify-center rounded-xl min-h-[40px] min-w-[40px]",
+  icon: "w-10 h-10 p-0 flex items-center justify-center rounded-xl min-h-[44px] min-w-[44px] sm:min-h-[40px] sm:min-w-[40px]",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(

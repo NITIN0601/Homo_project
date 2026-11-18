@@ -1,10 +1,10 @@
 import React from "react";
-import type { AuthUser } from "../../../types";
+import type { AuthUser } from "../../types";
 import {
   THEME_COLORS,
   THEME_GRADIENTS,
   PHASE_CONFIG,
-} from "../../../config";
+} from "../../config";
 
 interface UserProfileMenuProps {
   authUser: AuthUser;

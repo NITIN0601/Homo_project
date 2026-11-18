@@ -1,6 +1,6 @@
 import React from "react";
-import type { BlockedCalendarDate } from "../../../types";
-import { formatDateWithWeekday } from "../../../utils/format";
+import type { BlockedCalendarDate } from "../../types";
+import { formatDateWithWeekday } from "../../utils/format";
 
 interface CalendarDoctorOooBannerProps {
   monthBlockedDates: BlockedCalendarDate[];

@@ -1,16 +1,16 @@
 import React from "react";
-import type { AdminTab } from "../../../types";
-import type { PrimaryAdminGroup, AdminNavStats } from "./types";
-import type { HospitalTenantConfig } from "../../../types/tenant";
-import { Badge } from "../../ui/Badge";
-import { CLINIC } from "../../../config";
+import type { AdminTab } from "../../types";
+import type { PrimaryAdminGroup, AdminNavStats } from "./navTypes";
+import type { HospitalTenantConfig } from "../../types/tenant";
+import { Badge } from "../ui/Badge";
+import { HOSPITAL } from "../../config";
 
 interface NavAdminSubBarProps {
   activePrimaryGroup: PrimaryAdminGroup;
   adminTab: AdminTab | null;
   adminStats: AdminNavStats;
   tenant: HospitalTenantConfig;
-  clinicTime: { label: string; formattedTime: string };
+  hospitalTime?: { label: string; formattedTime: string };
   onAdminNav: (tab: AdminTab) => void;
 }
 
@@ -19,9 +19,10 @@ export const NavAdminSubBar: React.FC<NavAdminSubBarProps> = ({
   adminTab,
   adminStats,
   tenant,
-  clinicTime,
+  hospitalTime,
   onAdminNav,
 }) => {
+  const activeTime = hospitalTime || { label: "IST", formattedTime: "" };
   return (
     <div className="bg-stone-50/95 border-t border-stone-200/70 py-1.5 px-4 sm:px-6 shadow-2xs">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
@@ -200,10 +201,10 @@ export const NavAdminSubBar: React.FC<NavAdminSubBarProps> = ({
           </div>
         )}
 
-        {/* Right side location & live clinic clock */}
+        {/* Right side location & live hospital clock */}
         <div className="hidden md:flex items-center gap-2">
           <span className="text-[11px] font-bold text-stone-500 bg-white border border-stone-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1">
-            <span>📍</span> {tenant.contact.address.city || CLINIC.ADDRESS.CITY} · {clinicTime.label} ({clinicTime.formattedTime})
+            <span>📍</span> {tenant.contact.address.city || HOSPITAL.ADDRESS.CITY} · {activeTime.label} ({activeTime.formattedTime})
           </span>
         </div>
       </div>

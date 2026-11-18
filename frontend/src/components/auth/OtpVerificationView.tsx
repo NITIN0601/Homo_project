@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { THEME_GRADIENTS } from "../../../config";
+import { THEME_GRADIENTS } from "../../config";
 
 interface OtpVerificationViewProps {
   regEmail: string;
