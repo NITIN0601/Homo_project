@@ -1,6 +1,6 @@
 import React from "react";
-import type { StepProps } from "./types";
-import { DEFAULT_COLOR_PRESETS, type ColorPreset } from "../../../config/tenants/constants";
+import type { StepProps } from "./onboardTypes";
+import { DEFAULT_COLOR_PRESETS, type ColorPreset } from "../../config/tenants/constants";
 
 interface FacilityBrandingStepProps extends StepProps {
   handleApplyPreset: (preset: ColorPreset) => void;
@@ -33,11 +33,10 @@ export const FacilityBrandingStep: React.FC<FacilityBrandingStepProps> = ({
                 key={p.label}
                 type="button"
                 onClick={() => handleApplyPreset(p)}
-                className={`p-2 rounded-xl border text-left flex items-center gap-2 cursor-pointer transition-all ${
-                  isSelected
-                    ? "border-indigo-600 ring-2 ring-indigo-500/20 bg-indigo-50/30"
-                    : "border-stone-200 hover:bg-stone-50"
-                }`}
+                className={`p-2 rounded-xl border text-left flex items-center gap-2 cursor-pointer transition-all ${isSelected
+                  ? "border-indigo-600 ring-2 ring-indigo-500/20 bg-indigo-50/30"
+                  : "border-stone-200 hover:bg-stone-50"
+                  }`}
               >
                 <div className="w-5 h-5 rounded-md shadow-xs shrink-0" style={{ background: p.primary }} />
                 <span className="text-[11px] font-bold text-stone-800 leading-tight">{p.label}</span>
@@ -94,7 +93,7 @@ export const FacilityBrandingStep: React.FC<FacilityBrandingStepProps> = ({
               <div className="flex items-center gap-1 text-[10px]">
                 <button
                   type="button"
-                  onClick={() => updateField("logoUrl", "/generic-clinic-logo.svg")}
+                  onClick={() => updateField("logoUrl", "/generic-hospital-logo.svg")}
                   className="text-indigo-600 hover:underline font-semibold cursor-pointer"
                 >
                   Default
@@ -120,17 +119,17 @@ export const FacilityBrandingStep: React.FC<FacilityBrandingStepProps> = ({
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-xl border border-stone-200 bg-white flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-xs">
                 <img
-                  src={form.logoUrl || "/generic-clinic-logo.svg"}
+                  src={form.logoUrl || "/generic-hospital-logo.svg"}
                   alt="Logo Preview"
                   className="w-full h-full object-contain"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/generic-clinic-logo.svg";
+                    (e.target as HTMLImageElement).src = "/generic-hospital-logo.svg";
                   }}
                 />
               </div>
               <input
                 type="text"
-                placeholder="/generic-clinic-logo.svg or https://..."
+                placeholder="/generic-hospital-logo.svg or https://..."
                 value={form.logoUrl}
                 onChange={(e) => updateField("logoUrl", e.target.value)}
                 className="flex-1 border border-stone-200 rounded-xl px-3 py-2 text-xs bg-white outline-none"
@@ -172,16 +171,16 @@ export const FacilityBrandingStep: React.FC<FacilityBrandingStepProps> = ({
           </div>
         </div>
 
-        {/* About Clinic Text */}
+        {/* About Hospital Text */}
         <div>
           <label className="text-[10px] font-bold text-stone-600 uppercase">
-            About Hospital / Clinic Overview (Shown on Patient About Page)
+            About Overview (Shown on Patient About Page)
           </label>
           <textarea
             rows={2}
             placeholder="e.g. City Care Medical Center provides compassionate, personalized outpatient care and integrated specialty treatments..."
-            value={form.aboutClinicText}
-            onChange={(e) => updateField("aboutClinicText", e.target.value)}
+            value={form.aboutHospitalText}
+            onChange={(e) => updateField("aboutHospitalText", e.target.value)}
             className="w-full mt-1 border border-stone-200 rounded-xl px-3 py-1.5 text-xs bg-white outline-none"
           />
         </div>

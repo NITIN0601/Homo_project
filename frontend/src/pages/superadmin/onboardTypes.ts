@@ -1,4 +1,4 @@
-import type { HospitalTenantConfig, HospitalDoctor, HospitalFeatures } from "../../../types/tenant";
+import type { HospitalTenantConfig, HospitalDoctor, HospitalFeatures } from "../../types/tenant";
 
 export interface OnboardHospitalModalProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ export interface OnboardHospitalModalProps {
 export interface OnboardFormState {
   hospitalName: string;
   hospitalSlug: string;
+  facilityType: "hospital" | "clinic";
   tagline: string;
   phone: string;
   email: string;
@@ -29,7 +30,10 @@ export interface OnboardFormState {
   accentColor: string;
   logoUrl: string;
   bannerUrl: string;
-  aboutClinicText: string;
+  aboutHospitalText: string;
+  termsConditionsText: string;
+  privacyPolicyText: string;
+  emergencyNotice: string;
   doctorName: string;
   doctorEmail: string;
   doctorPhone: string;

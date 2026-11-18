@@ -5,6 +5,7 @@ import {
   getAllHospitalTenants,
   registerHospitalTenant,
   updateHospitalTenantInRegistry,
+  deleteHospitalTenantFromRegistry,
 } from "../config/tenants";
 import type { HospitalTenantConfig, HospitalDoctor, HospitalFeatures } from "../types/tenant";
 import { useToast } from "../context/ToastContext";
@@ -50,6 +51,50 @@ export const SuperAdminDashboard: React.FC = () => {
       window.removeEventListener("storage", refreshTenants);
     };
   }, [refreshTenants]);
+
+  // Synchronize server-registered hospitals into frontend registry on initial mount
+  useEffect(() => {
+    let mounted = true;
+    api.platform
+      .listHospitals()
+      .then((hospitals) => {
+        if (!mounted || !Array.isArray(hospitals) || hospitals.length === 0) return;
+        hospitals.forEach((h: any) => {
+          if (h && h.id) {
+            registerHospitalTenant(h);
+          }
+        });
+        setTenantsList(getAllHospitalTenants());
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleDeleteHospital = async (targetTenant: HospitalTenantConfig) => {
+    if (targetTenant.id === "default") {
+      toast.error("The default hospital facility cannot be deleted.");
+      return;
+    }
+    const confirmed = window.confirm(
+      `Are you sure you want to deactivate '${targetTenant.name}'? Existing patient records will be archived.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await api.platform.deleteHospital(targetTenant.id);
+    } catch (err: any) {
+      console.warn("Backend delete error:", err);
+    }
+
+    deleteHospitalTenantFromRegistry(targetTenant.id);
+    setTenantsList((prev) => prev.filter((t) => t.id !== targetTenant.id));
+    if (tenant.id === targetTenant.id) {
+      setTenantId("default");
+    }
+    toast.success(`Hospital '${targetTenant.name}' has been deactivated.`);
+  };
 
   const handleSwitchTenant = (targetTenant: HospitalTenantConfig) => {
     setTenantId(targetTenant.id);
@@ -100,6 +145,7 @@ export const SuperAdminDashboard: React.FC = () => {
       await api.platform.updateHospital(updatedTenant.id, {
         name: updatedTenant.name,
         short_name: updatedTenant.shortName,
+        facility_type: updatedTenant.facilityType || "hospital",
         tagline: updatedTenant.tagline,
         phone: updatedTenant.contact.phone,
         email: updatedTenant.contact.email,
@@ -109,7 +155,11 @@ export const SuperAdminDashboard: React.FC = () => {
         accent_color: updatedTenant.branding.accentColor,
         logo_url: updatedTenant.branding.logoUrl,
         banner_url: updatedTenant.branding.bannerUrl,
-        about_clinic_text: updatedTenant.branding.aboutClinicText,
+        about_hospital_text: updatedTenant.branding.aboutHospitalText,
+        legal: updatedTenant.legal,
+        terms_conditions_text: updatedTenant.legal?.termsConditionsText,
+        privacy_policy_text: updatedTenant.legal?.privacyPolicyText,
+        emergency_notice: updatedTenant.legal?.emergencyNotice,
         features: featuresConfig,
         doctor: doctorConfig,
       });
@@ -189,6 +239,7 @@ export const SuperAdminDashboard: React.FC = () => {
         id: newTenant.id,
         name: newTenant.name,
         short_name: newTenant.shortName,
+        facility_type: newTenant.facilityType || "hospital",
         tagline: newTenant.tagline,
         phone: newTenant.contact.phone,
         email: newTenant.contact.email,
@@ -196,9 +247,13 @@ export const SuperAdminDashboard: React.FC = () => {
         city: newTenant.contact.address.city,
         primary_color: newTenant.branding.primaryColor,
         accent_color: newTenant.branding.accentColor,
-        logo_url: newTenant.branding.logoUrl || "/generic-clinic-logo.svg",
+        logo_url: newTenant.branding.logoUrl || "/generic-hospital-logo.svg",
         banner_url: newTenant.branding.bannerUrl || "/assets/banner.jpg",
-        about_clinic_text: newTenant.branding.aboutClinicText,
+        about_hospital_text: newTenant.branding.aboutHospitalText,
+        legal: newTenant.legal,
+        terms_conditions_text: newTenant.legal?.termsConditionsText,
+        privacy_policy_text: newTenant.legal?.privacyPolicyText,
+        emergency_notice: newTenant.legal?.emergencyNotice,
         features: featuresConfig,
         doctor_name: doctorConfig.name,
         doctor_title: doctorConfig.title,
@@ -321,6 +376,7 @@ export const SuperAdminDashboard: React.FC = () => {
               onOpenFeatures={(target) => setManagingTenant(target)}
               onPreviewPatient={handlePreviewAsPatient}
               onPreviewDoctor={handlePreviewAsDoctor}
+              onDeleteHospital={handleDeleteHospital}
             />
           ))}
         </div>

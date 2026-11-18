@@ -1,6 +1,6 @@
 import React from "react";
-import type { StepProps } from "./types";
-import { COMMON_TIMEZONES } from "../../../utils/timezone";
+import type { StepProps } from "./onboardTypes";
+import { COMMON_TIMEZONES } from "../../utils/timezone";
 
 interface FacilityDetailsStepProps extends StepProps {
   handleLocationChange: (field: "country" | "state" | "city", value: string) => void;
@@ -64,6 +64,61 @@ export const FacilityDetailsStep: React.FC<FacilityDetailsStepProps> = ({
               isEditing ? "opacity-60 cursor-not-allowed bg-stone-100 text-stone-500" : "bg-stone-50 focus:bg-white"
             }`}
           />
+        </div>
+      </div>
+
+      {/* Facility Classification & Dynamic Terminology */}
+      <div className="p-3 bg-white rounded-xl border border-stone-200/90 space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-[10px] font-bold text-stone-700 uppercase tracking-wide flex items-center gap-1.5">
+            <span>🏷️</span> Facility Classification &amp; System Terminology *
+          </label>
+          <span className="text-[10px] text-stone-400 font-medium">
+            Syncs terminology across all patient &amp; doctor portals
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            onClick={() => updateField("facilityType", "hospital")}
+            className={`p-2.5 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
+              form.facilityType === "hospital"
+                ? "bg-indigo-50/70 border-indigo-500 ring-2 ring-indigo-500/20 text-indigo-950"
+                : "bg-stone-50/60 border-stone-200 hover:bg-stone-100 text-stone-700"
+            }`}
+          >
+            <span className="text-xl">🏥</span>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-black">Hospital</span>
+                <span className="text-[9px] bg-indigo-200/80 text-indigo-800 font-bold px-1.5 py-0.5 rounded">Default</span>
+              </div>
+              <p className="text-[10px] text-stone-500 leading-tight mt-0.5">
+                Hospital facility, medical center, and multi-department health complex.
+              </p>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => updateField("facilityType", "clinic")}
+            className={`p-2.5 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
+              form.facilityType === "clinic"
+                ? "bg-emerald-50/70 border-emerald-500 ring-2 ring-emerald-500/20 text-emerald-950"
+                : "bg-stone-50/60 border-stone-200 hover:bg-stone-100 text-stone-700"
+            }`}
+          >
+            <span className="text-xl">🌿</span>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-black">Clinic</span>
+                <span className="text-[9px] bg-emerald-200/80 text-emerald-800 font-bold px-1.5 py-0.5 rounded">Specialist</span>
+              </div>
+              <p className="text-[10px] text-stone-500 leading-tight mt-0.5">
+                Specialty clinic, outpatient dispensary, private practice, and holistic healing center.
+              </p>
+            </div>
+          </button>
         </div>
       </div>
 

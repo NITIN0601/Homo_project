@@ -10,6 +10,7 @@ export interface HospitalCardProps {
   onOpenFeatures: (hospital: HospitalTenantConfig) => void;
   onPreviewPatient: (hospital: HospitalTenantConfig) => void;
   onPreviewDoctor: (hospital: HospitalTenantConfig) => void;
+  onDeleteHospital?: (hospital: HospitalTenantConfig) => void;
 }
 
 export const HospitalCard: React.FC<HospitalCardProps> = ({
@@ -21,6 +22,7 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
   onOpenFeatures,
   onPreviewPatient,
   onPreviewDoctor,
+  onDeleteHospital,
 }) => {
   return (
     <div
@@ -44,10 +46,19 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
             style={{ background: hospital.branding.primaryColor }}
             aria-hidden="true"
           >
-            🏥
+            {hospital.facilityType === "clinic" ? "🌿" : "🏥"}
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-extrabold text-stone-900 text-base leading-snug truncate">{hospital.name}</h3>
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-extrabold text-stone-900 text-base leading-snug truncate">{hospital.name}</h3>
+              <span
+                className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded shrink-0 ${
+                  hospital.facilityType === "clinic" ? "bg-emerald-100 text-emerald-800" : "bg-blue-100 text-blue-800"
+                }`}
+              >
+                {hospital.facilityType === "clinic" ? "Clinic" : "Hospital"}
+              </span>
+            </div>
             <p className="text-xs font-mono text-stone-400">id: {hospital.id}</p>
           </div>
         </div>
@@ -195,6 +206,18 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
             🩺 Doctor View
           </button>
         </div>
+
+        {/* Deactivation / Deletion */}
+        {onDeleteHospital && hospital.id !== "default" && (
+          <button
+            type="button"
+            onClick={() => onDeleteHospital(hospital)}
+            className="w-full py-1.5 px-2 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 rounded-xl text-[11px] font-bold transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5"
+            title="Deactivate this hospital tenant"
+          >
+            <span>🗑️</span> Deactivate Hospital
+          </button>
+        )}
       </div>
     </div>
   );

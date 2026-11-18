@@ -15,6 +15,7 @@ import {
   DEFAULT_FACILITY_CONFIG,
   DEFAULT_DOCTOR_CONFIG,
   DEFAULT_NEW_TENANT_FEATURES,
+  generateDefaultLegalTemplates,
   type ColorPreset,
 } from "../../config/tenants/constants";
 import {
@@ -23,89 +24,116 @@ import {
   getTimezoneAbbreviation,
 } from "../../utils/timezone";
 import { inferCurrencyFromCountry } from "../../utils/currency";
-import {
-  FacilityDetailsStep,
-  FacilityScheduleStep,
-  DoctorCredentialsStep,
-  FacilityGovernanceStep,
-  FacilityBrandingStep,
-  type OnboardFormState,
-  type OnboardHospitalModalProps,
-} from "./onboard";
+import type { OnboardFormState, OnboardHospitalModalProps } from "./onboardTypes";
+import { FacilityBrandingStep } from "./FacilityBrandingStep";
+import { FacilityDetailsStep } from "./FacilityDetailsStep";
+import { DoctorCredentialsStep } from "./DoctorCredentialsStep";
+import { FacilityScheduleStep } from "./FacilityScheduleStep";
+import { FacilityGovernanceStep } from "./FacilityGovernanceStep";
+import { FacilityLegalStep } from "./FacilityLegalStep";
 
 export type { OnboardFormState, OnboardHospitalModalProps };
 
-const getInitialFormState = (): OnboardFormState => ({
-  hospitalName: "",
-  hospitalSlug: "",
-  tagline: "",
-  phone: DEFAULT_FACILITY_CONFIG.defaultPhone,
-  email: DEFAULT_FACILITY_CONFIG.defaultEmail,
-  country: "India",
-  state: "Karnataka",
-  city: "Bengaluru",
-  street: DEFAULT_FACILITY_CONFIG.defaultStreet,
-  pincode: "560003",
-  timezone: "Asia/Kolkata",
-  timezoneManualOverride: false,
-  primaryColor: DEFAULT_FACILITY_CONFIG.defaultPrimaryColor,
-  accentColor: DEFAULT_FACILITY_CONFIG.defaultAccentColor,
-  logoUrl: DEFAULT_FACILITY_CONFIG.defaultLogoUrl || "/generic-clinic-logo.svg",
-  bannerUrl: DEFAULT_FACILITY_CONFIG.defaultBannerUrl || "/assets/banner.jpg",
-  aboutClinicText: "",
-  doctorName: "",
-  doctorEmail: "",
-  doctorPhone: DEFAULT_DOCTOR_CONFIG.defaultPhone,
-  doctorTitle: DEFAULT_DOCTOR_CONFIG.defaultTitle,
-  doctorQual: DEFAULT_DOCTOR_CONFIG.defaultQualifications,
-  doctorRegNo: "",
-  doctorExp: DEFAULT_DOCTOR_CONFIG.defaultExperienceYears,
-  doctorSpecialties: DEFAULT_DOCTOR_CONFIG.defaultSpecialties,
-  doctorBio: "",
-  doctorFee: 750,
-  morningHours: "10:00 AM – 01:30 PM",
-  eveningHours: "05:00 PM – 08:30 PM",
-  availableDays: "Monday – Saturday",
-  sundayPolicy: "Prior Appointment Only",
-  features: { ...DEFAULT_NEW_TENANT_FEATURES },
-});
+const getInitialFormState = (): OnboardFormState => {
+  const defaultTemplates = generateDefaultLegalTemplates(
+    "New Hospital Facility",
+    "hospital",
+    "Bengaluru",
+    DEFAULT_FACILITY_CONFIG.defaultPhone,
+    DEFAULT_FACILITY_CONFIG.defaultEmail
+  );
 
-const getFormStateFromTenant = (t: HospitalTenantConfig): OnboardFormState => ({
-  hospitalName: t.name || "",
-  hospitalSlug: t.id || "",
-  tagline: t.tagline || "",
-  phone: t.contact?.phone || DEFAULT_FACILITY_CONFIG.defaultPhone,
-  email: t.contact?.email || DEFAULT_FACILITY_CONFIG.defaultEmail,
-  country: t.contact?.address?.country || "India",
-  state: t.contact?.address?.state || "Karnataka",
-  city: t.contact?.address?.city || "Bengaluru",
-  street: t.contact?.address?.street || DEFAULT_FACILITY_CONFIG.defaultStreet,
-  pincode: t.contact?.address?.pincode || "560003",
-  timezone: t.hours?.timezone || "Asia/Kolkata",
-  timezoneManualOverride: true,
-  primaryColor: t.branding?.primaryColor || DEFAULT_FACILITY_CONFIG.defaultPrimaryColor,
-  accentColor: t.branding?.accentColor || DEFAULT_FACILITY_CONFIG.defaultAccentColor,
-  logoUrl: t.branding?.logoUrl || "/generic-clinic-logo.svg",
-  bannerUrl: t.branding?.bannerUrl || "/assets/banner.jpg",
-  aboutClinicText: t.branding?.aboutClinicText || "",
-  doctorName: t.doctor?.name || "",
-  doctorEmail: t.doctor?.email || "",
-  doctorPhone: t.doctor?.phone || DEFAULT_DOCTOR_CONFIG.defaultPhone,
-  doctorTitle: t.doctor?.title || DEFAULT_DOCTOR_CONFIG.defaultTitle,
-  doctorQual: t.doctor?.qualifications || DEFAULT_DOCTOR_CONFIG.defaultQualifications,
-  doctorRegNo: t.doctor?.regNo || "",
-  doctorExp: t.doctor?.experienceYears || DEFAULT_DOCTOR_CONFIG.defaultExperienceYears,
-  doctorSpecialties: Array.isArray(t.doctor?.specialties)
-    ? t.doctor.specialties.join(", ")
-    : (t.doctor?.specialties || DEFAULT_DOCTOR_CONFIG.defaultSpecialties),
-  doctorBio: t.doctor?.aboutText || "",
-  doctorFee: t.doctor?.consultationFee || 750,
-  morningHours: t.hours?.morningDisplay || "10:00 AM – 01:30 PM",
-  eveningHours: t.hours?.eveningDisplay || "05:00 PM – 08:30 PM",
-  availableDays: t.hours?.availableDays || "Monday – Saturday",
-  sundayPolicy: (t.hours?.sundayPolicy as any) || "Prior Appointment Only",
-  features: { ...t.features },
-});
+  return {
+    hospitalName: "",
+    hospitalSlug: "",
+    facilityType: "hospital",
+    tagline: "",
+    phone: DEFAULT_FACILITY_CONFIG.defaultPhone,
+    email: DEFAULT_FACILITY_CONFIG.defaultEmail,
+    country: "India",
+    state: "Karnataka",
+    city: "Bengaluru",
+    street: DEFAULT_FACILITY_CONFIG.defaultStreet,
+    pincode: "560003",
+    timezone: "Asia/Kolkata",
+    timezoneManualOverride: false,
+    primaryColor: DEFAULT_FACILITY_CONFIG.defaultPrimaryColor,
+    accentColor: DEFAULT_FACILITY_CONFIG.defaultAccentColor,
+    logoUrl: DEFAULT_FACILITY_CONFIG.defaultLogoUrl || "/generic-hospital-logo.svg",
+    bannerUrl: DEFAULT_FACILITY_CONFIG.defaultBannerUrl || "/assets/banner.jpg",
+    aboutHospitalText: defaultTemplates.aboutHospitalText,
+    termsConditionsText: defaultTemplates.termsConditionsText,
+    privacyPolicyText: defaultTemplates.privacyPolicyText,
+    emergencyNotice: defaultTemplates.emergencyNotice,
+    doctorName: "",
+    doctorEmail: "",
+    doctorPhone: DEFAULT_DOCTOR_CONFIG.defaultPhone,
+    doctorTitle: DEFAULT_DOCTOR_CONFIG.defaultTitle,
+    doctorQual: DEFAULT_DOCTOR_CONFIG.defaultQualifications,
+    doctorRegNo: "",
+    doctorExp: DEFAULT_DOCTOR_CONFIG.defaultExperienceYears,
+    doctorSpecialties: DEFAULT_DOCTOR_CONFIG.defaultSpecialties,
+    doctorBio: "",
+    doctorFee: 750,
+    morningHours: "10:00 AM – 01:30 PM",
+    eveningHours: "05:00 PM – 08:30 PM",
+    availableDays: "Monday – Saturday",
+    sundayPolicy: "Prior Appointment Only",
+    features: { ...DEFAULT_NEW_TENANT_FEATURES },
+  };
+};
+
+const getFormStateFromTenant = (t: HospitalTenantConfig): OnboardFormState => {
+  const facilityType: "hospital" | "clinic" = t.facilityType === "clinic" ? "clinic" : "hospital";
+  const fallbackTemplates = generateDefaultLegalTemplates(
+    t.name || "Hospital Facility",
+    facilityType,
+    t.contact?.address?.city || "Bengaluru",
+    t.contact?.phone || DEFAULT_FACILITY_CONFIG.defaultPhone,
+    t.contact?.email || DEFAULT_FACILITY_CONFIG.defaultEmail
+  );
+
+  return {
+    hospitalName: t.name || "",
+    hospitalSlug: t.id || "",
+    facilityType,
+    tagline: t.tagline || "",
+    phone: t.contact?.phone || DEFAULT_FACILITY_CONFIG.defaultPhone,
+    email: t.contact?.email || DEFAULT_FACILITY_CONFIG.defaultEmail,
+    country: t.contact?.address?.country || "India",
+    state: t.contact?.address?.state || "Karnataka",
+    city: t.contact?.address?.city || "Bengaluru",
+    street: t.contact?.address?.street || DEFAULT_FACILITY_CONFIG.defaultStreet,
+    pincode: t.contact?.address?.pincode || "560003",
+    timezone: t.hours?.timezone || "Asia/Kolkata",
+    timezoneManualOverride: true,
+    primaryColor: t.branding?.primaryColor || DEFAULT_FACILITY_CONFIG.defaultPrimaryColor,
+    accentColor: t.branding?.accentColor || DEFAULT_FACILITY_CONFIG.defaultAccentColor,
+    logoUrl: t.branding?.logoUrl || "/generic-hospital-logo.svg",
+    bannerUrl: t.branding?.bannerUrl || "/assets/banner.jpg",
+    aboutHospitalText: t.branding?.aboutHospitalText || fallbackTemplates.aboutHospitalText,
+    termsConditionsText: t.legal?.termsConditionsText || fallbackTemplates.termsConditionsText,
+    privacyPolicyText: t.legal?.privacyPolicyText || fallbackTemplates.privacyPolicyText,
+    emergencyNotice: t.legal?.emergencyNotice || fallbackTemplates.emergencyNotice,
+    doctorName: t.doctor?.name || "",
+    doctorEmail: t.doctor?.email || "",
+    doctorPhone: t.doctor?.phone || DEFAULT_DOCTOR_CONFIG.defaultPhone,
+    doctorTitle: t.doctor?.title || DEFAULT_DOCTOR_CONFIG.defaultTitle,
+    doctorQual: t.doctor?.qualifications || DEFAULT_DOCTOR_CONFIG.defaultQualifications,
+    doctorRegNo: t.doctor?.regNo || "",
+    doctorExp: t.doctor?.experienceYears || DEFAULT_DOCTOR_CONFIG.defaultExperienceYears,
+    doctorSpecialties: Array.isArray(t.doctor?.specialties)
+      ? t.doctor.specialties.join(", ")
+      : (t.doctor?.specialties || DEFAULT_DOCTOR_CONFIG.defaultSpecialties),
+    doctorBio: t.doctor?.aboutText || "",
+    doctorFee: t.doctor?.consultationFee || 750,
+    morningHours: t.hours?.morningDisplay || "10:00 AM – 01:30 PM",
+    eveningHours: t.hours?.eveningDisplay || "05:00 PM – 08:30 PM",
+    availableDays: t.hours?.availableDays || "Monday – Saturday",
+    sundayPolicy: (t.hours?.sundayPolicy as any) || "Prior Appointment Only",
+    features: { ...t.features },
+  };
+};
 
 export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
   isOpen,
@@ -228,8 +256,12 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
       return;
     }
 
-    if (existingSlugs.includes(cleanSlug)) {
+    if (!isEditing && existingSlugs.includes(cleanSlug)) {
       toast.error("A hospital with this slug already exists.");
+      return;
+    }
+    if (slugError) {
+      toast.error(slugError);
       return;
     }
 
@@ -263,7 +295,8 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
         domain: `${cleanSlug}.ehr.local`,
         subdomains: [cleanSlug],
         name: cleanHospitalName,
-        shortName: cleanHospitalName.split(" ")[0] || "Clinic",
+        facilityType: form.facilityType || "hospital",
+        shortName: cleanHospitalName.split(" ")[0] || (form.facilityType === "clinic" ? "Clinic" : "Hospital"),
         tagline: sanitizeText(form.tagline, 150) || "Compassionate Healthcare with Clinical Precision",
         doctor: doctorConfig,
         doctors: [doctorConfig],
@@ -304,11 +337,17 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
           bannerUrl: form.bannerUrl.trim() || DEFAULT_FACILITY_CONFIG.defaultBannerUrl,
           fontSans: DEFAULT_FACILITY_CONFIG.defaultFontSans,
           aboutDocText: doctorConfig.aboutText,
-          aboutClinicText: sanitizeText(form.aboutClinicText, 500) || (sanitizeText(form.tagline, 150)
-            ? `${cleanHospitalName} — ${sanitizeText(form.tagline, 150)}`
-            : `${cleanHospitalName} provides comprehensive patient consultations and evidence-based clinical care.`),
+          aboutHospitalText:
+            sanitizeText(form.aboutHospitalText, 1000) ||
+            `${cleanHospitalName} provides comprehensive patient consultations and evidence-based clinical care.`,
         },
         features: form.features,
+        legal: {
+          termsConditionsText: form.termsConditionsText,
+          privacyPolicyText: form.privacyPolicyText,
+          emergencyNotice: form.emergencyNotice,
+          lastUpdated: new Date().toISOString(),
+        },
       };
 
       await onOnboard(newTenant, doctorConfig, form.features);
@@ -366,6 +405,11 @@ export const OnboardHospitalModal: React.FC<OnboardHospitalModalProps> = ({
           form={form}
           updateField={updateField}
           handleApplyPreset={handleApplyPreset}
+        />
+
+        <FacilityLegalStep
+          form={form}
+          updateField={updateField}
         />
 
         {/* Actions */}

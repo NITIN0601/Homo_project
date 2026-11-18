@@ -1,7 +1,7 @@
 import React from "react";
-import type { OnboardFormState } from "./types";
-import type { HospitalFeatures } from "../../../types/tenant";
-import { FeatureToggleGroup } from "../../../components/common/FeatureToggleGroup";
+import type { OnboardFormState } from "./onboardTypes";
+import type { HospitalFeatures } from "../../types/tenant";
+import { FeatureToggleGroup } from "../../components/common/FeatureToggleGroup";
 
 interface FacilityGovernanceStepProps {
   form: OnboardFormState;

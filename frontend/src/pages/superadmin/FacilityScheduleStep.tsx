@@ -1,5 +1,5 @@
 import React from "react";
-import type { StepProps } from "./types";
+import type { StepProps } from "./onboardTypes";
 
 interface FacilityScheduleStepProps extends StepProps {
   activeTimezoneDetails: { timeZone: string; label: string; offset: string };
