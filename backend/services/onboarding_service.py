@@ -99,9 +99,7 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
 
     about_text = (
         payload.get("about_hospital_text")
-        or payload.get("about_clinic_text")
         or payload.get("branding", {}).get("aboutHospitalText")
-        or payload.get("branding", {}).get("aboutClinicText")
         or f"{name} provides comprehensive patient consultations and evidence-based clinical care."
     )
 
@@ -123,7 +121,6 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
         "logo_url": payload.get("logo_url") or payload.get("branding", {}).get("logoUrl") or "/generic-hospital-logo.svg",
         "banner_url": payload.get("banner_url") or payload.get("branding", {}).get("bannerUrl") or "/assets/banner.jpg",
         "about_hospital_text": about_text,
-        "about_clinic_text": about_text,
     }
 
     # Location-based timezone inference: ensures zero ambiguity when entering operational hours
@@ -156,6 +153,95 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
     }
     hospital_record["features"] = features
     hospital_record["legal"] = legal
+
+    # Production Deployment, Release Tracking & Device Governance
+    raw_deployment = payload.get("deployment") or {}
+    hospital_record["deployment"] = {
+        "backendUrl": payload.get("backend_url") or raw_deployment.get("backendUrl") or "",
+        "frontendUrl": payload.get("frontend_url") or raw_deployment.get("frontendUrl") or "",
+        "deploymentStatus": payload.get("deployment_status") or raw_deployment.get("deploymentStatus") or "draft",
+        "deploymentVersion": payload.get("deployment_version") or raw_deployment.get("deploymentVersion") or "v1.0.0",
+        "lastDeployedAt": payload.get("last_deployed_at") or raw_deployment.get("lastDeployedAt") or None,
+        "supportedBrowsers": payload.get("supported_browsers")
+        or raw_deployment.get("supportedBrowsers")
+        or ["Chrome >= 110", "Safari >= 16", "Firefox >= 115", "Edge >= 110"],
+        "supportedDevices": payload.get("supported_devices")
+        or raw_deployment.get("supportedDevices")
+        or [
+            "Desktop (macOS / Windows / Linux)",
+            "Tablet (iPad / Android Tablet)",
+            "Mobile (iOS / Android)",
+        ],
+    }
+
+    # Hospital LLM Provider Configuration
+    raw_llm = payload.get("llm_config") or payload.get("llmConfig") or {}
+    hospital_record["llmConfig"] = {
+        "provider": payload.get("llm_provider") or raw_llm.get("provider") or "gemini",
+        "modelId": payload.get("llm_model_id") or raw_llm.get("modelId") or "gemini-1.5-flash",
+        "apiKey": payload.get("llm_api_key") or raw_llm.get("apiKey") or "",
+        "endpointUrl": payload.get("llm_endpoint_url") or raw_llm.get("endpointUrl") or "",
+    }
+
+    # Hospital Payment Gateway Accounts & Merchant Settlement
+    raw_payment = payload.get("payment_gateway") or payload.get("paymentGateway") or {}
+    hospital_record["paymentGateway"] = {
+        "provider": payload.get("payment_provider") or raw_payment.get("provider") or "upi",
+        "merchantId": payload.get("payment_merchant_id") or raw_payment.get("merchantId") or "",
+        "apiKey": payload.get("payment_api_key") or raw_payment.get("apiKey") or "",
+        "accountEmail": payload.get("payment_account_email") or raw_payment.get("accountEmail") or "",
+        "upiId": payload.get("payment_upi_id") or raw_payment.get("upiId") or "",
+    }
+
+    # Google Cloud & Calendar OAuth Integrations
+    raw_google = payload.get("google_integration") or payload.get("googleIntegration") or {}
+    hospital_record["googleIntegration"] = {
+        "clientId": payload.get("google_client_id") or raw_google.get("clientId") or "",
+        "calendarId": payload.get("google_calendar_id") or raw_google.get("calendarId") or "primary",
+        "serviceAccountEmail": payload.get("google_service_account_email") or raw_google.get("serviceAccountEmail") or "",
+    }
+
+    # Social Media & 3rd-Party Messaging Channels (WhatsApp, Instagram, Facebook)
+    raw_social = payload.get("social_media") or payload.get("socialMedia") or {}
+    raw_wa = raw_social.get("whatsapp") or {}
+    raw_ig = raw_social.get("instagram") or {}
+    clean_digits = "".join(filter(str.isdigit, hospital_record["phone"]))
+    hospital_record["socialMedia"] = {
+        "whatsapp": {
+            "enabled": raw_wa.get("enabled", True),
+            "businessAccountId": payload.get("whatsapp_business_id") or raw_wa.get("businessAccountId") or "",
+            "phoneNumberId": payload.get("whatsapp_phone_number_id") or raw_wa.get("phoneNumberId") or "",
+            "apiToken": payload.get("whatsapp_api_token") or raw_wa.get("apiToken") or "",
+            "displayNumber": raw_wa.get("displayNumber") or hospital_record["phone"],
+            "customGreeting": raw_wa.get("customGreeting") or f"Namaste! Welcome to {name}.",
+            "chatUrl": raw_wa.get("chatUrl") or (f"https://wa.me/{clean_digits}" if clean_digits else ""),
+        },
+        "instagram": {
+            "enabled": raw_ig.get("enabled", True),
+            "handle": payload.get("instagram_handle") or raw_ig.get("handle") or "",
+            "profileUrl": payload.get("instagram_url") or raw_ig.get("profileUrl") or "",
+            "accountId": raw_ig.get("accountId") or "",
+            "accessToken": raw_ig.get("accessToken") or "",
+            "autoReplyEnabled": raw_ig.get("autoReplyEnabled", False),
+            "directBookingEnabled": raw_ig.get("directBookingEnabled", True),
+        },
+        "facebook": {
+            "enabled": bool(raw_social.get("facebook_url")),
+            "pageUrl": raw_social.get("facebook_url") or "",
+            "pageId": "",
+            "accessToken": "",
+        },
+        "youtube": {
+            "enabled": bool(raw_social.get("youtube_url")),
+            "channelUrl": raw_social.get("youtube_url") or "",
+            "channelName": "",
+        },
+        "linkedin": {
+            "enabled": bool(raw_social.get("linkedin_url")),
+            "companyUrl": raw_social.get("linkedin_url") or "",
+            "companyName": "",
+        },
+    }
 
     created_hospital = create_hospital(hospital_record)
 

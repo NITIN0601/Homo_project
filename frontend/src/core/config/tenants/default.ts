@@ -29,8 +29,8 @@ const PRIMARY_DOCTOR: HospitalDoctor = {
 export const VANILLA_DEFAULT_TENANT: HospitalTenantConfig = {
   id: "default",
   slug: "default",
-  domain: "localhost",
-  subdomains: ["default", "hospital", "clinic", "ehr"],
+  domain: "default.local",
+  subdomains: ["default"],
   name: "General Healthcare Hospital",
   facilityType: "hospital",
   shortName: "General Hospital",
@@ -102,5 +102,41 @@ export const VANILLA_DEFAULT_TENANT: HospitalTenantConfig = {
     enableFollowupFeedback: true,
     enableAgastyaBot: true,
     enablePatientProfileEdit: true,
+  },
+  deployment: {
+    backendUrl: "",
+    frontendUrl: "",
+    deploymentStatus: "draft",
+    deploymentVersion: "v1.0.0",
+    supportedBrowsers: ["Chrome >= 110", "Safari >= 16", "Firefox >= 115", "Edge >= 110"],
+    supportedDevices: [
+      "Desktop (macOS / Windows / Linux)",
+      "Tablet (iPad / Android Tablet)",
+      "Mobile (iOS / Android)",
+    ],
+  },
+  llmConfig: {
+    provider: "gemini",
+    modelId: "gemini-1.5-flash",
+  },
+  paymentGateway: {
+    provider: "upi",
+    accountEmail: "admin@example.com",
+  },
+  googleIntegration: {
+    calendarId: "primary",
+  },
+  socialMedia: {
+    whatsapp: {
+      enabled: true,
+      displayNumber: "+1 555-0100",
+      chatUrl: "https://wa.me/15550100",
+      customGreeting: "Welcome to General Healthcare Hospital. How can we help?",
+    },
+    instagram: {
+      enabled: true,
+      handle: "@generalhealthcare",
+      profileUrl: "https://instagram.com/generalhealthcare",
+    },
   },
 };

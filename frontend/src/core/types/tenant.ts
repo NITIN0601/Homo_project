@@ -147,6 +147,65 @@ export interface HospitalHoursConfig {
   emergencyNotice?: string;
 }
 
+export interface HospitalDeploymentConfig {
+  backendUrl?: string;             // Deployed production backend REST API URL (initially empty draft)
+  frontendUrl?: string;            // Deployed production client URL (initially empty draft)
+  deploymentStatus?: "draft" | "staged" | "production";
+  deploymentVersion?: string;      // Current release version e.g. "v1.2.0"
+  lastDeployedAt?: string;
+  supportedBrowsers?: string[];    // Target supported browsers e.g. ["Chrome >= 110", "Safari >= 16", "Firefox >= 115", "Edge >= 110"]
+  supportedDevices?: string[];     // Target supported devices e.g. ["Desktop", "Tablet", "Mobile"]
+}
+
+export interface HospitalLLMConfig {
+  provider?: "gemini" | "openai" | "anthropic" | "groq";
+  modelId?: string;
+  apiKey?: string;
+  endpointUrl?: string;
+}
+
+export interface HospitalPaymentGatewayConfig {
+  provider?: "upi" | "razorpay" | "stripe";
+  merchantId?: string;
+  apiKey?: string;
+  accountEmail?: string;
+  upiId?: string;
+}
+
+export interface HospitalGoogleIntegrationConfig {
+  clientId?: string;
+  calendarId?: string;
+  serviceAccountEmail?: string;
+}
+
+export interface HospitalWhatsAppConfig {
+  enabled?: boolean;
+  businessAccountId?: string;
+  phoneNumberId?: string;
+  apiToken?: string;
+  displayNumber?: string;
+  customGreeting?: string;
+  chatUrl?: string;
+}
+
+export interface HospitalInstagramConfig {
+  enabled?: boolean;
+  handle?: string;
+  profileUrl?: string;
+  accountId?: string;
+  accessToken?: string;
+  autoReplyEnabled?: boolean;
+  directBookingEnabled?: boolean;
+}
+
+export interface HospitalSocialMediaConfig {
+  whatsapp?: HospitalWhatsAppConfig;
+  instagram?: HospitalInstagramConfig;
+  facebook?: { enabled?: boolean; pageUrl?: string; pageId?: string };
+  youtube?: { enabled?: boolean; channelUrl?: string; channelName?: string };
+  linkedin?: { enabled?: boolean; companyUrl?: string; companyName?: string };
+}
+
 export interface HospitalTenantConfig {
   id: string;                      // Unique internal tenant ID (e.g., "agastya", "citycare")
   slug: string;                    // URL slug
@@ -168,4 +227,9 @@ export interface HospitalTenantConfig {
   branding: HospitalBranding;
   features: HospitalFeatures;
   legal?: HospitalLegal;
+  deployment?: HospitalDeploymentConfig;
+  llmConfig?: HospitalLLMConfig;
+  paymentGateway?: HospitalPaymentGatewayConfig;
+  googleIntegration?: HospitalGoogleIntegrationConfig;
+  socialMedia?: HospitalSocialMediaConfig;
 }

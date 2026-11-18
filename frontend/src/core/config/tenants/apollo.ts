@@ -130,6 +130,52 @@ export const APOLLO_DEMO_TENANT: HospitalTenantConfig = {
     enableAgastyaBot: true,
     enablePatientProfileEdit: true,
   },
+  deployment: {
+    backendUrl: "",
+    frontendUrl: "https://apollo.telecare.in",
+    deploymentStatus: "staged",
+    deploymentVersion: "v1.1.0",
+    lastDeployedAt: "2026-11-15T08:30:00Z",
+    supportedBrowsers: ["Chrome >= 110", "Safari >= 16", "Firefox >= 115", "Edge >= 110"],
+    supportedDevices: [
+      "Desktop (macOS / Windows / Linux)",
+      "Tablet (iPad / Android Tablet)",
+      "Mobile (iOS / Android)",
+    ],
+  },
+  llmConfig: {
+    provider: "openai",
+    modelId: "gpt-4o",
+  },
+  paymentGateway: {
+    provider: "razorpay",
+    merchantId: "acc_apollo_live_99",
+    accountEmail: "support@apollo.telecare.in",
+    upiId: "apollo@okhdfcbank",
+  },
+  googleIntegration: {
+    calendarId: "primary",
+    serviceAccountEmail: "support@apollo.telecare.in",
+  },
+  socialMedia: {
+    whatsapp: {
+      enabled: true,
+      displayNumber: "+91 80 2630 4050",
+      chatUrl: "https://wa.me/918026304050",
+      customGreeting: "Welcome to Apollo TeleCare Integrated Clinics. Connect with our care navigators.",
+    },
+    instagram: {
+      enabled: true,
+      handle: "@apollo_telecare",
+      profileUrl: "https://instagram.com/apollo_telecare",
+      directBookingEnabled: true,
+    },
+    youtube: {
+      enabled: true,
+      channelUrl: "https://youtube.com/@ApolloTeleHealth",
+      channelName: "Apollo TeleHealth Network",
+    },
+  },
 };
 
 export default APOLLO_DEMO_TENANT;

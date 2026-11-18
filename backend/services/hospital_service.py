@@ -62,7 +62,7 @@ def get_hospital_by_domain(domain: str) -> dict[str, Any] | None:
     """Finds hospital associated with a custom domain or host subdomain."""
     if not domain:
         return None
-    clean_domain = domain.strip().lower()
+    clean_domain = domain.strip().lower().split(":")[0]
     for h in get_all_hospitals():
         h_domain = (h.get("domain") or "").lower()
         if h_domain == clean_domain:
@@ -177,16 +177,65 @@ def create_hospital(data: dict[str, Any]) -> dict[str, Any]:
             "bannerUrl": data.get("banner_url") or data.get("bannerUrl") or "/assets/banner.jpg",
             "aboutHospitalText": data.get("about_hospital_text")
             or data.get("aboutHospitalText")
-            or data.get("about_clinic_text")
-            or data.get("aboutClinicText")
-            or f"{data.get('name', 'Hospital')} provides comprehensive patient care.",
-            "aboutClinicText": data.get("about_hospital_text")
-            or data.get("aboutHospitalText")
-            or data.get("about_clinic_text")
-            or data.get("aboutClinicText")
             or f"{data.get('name', 'Hospital')} provides comprehensive patient care.",
         },
         "features": {**default_features, **(data.get("features") or {})},
+        "deployment": data.get("deployment") or {
+            "backendUrl": data.get("backend_url", ""),
+            "frontendUrl": data.get("frontend_url", ""),
+            "deploymentStatus": data.get("deployment_status", "draft"),
+            "deploymentVersion": data.get("deployment_version", "v1.0.0"),
+            "lastDeployedAt": data.get("last_deployed_at"),
+            "supportedBrowsers": data.get("supported_browsers")
+            or ["Chrome >= 110", "Safari >= 16", "Firefox >= 115", "Edge >= 110"],
+            "supportedDevices": data.get("supported_devices")
+            or [
+                "Desktop (macOS / Windows / Linux)",
+                "Tablet (iPad / Android Tablet)",
+                "Mobile (iOS / Android)",
+            ],
+        },
+        "llmConfig": data.get("llmConfig") or {
+            "provider": data.get("llm_provider", "gemini"),
+            "modelId": data.get("llm_model_id", "gemini-1.5-flash"),
+            "apiKey": data.get("llm_api_key", ""),
+            "endpointUrl": data.get("llm_endpoint_url", ""),
+        },
+        "paymentGateway": data.get("paymentGateway") or {
+            "provider": data.get("payment_provider", "upi"),
+            "merchantId": data.get("payment_merchant_id", ""),
+            "apiKey": data.get("payment_api_key", ""),
+            "accountEmail": data.get("payment_account_email", ""),
+            "upiId": data.get("payment_upi_id", ""),
+        },
+        "googleIntegration": data.get("googleIntegration") or {
+            "clientId": data.get("google_client_id", ""),
+            "calendarId": data.get("google_calendar_id", "primary"),
+            "serviceAccountEmail": data.get("google_service_account_email", ""),
+        },
+        "socialMedia": data.get("socialMedia") or {
+            "whatsapp": {
+                "enabled": True,
+                "businessAccountId": "",
+                "phoneNumberId": "",
+                "apiToken": "",
+                "displayNumber": data.get("phone", "+91 98450 12345"),
+                "customGreeting": f"Namaste! Welcome to {data.get('name', 'our healthcare facility')}.",
+                "chatUrl": f"https://wa.me/{''.join(filter(str.isdigit, data.get('phone', '')))}",
+            },
+            "instagram": {
+                "enabled": True,
+                "handle": "",
+                "profileUrl": "",
+                "accountId": "",
+                "accessToken": "",
+                "autoReplyEnabled": False,
+                "directBookingEnabled": True,
+            },
+            "facebook": {"enabled": False, "pageUrl": "", "pageId": "", "accessToken": ""},
+            "youtube": {"enabled": False, "channelUrl": "", "channelName": ""},
+            "linkedin": {"enabled": False, "companyUrl": "", "companyName": ""},
+        },
         "isActive": True,
     }
     return save_hospital(record)
@@ -246,9 +295,26 @@ def update_hospital_customization(hospital_id: str, updates: dict[str, Any]) -> 
     if not hospital:
         raise ValueError(f"Hospital '{hospital_id}' not found.")
 
-    for field in ("name", "shortName", "tagline", "hours", "currency", "currencySymbol", "facilityType", "legal"):
+    for field in (
+        "name",
+        "shortName",
+        "tagline",
+        "hours",
+        "currency",
+        "currencySymbol",
+        "facilityType",
+        "legal",
+        "deployment",
+        "llmConfig",
+        "paymentGateway",
+        "googleIntegration",
+        "socialMedia",
+    ):
         if field in updates:
-            hospital[field] = updates[field]
+            if isinstance(updates[field], dict) and isinstance(hospital.get(field), dict):
+                hospital[field] = {**hospital[field], **updates[field]}
+            else:
+                hospital[field] = updates[field]
 
     if "contact" in updates and isinstance(updates["contact"], dict):
         hospital["contact"] = {**(hospital.get("contact") or {}), **updates["contact"]}
@@ -281,13 +347,13 @@ def _fallback_hospital() -> dict[str, Any]:
     return {
         "id": "default",
         "slug": "default",
-        "name": getattr(settings, "CLINIC_NAME", "General Healthcare Clinic"),
-        "shortName": getattr(settings, "CLINIC_NAME", "General Clinic"),
+        "name": getattr(settings, "HOSPITAL_NAME", "General Healthcare Hospital"),
+        "shortName": getattr(settings, "HOSPITAL_NAME", "General Hospital"),
         "contact": {
-            "phone": getattr(settings, "CLINIC_PHONE", "+1 555-0100"),
-            "email": getattr(settings, "CLINIC_ADMIN_EMAIL", "admin@example.com"),
+            "phone": getattr(settings, "HOSPITAL_PHONE", "+1 555-0100"),
+            "email": getattr(settings, "HOSPITAL_ADMIN_EMAIL", "admin@example.com"),
             "address": {
-                "street": getattr(settings, "CLINIC_ADDRESS", "100 Medical Center Way"),
+                "street": getattr(settings, "HOSPITAL_ADDRESS", "100 Medical Center Way"),
                 "city": "Metropolis",
                 "country": "Country",
             },

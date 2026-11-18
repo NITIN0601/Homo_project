@@ -30,12 +30,14 @@ const PRIMARY_DOCTOR: HospitalDoctor = {
 export const AGASTYA_TENANT: HospitalTenantConfig = {
   id: "agastya",
   slug: "agastya",
-  domain: "agastyahomoeopathy.com",
-  subdomains: ["agastya", "hospital", "clinic", "ehr"],
-  name: "Agastya Homoeopathy Hospital",
-  facilityType: "hospital",
-  shortName: "Agastya",
-  tagline: "Gentle Healing, Lasting Wellness",
+  domain: "agastyahomoeo.com",
+  subdomains: ["agastya", "clinic", "ehr", "localhost"],
+  name: "Agastya Classical Homeopathy Clinic",
+  facilityType: "clinic",
+  shortName: "Agastya Clinic",
+  tagline: "Root-cause homeopathic healing with clinical precision",
+  currency: "INR",
+  currencySymbol: "₹",
   doctor: PRIMARY_DOCTOR,
   doctors: [PRIMARY_DOCTOR],
   specialties: [
@@ -88,7 +90,7 @@ export const AGASTYA_TENANT: HospitalTenantConfig = {
     bannerUrl: "/assets/banner.jpg",
     aboutDocText: PRIMARY_DOCTOR.aboutText,
     aboutHospitalText:
-      "Agastya Homoeopathy Hospital provides gentle, individualised classical homoeopathic healthcare serving patients globally with comprehensive case assessments, personalised treatment plans, and continuous clinical follow-up.",
+      "Agastya Classical Homeopathy Clinic provides gentle, individualised classical homoeopathic healthcare serving patients globally with comprehensive case assessments, personalised treatment plans, and continuous clinical follow-up.",
   },
   features: {
     enableECommerce: true,
@@ -105,6 +107,51 @@ export const AGASTYA_TENANT: HospitalTenantConfig = {
     enableFollowupFeedback: true,
     enableAgastyaBot: true,
     enablePatientProfileEdit: true,
+  },
+  deployment: {
+    backendUrl: "",
+    frontendUrl: "https://agastyahomoeo.com",
+    deploymentStatus: "production",
+    deploymentVersion: "v1.2.0",
+    lastDeployedAt: "2026-11-18T12:00:00Z",
+    supportedBrowsers: ["Chrome >= 110", "Safari >= 16", "Firefox >= 115", "Edge >= 110"],
+    supportedDevices: [
+      "Desktop (macOS / Windows / Linux)",
+      "Tablet (iPad / Android Tablet)",
+      "Mobile (iOS / Android)",
+    ],
+  },
+  llmConfig: {
+    provider: "gemini",
+    modelId: "gemini-1.5-flash",
+  },
+  paymentGateway: {
+    provider: "upi",
+    merchantId: "MERCH_AGASTYA_01",
+    accountEmail: "admin@agastyahomoeo.com",
+    upiId: "agastya@upi",
+  },
+  googleIntegration: {
+    calendarId: "primary",
+    serviceAccountEmail: "doctor@agastyahomoeo.com",
+  },
+  socialMedia: {
+    whatsapp: {
+      enabled: true,
+      displayNumber: "+91 98450 12345",
+      chatUrl: "https://wa.me/919845012345",
+      customGreeting: "Namaste from Agastya Classical Homeopathy Clinic! How can we assist your healing journey?",
+    },
+    instagram: {
+      enabled: true,
+      handle: "@agastyahomoeo",
+      profileUrl: "https://instagram.com/agastyahomoeo",
+      directBookingEnabled: true,
+    },
+    facebook: {
+      enabled: true,
+      pageUrl: "https://facebook.com/agastyahomoeo",
+    },
   },
 };
 

@@ -5,6 +5,73 @@ Hospital & Doctor Domain Schemas for Multi-Tenant Management.
 from pydantic import BaseModel, Field
 
 
+class HospitalDeploymentSchema(BaseModel):
+    backend_url: str | None = Field(default="", example="https://api.hospital.org")
+    frontend_url: str | None = Field(default="", example="https://hospital.org")
+    deployment_status: str | None = Field(default="draft", example="draft")
+    deployment_version: str | None = Field(default="v1.0.0", example="v1.0.0")
+    last_deployed_at: str | None = Field(default=None)
+    supported_browsers: list[str] | None = Field(
+        default_factory=lambda: ["Chrome >= 110", "Safari >= 16", "Firefox >= 115", "Edge >= 110"]
+    )
+    supported_devices: list[str] | None = Field(
+        default_factory=lambda: [
+            "Desktop (macOS / Windows / Linux)",
+            "Tablet (iPad / Android Tablet)",
+            "Mobile (iOS / Android)",
+        ]
+    )
+
+
+class HospitalLLMSchema(BaseModel):
+    provider: str | None = Field(default="gemini", example="gemini")
+    model_id: str | None = Field(default="gemini-1.5-flash", example="gemini-1.5-flash")
+    api_key: str | None = Field(default="", example="")
+    endpoint_url: str | None = Field(default="", example="")
+
+
+class HospitalPaymentGatewaySchema(BaseModel):
+    provider: str | None = Field(default="upi", example="upi")
+    merchant_id: str | None = Field(default="", example="")
+    api_key: str | None = Field(default="", example="")
+    account_email: str | None = Field(default="", example="")
+    upi_id: str | None = Field(default="", example="")
+
+
+class HospitalGoogleIntegrationSchema(BaseModel):
+    client_id: str | None = Field(default="", example="")
+    calendar_id: str | None = Field(default="primary", example="primary")
+    service_account_email: str | None = Field(default="", example="")
+
+
+class HospitalWhatsAppSchema(BaseModel):
+    enabled: bool = Field(default=True)
+    business_account_id: str | None = Field(default="", example="WABA-99881122")
+    phone_number_id: str | None = Field(default="", example="1092837465")
+    api_token: str | None = Field(default="", example="EAAB...")
+    display_number: str | None = Field(default="+91 98450 12345", example="+91 98450 12345")
+    custom_greeting: str | None = Field(default=None, example="Namaste! Welcome to our healthcare center.")
+    chat_url: str | None = Field(default=None, example="https://wa.me/919845012345")
+
+
+class HospitalInstagramSchema(BaseModel):
+    enabled: bool = Field(default=True)
+    handle: str | None = Field(default="", example="@cliniccare")
+    profile_url: str | None = Field(default="", example="https://instagram.com/cliniccare")
+    account_id: str | None = Field(default="", example="ig_10293847")
+    access_token: str | None = Field(default="", example="")
+    auto_reply_enabled: bool = Field(default=False)
+    direct_booking_enabled: bool = Field(default=True)
+
+
+class HospitalSocialMediaSchema(BaseModel):
+    whatsapp: HospitalWhatsAppSchema | None = Field(default_factory=HospitalWhatsAppSchema)
+    instagram: HospitalInstagramSchema | None = Field(default_factory=HospitalInstagramSchema)
+    facebook_url: str | None = Field(default="")
+    youtube_url: str | None = Field(default="")
+    linkedin_url: str | None = Field(default="")
+
+
 class HospitalCreateRequest(BaseModel):
     id: str = Field(..., example="city-care", description="Unique alphanumeric hospital slug/id")
     name: str = Field(..., example="City Care Medical Center")
@@ -29,6 +96,11 @@ class HospitalCreateRequest(BaseModel):
     privacy_policy_text: str | None = Field(default=None)
     emergency_notice: str | None = Field(default=None)
     legal: dict[str, str | None] | None = Field(default=None)
+    deployment: HospitalDeploymentSchema | None = Field(default=None)
+    llm_config: HospitalLLMSchema | None = Field(default=None)
+    payment_gateway: HospitalPaymentGatewaySchema | None = Field(default=None)
+    google_integration: HospitalGoogleIntegrationSchema | None = Field(default=None)
+    social_media: HospitalSocialMediaSchema | None = Field(default=None)
     features: dict[str, bool] | None = Field(
         default=None,
         description="Feature flag overrides (enableECommerce, enableVoiceStudio, etc.)",
@@ -81,6 +153,13 @@ class HospitalOnboardRequest(BaseModel):
     privacy_policy_text: str | None = Field(default=None)
     emergency_notice: str | None = Field(default=None)
     legal: dict[str, str | None] | None = Field(default=None)
+
+    # Deployment, LLM, Payment Accounts & Google Integrations
+    deployment: HospitalDeploymentSchema | None = Field(default=None)
+    llm_config: HospitalLLMSchema | None = Field(default=None)
+    payment_gateway: HospitalPaymentGatewaySchema | None = Field(default=None)
+    google_integration: HospitalGoogleIntegrationSchema | None = Field(default=None)
+    social_media: HospitalSocialMediaSchema | None = Field(default=None)
 
     # Operational Hours & Scheduling
     timezone: str | None = Field(default="Asia/Kolkata", example="Asia/Kolkata")
