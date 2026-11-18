@@ -1,12 +1,13 @@
 import { HOSPITAL } from "../../config/hospital";
+import { CANONICAL_TIMEZONE_ABBREVIATIONS } from "./constants";
 import type { HospitalTimeInfo, TimeOfDayPeriod } from "./types";
 
 /**
- * Returns current date and time strictly in the hospital's operational timezone (Asia/Kolkata / IST).
- * Immune to the patient's device clock or geographical location.
+ * Returns current date and time strictly in the hospital's operational timezone.
+ * Supports multi-tenant timezone and locale configuration.
  */
-export function getHospitalTimeInfo(): HospitalTimeInfo {
-  const timeZone = HOSPITAL.TIMEZONE || "Asia/Kolkata";
+export function getHospitalTimeInfo(customTimezone?: string, customLocale?: string): HospitalTimeInfo {
+  const timeZone = customTimezone || HOSPITAL.TIMEZONE || "Asia/Kolkata";
   const now = new Date();
 
   const formatter = new Intl.DateTimeFormat("en-US", {
@@ -30,15 +31,27 @@ export function getHospitalTimeInfo(): HospitalTimeInfo {
   const todayYMD = `${year}-${month}-${day}`;
   const currentTotalMinutes = hour * 60 + minute;
 
-  const displayTimeFormatter = new Intl.DateTimeFormat("en-IN", {
+  const displayLocale = customLocale || (timeZone === "Asia/Kolkata" ? "en-IN" : "en-US");
+  const displayTimeFormatter = new Intl.DateTimeFormat(displayLocale, {
     timeZone,
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
   });
-  const formattedTime = `${displayTimeFormatter.format(now)} IST`;
 
-  const displayDateFormatter = new Intl.DateTimeFormat("en-US", {
+  const timeZoneNamePart =
+    CANONICAL_TIMEZONE_ABBREVIATIONS[timeZone] ||
+    new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      timeZoneName: "short",
+    })
+      .formatToParts(now)
+      .find((p) => p.type === "timeZoneName")?.value ||
+    (timeZone === "Asia/Kolkata" ? "IST" : timeZone);
+
+  const formattedTime = `${displayTimeFormatter.format(now)} ${timeZoneNamePart}`;
+
+  const displayDateFormatter = new Intl.DateTimeFormat(displayLocale, {
     timeZone,
     weekday: "short",
     month: "short",
@@ -55,7 +68,7 @@ export function getHospitalTimeInfo(): HospitalTimeInfo {
     formattedTime,
     formattedDate,
     timeZone,
-    label: "IST",
+    label: timeZoneNamePart,
   };
 }
 

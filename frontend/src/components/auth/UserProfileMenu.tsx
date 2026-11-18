@@ -1,5 +1,5 @@
 import React from "react";
-import type { AuthUser } from "../../types";
+import type { AuthUser, Page, AdminTab } from "../../types";
 import {
   THEME_COLORS,
   THEME_GRADIENTS,
@@ -9,8 +9,8 @@ import {
 interface UserProfileMenuProps {
   authUser: AuthUser;
   onLogout: () => void;
-  onNavigate: (page: any) => void;
-  onSetAdminTab: (tab: any) => void;
+  onNavigate: (page: Page) => void;
+  onSetAdminTab: (tab: AdminTab) => void;
   onToggleOrders: (open: boolean) => void;
   onClose: () => void;
 }

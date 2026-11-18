@@ -8,11 +8,11 @@ export * from "./en";
  */
 export function t(key: TranslationKey, fallback?: string): string {
   const parts = key.split(".");
-  let current: any = en;
+  let current: Record<string, unknown> | string = en;
 
   for (const part of parts) {
     if (current && typeof current === "object" && part in current) {
-      current = current[part];
+      current = (current as Record<string, unknown>)[part] as Record<string, unknown> | string;
     } else {
       return fallback || key;
     }
@@ -21,10 +21,9 @@ export function t(key: TranslationKey, fallback?: string): string {
   return typeof current === "string" ? current : fallback || key;
 }
 
-export function useI18n() {
+export function useI18n(tenantLocale?: string) {
   return {
     t,
-    locale: "en-IN",
+    locale: tenantLocale || "en-IN",
   };
 }
-

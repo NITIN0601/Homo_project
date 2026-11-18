@@ -1,6 +1,6 @@
 import React from "react";
 import { useTenant } from "../../context/ThemeProvider";
-import type { UserProfile, HomeopathicRemedySuggestion } from "../../types";
+import type { UserProfile, HomeopathicRemedySuggestion, HomeopathicCaseRecord } from "../../types";
 import { DOCTOR, HOSPITAL } from "../../config";
 import {
   LANGUAGE_LABELS,
@@ -33,8 +33,8 @@ interface VoiceStudioReviewStepProps {
   setAudioIsPurged: (val: boolean) => void;
   audioDurationSec: number;
   audioChecksumSha256: string;
-  syncedCaseRecord: any;
-  patientFilteredRecord: any;
+  syncedCaseRecord: HomeopathicCaseRecord | null;
+  patientFilteredRecord: Partial<HomeopathicCaseRecord> | null;
   currentPatient: UserProfile;
   shareRemedy: boolean;
   setShareRemedy: (val: boolean) => void;

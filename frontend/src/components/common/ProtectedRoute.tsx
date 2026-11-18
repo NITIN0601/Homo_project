@@ -182,7 +182,24 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   fallback,
 }) => {
+  const { state } = useApp();
   const denial = fallback ?? <AccessDeniedScreen requiredRole={requiredRole} />;
+
+  if (!state.authUser) {
+    return denial;
+  }
+
+  const roleMatches =
+    requiredRole === "patient"
+      ? Boolean(state.authUser)
+      : requiredRole === "admin"
+      ? state.authUser.role === "admin" || state.authUser.role === "super_admin"
+      : state.authUser.role === "super_admin";
+
+  if (!roleMatches) {
+    return denial;
+  }
+
   return (
     <RbacErrorBoundary fallback={denial}>
       {children}

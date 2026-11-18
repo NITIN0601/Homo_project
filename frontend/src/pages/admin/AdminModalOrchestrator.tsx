@@ -1,5 +1,12 @@
 import React, { Suspense, lazy } from "react";
-import type { UserProfile, ConsultationInvoice, PatientClinicalMedia, InventoryItem } from "../../types";
+import type {
+  UserProfile,
+  ConsultationInvoice,
+  PatientClinicalMedia,
+  InventoryItem,
+  BookedAppointment,
+  VisitSummaryRecord,
+} from "../../types";
 import type { BatchOrderItem, PharmacyPurchaseOrder } from "./types";
 import { AppointmentBookingModal } from "./AppointmentBookingModal";
 import { AppointmentCancellationModal } from "./AppointmentCancellationModal";
@@ -20,7 +27,7 @@ export interface AdminModalOrchestratorProps {
   // Modal visibility & active record states
   isBookingModalOpen: boolean;
   onCloseBookingModal: () => void;
-  onBookAppointment: (apt: any) => Promise<void>;
+  onBookAppointment: (apt: BookedAppointment) => Promise<void>;
 
   cancellingAppointmentId: string | null;
   onCloseCancelModal: () => void;
@@ -28,7 +35,7 @@ export interface AdminModalOrchestratorProps {
 
   prescribeModalPatient: UserProfile | null;
   onClosePrescribeModal: () => void;
-  onPrescribeRemedy: (patientId: string, newVisit: any, medicineId: string, customDosageNote: string) => void;
+  onPrescribeRemedy: (patientId: string, newVisit: VisitSummaryRecord, medicineId: string, customDosageNote: string) => void;
 
   postFeeModalPatient: UserProfile | null;
   onClosePostFeeModal: () => void;
@@ -38,7 +45,7 @@ export interface AdminModalOrchestratorProps {
   onCloseUploadPrescription: () => void;
   uploadTargetPatientId: string;
   uploadChiefDiagnosis: string;
-  onSavePrescription: (patientId: string, newVisit: any, attachment?: any) => void;
+  onSavePrescription: (patientId: string, newVisit: VisitSummaryRecord, attachment?: PatientClinicalMedia) => void;
 
   isCreatePOModalOpen: boolean;
   onCloseCreatePOModal: () => void;

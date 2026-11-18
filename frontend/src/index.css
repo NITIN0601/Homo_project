@@ -221,3 +221,34 @@
   from { opacity: 0; transform: translateX(-20px); }
   to   { opacity: 1; transform: translateX(0); }
 }
+
+/* ─── Print Styles Isolation (HIPAA Receipt & EHR Protection) ── */
+@media print {
+  html, body {
+    background: white !important;
+    color: black !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #print-target,
+  #print-target * {
+    visibility: visible;
+  }
+  #print-target {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 1.5rem;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    color: black !important;
+    z-index: 99999;
+  }
+  .no-print, nav, footer, button, .modal-backdrop {
+    display: none !important;
+  }
+}

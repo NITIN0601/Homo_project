@@ -531,16 +531,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
     window.addEventListener("storage", onStorage);
 
-    // 2. Cross-port polling (fetches from shared dev server API every 15s)
+    // 2. Cross-port polling & Server-Sent Events (SSE)
     let isSubscribed = true;
+    let pollTimer: number | null = null;
+
     const syncFromServer = async () => {
+      // Pause syncing when document/tab is hidden to prevent DDoS on backend (HIPAA/Performance)
+      if (typeof document !== "undefined" && document.hidden) return;
+
       try {
         const resDates = await fetch("/api/blocked-dates");
         if (resDates.ok && isSubscribed) {
           const data = await resDates.json();
           if (Array.isArray(data)) {
             const currentDates = stateRef.current.blockedDates.map((b) => `${b.id || ""}_${b.date}_${b.reason}_${b.type}_${b.startTime || ""}_${b.endTime || ""}`).sort().join("|");
-            const serverDates = data.map((b: any) => `${b.id || ""}_${b.date}_${b.reason}_${b.type || "ooo"}_${b.startTime || ""}_${b.endTime || ""}`).sort().join("|");
+            const serverDates = data.map((b: BlockedCalendarDate) => `${b.id || ""}_${b.date}_${b.reason}_${b.type || "ooo"}_${b.startTime || ""}_${b.endTime || ""}`).sort().join("|");
             if (currentDates !== serverDates) {
               dispatch({ type: "SET_BLOCKED_DATES", payload: data });
             }
@@ -554,7 +559,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           const data = await resApts.json();
           if (Array.isArray(data)) {
             const currentApts = stateRef.current.appointments.map((a) => `${a.id}_${a.status}_${a.date}_${a.time}`).sort().join("|");
-            const serverApts = data.map((a: any) => `${a.id}_${a.status}_${a.date}_${a.time}`).sort().join("|");
+            const serverApts = data.map((a: BookedAppointment) => `${a.id}_${a.status}_${a.date}_${a.time}`).sort().join("|");
             if (currentApts !== serverApts) {
               dispatch({ type: "SET_APPOINTMENTS", payload: data });
             }
@@ -591,9 +596,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       } catch {}
     };
 
-    // Initial fetch
+    // Initial sync
     syncFromServer();
-    const interval = setInterval(syncFromServer, 5000);
+
+    // Schedule jittered background polling (15-20s interval with random jitter)
+    const scheduleNextPoll = () => {
+      if (!isSubscribed) return;
+      const jitterMs = 15000 + Math.floor(Math.random() * 5000);
+      pollTimer = window.setTimeout(async () => {
+        await syncFromServer();
+        scheduleNextPoll();
+      }, jitterMs);
+    };
+    scheduleNextPoll();
+
     const onFocus = () => syncFromServer();
     const onVisibility = () => {
       if (document.visibilityState === "visible") {
@@ -603,18 +619,41 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibility);
 
+    // Optional SSE EventSource listener for real-time pushed alerts (Fix 29)
+    let sseSource: EventSource | null = null;
+    if (typeof window !== "undefined" && "EventSource" in window) {
+      try {
+        sseSource = new EventSource("/api/events/stream");
+        sseSource.onmessage = (e) => {
+          try {
+            const payload = JSON.parse(e.data);
+            if (payload?.type === "APPOINTMENT_UPDATED") {
+              syncFromServer();
+            }
+          } catch {}
+        };
+      } catch {}
+    }
+
     return () => {
       isSubscribed = false;
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisibility);
-      clearInterval(interval);
+      if (pollTimer) clearTimeout(pollTimer);
+      if (sseSource) sseSource.close();
     };
   }, []);
 
-  // ── Multi-Tab Security & Session Sync (BroadcastChannel) ──────────────────────
+  // ── Multi-Tab Security & Session Sync (BroadcastChannel + Fallback) ─────────
   useEffect(() => {
-    return subscribeToSessionEvents((msg) => {
+    const handleTenantSwitch = () => {
+      dispatch({ type: "RESET_CLINICAL_STATE" });
+    };
+
+    window.addEventListener("hospital_tenant_switched", handleTenantSwitch);
+
+    const unsubscribe = subscribeToSessionEvents((msg) => {
       if (msg.type === "AUTH_LOGOUT") {
         dispatch({ type: "LOGOUT" });
       } else if (msg.type === "AUTH_LOGIN") {
@@ -624,8 +663,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             dispatch({ type: "LOGIN", payload: JSON.parse(stored) });
           }
         } catch {}
+      } else if (msg.type === "TENANT_SWITCH") {
+        dispatch({ type: "RESET_CLINICAL_STATE" });
       }
     });
+
+    return () => {
+      window.removeEventListener("hospital_tenant_switched", handleTenantSwitch);
+      unsubscribe();
+    };
   }, []);
 
   // ── Synchronize Browser URL (<tab_name>) with activePage and adminTab ─────────

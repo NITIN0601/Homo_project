@@ -1,8 +1,8 @@
 import React from "react";
-import type { HomeopathicCaseRecord } from "../../types";
+import type { HomeopathicCaseRecord, HomeopathicChiefComplaint, HomeopathicPrescribedRemedy } from "../../types";
 
 interface CaseRecordCardProps {
-  record: HomeopathicCaseRecord | any;
+  record: HomeopathicCaseRecord | Partial<HomeopathicCaseRecord>;
   showSaveButton?: boolean;
   onSave?: () => void;
   isSaving?: boolean;
@@ -70,7 +70,7 @@ export const CaseRecordCard: React.FC<CaseRecordCardProps> = ({
             Chief Complaints &amp; Modalities
           </span>
           <div className="space-y-1.5">
-            {complaints.map((c: any, i: number) => (
+            {complaints.map((c: HomeopathicChiefComplaint, i: number) => (
               <div key={i} className="p-3 bg-emerald-50/50 rounded-2xl border border-emerald-100">
                 <p className="font-bold text-emerald-950">
                   {c.location || "General"} — <span className="font-medium text-emerald-800">{c.sensation}</span>
@@ -97,7 +97,7 @@ export const CaseRecordCard: React.FC<CaseRecordCardProps> = ({
             Prescribed Simillimum
           </span>
           <div className="space-y-1.5">
-            {remedies.map((m: any, i: number) => (
+            {remedies.map((m: HomeopathicPrescribedRemedy, i: number) => (
               <div
                 key={i}
                 className="p-3 bg-stone-50 rounded-2xl border border-stone-200 flex items-center justify-between"

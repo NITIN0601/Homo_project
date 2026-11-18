@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
+import { sendCrashReport } from "../utils/telemetry";
 
 export type ToastType = "success" | "error" | "warning" | "info";
 
@@ -110,13 +111,18 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 export function useToast(): ToastContextValue["toast"] & { showToast: ToastContextValue["showToast"] } {
   const ctx = useContext(ToastContext);
   if (!ctx) {
-    // Graceful fallback for non-provider renders / tests
+    if (import.meta.env.DEV) {
+      console.warn("[ToastContext] useToast called outside ToastProvider tree.");
+    }
     return {
-      success: (msg: string) => console.log("[Toast success]", msg),
-      error: (msg: string) => console.error("[Toast error]", msg),
-      warning: (msg: string) => console.warn("[Toast warning]", msg),
-      info: (msg: string) => console.info("[Toast info]", msg),
-      showToast: (msg: string) => console.log("[Toast]", msg),
+      success: (msg: string) => { if (import.meta.env.DEV) console.info("[Toast success]", msg); },
+      error: (msg: string) => {
+        if (import.meta.env.DEV) console.error("[Toast error]", msg);
+        sendCrashReport(new Error(`[Toast error] ${msg}`));
+      },
+      warning: (msg: string) => { if (import.meta.env.DEV) console.warn("[Toast warning]", msg); },
+      info: (msg: string) => { if (import.meta.env.DEV) console.info("[Toast info]", msg); },
+      showToast: (msg: string) => { if (import.meta.env.DEV) console.info("[Toast]", msg); },
     };
   }
   return {

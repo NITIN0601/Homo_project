@@ -45,7 +45,9 @@ export const schedulingService = {
           body: JSON.stringify(payload),
         });
       } catch (err) {
-        console.warn("Direct /api/book-appointment failed, falling back to local dispatch", err);
+        if (import.meta.env.DEV) {
+          console.warn("Direct /api/book-appointment failed, falling back to local dispatch", err);
+        }
         return null;
       }
     },

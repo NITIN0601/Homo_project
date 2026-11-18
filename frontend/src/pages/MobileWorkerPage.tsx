@@ -10,6 +10,8 @@ import {
 } from "../services/imageUploadPipeline";
 import CaseRecordCard from "../components/common/CaseRecordCard";
 import ProviderSelector from "../components/common/ProviderSelector";
+import { validateClinicalFile } from "../utils/fileValidation";
+import { auditService } from "../services/auditService";
 
 export const MobileWorkerPage: React.FC = () => {
   const { navigateTo } = useApp();
@@ -29,6 +31,15 @@ export const MobileWorkerPage: React.FC = () => {
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Revoke object URL on unmount or when previewUrl changes to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (previewUrl && previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   useEffect(() => {
     const timer = setInterval(() => {
       const status = getCooldownStatus();
@@ -42,6 +53,22 @@ export const MobileWorkerPage: React.FC = () => {
     setUploadToast(null);
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validate MIME type and file size
+    const validation = validateClinicalFile(file);
+    if (!validation.valid) {
+      setUploadToast({
+        type: "error",
+        msg: validation.error || "File rejected: invalid format or size exceeds 25MB.",
+      });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    // Revoke previous blob URL if exists
+    if (previewUrl && previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(previewUrl);
+    }
 
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
@@ -70,10 +97,24 @@ export const MobileWorkerPage: React.FC = () => {
         selectedFile.name,
         "android_mobile_worker"
       );
+
+      // Audit trail logging
+      auditService.logAction("UPLOADED_PRESCRIPTION", {
+        details: {
+          fileName: selectedFile.name,
+          fileHash: result.fileHash,
+          worker: "android_mobile_worker",
+        },
+      });
+
       setUploadToast({
         type: "success",
         msg: `Prescription verified & recorded! (Hash: ${result.fileHash.slice(0, 12)}...)`,
       });
+
+      if (previewUrl && previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
       setSelectedFile(null);
       setPreviewUrl(null);
       setComputedHash(null);

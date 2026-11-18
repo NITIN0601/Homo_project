@@ -19,8 +19,10 @@ import {
 import {
   isSlotPassed,
   isUserSlotPassed,
+  getTimezoneOffsetString,
   type LocalizedUserSlot,
 } from "../utils/timezone";
+import { splitFullName } from "../utils/format";
 import type {
   AppointmentFormValues,
   AppointmentFormErrors,
@@ -44,27 +46,16 @@ export { MORNING_SLOTS, EVENING_SLOTS, ALL_TIME_SLOTS };
 const TIME_SLOTS: readonly string[] = ALL_TIME_SLOTS;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-function toISO(date: string, time: string): string {
-  return `${date}T${time}:00+05:30`;
+export function toISO(date: string, time: string, timezone: string = "Asia/Kolkata"): string {
+  const rawOffset = getTimezoneOffsetString(timezone);
+  const offset = rawOffset.replace(/^UTC/, "") || "+00:00";
+  return `${date}T${time}:00${offset === "+00:00" ? "Z" : offset}`;
 }
 
 function addMinutes(time: string, mins: number): string {
   const [h, m] = time.split(":").map(Number);
   const total = h * 60 + m + mins;
   return `${String(Math.floor(total / 60)).padStart(2,"0")}:${String(total % 60).padStart(2,"0")}`;
-}
-
-// ─── Name splitting helper ────────────────────────────────────────────────────
-export function splitFullName(fullName: string): { firstName: string; middleName: string; lastName: string } {
-  const parts = (fullName || "").trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return { firstName: "", middleName: "", lastName: "" };
-  if (parts.length === 1) return { firstName: parts[0], middleName: "", lastName: "" };
-  if (parts.length === 2) return { firstName: parts[0], middleName: "", lastName: parts[1] };
-  return {
-    firstName: parts[0],
-    middleName: parts.slice(1, -1).join(" "),
-    lastName: parts[parts.length - 1],
-  };
 }
 
 // ─── Validation ───────────────────────────────────────────────────────────────
@@ -186,30 +177,37 @@ const AppointmentsPage: React.FC = () => {
     if (!ident) return;
 
     let isSubscribed = true;
+    const controller = new AbortController();
     const fetchContinuity = async () => {
       setContinuityLoading(true);
-      const res = await api.appointments.checkContinuityPreference(
-        tenant.id,
-        ident,
-        form.selectedDate || undefined,
-        form.selectedSlot || undefined
-      );
-      if (isSubscribed && res) {
-        setContinuity(res);
-        if (!selectedDoctor) {
-          if (res.status === "doctor_inactive" && res.recommended_alternate) {
-            setSelectedDoctor(res.recommended_alternate);
-          } else if (res.preferred_doctor) {
-            setSelectedDoctor(res.preferred_doctor);
+      try {
+        const res = await api.appointments.checkContinuityPreference(
+          tenant.id,
+          ident,
+          form.selectedDate || undefined,
+          form.selectedSlot || undefined
+        );
+        if (isSubscribed && res) {
+          setContinuity(res);
+          if (!selectedDoctor) {
+            if (res.status === "doctor_inactive" && res.recommended_alternate) {
+              setSelectedDoctor(res.recommended_alternate);
+            } else if (res.preferred_doctor) {
+              setSelectedDoctor(res.preferred_doctor);
+            }
           }
         }
+      } catch {
+        // ignored if aborted or network interrupted
+      } finally {
+        if (isSubscribed) setContinuityLoading(false);
       }
-      if (isSubscribed) setContinuityLoading(false);
     };
 
     const timer = setTimeout(fetchContinuity, 350);
     return () => {
       isSubscribed = false;
+      controller.abort();
       clearTimeout(timer);
     };
   }, [form.email, form.phone, form.selectedDate, form.selectedSlot, tenant.id, authUser]);
@@ -334,12 +332,13 @@ const AppointmentsPage: React.FC = () => {
     const hospitalDate = selectedLocalizedSlot ? selectedLocalizedSlot.hospitalDateYMD : form.selectedDate;
     const hospitalSlot = selectedLocalizedSlot ? selectedLocalizedSlot.hospitalSlot24 : form.selectedSlot;
     const hospitalTime = selectedLocalizedSlot ? selectedLocalizedSlot.hospitalTime12 : form.selectedSlot;
+    const tenantTz = tenant.hours?.timezone || tenant.doctor?.availability?.timezone || HOSPITAL.TIMEZONE || "Asia/Kolkata";
     const isoStartTime = selectedLocalizedSlot
       ? selectedLocalizedSlot.isoTimestamp
-      : toISO(form.selectedDate, form.selectedSlot);
+      : toISO(form.selectedDate, form.selectedSlot, tenantTz);
     const isoEndTime = selectedLocalizedSlot
       ? new Date(new Date(selectedLocalizedSlot.isoTimestamp).getTime() + 30 * 60000).toISOString()
-      : toISO(form.selectedDate, addMinutes(form.selectedSlot, 30));
+      : toISO(form.selectedDate, addMinutes(form.selectedSlot, 30), tenantTz);
 
     const newAppointment: BookedAppointment = {
       id: `apt-${Date.now()}`,

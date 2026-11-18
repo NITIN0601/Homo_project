@@ -146,7 +146,10 @@ export async function processSecureImageUpload(
       fileHash,
       record: data.record,
     };
-  } catch (err: any) {
-    throw new Error(err.message || "Upload verification failed.");
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw new Error(String(err) || "Upload verification failed.");
   }
 }

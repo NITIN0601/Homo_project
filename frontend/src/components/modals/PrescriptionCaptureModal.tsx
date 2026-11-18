@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { validateClinicalFile } from "../../utils/fileValidation";
 
 interface PrescriptionCaptureModalProps {
   isOpen: boolean;
@@ -65,7 +66,9 @@ export const PrescriptionCaptureModal: React.FC<PrescriptionCaptureModalProps> =
         videoRef.current.srcObject = stream;
       }
     } catch (err: any) {
-      console.error("Camera access error:", err);
+      if (import.meta.env.DEV) {
+        console.error("Camera access error:", err);
+      }
       setCameraError(
         err.name === "NotAllowedError" || err.name === "PermissionDeniedError"
           ? "Camera permission was denied. Please allow camera access in your browser settings or select a file from your device folder."
@@ -102,6 +105,14 @@ export const PrescriptionCaptureModal: React.FC<PrescriptionCaptureModalProps> =
   const handleFolderFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setCameraError(null);
+    const validation = validateClinicalFile(file);
+    if (!validation.valid) {
+      setCameraError(validation.error || "File validation failed: invalid format or size exceeds 25MB.");
+      e.target.value = "";
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (event) => {

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import type { UserProfile, PatientClinicalMedia } from "../../types";
 import { formatDateISO } from "../../utils/format";
 import { Modal, Input, Select, Textarea, Button, Badge } from "../../components/ui";
+import { validateClinicalFile } from "../../utils/fileValidation";
+import { auditService } from "../../services/auditService";
 
 interface ClinicalMediaUploadModalProps {
   isOpen: boolean;
@@ -51,9 +53,32 @@ export const ClinicalMediaUploadModal: React.FC<ClinicalMediaUploadModalProps> =
     return () => clearInterval(timer);
   }, [isRecording]);
 
+  const [fileError, setFileError] = useState<string | null>(null);
+
+  // Revoke object URL on unmount or URL change to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (previewUrl && previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFileError(null);
     const file = e.target.files?.[0];
     if (file) {
+      const validation = validateClinicalFile(file);
+      if (!validation.valid) {
+        setFileError(validation.error || "File validation failed.");
+        e.target.value = "";
+        return;
+      }
+
+      if (previewUrl && previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
       setSelectedFileName(file.name);
       if (!title) {
         setTitle(file.name.replace(/\.[^/.]+$/, ""));
@@ -105,7 +130,19 @@ export const ClinicalMediaUploadModal: React.FC<ClinicalMediaUploadModalProps> =
           : "1.8 MB",
     };
 
+    auditService.logAction("UPLOADED_PRESCRIPTION", {
+      targetPatientId,
+      details: {
+        title: title.trim(),
+        category,
+        fileName: selectedFileName,
+      },
+    });
+
     onUploadMedia(newMedia);
+    if (previewUrl && previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(previewUrl);
+    }
     onClose();
     setTitle("");
     setNotes("");
@@ -198,6 +235,12 @@ export const ClinicalMediaUploadModal: React.FC<ClinicalMediaUploadModalProps> =
             accept={category === "voice" ? "audio/*" : "image/*,.pdf"}
             className="hidden"
           />
+
+          {fileError && (
+            <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
+              ⚠️ {fileError}
+            </div>
+          )}
 
           {category === "voice" ? (
             <div className="bg-stone-900 text-white rounded-2xl p-4 text-center space-y-3 border border-stone-800">
