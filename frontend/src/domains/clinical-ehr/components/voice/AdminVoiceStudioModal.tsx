@@ -307,7 +307,7 @@ export const AdminVoiceStudioModal: React.FC<AdminVoiceStudioModalProps> = ({
         share_conversation_summary: shareClinicalNotes,
       },
       forensic_audio_provenance: {
-        retained_on_local_clinic_system: retainAudioOnSystem && !audioIsPurged,
+        retained_on_local_hospital_system: retainAudioOnSystem && !audioIsPurged,
         sha256_checksum: audioChecksumSha256 || undefined,
         audio_duration_seconds: audioDurationSec,
         is_permanently_purged: audioIsPurged,

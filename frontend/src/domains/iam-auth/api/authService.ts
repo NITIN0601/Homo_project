@@ -55,7 +55,16 @@ export const authService = {
     return { success: true };
   },
 
-  invite: async (data: { name: string; email: string; role?: string; hospital_id?: string; phone?: string }): Promise<{ status: string; invite_url: string }> => {
+  invite: async (data: {
+    name: string;
+    email: string;
+    role?: string;
+    hospital_id?: string;
+    phone?: string;
+    custom_message?: string;
+    send_email?: boolean;
+    send_sms?: boolean;
+  }): Promise<{ status: string; invite_url: string; message?: string; delivery?: any }> => {
     return apiFetch("/auth/invite", {
       method: "POST",
       body: JSON.stringify(data),
@@ -124,6 +133,19 @@ export const authService = {
   verifyOtp: async (email: string, otp: string): Promise<{ valid: boolean }> => {
     if (USE) return apiFetch("/auth/verify-otp", { method: "POST", body: JSON.stringify({ email, otp }) });
     return { valid: otp === "123456" }; // mock: any 6-digit code works in demo
+  },
+
+  refresh: async (): Promise<{ token: string } | null> => {
+    if (USE) {
+      const res = await apiFetch<{ status: string; token: string }>("/auth/refresh", {
+        method: "POST",
+      });
+      if (res.token) {
+        tokenStorage.setToken(res.token);
+      }
+      return res;
+    }
+    return null;
   },
 
   logout: (): void => {

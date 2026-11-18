@@ -27,7 +27,7 @@ export async function coreFetch<T>(base: string, path: string, options?: Request
   const token = tokenStorage.getToken();
   const maxRetries = options?.retries ?? (options?.method && options.method !== "GET" ? 0 : 1);
   const activeTenant = resolveActiveHospitalTenant();
-  const tenantId = activeTenant?.id || "default";
+  const tenantId = activeTenant?.id || "agastya";
   const requestId = generateRequestId();
 
   const defaultHeaders: Record<string, string> = {

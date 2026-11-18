@@ -14,6 +14,16 @@ client = TestClient(app)
 class TestSuperAdminAndPlatformMgmt(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        from services.auth_service import ACCOUNTS_FILE, INVITES_FILE
+        from services.data_store import load_json
+        from services.doctor_service import DOCTORS_FILE
+        from services.hospital_service import HOSPITALS_FILE
+
+        cls._orig_hospitals = load_json(HOSPITALS_FILE, default=[])
+        cls._orig_doctors = load_json(DOCTORS_FILE, default=[])
+        cls._orig_accounts = load_json(ACCOUNTS_FILE, default={})
+        cls._orig_invites = load_json(INVITES_FILE, default={})
+
         cls.super_admin_token = generate_local_jwt(
             {"id": "usr-super-001", "role": "super_admin", "email": "superadmin@agastyahomoeo.com"}
         )
@@ -23,6 +33,18 @@ class TestSuperAdminAndPlatformMgmt(unittest.TestCase):
         cls.patient_token = generate_local_jwt(
             {"id": "usr-001", "role": "patient", "email": "john@agastyahomoeo.com"}
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        from services.auth_service import ACCOUNTS_FILE, INVITES_FILE
+        from services.data_store import save_json
+        from services.doctor_service import DOCTORS_FILE
+        from services.hospital_service import HOSPITALS_FILE
+
+        save_json(HOSPITALS_FILE, cls._orig_hospitals)
+        save_json(DOCTORS_FILE, cls._orig_doctors)
+        save_json(ACCOUNTS_FILE, cls._orig_accounts)
+        save_json(INVITES_FILE, cls._orig_invites)
 
     def test_admin_cannot_access_super_admin_endpoint(self):
         """Admin is forbidden from creating new hospital tenants (Super Admin only)."""

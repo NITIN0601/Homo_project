@@ -203,14 +203,14 @@ async def delete_doctor_endpoint(
     }
 
 
-@router.put("/hospitals/{hospital_id}/customization", summary="Update clinic customization & doctor bio (Admin)")
+@router.put("/hospitals/{hospital_id}/customization", summary="Update hospital customization & doctor bio (Admin)")
 async def update_hospital_customization_endpoint(
     hospital_id: str,
     payload: dict,
     user: dict = Depends(require_admin_role),
 ):
     """
-    Hospital Admin & Super Admin: Updates clinic branding, contact info, operating hours,
+    Hospital Admin & Super Admin: Updates hospital branding, contact info, operating hours,
     and doctor credentials from the Customization Tab with real-time persistent SSOT.
     """
     try:
@@ -265,6 +265,7 @@ async def toggle_dev_mode_endpoint(
 
 
 @router.get("/hospitals", summary="List all active hospital tenants")
+@router.get("/clinics", include_in_schema=False)
 async def list_hospitals_endpoint(active_only: bool = Query(default=True)):
     """Returns list of registered hospital/clinic tenants."""
     return list_hospitals(active_only=active_only)
@@ -287,6 +288,7 @@ async def get_active_hospital_endpoint(
 
 
 @router.get("/hospitals/{hospital_id}", summary="Get hospital tenant by ID or slug")
+@router.get("/clinics/{hospital_id}", include_in_schema=False)
 async def get_hospital_endpoint(hospital_id: str):
     """Retrieves hospital profile, branding, contacts, and features."""
     h = get_hospital(hospital_id)

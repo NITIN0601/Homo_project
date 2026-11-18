@@ -42,7 +42,7 @@ class Test100UsersParallelInteraction(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(app)
         # Mock external Supabase sync & Google Calendar to focus strictly on concurrency & race conditions
-        self.sb_patch = patch("main.sync_appointment_to_supabase", new_callable=AsyncMock)
+        self.sb_patch = patch("routes.scheduling.sync_appointment_to_supabase", new_callable=AsyncMock)
         self.mock_sb = self.sb_patch.start()
         self.mock_sb.return_value = {"id": "sb-concurrency-mock", "status": "synced"}
 
@@ -54,6 +54,17 @@ class Test100UsersParallelInteraction(unittest.TestCase):
         self._orig_appointments = get_all_appointments()
         self._orig_inventory = get_all_inventory()
 
+        # Clean any leftover load test appointments from prior runs
+        self._clean_apts = [
+            a for a in self._orig_appointments
+            if not str(a.get("patientEmail", "")).startswith("patient.compete")
+            and not str(a.get("patientEmail", "")).startswith("patient.unique")
+            and not str(a.get("user_email", "")).startswith("patient.compete")
+            and not str(a.get("user_email", "")).startswith("patient.unique")
+        ]
+        save_json(APPOINTMENTS_FILE, self._clean_apts)
+        self._base_count = len(self._clean_apts)
+
         # Admin JWT token
         self.admin_token = generate_local_jwt({"sub": "admin-test", "email": "doctor@example.com", "role": "admin"})
         self.admin_headers = {"Authorization": f"Bearer {self.admin_token}"}
@@ -61,7 +72,7 @@ class Test100UsersParallelInteraction(unittest.TestCase):
     def tearDown(self):
         self.sb_patch.stop()
         self.cal_patch.stop()
-        save_json(APPOINTMENTS_FILE, self._orig_appointments)
+        save_json(APPOINTMENTS_FILE, self._clean_apts)
         save_json(INVENTORY_FILE, self._orig_inventory)
 
     def test_100_parallel_users_concurrency_surge(self):
@@ -120,17 +131,19 @@ class Test100UsersParallelInteraction(unittest.TestCase):
                     "patientName": f"Patient L{idx}",
                     "patientPhone": "+91 98450 00000",
                     "doctorName": "Dr. Primary Physician",
-                    "amountINR": 750.0,
+                    "amount": 750.0,
+                    "currency": "INR",
+                    "currencySymbol": "₹",
                     "description": "Consultation Fee",
                     "date": base_day,
                     "status": "pending",
                 }
-                res = self.client.post("/api/v1/consultation-invoices", json=invoice_payload)
+                res = self.client.post("/api/v1/consultation-invoices", json=invoice_payload, headers=self.admin_headers)
                 return ("admin_invoice", idx, res.status_code, res.json())
 
         # ── 4. 10 Dispensary Workers Restocking Inventory ────────────────
         def dispensary_restock(idx):
-            res = self.client.post("/api/v1/inventory/m1/restock", json={"qty": 5})
+            res = self.client.post("/api/v1/inventory/m1/restock", json={"qty": 5}, headers=self.admin_headers)
             return ("dispensary_restock", idx, res.status_code, res.json())
 
         results = []
@@ -192,7 +205,7 @@ class Test100UsersParallelInteraction(unittest.TestCase):
         # Verify no file corruption in appointments store
         persisted_appointments = get_all_appointments()
         self.assertIsInstance(persisted_appointments, list)
-        self.assertGreater(len(persisted_appointments), len(self._orig_appointments))
+        self.assertGreater(len(persisted_appointments), self._base_count)
 
 
 if __name__ == "__main__":

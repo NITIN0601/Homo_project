@@ -14,5 +14,6 @@ export function applyDefaultHeaders(ctx: RequestInterceptorContext): void {
   ctx.headers["X-Request-ID"] = ctx.requestId;
   if (ctx.tenantId) {
     ctx.headers["X-Tenant-ID"] = ctx.tenantId;
+    ctx.headers["X-Hospital-ID"] = ctx.tenantId;
   }
 }

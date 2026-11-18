@@ -114,7 +114,11 @@ class AuditTraceMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         trace_id = request.headers.get("X-Trace-ID") or f"trc-{uuid.uuid4().hex[:12]}"
         session_id = request.headers.get("X-Session-ID") or request.headers.get("X-Conversation-ID") or "sess-anonymous"
-        hospital_id = request.headers.get("X-Hospital-ID") or getattr(settings, "DEFAULT_HOSPITAL_ID", "default")
+        hospital_id = (
+            request.headers.get("X-Hospital-ID")
+            or request.headers.get("X-Tenant-ID")
+            or getattr(settings, "DEFAULT_HOSPITAL_ID", "default")
+        )
         request.state.hospital_id = hospital_id
         request.state.trace_id = trace_id
         start_time = time.perf_counter()

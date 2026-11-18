@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 
 class AppointmentStatusUpdate(BaseModel):
-    status: Literal["Confirmed", "Pending", "Cancelled", "Completed", "No-Show"]
+    status: Literal["Confirmed", "Pending", "Cancelled", "Completed", "No-Show", "In Consultation"]
 
 
 class DirectAppointmentCreateRequest(BaseModel):

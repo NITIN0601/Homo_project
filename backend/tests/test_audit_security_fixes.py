@@ -15,9 +15,18 @@ from core.security import create_access_token, is_token_revoked, verify_access_t
 from fastapi.testclient import TestClient
 from main import app
 from services.auth_service import authenticate_or_register_google_user, generate_otp, verify_otp_code
+from services.data_store import load_json, save_json
 
 
 class TestEnterpriseSecurityFixes(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls._orig_revoked = load_json("revoked_tokens.json", default={})
+
+    @classmethod
+    def tearDownClass(cls):
+        save_json("revoked_tokens.json", cls._orig_revoked)
+
     def setUp(self):
         self.client = TestClient(app)
 
@@ -108,6 +117,39 @@ class TestEnterpriseSecurityFixes(unittest.TestCase):
         # Token must now be rejected
         self.assertTrue(is_token_revoked(jti))
         self.assertIsNone(verify_access_token(token))
+
+    def test_token_refresh_and_rotation(self):
+        token = create_access_token({"sub": "user@test.com", "role": "patient", "hospital_id": "default"})
+        old_payload = verify_access_token(token)
+        self.assertIsNotNone(old_payload)
+        old_jti = old_payload.get("jti")
+
+        # Unauthenticated refresh fails
+        resp_unauth = self.client.post("/api/v1/auth/refresh")
+        self.assertEqual(resp_unauth.status_code, 401)
+
+        # Valid refresh succeeds and returns a new token
+        resp = self.client.post("/api/v1/auth/refresh", headers={"Authorization": f"Bearer {token}"})
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data.get("status"), "success")
+        new_token = data.get("token")
+        self.assertIsNotNone(new_token)
+        self.assertNotEqual(new_token, token)
+
+        # Old token is now revoked
+        self.assertTrue(is_token_revoked(old_jti))
+        self.assertIsNone(verify_access_token(token))
+
+        # Re-using old revoked token for refresh fails
+        resp_reuse = self.client.post("/api/v1/auth/refresh", headers={"Authorization": f"Bearer {token}"})
+        self.assertEqual(resp_reuse.status_code, 401)
+
+        # New token is active and valid with the same user claims
+        new_payload = verify_access_token(new_token)
+        self.assertIsNotNone(new_payload)
+        self.assertEqual(new_payload.get("sub"), "user@test.com")
+        self.assertEqual(new_payload.get("role"), "patient")
 
     def test_google_auth_prevents_unverified_admin_claim(self):
         # Attempting admin login without id_token must be rejected

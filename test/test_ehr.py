@@ -12,7 +12,10 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent / "backend"
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
+from services.data_store import load_json, save_json
 from services.supabase_service import (
+    HASHES_FILE,
+    RECORDS_FILE,
     check_and_insert_file_hash,
     fetch_patient_records,
     insert_patient_record,
@@ -20,6 +23,15 @@ from services.supabase_service import (
 
 
 class TestEHRModule(unittest.IsolatedAsyncioTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls._orig_records = load_json(RECORDS_FILE, default=[])
+        cls._orig_hashes = load_json(HASHES_FILE, default=[])
+
+    @classmethod
+    def tearDownClass(cls):
+        save_json(RECORDS_FILE, cls._orig_records)
+        save_json(HASHES_FILE, cls._orig_hashes)
 
     async def test_anti_spam_hash_insertion_and_duplicate_detection(self):
         unique_hash = f"sha256_test_hash_{uuid.uuid4().hex}"

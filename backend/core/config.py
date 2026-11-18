@@ -58,23 +58,12 @@ class Settings:
     MAX_CUSTOMERS_PER_HOSPITAL: int = int(os.getenv("MAX_CUSTOMERS_PER_HOSPITAL", "1000"))
 
     # Hospital & Facility Profile (Configurable via Environment or Tenant Registry)
-    CLINIC_NAME: str = os.getenv("CLINIC_NAME", os.getenv("HOSPITAL_NAME", "General Healthcare Hospital"))
-    HOSPITAL_NAME: str = CLINIC_NAME
-
-    CLINIC_DOMAIN: str = os.getenv("CLINIC_DOMAIN", os.getenv("HOSPITAL_DOMAIN", "example.com"))
-    HOSPITAL_DOMAIN: str = CLINIC_DOMAIN
-
-    CLINIC_LOCATION: str = os.getenv("CLINIC_LOCATION", os.getenv("HOSPITAL_LOCATION", "Global"))
-    HOSPITAL_LOCATION: str = CLINIC_LOCATION
-
-    CLINIC_ADDRESS: str = os.getenv("CLINIC_ADDRESS", os.getenv("HOSPITAL_ADDRESS", "100 Medical Center Way"))
-    HOSPITAL_ADDRESS: str = CLINIC_ADDRESS
-
-    CLINIC_PHONE: str = os.getenv("CLINIC_PHONE", os.getenv("HOSPITAL_PHONE", "+1 555-0100"))
-    HOSPITAL_PHONE: str = CLINIC_PHONE
-
-    CLINIC_ADMIN_EMAIL: str = os.getenv("CLINIC_ADMIN_EMAIL", os.getenv("HOSPITAL_ADMIN_EMAIL", "admin@example.com"))
-    HOSPITAL_ADMIN_EMAIL: str = CLINIC_ADMIN_EMAIL
+    HOSPITAL_NAME: str = os.getenv("HOSPITAL_NAME", "General Healthcare Hospital")
+    HOSPITAL_DOMAIN: str = os.getenv("HOSPITAL_DOMAIN", "example.com")
+    HOSPITAL_LOCATION: str = os.getenv("HOSPITAL_LOCATION", "Global")
+    HOSPITAL_ADDRESS: str = os.getenv("HOSPITAL_ADDRESS", "100 Medical Center Way")
+    HOSPITAL_PHONE: str = os.getenv("HOSPITAL_PHONE", "+1 555-0100")
+    HOSPITAL_ADMIN_EMAIL: str = os.getenv("HOSPITAL_ADMIN_EMAIL", "admin@example.com")
 
     DOCTOR_NAME: str = os.getenv("DOCTOR_NAME", "Dr. Primary Physician, MD")
     DOCTOR_SHORT_NAME: str = os.getenv("DOCTOR_SHORT_NAME", "Dr. Physician")

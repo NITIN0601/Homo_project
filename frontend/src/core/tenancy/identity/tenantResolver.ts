@@ -13,7 +13,7 @@ export interface TenantResolutionContext {
  * 0. Query Parameter: ?tenant=... or ?hospital=...
  * 1. Option B: Active User Context (if logged in and authorized)
  * 2. Option A: Domain / Subdomain matching from hostname
- * 3. Fallback: Default vanilla clinic tenant (General Healthcare Clinic)
+ * 3. Fallback: Default configured hospital tenant (Agastya Classical Homeopathy Clinic)
  */
 export function resolveActiveHospitalTenant(ctx?: TenantResolutionContext): HospitalTenantConfig {
   // ── 0. Query Parameter Override (?tenant=... or ?hospital=...) ───────────────
@@ -40,10 +40,12 @@ export function resolveActiveHospitalTenant(ctx?: TenantResolutionContext): Hosp
   }
 
   // ── 1. Option B: Auth / Session Context ─────────────────────────────────────
-  if (ctx.userActiveHospitalId) {
-    const userTenantId = ctx.userActiveHospitalId.toLowerCase();
+  const activeHospId = ctx.userActiveHospitalId;
+  if (activeHospId) {
+    const userTenantId = activeHospId.toLowerCase();
+    const authorizedList = ctx.userAuthorizedHospitals;
     // Verify user authorization if authorized list is present
-    if (!ctx.userAuthorizedHospitals || ctx.userAuthorizedHospitals.includes(userTenantId)) {
+    if (!authorizedList || authorizedList.includes(userTenantId)) {
       if (HOSPITAL_TENANTS[userTenantId]) {
         return HOSPITAL_TENANTS[userTenantId];
       }
@@ -71,6 +73,9 @@ export function resolveActiveHospitalTenant(ctx?: TenantResolutionContext): Hosp
   // Check fallback keyword in hostname
   if (hostname.includes("apollo")) {
     return HOSPITAL_TENANTS.apollo || DEFAULT_HOSPITAL_TENANT;
+  }
+  if (hostname.includes("agastya")) {
+    return HOSPITAL_TENANTS.agastya || DEFAULT_HOSPITAL_TENANT;
   }
 
   // ── 3. Fallback to default configured clinic tenant ─────────────────────────

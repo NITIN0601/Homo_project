@@ -39,24 +39,24 @@ def generate_clinical_watermark(
     file_sha256: str,
     doctor_name: str | None = None,
     doctor_id: str = "DOC-001",
-    clinic_name: str | None = None,
     patient_id: str | None = None,
+    hospital_name: str | None = None,
 ) -> dict[str, Any]:
     """
     Generates a cryptographically signed health-data watermark.
     Protects patient privacy by embedding:
       • Non-repudiation HMAC-SHA256 signature
-      • Clinical provenance (Doctor & Clinic accreditation)
+      • Clinical provenance (Doctor & Hospital accreditation)
       • Pseudonymized patient hash (no plaintext PII)
       • Legal misuse warning (Unauthorized duplication punishable under ABDM / DISHA / HIPAA)
       • Tamper-proof timestamp & audio checksum
     """
     doc_name = doctor_name or settings.DOCTOR_NAME
-    c_name = clinic_name or settings.CLINIC_NAME
+    h_name = hospital_name or getattr(settings, "HOSPITAL_NAME", "Agastya Classical Homeopathy Clinic")
     timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     pseudonymized_patient = hashlib.sha256((patient_id or "ANONYMOUS").encode()).hexdigest()[:16]
 
-    payload_string = f"{interaction_id}|{file_sha256}|{doctor_id}|{c_name}|{timestamp}|{pseudonymized_patient}"
+    payload_string = f"{interaction_id}|{file_sha256}|{doctor_id}|{h_name}|{timestamp}|{pseudonymized_patient}"
     signature = hmac.new(WATERMARK_SECRET_KEY, payload_string.encode("utf-8"), hashlib.sha256).hexdigest()
 
     watermark_data = {
@@ -64,12 +64,12 @@ def generate_clinical_watermark(
         "watermark_version": "v2.1-clinical",
         "compliance_standard": "ABDM-M3 / DISHA / HIPAA Security Rule §164.312",
         "legal_warning": (
-            f"CONFIDENTIAL HEALTH DATA: Property of {c_name} & Registered Patient. "
+            f"CONFIDENTIAL HEALTH DATA: Property of {h_name} & Registered Patient. "
             "Unauthorized extraction, cloning, re-identification, or distribution is strictly prohibited "
             "under the Digital Personal Data Protection Act (DPDPA 2023) and ABDM health data standards."
         ),
-        "clinic_provenance": {
-            "clinic_name": c_name,
+        "hospital_provenance": {
+            "hospital_name": h_name,
             "attending_physician": doc_name,
             "physician_license_id": doctor_id,
         },
@@ -127,11 +127,12 @@ def verify_audio_watermark(interaction_id: str) -> dict[str, Any]:
 
     # Recompute HMAC signature
     timestamp = data["audio_integrity"]["watermarked_at_utc"]
-    doctor_id = data["clinic_provenance"]["physician_license_id"]
-    clinic_name = data["clinic_provenance"]["clinic_name"]
+    prov = data.get("hospital_provenance", {})
+    doctor_id = prov.get("physician_license_id", "DOC-001")
+    facility_name = prov.get("hospital_name", "")
     patient_hash = data["patient_provenance"]["pseudonymized_id_hash"]
 
-    payload_string = f"{interaction_id}|{expected_sha}|{doctor_id}|{clinic_name}|{timestamp}|{patient_hash}"
+    payload_string = f"{interaction_id}|{expected_sha}|{doctor_id}|{facility_name}|{timestamp}|{patient_hash}"
     expected_sig = hmac.new(WATERMARK_SECRET_KEY, payload_string.encode("utf-8"), hashlib.sha256).hexdigest()
 
     if expected_sig != data["audio_integrity"]["signature_hmac_sha256"]:

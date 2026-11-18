@@ -1,7 +1,7 @@
 import React, { Component, type ErrorInfo, type ReactNode } from "react";
 import { RbacAccessError } from "../model/AuthContext";
 import { useApp } from "@app/store";
-import { useTenant } from "@core/tenancy";
+import { useHospital } from "@core/tenancy";
 import { THEME_GRADIENTS, THEME_COLORS, USE_MOCK_DATA, DEMO_CREDENTIALS } from "../../../core/config";
 import { MOCK_ACCOUNTS } from "../../../mocks";
 
@@ -61,7 +61,8 @@ interface AccessDeniedScreenProps {
 
 const AccessDeniedScreen: React.FC<AccessDeniedScreenProps> = ({ requiredRole = "admin" }) => {
   const { navigateTo, openAuthModal, login } = useApp();
-  const { tenant } = useTenant();
+  const hospital = useHospital();
+  const { tenant, facilityLabelLower } = hospital;
   const isSuperAdminRequired = requiredRole === "super_admin";
   const doctorDisplayName = tenant.doctor?.name || "the attending physician";
 
@@ -103,7 +104,7 @@ const AccessDeniedScreen: React.FC<AccessDeniedScreenProps> = ({ requiredRole = 
       <p className="text-stone-500 text-sm leading-relaxed mb-6">
         {isSuperAdminRequired
           ? "This area is restricted to Platform Super Administrators managing multi-hospital infrastructure, cross-tenant configurations, and governance."
-          : `This area is restricted to authorized clinic medical staff. If you are ${doctorDisplayName} or a clinic administrator, please sign in with your administrative credentials.`}
+          : `This area is restricted to authorized ${facilityLabelLower} medical staff. If you are ${doctorDisplayName} or a ${facilityLabelLower} administrator, please sign in with your administrative credentials.`}
       </p>
 
       <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-center">

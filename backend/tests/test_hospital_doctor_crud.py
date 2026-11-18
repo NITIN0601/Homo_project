@@ -16,6 +16,8 @@ from services.hospital_service import HOSPITALS_FILE, get_all_hospitals, get_hos
 class TestHospitalDoctorCrud(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls._orig_hospitals = get_all_hospitals()
+        cls._orig_doctors = get_all_doctors()
         cls.client = TestClient(app)
         cls.super_admin_token = create_access_token(
             {
@@ -35,6 +37,11 @@ class TestHospitalDoctorCrud(unittest.TestCase):
         )
         cls.super_headers = {"Authorization": f"Bearer {cls.super_admin_token}"}
         cls.admin_headers = {"Authorization": f"Bearer {cls.admin_token}"}
+
+    @classmethod
+    def tearDownClass(cls):
+        save_json(HOSPITALS_FILE, cls._orig_hospitals)
+        save_json(DOCTORS_FILE, cls._orig_doctors)
 
     def setUp(self):
         self.created_hospital_ids = []

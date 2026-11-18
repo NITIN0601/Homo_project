@@ -31,6 +31,7 @@ export const api = {
   calendar: schedulingService.calendar,
   invoices: billingService.invoices,
   hospitals: hospitalService.hospitals,
+  clinics: hospitalService.hospitals,
   platform: hospitalService.platform,
 };
 

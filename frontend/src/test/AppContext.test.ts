@@ -106,7 +106,7 @@ describe("AppContext State Machine & Reducer Regression Suite", () => {
         patientName: "John Doe",
         doctorName: "Dr. Bramarambha K, MD",
         visitDate: "2026-10-02",
-        amountINR: 750,
+        amount: 750,
         consultationType: "In-Person Hospital Visit",
         notes: "Acute constitutional consultation",
         status: "pending",
@@ -130,7 +130,7 @@ describe("AppContext State Machine & Reducer Regression Suite", () => {
         patientName: "John Doe",
         doctorName: "Dr. Bramarambha K, MD",
         visitDate: "2026-10-02",
-        amountINR: 750,
+        amount: 750,
         consultationType: "In-Person Hospital Visit",
         notes: "Initial consultation",
         status: "pending",
@@ -142,14 +142,14 @@ describe("AppContext State Machine & Reducer Regression Suite", () => {
         payload: invoice,
       });
 
-      const updated = { ...invoice, amountINR: 950, notes: "Extended constitutional consultation" };
+      const updated = { ...invoice, amount: 950, notes: "Extended constitutional consultation" };
       const s2 = appReducer(s1, {
         type: "POST_CONSULTATION_INVOICE",
         payload: updated,
       });
 
       expect(s2.consultationInvoices).toHaveLength(1);
-      expect(s2.consultationInvoices[0].amountINR).toBe(950);
+      expect(s2.consultationInvoices[0].amount).toBe(950);
       expect(s2.consultationInvoices[0].notes).toBe("Extended constitutional consultation");
     });
   });
@@ -248,7 +248,7 @@ describe("AppContext State Machine & Reducer Regression Suite", () => {
         patientName: "John Doe",
         doctorName: "Dr. Bramarambha K",
         visitDate: "2026-10-02",
-        amountINR: 750,
+        amount: 750,
         consultationType: "In-Person Hospital Visit",
         notes: "Consultation notes",
         status: "pending",

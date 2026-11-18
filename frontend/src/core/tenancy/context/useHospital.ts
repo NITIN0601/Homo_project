@@ -34,6 +34,8 @@ export interface HospitalFacade {
   facilityType: "hospital" | "clinic";
   facilityLabel: "Hospital" | "Clinic";
   facilityLabelLower: "hospital" | "clinic";
+  currency: string;
+  currencySymbol: string;
   aboutHospitalText: string;
   branding: HospitalTenantConfig["branding"];
   features: HospitalTenantConfig["features"];
@@ -50,17 +52,17 @@ export function useHospital(): HospitalFacade {
     const primaryDoctor: HospitalDoctor = hasTenantDoctor
       ? tenant.doctor
       : tenant.doctors && tenant.doctors.length > 0
-      ? tenant.doctors[0]
-      : {
-          id: "doc-default",
-          name: DOCTOR.NAME,
-          title: DOCTOR.TITLE,
-          qualifications: DOCTOR.QUALIFICATIONS,
-          experienceYears: 6,
-          regNo: "MED-001",
-          aboutText: DOCTOR.BIO_SUMMARY,
-          specialties: ["General Medicine", "Holistic Health"],
-        };
+        ? tenant.doctors[0]
+        : {
+            id: tenant.doctor?.id || "doc-001",
+            name: DOCTOR.NAME,
+            title: DOCTOR.TITLE,
+            qualifications: DOCTOR.QUALIFICATIONS,
+            experienceYears: 6,
+            regNo: "KAR-HOM-2018-0492",
+            aboutText: DOCTOR.BIO_SUMMARY,
+            specialties: ["Classical Homeopathy", "Chronic Pathology"],
+          };
 
     const doctorsList: HospitalDoctor[] =
       tenant.doctors && tenant.doctors.length > 0 ? tenant.doctors : [primaryDoctor];
@@ -93,6 +95,8 @@ export function useHospital(): HospitalFacade {
       facilityType,
       facilityLabel,
       facilityLabelLower,
+      currency: tenant.currency || "INR",
+      currencySymbol: tenant.currencySymbol || "₹",
       logoUrl: tenant.branding.logoUrl || HOSPITAL.LOGO_PATH,
       phone: tenant.contact.phoneDisplay || tenant.contact.phone || HOSPITAL.PHONE_DISPLAY,
       phoneTel: tenant.contact.phone || HOSPITAL.PHONE_TEL,

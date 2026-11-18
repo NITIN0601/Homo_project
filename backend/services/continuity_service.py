@@ -146,7 +146,7 @@ def resolve_patient_doctor_continuity(
             (d for d in hospital_docs if d.get("name") == prev_doc_name or d.get("shortName") == prev_doc_name), None
         )
 
-    # 4.1 Check if treating doctor is inactive or left clinic
+    # 4.1 Check if treating doctor is inactive or left hospital
     is_doc_active = bool(doc_profile and doc_profile.get("isActive", True))
 
     if not is_doc_active:
@@ -159,7 +159,7 @@ def resolve_patient_doctor_continuity(
             "is_returning_patient": True,
             "status": "doctor_inactive",
             "message": (
-                f"{prev_doc_name} is no longer practicing at this clinic. "
+                f"{prev_doc_name} is no longer practicing at this hospital. "
                 f"Your clinical case file and constitutional notes will be assigned to {alternate_doc.get('name') if alternate_doc else 'the duty physician'}."
             ),
             "last_visit_date": last_visit_date,

@@ -13,7 +13,13 @@ from typing import Any
 
 from core.audit import record_clinical_audit_event
 from core.config import settings
-from core.security import get_current_user_optional, verify_access_token, verify_local_jwt
+from core.dependencies import limiter
+from core.security import (
+    get_current_user,
+    require_admin_role,
+    verify_access_token,
+    verify_local_jwt,
+)
 from fastapi import (
     APIRouter,
     Depends,
@@ -22,6 +28,7 @@ from fastapi import (
     Header,
     HTTPException,
     Query,
+    Request,
     UploadFile,
     status,
 )
@@ -128,7 +135,10 @@ async def verify_and_register_hash(req: FileHashRequest):
     "/patient-records",
     summary="Create full patient record in Supabase (with on-prem fallback)",
 )
-async def create_patient_record(payload: PatientRecordCreate):
+async def create_patient_record(
+    payload: PatientRecordCreate,
+    user: dict[str, Any] = Depends(require_admin_role),
+):
     try:
         analysis_dict = payload.homeopathic_analysis.model_dump()
         result = await insert_patient_record(
@@ -225,13 +235,16 @@ async def get_patient_records(
     "/ai/upload-and-parse-audio",
     summary="Direct multi-part consultation audio upload with streaming watermark & AI analysis",
 )
+@limiter.limit("10/minute")
 async def process_consultation(
+    request: Request,
     file: UploadFile = File(...),
     patient_name: str = Form(...),
     doctor_notes: str | None = Form(None),
     provider: str = Form("gemini"),
     model: str | None = Form(None),
     api_key: str | None = Form(None),
+    user: dict[str, Any] = Depends(require_admin_role),
 ):
     safe_name = sanitize_safe_id(patient_name)
     interaction_id = f"{safe_name}_{int(time.time())}"
@@ -356,12 +369,24 @@ def check_phi_access_permission(target_patient_id: str, authorization: str | dic
 
 
 @router.get("/visit-summaries", summary="List patient clinical visit files")
-async def list_visit_summaries_endpoint(user: dict[str, Any] | None = Depends(get_current_user_optional)):
-    if user and user.get("role") == "patient":
+async def list_visit_summaries_endpoint(
+    request: Request,
+    user: dict[str, Any] = Depends(get_current_user),
+):
+    all_summaries = get_all_visit_summaries()
+    role = user.get("role")
+    if role == "patient":
         uid = user.get("sub") or user.get("id") or user.get("email")
-        all_summaries = get_all_visit_summaries()
         return {uid: all_summaries[uid]} if uid in all_summaries else {}
-    return get_all_visit_summaries()
+    hospital_id = getattr(request.state, "hospital_id", None) or user.get("hospital_id")
+    if hospital_id and role != "super_admin":
+        target_hosp = hospital_id.strip().lower()
+        return {
+            k: v
+            for k, v in all_summaries.items()
+            if (v.get("hospitalId") or v.get("hospital_id") or "default").strip().lower() == target_hosp
+        }
+    return all_summaries
 
 
 @router.post("/visit-summaries", summary="Add patient consultation visit summary")
@@ -372,7 +397,7 @@ async def add_visit_summary_endpoint(payload: dict[str, Any], authorization: str
     check_phi_access_permission(patient_id, authorization)
     saved = save_visit_summary(patient_id, payload)
 
-    customer_email = payload.get("patientEmail") or f"{patient_id}@{settings.CLINIC_DOMAIN}"
+    customer_email = payload.get("patientEmail") or f"{patient_id}@{settings.HOSPITAL_DOMAIN}"
     customer_name = payload.get("patientName") or "Valued Patient"
     chief_diagnosis = payload.get("chiefDiagnosis") or "Consultation Review"
     prescribed_remedies = payload.get("prescribedRemedies", [])

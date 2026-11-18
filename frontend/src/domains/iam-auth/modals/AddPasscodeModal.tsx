@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { AdminPasscode } from "@core/types/tenant";
+import { useHospital } from "@core/tenancy";
 import { Button, Modal } from "../../../shared/ui";
 
 interface AddPasscodeModalProps {
@@ -17,6 +18,7 @@ export const AddPasscodeModal: React.FC<AddPasscodeModalProps> = ({
   currentAdminName,
   onPasscodeAdded,
 }) => {
+  const hospital = useHospital();
   const [addAuthPasscode, setAddAuthPasscode] = useState("");
   const [addNewPasscode, setAddNewPasscode] = useState("");
   const [addPasscodeLabel, setAddPasscodeLabel] = useState("");
@@ -59,7 +61,7 @@ export const AddPasscodeModal: React.FC<AddPasscodeModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Add New Admin Security Passcode"
-      subtitle="Provision a designated passcode for secondary hospital administrators"
+      subtitle={`Provision a designated passcode for secondary ${hospital?.facilityLabelLower || "hospital"} administrators`}
       size="sm"
       footer={
         <div className="flex items-center justify-end gap-2 w-full">

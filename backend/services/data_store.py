@@ -3,6 +3,7 @@ Local data persistence store for clinic appointments, invoices, blocked dates, a
 Synchronizes with shared dev-cache so Frontend (Vite) and Backend (FastAPI) share identical state.
 """
 
+import copy
 import fcntl
 import json
 import logging
@@ -62,23 +63,26 @@ class InterProcessLock:
             self._thread_lock.release()
 
 
-def _get_primary_path(filename: str) -> Path:
+def _get_primary_path(filename: str | Path) -> Path:
     """Primary Source of Truth (SSOT) on-prem disk store."""
-    return BACKEND_DATA_DIR / filename
+    p = Path(filename)
+    if p.is_absolute():
+        return p
+    return BACKEND_DATA_DIR / p.name
 
 
-def load_json(filename: str, default: Any = None, use_cache: bool = True) -> Any:
+def load_json(filename: str | Path, default: Any = None, use_cache: bool = True) -> Any:
     """
     Loads JSON data prioritizing backend/data as SSOT.
     Protected with shared file lock and high-speed in-memory TTL caching.
     """
-    now = time.monotonic()
-    if use_cache and filename in _CACHE:
-        val, cached_time = _CACHE[filename]
-        if now - cached_time < CACHE_TTL:
-            return val
-
     primary_path = _get_primary_path(filename)
+    cache_key = str(primary_path)
+    now = time.monotonic()
+    if use_cache and cache_key in _CACHE:
+        val, cached_time = _CACHE[cache_key]
+        if now - cached_time < CACHE_TTL:
+            return copy.deepcopy(val)
 
     if primary_path.exists():
         try:
@@ -86,7 +90,7 @@ def load_json(filename: str, default: Any = None, use_cache: bool = True) -> Any
                 try:
                     fcntl.flock(f.fileno(), fcntl.LOCK_SH)
                     data = json.load(f)
-                    _CACHE[filename] = (data, now)
+                    _CACHE[cache_key] = (copy.deepcopy(data), now)
                     return data
                 finally:
                     try:
@@ -99,17 +103,18 @@ def load_json(filename: str, default: Any = None, use_cache: bool = True) -> Any
     fallback_val = default if default is not None else []
     if default is not None:
         save_json(filename, fallback_val)
-    _CACHE[filename] = (fallback_val, now)
+    _CACHE[cache_key] = (copy.deepcopy(fallback_val), now)
     return fallback_val
 
 
-def save_json(filename: str, data: Any) -> None:
+def save_json(filename: str | Path, data: Any) -> None:
     """
     Persists JSON data to primary backend/data store atomically.
     Uses tempfile + atomic rename (os.replace) with exclusive file lock
     to prevent file corruption under concurrent parallel access.
     """
     primary_path = _get_primary_path(filename)
+    cache_key = str(primary_path)
     dir_name = primary_path.parent
     try:
         # Atomic write pattern: write to temporary file in the same directory, then rename
@@ -126,7 +131,7 @@ def save_json(filename: str, data: Any) -> None:
                 except OSError:
                     pass
         os.replace(temp_name, str(primary_path))
-        _CACHE[filename] = (data, time.monotonic())
+        _CACHE[cache_key] = (copy.deepcopy(data), time.monotonic())
     except Exception as exc:
         logger.error(f"CRITICAL: Failed saving primary data store {primary_path}: {exc}")
         if "temp_name" in locals() and os.path.exists(temp_name):
@@ -315,7 +320,7 @@ def get_whatsapp_config() -> dict[str, Any]:
         WHATSAPP_CONFIG_FILE,
         default={
             "doctorName": settings.DOCTOR_SHORT_NAME,
-            "whatsappNumber": settings.CLINIC_PHONE,
+            "whatsappNumber": settings.HOSPITAL_PHONE,
             "autoNotifyRegistration": True,
             "autoNotifyPrescriptions": True,
         },

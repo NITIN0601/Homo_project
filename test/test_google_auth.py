@@ -9,6 +9,7 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent / "backend"
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
+from core.config import settings
 from main import app
 from services.auth_service import create_user_invite
 
@@ -16,6 +17,22 @@ client = TestClient(app)
 
 
 class TestGoogleAuthFlow(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from services.auth_service import ACCOUNTS_FILE, INVITES_FILE
+        from services.data_store import load_json
+        cls._orig_accounts = load_json(ACCOUNTS_FILE, default={})
+        cls._orig_invites = load_json(INVITES_FILE, default={})
+        cls._orig_mock = settings.USE_MOCK_DATA
+        settings.USE_MOCK_DATA = True
+
+    @classmethod
+    def tearDownClass(cls):
+        from services.auth_service import ACCOUNTS_FILE, INVITES_FILE
+        from services.data_store import save_json
+        save_json(ACCOUNTS_FILE, cls._orig_accounts)
+        save_json(INVITES_FILE, cls._orig_invites)
+        settings.USE_MOCK_DATA = cls._orig_mock
     def test_patient_google_signup_passwordless(self):
         """Verify patient can register & login with Google without setting a password."""
         test_email = f"patient_{uuid.uuid4().hex[:6]}@gmail.com"

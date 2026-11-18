@@ -19,7 +19,7 @@ class TestInputSanitization(unittest.TestCase):
             patientId="pat-101",
             patientName=" <script>alert('xss')</script> John Doe ",
             doctorName="Dr. Jane Smith & Co.",
-            amountINR=850.50,
+            amount=850.50,
             description="Consultation for <img src=x onerror=alert(1)> dyspepsia.",
             transactionRef="UPI-UTR 123456#$!",
         )
@@ -34,7 +34,7 @@ class TestInputSanitization(unittest.TestCase):
                 patientId="pat-101",
                 patientName="John Doe",
                 doctorName="Dr. Smith",
-                amountINR=-500,  # Negative amount must fail
+                amount=-500,  # Negative amount must fail
                 description="Follow up",
             )
 
@@ -44,7 +44,7 @@ class TestInputSanitization(unittest.TestCase):
                 patientId="pat-101",
                 patientName="John Doe",
                 doctorName="Dr. Smith",
-                amountINR=0,  # Zero amount must fail
+                amount=0,  # Zero amount must fail
                 description="Follow up",
             )
 

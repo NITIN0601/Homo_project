@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useApp } from "../store/AppContext";
 import { useTenant } from "../../core/tenancy/branding/ThemeProvider";
+import { useHospital } from "../../core/tenancy/context/useHospital";
 import { MOCK_ACCOUNTS } from "../../mocks";
 import { DEMO_CREDENTIALS, DEV_PORTS } from "../../core/config";
 
 export const DemoHeaderBanner: React.FC = () => {
   const { state, login, logout, navigateTo } = useApp();
   const { tenant } = useTenant();
+  const hospital = useHospital();
   const { authUser, activePage } = state;
   const [collapsed, setCollapsed] = useState(false);
 
@@ -66,7 +68,7 @@ export const DemoHeaderBanner: React.FC = () => {
               {isSuperAdminPage
                 ? "⚡ Platform Super Admin Console"
                 : isAdminPage
-                ? "🩺 Hospital Doctor Admin Console"
+                ? `🩺 ${hospital.facilityLabel} Doctor Admin Console`
                 : "👤 Patient Client Portal"}
             </strong>
             <span className="text-stone-400">

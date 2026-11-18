@@ -81,11 +81,15 @@ class TestRouteProtection(unittest.TestCase):
         self.assertEqual(data.get("view"), "patient_records_full")
         self.assertIn("records", data)
 
-    def test_mobile_view_unauthenticated_allowed(self):
-        """Verifies that default mobile view query remains accessible without admin credentials."""
-        res = self.client.get("/api/v1/patient-records?view=mobile")
-        self.assertEqual(res.status_code, 200)
-        data = res.json()
+    def test_mobile_view_unauthenticated_rejected(self):
+        """Verifies HIPAA PHI guard: unauthenticated mobile query is rejected with 401, while authenticated succeeds."""
+        res_unauth = self.client.get("/api/v1/patient-records?view=mobile")
+        self.assertEqual(res_unauth.status_code, 401)
+
+        headers = {"Authorization": f"Bearer {self.patient_token}"}
+        res_auth = self.client.get("/api/v1/patient-records?view=mobile", headers=headers)
+        self.assertEqual(res_auth.status_code, 200)
+        data = res_auth.json()
         self.assertEqual(data.get("status"), "success")
         self.assertEqual(data.get("view"), "mobile_patient_view")
 
@@ -110,7 +114,7 @@ class TestRouteProtection(unittest.TestCase):
 
     def test_audit_trace_headers_attached_to_responses(self):
         """Verifies that AuditTraceMiddleware attaches X-Trace-ID and X-Session-ID to every response."""
-        res = self.client.get("/api/v1/sync/status")
+        res = self.client.get("/api/v1/health")
         self.assertEqual(res.status_code, 200)
         self.assertIn("X-Trace-ID", res.headers)
         self.assertIn("X-Session-ID", res.headers)

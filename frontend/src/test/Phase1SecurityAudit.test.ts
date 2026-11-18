@@ -13,7 +13,7 @@ describe("Phase 1: Immediate Blockers & Security Hardening Verification", () => 
     try {
       localStorage.clear();
       sessionStorage.clear();
-    } catch {}
+    } catch { }
     tokenStorage.clearToken();
     auditService.clearMemoryLogs();
   });
@@ -60,7 +60,7 @@ describe("Phase 1: Immediate Blockers & Security Hardening Verification", () => 
         appointments: [{ id: "apt-1", patientName: "Secret Apollo Patient" } as any],
         blockedDates: [{ id: "b-1", date: "2026-10-10" } as any],
         visitSummaries: { "p-1": { patientId: "p-1", patientName: "Secret File", visits: [] } as any },
-        consultationInvoices: [{ id: "inv-1", patientName: "Private Patient", amountINR: 1000 } as any],
+        consultationInvoices: [{ id: "inv-1", patientName: "Private Patient", amount: 1000 } as any],
       };
 
       const cleanState = appReducer(dirtyState, { type: "RESET_CLINICAL_STATE" });
@@ -99,7 +99,7 @@ describe("Phase 1: Immediate Blockers & Security Hardening Verification", () => 
         patientName: "Jane Doe",
         doctorName: "Dr. Doctor",
         visitDate: "2026-11-18",
-        amountINR: 500,
+        amount: 500,
         consultationType: "In-Person Hospital Visit",
         status: "pending",
         issuedAt: new Date().toISOString(),

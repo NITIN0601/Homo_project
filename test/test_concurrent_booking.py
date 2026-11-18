@@ -30,14 +30,22 @@ class TestConcurrentAppointmentBooking(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(app)
         # Mock external Supabase sync in booking tests to run at in-memory speed
-        self.sb_patch = patch("main.sync_appointment_to_supabase", new_callable=AsyncMock)
+        self.sb_patch = patch("routes.scheduling.sync_appointment_to_supabase", new_callable=AsyncMock)
         self.mock_sb = self.sb_patch.start()
         self.mock_sb.return_value = {"id": "sb-mock-apt", "status": "synced"}
 
-        # Snapshot appointments before test to ensure test isolation
-        from services.data_store import get_all_appointments
-        self._orig_appointments = get_all_appointments()
-        self._test_token = int(datetime.now().timestamp()) % 10000
+        # Snapshot appointments before test and clean any lingering test appointments
+        from services.data_store import APPOINTMENTS_FILE, get_all_appointments, save_json
+        cleaned = [
+            a for a in get_all_appointments()
+            if not any(
+                p in (a.get("patientEmail") or "")
+                for p in ("patient.one", "patient.two", "patient.a", "patient.b", "patient.repeat", "primary.patient", "secondary.patient", "patient.multi")
+            ) and not a.get("id", "").startswith("apt-e2e-")
+        ]
+        save_json(APPOINTMENTS_FILE, cleaned)
+        self._orig_appointments = cleaned
+        self._test_token = int(datetime.now().timestamp() * 1000) % 10000
 
     def tearDown(self):
         self.sb_patch.stop()
@@ -148,8 +156,8 @@ class TestConcurrentAppointmentBooking(unittest.TestCase):
             res_a = future_a.result()
             res_b = future_b.result()
 
-        self.assertEqual(res_a.status_code, 201)
-        self.assertEqual(res_b.status_code, 201)
+        self.assertEqual(res_a.status_code, 201, msg=f"res_a failed with {res_a.status_code}: {res_a.json()}")
+        self.assertEqual(res_b.status_code, 201, msg=f"res_b failed with {res_b.status_code}: {res_b.json()}")
 
 
 if __name__ == "__main__":

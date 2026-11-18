@@ -164,7 +164,7 @@ def _fallback_doctor() -> dict[str, Any]:
         "shortName": getattr(settings, "DOCTOR_SHORT_NAME", "Dr. Primary"),
         "title": getattr(settings, "DOCTOR_NAME", "Dr. Primary Physician, MD"),
         "email": getattr(settings, "DOCTOR_EMAIL", "doctor@example.com"),
-        "phone": getattr(settings, "CLINIC_PHONE", "+1 555-0100"),
+        "phone": getattr(settings, "HOSPITAL_PHONE", "+1 555-0100"),
         "specialties": ["General Medicine", "Holistic Health"],
         "calendarId": "primary",
         "isPrimary": True,

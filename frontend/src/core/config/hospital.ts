@@ -2,35 +2,35 @@ import { THEME_COLORS } from "./theme";
 
 // ─── Doctor Profile (SSOT Baseline Placeholders) ──────────────────────────────
 export const DOCTOR = {
-  NAME:            "Dr. Primary Physician",
-  FULL_NAME_WITH_DOT: "Dr. Primary Physician, MD",
-  TITLE:           "Primary Consulting Physician, MD",
-  QUALIFICATIONS:  "MD, MBBS",
-  DESIGNATION:     "Consulting Physician",
-  COLLEGE:         "Medical College & Hospital",
-  COLLEGE_SHORT:   "Medical College",
-  ALMA_MATER:      "Medical College & Hospital",
-  RANK:            "Clinical Excellence",
-  CERTIFICATION:   "Board Certified",
-  EXPERIENCE_YEARS: "10 Years",
-  EXPERIENCE_DESC: "10 years of dedicated clinical experience providing individualised healthcare",
-  EMAIL:           "doctor@example.com",
-  UPI_ID:          "hospital@upi",
+  NAME:            "Dr. Bramarambha K",
+  FULL_NAME_WITH_DOT: "Dr. Bramarambha K, MD (Homoeopathy)",
+  TITLE:           "Dr. Bramarambha K, MD (Homeopathic Materia Medica), SCPH",
+  QUALIFICATIONS:  "BHMS, MD (Homoeopathy), SCPH",
+  DESIGNATION:     "Consulting Homoeopathic Physician",
+  COLLEGE:         "Government Homoeopathic Medical College & Hospital, Bengaluru",
+  COLLEGE_SHORT:   "Govt. Homoeopathic Medical College",
+  ALMA_MATER:      "Government Homoeopathic Medical College & Hospital, Bengaluru",
+  RANK:            "RGUHS University 3rd Rank in MD",
+  CERTIFICATION:   "SCPH Certified Classical Prescriber",
+  EXPERIENCE_YEARS: "6+ Years",
+  EXPERIENCE_DESC: "6+ years of dedicated clinical experience in individualised classical homeopathy",
+  EMAIL:           "doctor@agastyahomoeo.com",
+  UPI_ID:          "agastya@upi",
 
   BIO_SUMMARY:
-    "Experienced clinical practitioner dedicated to holistic patient wellness, compassionate care, and evidence-based clinical medicine.",
+    "Homoeopathic Physician with postgraduate specialisation in Homeopathic Materia Medica from RGUHS Bengaluru, SCPH-certified in classical homeopathy.",
 
   APPROACH:
-    "My approach to care is centred on understanding each patient’s health history, lifestyle, and individual concerns, so that treatment can be planned according to their specific needs.",
+    "My approach to care is centred on understanding each patient’s health history, mental state, and physical symptoms to select the single simillimum remedy tailored to their constitutional state.",
 
   EXPERIENCE_DETAIL:
-    "Extensive clinical experience providing comprehensive patient consultations and managing a diverse range of chronic and acute health concerns.",
+    "Extensive clinical experience managing chronic pathologies, allergic rhinitis, paediatric immunity, eczema, and migraine through classical Hahnemannian principles.",
 
   CREDENTIAL_CHIPS: [
-    { label: "Clinical Experience",   value: "10 Years",        sub: "Patient-Centered Care" },
-    { label: "Medical Credentials",   value: "MD, MBBS",        sub: "Clinical Medicine" },
-    { label: "Faculty & Practice",    value: "Consultant",      sub: "General & Holistic Practice" },
-    { label: "Board Certification",   value: "Certified",       sub: "Advanced Clinical Practice" },
+    { label: "Clinical Experience",   value: "6+ Years",        sub: "Classical Homeopathy" },
+    { label: "Medical Credentials",   value: "MD, BHMS",        sub: "Materia Medica Specialist" },
+    { label: "University Honor",      value: "3rd Rank",        sub: "RGUHS Bengaluru" },
+    { label: "Board Certification",   value: "SCPH Certified",  sub: "Advanced Classical Practice" },
   ],
 } as const;
 
@@ -45,11 +45,11 @@ export const DOCTOR_BIO = {
 
 // ─── Hospital Identity (SSOT Baseline Placeholders) ───────────────────────────
 export const HOSPITAL = {
-  NAME:              "General Hospital",
-  FULL_NAME:         "General Healthcare Hospital",
-  TAGLINE:           "Patient-Centered Healthcare & Lasting Wellness",
-  SECONDARY_TAGLINE: "Your Health • Our Priority",
-  WEBSITE:           "https://hospital.example.com",
+  NAME:              "Agastya Clinic",
+  FULL_NAME:         "Agastya Classical Homeopathy Clinic",
+  TAGLINE:           "Root-cause homeopathic healing with clinical precision",
+  SECONDARY_TAGLINE: "Gentle Healing, Lasting Wellness",
+  WEBSITE:           "https://agastyahomoeo.com",
   TIMEZONE:          "Asia/Kolkata",
   TIMEZONE_LABEL:    "IST (Indian Standard Time, UTC+5:30)",
   TIMEZONE_OFFSET:   "+05:30",
@@ -76,35 +76,35 @@ export const HOSPITAL = {
   DOCTOR_UPI_ID:          DOCTOR.UPI_ID,
 
   // Contact
-  PHONE_DISPLAY:   "+1 555-0100",
-  PHONE_TEL:       "+15550100",
-  SUPPORT_EMAIL:   "admin@example.com",
-  PHARMACY_EMAIL:  "pharmacy@example.com",
+  PHONE_DISPLAY:   "+91 98450 12345",
+  PHONE_TEL:       "+919845012345",
+  SUPPORT_EMAIL:   "admin@agastyahomoeo.com",
+  PHARMACY_EMAIL:  "pharmacy@agastyahomoeo.com",
 
   // Assets
-  LOGO_PATH:       "/generic-hospital-logo.svg",
-  LOGO_ALT:        "General Healthcare Hospital — Patient-Centered Healthcare",
+  LOGO_PATH:       "/agastya-logo.png",
+  LOGO_ALT:        "Agastya Classical Homeopathy Clinic — Root-cause homeopathic healing",
 
   // Address (SSOT)
   ADDRESS: {
-    STREET:            "100 Medical Center Way",
-    AREA:              "Medical Center",
-    CITY:              "Metropolis",
-    STATE:             "State",
-    PINCODE:           "10001",
-    COUNTRY:           "Country",
-    CITY_STATE:        "Metropolis, State",
-    SHORT:             "Metropolis, State",
-    FULL:              "100 Medical Center Way, Metropolis, State – 10001",
-    FULL_WITH_COUNTRY: "100 Medical Center Way, Metropolis, State – 10001, Country",
-    MAPS_URL:          "https://maps.google.com/?q=Medical+Center",
+    STREET:            "No. 10/2, 2nd Temple Road, 16th Cross",
+    AREA:              "Malleshwaram",
+    CITY:              "Bengaluru",
+    STATE:             "Karnataka",
+    PINCODE:           "560003",
+    COUNTRY:           "India",
+    CITY_STATE:        "Bengaluru, Karnataka",
+    SHORT:             "Malleshwaram, Bengaluru",
+    FULL:              "No. 10/2, 2nd Temple Road, 16th Cross, Malleshwaram, Bengaluru, Karnataka – 560003",
+    FULL_WITH_COUNTRY: "No. 10/2, 2nd Temple Road, 16th Cross, Malleshwaram, Bengaluru, Karnataka – 560003, India",
+    MAPS_URL:          "https://maps.google.com/?q=No.+10/2,+2nd+Temple+Road,+16th+Cross,+Malleshwaram,+Bengaluru,+Karnataka+560003",
   },
 
   // Branches
   BRANCHES: {
-    MALLESHWARAM: "Main Medical Center",
+    MALLESHWARAM: "Malleshwaram Main Clinic",
     TELE:         "Virtual Consultation Care Hub",
-    OPD:          "Outpatient Medical Center",
+    OPD:          "Agastya Homoeopathic OPD",
   },
 
   // Trust Badges

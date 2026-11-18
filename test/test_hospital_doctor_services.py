@@ -14,11 +14,24 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent / "backend"
 sys.path.insert(0, str(BACKEND_DIR))
 
 from main import app
-from services.doctor_service import get_primary_doctor, list_doctors
-from services.hospital_service import get_hospital, list_hospitals
+from services.data_store import APPOINTMENTS_FILE, load_json, save_json
+from services.doctor_service import DOCTORS_FILE, get_primary_doctor, list_doctors
+from services.hospital_service import HOSPITALS_FILE, get_hospital, list_hospitals
 
 
 class TestHospitalDoctorServices(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls._orig_hospitals = load_json(HOSPITALS_FILE, default=[])
+        cls._orig_doctors = load_json(DOCTORS_FILE, default=[])
+        cls._orig_apts = load_json(APPOINTMENTS_FILE, default=[])
+
+    @classmethod
+    def tearDownClass(cls):
+        save_json(HOSPITALS_FILE, cls._orig_hospitals)
+        save_json(DOCTORS_FILE, cls._orig_doctors)
+        save_json(APPOINTMENTS_FILE, cls._orig_apts)
+
     def setUp(self):
         self.client = TestClient(app)
 

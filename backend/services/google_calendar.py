@@ -82,7 +82,7 @@ async def create_google_calendar_event(
     Inserts an event into Google Calendar with sendUpdates='all'.
     """
     target_cal_id = calendar_id or CALENDAR_ID
-    sum_text = summary or f"Homoeopathy Consultation — {settings.CLINIC_NAME}"
+    sum_text = summary or f"Homoeopathy Consultation — {settings.HOSPITAL_NAME}"
     doc_display = doctor_name or settings.DOCTOR_SHORT_NAME
     doc_mail = doctor_email or settings.DOCTOR_EMAIL
     desc_text = description or f"Clinical consultation with {doc_display}"

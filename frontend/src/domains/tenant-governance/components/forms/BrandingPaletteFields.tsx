@@ -7,7 +7,6 @@ export interface BrandingPaletteValues {
   logoUrl?: string;
   bannerUrl?: string;
   aboutHospitalText?: string;
-  aboutClinicText?: string;
 }
 
 interface BrandingPaletteFieldsProps {
@@ -127,7 +126,7 @@ export const BrandingPaletteFields: React.FC<BrandingPaletteFieldsProps> = ({
       {/* About Hospital Text */}
       <Textarea
         label="About Facility &amp; Mission Statement"
-        value={values.aboutHospitalText || values.aboutClinicText || ""}
+        value={values.aboutHospitalText || ""}
         onChange={(e) => onChange("aboutHospitalText", e.target.value)}
         rows={3}
         placeholder="Brief narrative introducing your facility philosophy, history, and community care commitments..."

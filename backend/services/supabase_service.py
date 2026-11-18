@@ -395,8 +395,8 @@ async def sync_appointment_to_supabase(appointment: dict[str, Any]) -> dict[str,
     url = f"{get_rest_url()}/appointments"
     payload = {
         "patient_name": appointment.get("patientName", "Patient"),
-        "patient_email": appointment.get("patientEmail", f"patient@{settings.CLINIC_DOMAIN}"),
-        "patient_phone": appointment.get("patientPhone", settings.CLINIC_PHONE),
+        "patient_email": appointment.get("patientEmail", f"patient@{settings.HOSPITAL_DOMAIN}"),
+        "patient_phone": appointment.get("patientPhone", settings.HOSPITAL_PHONE),
         "start_time": appointment.get("createdAt") or datetime.now(timezone.utc).isoformat(),
         "end_time": datetime.now(timezone.utc).isoformat(),
         "doctor_title": appointment.get("doctorName", settings.DOCTOR_NAME),
@@ -457,8 +457,8 @@ def format_supabase_appointment(item: dict[str, Any]) -> dict[str, Any]:
         "id": str(item.get("id")),
         "patientId": item.get("patient_id") or f"usr-{str(item.get('id'))[:6]}",
         "patientName": item.get("patient_name", "Patient"),
-        "patientPhone": item.get("patient_phone", settings.CLINIC_PHONE),
-        "patientEmail": item.get("patient_email", f"patient@{settings.CLINIC_DOMAIN}"),
+        "patientPhone": item.get("patient_phone", settings.HOSPITAL_PHONE),
+        "patientEmail": item.get("patient_email", f"patient@{settings.HOSPITAL_DOMAIN}"),
         "date": item.get("date") or date_val,
         "time": item.get("time") or time_val,
         "slot": item.get("slot") or slot_val,
@@ -466,6 +466,7 @@ def format_supabase_appointment(item: dict[str, Any]) -> dict[str, Any]:
         "chiefReason": item.get("chief_reason", "Clinical Consultation"),
         "status": (item.get("status") or "Confirmed").capitalize(),
         "doctorName": item.get("doctor_title", settings.DOCTOR_NAME),
+        "hospitalId": item.get("hospital_id") or item.get("hospitalId") or "default",
         "createdAt": item.get("created_at") or st,
     }
 

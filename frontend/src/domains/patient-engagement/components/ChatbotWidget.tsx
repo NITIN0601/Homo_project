@@ -65,7 +65,10 @@ function getBotResponse(
 ): BotResponse {
   const q = input.toLowerCase().trim();
   const sessionHours = getMappedSessionHours(undefined, userTz);
-  const botName = tenant?.shortName ? `${tenant.shortName}Bot` : "HospitalBot";
+  const facilityType: "hospital" | "clinic" = tenant?.facilityType === "clinic" ? "clinic" : "hospital";
+  const facilityLabel: "Hospital" | "Clinic" = facilityType === "clinic" ? "Clinic" : "Hospital";
+  const facilityLabelLower: "hospital" | "clinic" = facilityType;
+  const botName = tenant?.shortName ? `${tenant.shortName}Bot` : `${facilityLabel}Bot`;
   const hospitalName = tenant?.name || HOSPITAL.NAME;
   const doctorTitle = tenant?.doctor?.title || DOCTOR.TITLE;
   const doctorName = tenant?.doctor?.name || DOCTOR.NAME;
@@ -81,14 +84,14 @@ function getBotResponse(
       text:
         `Hello${patientName !== "Patient" ? `, ${patientName}` : ""}! 👋 I'm **${botName}**, your ${hospitalName} AI assistant.\n\n` +
         `• **Care & Consultations:** Personalized clinical consultations with ${doctorTitle}.\n` +
-        `• **Patient Services:** In-hospital consultations, online tele-care, and direct remedy dispensing.\n` +
-        `• **Quick Navigation:** Instant booking, hospital schedules, and verified visit summaries.\n\n` +
+        `• **Patient Services:** In-${facilityLabelLower} consultations, online tele-care, and direct remedy dispensing.\n` +
+        `• **Quick Navigation:** Instant booking, ${facilityLabelLower} schedules, and verified visit summaries.\n\n` +
         `How can I assist you with your health today?`,
       actions: [
         { label: "📅 Book Consultation Slot",    page: "appointments" },
         { label: "📋 View My Visit Summary",     page: "visit-summary" },
         { label: "🩺 Treated Specialisations",   page: "about", scrollTo: "specialisations" },
-        { label: "🕐 Check Hospital Hours",        page: "about", scrollTo: "hospital-schedule" },
+        { label: `🕐 Check ${facilityLabel} Hours`,        page: "about", scrollTo: "hospital-schedule" },
       ],
     };
   }
@@ -107,7 +110,7 @@ function getBotResponse(
       actions: [
         { label: "📅 Book Consultation Slot", page: "appointments" },
         { label: "🕒 View Schedule on Page",  page: "about", scrollTo: "hospital-schedule" },
-        { label: "📍 Hospital Location Details", page: "about", scrollTo: "hospital-location" },
+        { label: `📍 ${facilityLabel} Location Details`, page: "about", scrollTo: "hospital-location" },
       ],
     };
   }
@@ -121,12 +124,12 @@ function getBotResponse(
         `🚶‍♂️ *Walk-in Consultations at ${tenant?.name || HOSPITAL.FULL_NAME}:*\n\n` +
         `• *Walk-ins Welcome:* ${OFFICE_HOURS.EVENING.days} during ${sessionHours.evening.fullSessionName} (*${walkinHours}*) at ${tenant?.contact?.address?.city || HOSPITAL.ADDRESS.SHORT}.\n` +
         `• *Morning & Sunday Sessions:* Conducted strictly by prior appointment for detailed case-taking.\n` +
-        `• *Queue Tokens:* Issued on a first-come, first-served basis at the hospital reception desk upon arrival.\n\n` +
+        `• *Queue Tokens:* Issued on a first-come, first-served basis at the ${facilityLabelLower} reception desk upon arrival.\n\n` +
         `We recommend booking your slot online to ensure minimal waiting time!`,
       actions: [
         { label: "📅 Book Online Slot",      page: "appointments" },
-        { label: "🕒 View Hospital Timings",   page: "about", scrollTo: "hospital-schedule" },
-        { label: "📍 View Hospital Directions", page: "about", scrollTo: "hospital-location" },
+        { label: `🕒 View ${facilityLabel} Timings`,   page: "about", scrollTo: "hospital-schedule" },
+        { label: `📍 View ${facilityLabel} Directions`, page: "about", scrollTo: "hospital-location" },
       ],
     };
   }
@@ -138,10 +141,10 @@ function getBotResponse(
         `📍 *${tenant?.name || HOSPITAL.FULL_NAME} Address & Contact:*\n\n` +
         `• *Address:* ${hospitalAddress}\n` +
         `• *Direct Contact:* 📞 ${hospitalPhone} | 📧 ${hospitalEmail}\n\n` +
-        `Click below to view the address and interactive map on the hospital page.`,
+        `Click below to view the address and interactive map on the ${facilityLabelLower} page.`,
       actions: [
         { label: "📍 View Map & Address on Page", page: "about", scrollTo: "hospital-location" },
-        { label: "📅 Book Hospital Visit",          page: "appointments" },
+        { label: `📅 Book ${facilityLabel} Visit`,          page: "appointments" },
         { label: `👩‍⚕️ About ${doctorName}`,        page: "about", scrollTo: "doctor-profile" },
       ],
     };
@@ -341,7 +344,7 @@ function getBotResponse(
     return {
       text:
         `💳 *Consultation Fees & Invoicing:* \n\n` +
-        `• *Transparent Settlement:* Consultation and remedy fees are settled at the hospital reception desk upon arrival or appointment confirmation.\n` +
+        `• *Transparent Settlement:* Consultation and remedy fees are settled at the ${facilityLabelLower} reception desk upon arrival or appointment confirmation.\n` +
         `• *Payment Methods:* UPI, cash, and digital payments are accepted.\n` +
         `• *Verified Receipts:* Download official tax invoices and track payment reconciliation directly in your Visit Summary.\n` +
         `• *Portal Security:* No card numbers or banking passwords are collected or stored on this portal.`,

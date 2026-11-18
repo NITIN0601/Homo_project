@@ -40,6 +40,17 @@ from services.payment_validator import PaymentValidator
 class TestEndToEndClinicalScenarios(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        from services.data_store import (
+            APPOINTMENTS_FILE,
+            INVENTORY_FILE,
+            INVOICES_FILE,
+            load_json,
+        )
+
+        cls._orig_appointments = load_json(APPOINTMENTS_FILE, default=[])
+        cls._orig_inventory = load_json(INVENTORY_FILE, default=[])
+        cls._orig_invoices = load_json(INVOICES_FILE, default=[])
+
         cls.client = TestClient(app)
 
         # 1. Generate Authenticated Admin / Doctor Session Token
@@ -69,6 +80,19 @@ class TestEndToEndClinicalScenarios(unittest.TestCase):
         })
         cls.patient2_headers = {"Authorization": f"Bearer {cls.patient2_token}"}
 
+    @classmethod
+    def tearDownClass(cls):
+        from services.data_store import (
+            APPOINTMENTS_FILE,
+            INVENTORY_FILE,
+            INVOICES_FILE,
+            save_json,
+        )
+
+        save_json(APPOINTMENTS_FILE, cls._orig_appointments)
+        save_json(INVENTORY_FILE, cls._orig_inventory)
+        save_json(INVOICES_FILE, cls._orig_invoices)
+
     # =========================================================================
     # PATIENT / CUSTOMER SCENARIOS
     # =========================================================================
@@ -80,10 +104,12 @@ class TestEndToEndClinicalScenarios(unittest.TestCase):
         self.assertEqual(otp_res.status_code, 200)
         self.assertTrue(otp_res.json().get("success"))
 
-        # Verify with valid code (demo code '123456' accepted)
+        # Verify with valid code
+        from services.auth_service import _OTP_CACHE
+        valid_otp = _OTP_CACHE.get("john@agastyahomoeo.com", {}).get("otp", "123456")
         verify_res = self.client.post("/api/v1/auth/verify-otp", json={
             "email": "john@agastyahomoeo.com",
-            "otp": "123456"
+            "otp": valid_otp
         })
         self.assertEqual(verify_res.status_code, 200)
         self.assertTrue(verify_res.json().get("valid"))
@@ -181,13 +207,13 @@ class TestEndToEndClinicalScenarios(unittest.TestCase):
                 inv.get("patientId") == "usr-001" or inv.get("patientEmail") == "john@agastyahomoeo.com"
             )
 
-        # Patient submits UPI reference for post-consultation settlement
+        # Patient / Doctor submits UPI reference for post-consultation settlement
         sub_res = self.client.put("/api/v1/consultation-invoices/INV-2026-101", json={
             "status": "processing",
             "paymentMethod": "upi",
             "transactionRef": "UPI/20261103/99221144",
             "patientUpiId": "john.doe@okaxis"
-        })
+        }, headers=self.admin_headers)
         self.assertEqual(sub_res.status_code, 200)
         self.assertEqual(sub_res.json()["status"], "processing")
 
@@ -236,19 +262,19 @@ class TestEndToEndClinicalScenarios(unittest.TestCase):
             # Transition to 'In Consultation'
             stat_res1 = self.client.put(f"/api/v1/appointments/{apt_id}/status", json={
                 "status": "In Consultation"
-            })
+            }, headers=self.admin_headers)
             self.assertEqual(stat_res1.status_code, 200)
             self.assertEqual(stat_res1.json()["status"], "In Consultation")
 
             # Transition to 'Completed'
             stat_res2 = self.client.put(f"/api/v1/appointments/{apt_id}/status", json={
                 "status": "Completed"
-            })
+            }, headers=self.admin_headers)
             self.assertEqual(stat_res2.status_code, 200)
             self.assertEqual(stat_res2.json()["status"], "Completed")
         finally:
             # Mark Cancelled on cleanup to free slot for idempotent test re-runs
-            self.client.put(f"/api/v1/appointments/{apt_id}/status", json={"status": "Cancelled"})
+            self.client.put(f"/api/v1/appointments/{apt_id}/status", json={"status": "Cancelled"}, headers=self.admin_headers)
 
     def test_scenario_08_doctor_ehr_visit_and_prescription_issuance(self):
         """Scenario 8: Doctor issues clinical visit summary and prescribes remedies."""
@@ -288,13 +314,15 @@ class TestEndToEndClinicalScenarios(unittest.TestCase):
             "patientName": "John Doe",
             "patientEmail": "john@agastyahomoeo.com",
             "doctorName": "Dr. Primary Physician",
-            "amountINR": 750,
+            "amount": 750,
+            "currency": "INR",
+            "currencySymbol": "₹",
             "status": "pending",
             "description": "Follow-up consultation fee",
             "consultationType": "In-Person Clinic Visit",
             "issuedAt": "Nov 03, 2026 05:00 PM",
             "notes": "Follow-up consultation fee"
-        })
+        }, headers=self.admin_headers)
         self.assertEqual(post_fee_res.status_code, 200)
 
         # Doctor reconciles payment funds received with 12-digit UTR
@@ -302,7 +330,7 @@ class TestEndToEndClinicalScenarios(unittest.TestCase):
             "status": "paid",
             "transactionRef": "UTR-2026-9988776655",
             "paidAt": "Nov 03, 2026 05:15 PM"
-        })
+        }, headers=self.admin_headers)
         self.assertEqual(reconcile_res.status_code, 200)
         self.assertEqual(reconcile_res.json()["status"], "paid")
         self.assertEqual(reconcile_res.json()["transactionRef"], "UTR-2026-9988776655")
@@ -319,7 +347,7 @@ class TestEndToEndClinicalScenarios(unittest.TestCase):
         item_id = inventory[0]["id"]
         init_qty = inventory[0].get("stockQty", 0)
 
-        restock_res = self.client.post(f"/api/v1/inventory/{item_id}/restock", json={"qty": 20})
+        restock_res = self.client.post(f"/api/v1/inventory/{item_id}/restock", json={"qty": 20}, headers=self.admin_headers)
         self.assertEqual(restock_res.status_code, 200)
         updated_data = restock_res.json()
         self.assertTrue(updated_data.get("success"))

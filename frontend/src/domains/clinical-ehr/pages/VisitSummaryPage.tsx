@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useApp, MEDICINE_CATALOGUE } from "@app/store";
-import { useTenant } from "@core/tenancy";
+import { useHospital } from "@core/tenancy";
 import type { VisitSummaryRecord, ConsultationInvoice } from "@core/types";
 import { HOSPITAL } from "../../../core/config";
 import { formatCurrency } from "../../../shared/utils/format";
@@ -19,7 +19,8 @@ import { ReceiptModal } from "../../billing-finance";
 export const VisitSummaryPage: React.FC = () => {
   const { state, addToCart, navigateTo, openAuthModal, updatePatientMedicalFile } = useApp();
   const { authUser, visitSummaries, consultationInvoices } = state;
-  const { tenant } = useTenant();
+  const hospital = useHospital();
+  const { tenant, facilityLabelLower } = hospital;
 
   const patientId = authUser?.id || "usr-001";
   const medicalFile = visitSummaries[patientId] || {
@@ -155,15 +156,15 @@ export const VisitSummaryPage: React.FC = () => {
   );
 
   const totalBilledINR = useMemo(
-    () => patientInvoices.reduce((sum, inv) => sum + (inv.amountINR || 0), 0),
+    () => patientInvoices.reduce((sum, inv) => sum + (inv.amount || 0), 0),
     [patientInvoices]
   );
   const totalPendingINR = useMemo(
-    () => pendingInvoices.reduce((sum, inv) => sum + (inv.amountINR || 0), 0),
+    () => pendingInvoices.reduce((sum, inv) => sum + (inv.amount || 0), 0),
     [pendingInvoices]
   );
   const totalPaidINR = useMemo(
-    () => paidInvoices.reduce((sum, inv) => sum + (inv.amountINR || 0), 0),
+    () => paidInvoices.reduce((sum, inv) => sum + (inv.amount || 0), 0),
     [paidInvoices]
   );
 
@@ -299,7 +300,7 @@ export const VisitSummaryPage: React.FC = () => {
           <span className="text-3xl">🔒</span>
           <h3 className="font-extrabold text-base">Summary Modules Restricted</h3>
           <p className="text-xs text-amber-800 max-w-md mx-auto">
-            Medical history records, consultation billing, and follow-up submissions are currently restricted by the hospital administrator. Please contact hospital reception directly for assistance.
+            Medical history records, consultation billing, and follow-up submissions are currently restricted by the {facilityLabelLower} administrator. Please contact {facilityLabelLower} reception directly for assistance.
           </p>
         </div>
       ) : (

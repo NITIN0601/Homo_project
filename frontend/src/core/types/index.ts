@@ -445,8 +445,7 @@ export interface ConsultationInvoice {
   patientName: string;
   doctorName: string;
   visitDate: string;
-  amountINR: number;
-  amount?: number;
+  amount: number;
   currency?: string;
   currencySymbol?: string;
   consultationType: "In-Person Hospital Visit" | "Online Tele-Consultation" | "Follow-up Review";

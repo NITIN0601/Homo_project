@@ -22,16 +22,42 @@ logger = logging.getLogger("security")
 # SSOT for email validation across auth and calendar services
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
 
-# In-memory revocation blocklist: jti -> expires_at_timestamp
+# In-memory and persistent revocation blocklist: jti -> expires_at_timestamp
 _REVOKED_TOKENS: dict[str, float] = {}
 
 
+def _get_persistent_revocations() -> dict[str, float]:
+    """Loads revoked tokens from persistent store, merging into in-memory cache."""
+    global _REVOKED_TOKENS
+    try:
+        from services.data_store import load_json
+
+        persisted = load_json("revoked_tokens.json", default={})
+        if isinstance(persisted, dict):
+            now = datetime.now(timezone.utc).timestamp()
+            # Prune expired tokens during load
+            valid = {k: v for k, v in persisted.items() if isinstance(v, (int, float)) and v > now}
+            _REVOKED_TOKENS.update(valid)
+    except Exception as exc:
+        logger.debug(f"Could not load persistent token revocations: {exc}")
+    return _REVOKED_TOKENS
+
+
 def revoke_token(jti: str, expires_at: float | None = None) -> None:
-    """Revokes a JWT token by its unique identifier (JTI)."""
+    """Revokes a JWT token by its unique identifier (JTI), persisting across worker processes."""
     if not jti:
         return
     exp = expires_at if expires_at else (datetime.now(timezone.utc).timestamp() + 86400 * 7)
     _REVOKED_TOKENS[jti] = exp
+    try:
+        from services.data_store import load_json, save_json
+
+        persisted = load_json("revoked_tokens.json", default={})
+        if isinstance(persisted, dict):
+            persisted[jti] = exp
+            save_json("revoked_tokens.json", persisted)
+    except Exception as exc:
+        logger.warning(f"Could not persist revoked token JTI {jti}: {exc}")
 
 
 def is_token_revoked(jti: str | None) -> bool:
@@ -40,6 +66,11 @@ def is_token_revoked(jti: str | None) -> bool:
         return False
     now = datetime.now(timezone.utc).timestamp()
     exp = _REVOKED_TOKENS.get(jti)
+    if exp is None:
+        # Check persistent storage for tokens revoked by another worker process
+        _get_persistent_revocations()
+        exp = _REVOKED_TOKENS.get(jti)
+
     if exp is None:
         return False
     if now > exp:
@@ -234,7 +265,12 @@ def scope_items_to_patient_or_admin(
         return []
 
     role = user.get("role")
-    scoped_hospital = hospital_id or user.get("hospital_id")
+    user_hospital = user.get("hospital_id")
+    # Security: Authenticated doctor/admin hospital identity takes strict precedence over unverified client headers
+    if role != "super_admin" and user_hospital:
+        scoped_hospital = user_hospital
+    else:
+        scoped_hospital = hospital_id or user_hospital
 
     filtered_items = items
     if scoped_hospital and role != "super_admin":

@@ -15,32 +15,58 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from fastapi.testclient import TestClient
+from core.security import create_access_token
 from main import app
+from services.auth_service import _OTP_CACHE
 
 
 class TestPhase1ApiEndpoints(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        from services.data_store import INVENTORY_FILE, VISIT_SUMMARIES_FILE, load_json
+        from services.supabase_service import HASHES_FILE, RECORDS_FILE
+
+        cls._orig_inventory = load_json(INVENTORY_FILE, default=[])
+        cls._orig_records = load_json(RECORDS_FILE, default=[])
+        cls._orig_hashes = load_json(HASHES_FILE, default=[])
+        cls._orig_visits = load_json(VISIT_SUMMARIES_FILE, default={})
+
         cls.client = TestClient(app)
+        cls.admin_token = create_access_token({"sub": "usr-admin-001", "role": "admin", "hospital_id": "default"})
+        cls.admin_headers = {"Authorization": f"Bearer {cls.admin_token}"}
+        cls.super_admin_token = create_access_token({"sub": "usr-super-001", "role": "super_admin", "hospital_id": "default"})
+        cls.super_admin_headers = {"Authorization": f"Bearer {cls.super_admin_token}"}
+
+    @classmethod
+    def tearDownClass(cls):
+        from services.data_store import INVENTORY_FILE, VISIT_SUMMARIES_FILE, save_json
+        from services.supabase_service import HASHES_FILE, RECORDS_FILE
+
+        save_json(INVENTORY_FILE, cls._orig_inventory)
+        save_json(RECORDS_FILE, cls._orig_records)
+        save_json(HASHES_FILE, cls._orig_hashes)
+        save_json(VISIT_SUMMARIES_FILE, cls._orig_visits)
 
     def test_auth_send_and_verify_otp(self):
         # 1. Send OTP
-        res = self.client.post("/api/v1/auth/send-otp", json={"email": "patient.test@agastyahomoeo.com"})
+        email = "patient.test@agastyahomoeo.com"
+        res = self.client.post("/api/v1/auth/send-otp", json={"email": email})
         self.assertEqual(res.status_code, 200)
         self.assertTrue(res.json().get("success"))
 
-        # 2. Verify with valid demo OTP 123456
+        # 2. Verify with valid generated OTP from cache
+        otp_code = _OTP_CACHE.get(email, {}).get("otp", "123456")
         res_verify = self.client.post("/api/v1/auth/verify-otp", json={
-            "email": "patient.test@agastyahomoeo.com",
-            "otp": "123456"
+            "email": email,
+            "otp": otp_code
         })
         self.assertEqual(res_verify.status_code, 200)
         self.assertTrue(res_verify.json().get("valid"))
 
         # 3. Verify with invalid OTP
         res_invalid = self.client.post("/api/v1/auth/verify-otp", json={
-            "email": "patient.test@agastyahomoeo.com",
+            "email": email,
             "otp": "000000"
         })
         self.assertEqual(res_invalid.status_code, 200)
@@ -75,7 +101,7 @@ class TestPhase1ApiEndpoints(unittest.TestCase):
             "email": "test.patient@example.com",
             "subject": "Prescription Follow-up Review",
             "body": "Dear patient, please review your latest prescription dosage."
-        })
+        }, headers=self.admin_headers)
         self.assertEqual(res.status_code, 200)
         self.assertTrue(res.json().get("success"))
 
@@ -86,7 +112,7 @@ class TestPhase1ApiEndpoints(unittest.TestCase):
             "whatsappNumber": "+91 98450 12345",
             "autoNotifyRegistration": True,
             "autoNotifyPrescriptions": True
-        })
+        }, headers=self.admin_headers)
         self.assertEqual(res_reg.status_code, 200)
         self.assertTrue(res_reg.json().get("success"))
 
@@ -95,7 +121,7 @@ class TestPhase1ApiEndpoints(unittest.TestCase):
             "phone": "+91 98123 45678",
             "message": "Your appointment is confirmed for tomorrow 10:30 AM",
             "type": "registration"
-        })
+        }, headers=self.admin_headers)
         self.assertEqual(res_msg.status_code, 200)
         self.assertTrue(res_msg.json().get("success"))
         self.assertIn("messageId", res_msg.json())
@@ -109,7 +135,7 @@ class TestPhase1ApiEndpoints(unittest.TestCase):
         self.assertGreaterEqual(len(items), 1)
 
         # 2. Restock item m1
-        res_restock = self.client.post("/api/v1/inventory/m1/restock", json={"qty": 15})
+        res_restock = self.client.post("/api/v1/inventory/m1/restock", json={"qty": 15}, headers=self.admin_headers)
         self.assertEqual(res_restock.status_code, 200)
         self.assertTrue(res_restock.json().get("success"))
 
@@ -122,7 +148,7 @@ class TestPhase1ApiEndpoints(unittest.TestCase):
 
     def test_sync_status_and_reconciliation(self):
         # 1. Fetch sync status
-        res_status = self.client.get("/api/v1/sync/status")
+        res_status = self.client.get("/api/v1/sync/status", headers=self.admin_headers)
         self.assertEqual(res_status.status_code, 200)
         data = res_status.json()
         self.assertIn("supabase", data)
@@ -130,24 +156,24 @@ class TestPhase1ApiEndpoints(unittest.TestCase):
         self.assertIn("pending_sync_records", data["sync"])
 
         # 2. Trigger reconciliation
-        res_rec = self.client.post("/api/v1/sync/reconcile")
+        res_rec = self.client.post("/api/v1/sync/reconcile", headers=self.super_admin_headers)
         self.assertEqual(res_rec.status_code, 200)
         rec_data = res_rec.json()
         self.assertIn("status", rec_data)
 
     def test_admin_alerts_tracking_and_clear(self):
         # 1. Retrieve admin alerts
-        res_alerts = self.client.get("/api/v1/admin/alerts")
+        res_alerts = self.client.get("/api/v1/admin/alerts", headers=self.admin_headers)
         self.assertEqual(res_alerts.status_code, 200)
         self.assertIn("alerts", res_alerts.json())
 
         # 2. Clear alerts
-        res_clear = self.client.delete("/api/v1/admin/alerts")
+        res_clear = self.client.delete("/api/v1/admin/alerts", headers=self.super_admin_headers)
         self.assertEqual(res_clear.status_code, 200)
         self.assertTrue(res_clear.json().get("success"))
 
         # 3. Verify zero alerts after clear
-        res_after = self.client.get("/api/v1/admin/alerts")
+        res_after = self.client.get("/api/v1/admin/alerts", headers=self.admin_headers)
         self.assertEqual(res_after.json().get("count"), 0)
 
 
