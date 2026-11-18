@@ -8,8 +8,10 @@ import logging
 import os
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
+from core.audit import record_clinical_audit_event
 from core.config import settings
 from core.security import get_current_user_optional, verify_access_token, verify_local_jwt
 from fastapi import (
@@ -53,6 +55,14 @@ from services.supabase_service import (
     insert_patient_record,
 )
 from services.typesafe_jev_service import classify_clinical_state_with_jev
+from services.voicestudio_client import transcribe_audio_with_voicestudio
+
+logger = logging.getLogger("clinical_records")
+
+ALLOWED_AUDIO_EXTENSIONS = {"wav", "webm", "mp3", "ogg", "m4a", "flac"}
+ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "webp", "pdf"}
+MAX_AUDIO_BYTES = 200 * 1024 * 1024  # 200 MB
+MAX_IMAGE_BYTES = 20 * 1024 * 1024  # 20 MB
 
 logger = logging.getLogger("clinical_records_routes")
 
@@ -178,8 +188,8 @@ async def get_patient_records(
                 detail="Access denied: Admin role required to access full records.",
             )
     else:
-        # Strict HIPAA guard: In production, unauthenticated PHI queries are strictly prohibited
-        if settings.IS_PRODUCTION and not user:
+        # Strict HIPAA guard: Unauthenticated PHI queries are strictly prohibited across all environments
+        if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Authentication required to access patient clinical records.",
@@ -225,7 +235,18 @@ async def process_consultation(
 ):
     safe_name = sanitize_safe_id(patient_name)
     interaction_id = f"{safe_name}_{int(time.time())}"
-    extension = file.filename.split(".")[-1] if file.filename and "." in file.filename else "wav"
+    extension = (file.filename.split(".")[-1] if file.filename and "." in file.filename else "wav").lower()
+
+    if extension not in ALLOWED_AUDIO_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported audio format '.{extension}'. Allowed: {', '.join(sorted(ALLOWED_AUDIO_EXTENSIONS))}",
+        )
+    if file.size and file.size > MAX_AUDIO_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Audio file size exceeds limit of {MAX_AUDIO_BYTES // (1024 * 1024)} MB.",
+        )
 
     try:
         audio_info = await save_recording_stream(
@@ -237,16 +258,24 @@ async def process_consultation(
         logger.error("Streaming upload error: %s", e)
         raise HTTPException(status_code=500, detail=f"Audio stream failed: {e!s}")
 
-    simulated_transcript = (
-        f"Patient {patient_name} presents for homeopathic constitutional intake. "
-        f"Complains of recurring digestive disturbances, aggravation after rich food. "
-        f"Thermally chilly, craves warm drinks and sweets. "
-        f"Anxious about health in evening. Clinical notes: {doctor_notes or 'None'}."
-    )
+    # Real transcription via VoiceStudio Whisper daemon
+    audio_file_path = Path(audio_info["file_path"])
+    stt_res = await transcribe_audio_with_voicestudio(audio_file_path)
+    actual_transcript = (stt_res.get("text") or "").strip()
+
+    if actual_transcript:
+        clinical_text = (
+            f"Patient {patient_name} Consultation Transcript:\n{actual_transcript}\n\n"
+            f"Physician Notes: {doctor_notes or 'None'}"
+        )
+    elif doctor_notes and doctor_notes.strip():
+        clinical_text = f"Patient {patient_name} Consultation Notes:\n{doctor_notes.strip()}"
+    else:
+        clinical_text = f"Patient {patient_name} consultation recording uploaded ({audio_info.get('file_size_bytes', 0)} bytes). No audio transcript available."
 
     try:
         case_dict = await parse_clinical_text_to_case_analysis(
-            text=simulated_transcript,
+            text=clinical_text,
             provider=provider,
             model=model,
             api_key=api_key,
@@ -348,7 +377,15 @@ async def add_visit_summary_endpoint(payload: dict[str, Any], authorization: str
     chief_diagnosis = payload.get("chiefDiagnosis") or "Consultation Review"
     prescribed_remedies = payload.get("prescribedRemedies", [])
     follow_up_date = payload.get("followUpDate") or "In 4 Weeks"
-    feedback_link = f"http://localhost:5173/visit-summary?tab=feedback&patientId={patient_id}"
+    feedback_link = f"{settings.FRONTEND_URL}/visit-summary?tab=feedback&patientId={patient_id}"
+
+    record_clinical_audit_event(
+        action="VISIT_SUMMARY_RECORDED",
+        resource_type="visit_summary",
+        resource_id=patient_id,
+        actor=customer_email,
+        details={"chiefDiagnosis": chief_diagnosis, "followUpDate": follow_up_date},
+    )
 
     followup_dispatch = await send_visit_followup_and_feedback(
         customer_email=customer_email,
@@ -395,7 +432,22 @@ async def upload_prescription_endpoint(
     authorization: str | None = Header(None),
 ):
     check_phi_access_permission(patient_id, authorization)
-    file_name = file.filename if file and file.filename else f"rx_{int(datetime.now().timestamp())}.jpg"
+    if file:
+        ext = (file.filename.split(".")[-1] if file.filename and "." in file.filename else "jpg").lower()
+        if ext not in ALLOWED_IMAGE_EXTENSIONS:
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail=f"Unsupported document format '.{ext}'. Allowed: {', '.join(sorted(ALLOWED_IMAGE_EXTENSIONS))}",
+            )
+        if file.size and file.size > MAX_IMAGE_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"Prescription file size exceeds limit of {MAX_IMAGE_BYTES // (1024 * 1024)} MB.",
+            )
+        file_name = file.filename or f"rx_{int(datetime.now().timestamp())}.{ext}"
+    else:
+        file_name = f"rx_{int(datetime.now().timestamp())}.jpg"
+
     inventory = get_all_inventory()
     mock_remedies = (
         [
@@ -423,15 +475,22 @@ async def upload_prescription_endpoint(
     parsed_record = {
         "id": f"vis-{int(datetime.now().timestamp() * 1000)}",
         "visitDate": datetime.now().strftime("%d %b %Y"),
-        "chiefDiagnosis": "Uploaded Prescription Auto-Parsed by AI OCR",
+        "chiefDiagnosis": "Uploaded Prescription Document Intake",
         "symptomsObserved": ["Patient Uploaded Prescription Photo"],
         "prescribedRemedies": mock_remedies,
-        "clinicalNotes": "Prescription document uploaded by patient. Parsed remedies automatically added to patient EHR timeline.",
+        "clinicalNotes": "Prescription document uploaded by patient and logged to clinical EHR timeline.",
         "lifestyleAdvice": "Avoid caffeine & camphor 30 mins before remedies.",
         "followUpDate": "In 14 Days",
         "prescriptionImageUri": f"/uploads/{file_name}",
     }
     save_visit_summary(patient_id, parsed_record)
+    record_clinical_audit_event(
+        action="PRESCRIPTION_DOCUMENT_UPLOADED",
+        resource_type="prescription_image",
+        resource_id=patient_id,
+        actor=patient_id,
+        details={"filename": file_name},
+    )
     return parsed_record
 
 
@@ -475,5 +534,24 @@ async def jev_repertorize_endpoint(req: JevRepertorizeRequest):
 
 
 @router.post("/prescriptions/upload", summary="Prescription upload (documented schema alias)")
-async def upload_prescription_alias_endpoint(file: UploadFile | None = File(None)):
-    return await upload_prescription_endpoint(patient_id="usr-demo-01", file=file)
+async def upload_prescription_alias_endpoint(
+    file: UploadFile | None = File(None),
+    authorization: str | None = Header(None),
+):
+    """Authenticated alias endpoint resolving the authenticated patient's EHR."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required to upload prescriptions.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    token = authorization.split("Bearer ", 1)[1].strip()
+    user = verify_local_jwt(token)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired session token.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    patient_id = user.get("sub") or user.get("id") or user.get("email") or "patient"
+    return await upload_prescription_endpoint(patient_id=patient_id, file=file, authorization=authorization)

@@ -8,6 +8,8 @@ import zoneinfo
 from datetime import datetime
 from typing import Any
 
+from core.config import settings
+
 COMMON_TIMEZONES: list[dict[str, str]] = [
     {
         "timeZone": "Asia/Kolkata",
@@ -546,5 +548,6 @@ def infer_timezone_from_location(
         if c_clean in ["new zealand", "nz"]:
             return build_res("Pacific/Auckland", "high", "country", "New Zealand")
 
-    # 4. Default Fallback
-    return build_res("Asia/Kolkata", "fallback", "default", "Default IST")
+    # 4. Configurable Default Fallback (Tenant/System SSOT)
+    fallback_tz = getattr(settings, "DEFAULT_TIMEZONE", "Asia/Kolkata")
+    return build_res(fallback_tz, "fallback", "default", f"Default ({fallback_tz})")

@@ -9,6 +9,7 @@ import logging
 import os
 import tempfile
 import threading
+import time
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +22,10 @@ BACKEND_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 # Ensure primary persistent data directory exists
 BACKEND_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+# In-memory LRU read-cache with TTL (Phase 2 Concurrency Scalability)
+_CACHE: dict[str, tuple[Any, float]] = {}
+CACHE_TTL = 3.0  # seconds
 
 
 class InterProcessLock:
@@ -62,11 +67,17 @@ def _get_primary_path(filename: str) -> Path:
     return BACKEND_DATA_DIR / filename
 
 
-def load_json(filename: str, default: Any = None) -> Any:
+def load_json(filename: str, default: Any = None, use_cache: bool = True) -> Any:
     """
     Loads JSON data prioritizing backend/data as SSOT.
-    Protected with shared file lock to prevent reading mid-write.
+    Protected with shared file lock and high-speed in-memory TTL caching.
     """
+    now = time.monotonic()
+    if use_cache and filename in _CACHE:
+        val, cached_time = _CACHE[filename]
+        if now - cached_time < CACHE_TTL:
+            return val
+
     primary_path = _get_primary_path(filename)
 
     if primary_path.exists():
@@ -74,7 +85,9 @@ def load_json(filename: str, default: Any = None) -> Any:
             with open(primary_path, encoding="utf-8") as f:
                 try:
                     fcntl.flock(f.fileno(), fcntl.LOCK_SH)
-                    return json.load(f)
+                    data = json.load(f)
+                    _CACHE[filename] = (data, now)
+                    return data
                 finally:
                     try:
                         fcntl.flock(f.fileno(), fcntl.LOCK_UN)
@@ -86,6 +99,7 @@ def load_json(filename: str, default: Any = None) -> Any:
     fallback_val = default if default is not None else []
     if default is not None:
         save_json(filename, fallback_val)
+    _CACHE[filename] = (fallback_val, now)
     return fallback_val
 
 
@@ -112,6 +126,7 @@ def save_json(filename: str, data: Any) -> None:
                 except OSError:
                     pass
         os.replace(temp_name, str(primary_path))
+        _CACHE[filename] = (data, time.monotonic())
     except Exception as exc:
         logger.error(f"CRITICAL: Failed saving primary data store {primary_path}: {exc}")
         if "temp_name" in locals() and os.path.exists(temp_name):
@@ -126,8 +141,16 @@ def save_json(filename: str, data: Any) -> None:
 APPOINTMENTS_FILE = "appointments_sync.json"
 
 
-def get_all_appointments() -> list[dict[str, Any]]:
-    return load_json(APPOINTMENTS_FILE, default=[])
+def get_all_appointments(hospital_id: str | None = None) -> list[dict[str, Any]]:
+    all_apts = load_json(APPOINTMENTS_FILE, default=[])
+    if hospital_id and hospital_id != "default":
+        target = hospital_id.strip().lower()
+        return [
+            a
+            for a in all_apts
+            if (a.get("hospitalId") or a.get("hospital_id") or "default").strip().lower() == target
+        ]
+    return all_apts
 
 
 def save_appointment(appointment: dict[str, Any]) -> list[dict[str, Any]]:
@@ -157,8 +180,16 @@ def update_appointment_status(appointment_id: str, new_status: str) -> dict[str,
 INVOICES_FILE = "invoices_sync.json"
 
 
-def get_all_invoices() -> list[dict[str, Any]]:
-    return load_json(INVOICES_FILE, default=[])
+def get_all_invoices(hospital_id: str | None = None) -> list[dict[str, Any]]:
+    all_invs = load_json(INVOICES_FILE, default=[])
+    if hospital_id and hospital_id != "default":
+        target = hospital_id.strip().lower()
+        return [
+            i
+            for i in all_invs
+            if (i.get("hospitalId") or i.get("hospital_id") or "default").strip().lower() == target
+        ]
+    return all_invs
 
 
 def save_invoice(invoice: dict[str, Any]) -> list[dict[str, Any]]:
