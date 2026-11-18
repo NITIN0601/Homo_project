@@ -191,13 +191,13 @@ describe("Phase 1: Enterprise UI Primitives & Design Tokens", () => {
       const html = renderToString(
         <div>
           <Heading level={1}>Clinical Portal</Heading>
-          <Text variant="muted">Patient portal for Agastya Clinic</Text>
+          <Text variant="muted">Patient portal for Agastya Hospital</Text>
           <Caption>Last updated 2 hours ago</Caption>
           <MicroLabel>MRN-4892</MicroLabel>
         </div>
       );
       expect(html).toContain("Clinical Portal");
-      expect(html).toContain("Patient portal for Agastya Clinic");
+      expect(html).toContain("Patient portal for Agastya Hospital");
       expect(html).toContain("Last updated 2 hours ago");
       expect(html).toContain("MRN-4892");
     });

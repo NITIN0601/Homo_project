@@ -8,30 +8,31 @@ import {
   getTimezoneAbbreviation,
 } from "../utils/timezone";
 import {
-  isClinicDateConcluded,
-  getClinicDateOperatingStatus,
+  isHospitalDateConcluded,
+  getHospitalDateOperatingStatus,
 } from "../utils/schedulingEngine";
 
 describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
-  it("maps clinic IST schedule strictly to Asia/Kolkata local date without dual clock", () => {
+  it("maps hospital IST schedule strictly to Asia/Kolkata local date without dual clock", () => {
     const slots = getLocalizedSlotsForDate("2026-11-15", "Asia/Kolkata");
-    // Clinic has 6 morning slots (10:00-12:30) + 5 evening slots (17:30-19:30) = 11 total slots
+    // Hospital has 6 morning slots (10:00-12:30) + 5 evening slots (17:30-19:30) = 11 total slots
     expect(slots.length).toBe(11);
 
     // Morning session
     expect(slots[0].userDateYMD).toBe("2026-11-15");
-    expect(slots[0].clinicSlot24).toBe("10:00");
+    expect(slots[0].hospitalSlot24).toBe("10:00");
     expect(slots[0].userTime12).toMatch(/10:00\s*AM/i);
     expect(slots[0].period).toBe("Morning");
 
     // Evening session
-    const eveningSlot = slots.find((s) => s.clinicSlot24 === "17:30");
+    const eveningSlot = slots.find((s) => s.hospitalSlot24 === "17:30");
     expect(eveningSlot).toBeDefined();
+    expect(eveningSlot?.hospitalSlot24).toBe("17:30");
     expect(eveningSlot?.userTime12).toMatch(/0?5:30\s*PM/i);
     expect(eveningSlot?.period).toBe("Evening");
   });
 
-  it("correctly maps candidate clinic slots to an America/New_York (US Eastern) patient's local date", () => {
+  it("correctly maps candidate hospital slots to an America/New_York (US Eastern) patient's local date", () => {
     const slots = getLocalizedSlotsForDate("2026-11-14", "America/New_York");
     expect(slots.length).toBeGreaterThan(0);
 
@@ -43,8 +44,8 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
     // Verify morning slots in EST (coming from India Nov 14 evening OPD)
     const morningSlot = slots.find((s) => s.userTime12.includes("7:00 AM") || s.userTime12.includes("07:00 AM"));
     expect(morningSlot).toBeDefined();
-    expect(morningSlot?.clinicDateYMD).toBe("2026-11-14");
-    expect(morningSlot?.clinicSlot24).toBe("17:30");
+    expect(morningSlot?.hospitalDateYMD).toBe("2026-11-14");
+    expect(morningSlot?.hospitalSlot24).toBe("17:30");
     expect(morningSlot?.period).toBe("Morning");
   });
 
@@ -60,10 +61,10 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
     const tzInfo = getUserTimezone("America/New_York");
     expect(tzInfo.timeZone).toBe("America/New_York");
     expect(tzInfo.todayYMD).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(tzInfo.isClinicTimezone).toBe(false);
+    expect(tzInfo.isHospitalTimezone).toBe(false);
 
     const kolkataInfo = getUserTimezone("Asia/Kolkata");
-    expect(kolkataInfo.isClinicTimezone).toBe(true);
+    expect(kolkataInfo.isHospitalTimezone).toBe(true);
     expect(kolkataInfo.label).toBe("IST");
   });
 
@@ -74,9 +75,9 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
     }
   });
 
-  it("detects when clinic operating day has concluded in India and preserves cross-timezone upcoming slots", () => {
-    // Simulated clinic clock: Nov 15 06:00 AM IST
-    const mockClinicTime = {
+  it("detects when hospital operating day has concluded in India and preserves cross-timezone upcoming slots", () => {
+    // Simulated hospital clock: Nov 15 06:00 AM IST
+    const mockHospitalTime = {
       todayYMD: "2026-11-15",
       currentHour: 6,
       currentMinute: 0,
@@ -88,19 +89,19 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
     };
 
     // Date Nov 14 in India has concluded!
-    expect(isClinicDateConcluded("2026-11-14", mockClinicTime)).toBe(true);
+    expect(isHospitalDateConcluded("2026-11-14", mockHospitalTime)).toBe(true);
 
     // In America/New_York, Nov 14 evening maps to Nov 15 10:00 AM IST (11:30 PM EST)
-    const status = getClinicDateOperatingStatus("2026-11-14", "America/New_York");
+    const status = getHospitalDateOperatingStatus("2026-11-14", "America/New_York");
     // At 8:00 PM EST, the 11:30 PM slot tonight is upcoming and bookable!
     const slot1130 = status.slots.find((s) => s.userTime12.includes("11:30 PM"));
     expect(slot1130).toBeDefined();
-    expect(slot1130?.clinicDateYMD).toBe("2026-11-15");
-    expect(slot1130?.clinicSlot24).toBe("10:00");
+    expect(slot1130?.hospitalDateYMD).toBe("2026-11-15");
+    expect(slot1130?.hospitalSlot24).toBe("10:00");
     expect(slot1130?.isSundayPriorAppt).toBe(true);
 
     // For a fully elapsed past date, all slots are unavailable
-    const pastStatus = getClinicDateOperatingStatus("2026-11-10", "America/New_York");
+    const pastStatus = getHospitalDateOperatingStatus("2026-11-10", "America/New_York");
     expect(pastStatus.isPastInUserTz).toBe(true);
     expect(pastStatus.allSlotsUnavailable).toBe(true);
     expect(pastStatus.availableSlotsCount).toBe(0);
@@ -122,7 +123,7 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
       },
     };
 
-    const status = getClinicDateOperatingStatus("2026-11-17", "Asia/Kolkata", [], [], undefined, doctorWithTuesdayOff);
+    const status = getHospitalDateOperatingStatus("2026-11-24", "Asia/Kolkata", [], [], undefined, doctorWithTuesdayOff);
     expect(status.allSlotsUnavailable).toBe(true);
     expect(status.unavailabilityReason).toContain("Dr. Rajesh Sharma does not consult on Tuesdays");
     for (const slot of status.slots) {
@@ -146,7 +147,7 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
       },
     };
 
-    const status = getClinicDateOperatingStatus("2026-12-25", "Asia/Kolkata", [], [], undefined, doctorOnHoliday);
+    const status = getHospitalDateOperatingStatus("2026-12-25", "Asia/Kolkata", [], [], undefined, doctorOnHoliday);
     expect(status.allSlotsUnavailable).toBe(true);
     expect(status.unavailabilityReason).toContain("Dr. Anita Nair is on scheduled leave / holiday on this date");
     for (const slot of status.slots) {
@@ -165,7 +166,7 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
       sundayPolicy: "Closed" as const,
     };
 
-    const statusClosed = getClinicDateOperatingStatus("2026-11-22", "Asia/Kolkata", [], [], customHoursClosedSunday);
+    const statusClosed = getHospitalDateOperatingStatus("2026-11-22", "Asia/Kolkata", [], [], customHoursClosedSunday);
     expect(statusClosed.allSlotsUnavailable).toBe(true);
     expect(statusClosed.unavailabilityReason).toContain("Facility is closed on Sundays");
 
@@ -177,7 +178,7 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
       sundayPolicy: "Prior Appointment Only" as const,
     };
 
-    const statusAppt = getClinicDateOperatingStatus("2026-11-22", "Asia/Kolkata", [], [], customHoursApptSunday);
+    const statusAppt = getHospitalDateOperatingStatus("2026-11-22", "Asia/Kolkata", [], [], customHoursApptSunday);
     expect(statusAppt.allSlotsUnavailable).toBe(false);
     expect(statusAppt.slots.length).toBeGreaterThan(0);
     expect(statusAppt.slots[0].isSundayPriorAppt).toBe(true);
@@ -269,7 +270,7 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
       },
     };
 
-    const status = getClinicDateOperatingStatus("2026-11-17", "Asia/Kolkata", [], [], undefined, doctorWithTuesdayOff);
+    const status = getHospitalDateOperatingStatus("2026-11-24", "Asia/Kolkata", [], [], undefined, doctorWithTuesdayOff);
     expect(status.allSlotsUnavailable).toBe(true);
     expect(status.unavailabilityReason).toContain("Dr. Rajesh Sharma does not consult on Tuesdays");
     for (const slot of status.slots) {
@@ -293,7 +294,7 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
       },
     };
 
-    const status = getClinicDateOperatingStatus("2026-12-25", "Asia/Kolkata", [], [], undefined, doctorOnHoliday);
+    const status = getHospitalDateOperatingStatus("2026-12-25", "Asia/Kolkata", [], [], undefined, doctorOnHoliday);
     expect(status.allSlotsUnavailable).toBe(true);
     expect(status.unavailabilityReason).toContain("Dr. Anita Nair is on scheduled leave / holiday on this date");
     for (const slot of status.slots) {
@@ -312,7 +313,7 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
       sundayPolicy: "Closed" as const,
     };
 
-    const statusClosed = getClinicDateOperatingStatus("2026-11-22", "Asia/Kolkata", [], [], customHoursClosedSunday);
+    const statusClosed = getHospitalDateOperatingStatus("2026-11-22", "Asia/Kolkata", [], [], customHoursClosedSunday);
     expect(statusClosed.allSlotsUnavailable).toBe(true);
     expect(statusClosed.unavailabilityReason).toContain("Facility is closed on Sundays");
 
@@ -324,7 +325,7 @@ describe("Internal Doctor Availability & Local Timezone Mapping Engine", () => {
       sundayPolicy: "Prior Appointment Only" as const,
     };
 
-    const statusAppt = getClinicDateOperatingStatus("2026-11-22", "Asia/Kolkata", [], [], customHoursApptSunday);
+    const statusAppt = getHospitalDateOperatingStatus("2026-11-22", "Asia/Kolkata", [], [], customHoursApptSunday);
     expect(statusAppt.allSlotsUnavailable).toBe(false);
     expect(statusAppt.slots.length).toBeGreaterThan(0);
     expect(statusAppt.slots[0].isSundayPriorAppt).toBe(true);

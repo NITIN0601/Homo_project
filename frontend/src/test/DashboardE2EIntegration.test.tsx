@@ -3,7 +3,7 @@ import React from "react";
 import { renderToString } from "react-dom/server";
 import { ThemeProvider } from "../context/ThemeProvider";
 import { AppProvider } from "../context/AppContext";
-import { AuthContext, type AuthContextValue } from "../context/slices/AuthContext";
+import { AuthContext, type AuthContextValue } from "../context/AuthContext";
 import { SuperAdminDashboard } from "../pages/SuperAdminDashboard";
 import { AdminDashboard } from "../pages/AdminDashboard";
 import { VisitSummaryPage } from "../pages/VisitSummaryPage";
@@ -19,19 +19,19 @@ import {
 const createMockAuth = (role: "super_admin" | "admin" | "patient" | null, name = "Test User"): AuthContextValue => ({
   authUser: role
     ? {
-        id: `usr-${role}`,
-        name,
-        email: `${role}@clinic.org`,
-        role,
-      }
+      id: `usr-${role}`,
+      name,
+      email: `${role}@clinic.org`,
+      role,
+    }
     : null,
   isAuthModalOpen: false,
   savedCards: [],
-  login: () => {},
-  logout: () => {},
-  openAuthModal: () => {},
-  closeAuthModal: () => {},
-  addSavedCard: () => {},
+  login: () => { },
+  logout: () => { },
+  openAuthModal: () => { },
+  closeAuthModal: () => { },
+  addSavedCard: () => { },
 });
 
 const renderWithProviders = (
@@ -71,15 +71,15 @@ describe("End-to-End Dashboard & UI Component Verification", () => {
       const html = renderWithProviders(
         <CalendarTab
           blockedDates={[]}
-          onBlockDate={() => {}}
-          onBlockDateRange={() => {}}
-          onUnblockDate={() => {}}
-          onUpdateBlockedDate={() => {}}
+          onBlockDate={() => { }}
+          onBlockDateRange={() => { }}
+          onUnblockDate={() => { }}
+          onUpdateBlockedDate={() => { }}
         />,
         createMockAuth("admin")
       );
       expect(html).toContain("Doctor Schedule, Out-of-Office &amp; Availability Manager");
-      expect(html).toContain("Block Clinic Dates &amp; Time Slots");
+      expect(html).toContain("Block Hospital Dates &amp; Time Slots");
     });
 
     it("renders BillingInvoicesTab with invoices table and UTR reconciliation", () => {
@@ -87,14 +87,14 @@ describe("End-to-End Dashboard & UI Component Verification", () => {
         <BillingInvoicesTab
           invoices={[]}
           patientList={[]}
-          onOpenReconcileModal={() => {}}
-          onConfirmPayment={() => {}}
-          onUpdateStatus={() => {}}
-          onOpenPostFeeModal={() => {}}
+          onOpenReconcileModal={() => { }}
+          onConfirmPayment={() => { }}
+          onUpdateStatus={() => { }}
+          onOpenPostFeeModal={() => { }}
         />,
         createMockAuth("admin")
       );
-      expect(html).toContain("Clinic Billing &amp; Consultation Invoices Hub");
+      expect(html).toContain("Hospital Billing &amp; Consultation Invoices Hub");
       expect(html).toContain("Total Billed");
       expect(html).toContain("Verification Needed");
     });
@@ -104,13 +104,13 @@ describe("End-to-End Dashboard & UI Component Verification", () => {
         <DispensaryInventoryTab
           inventory={[]}
           requisitionBatch={[]}
-          onToggleAddToBatch={() => {}}
-          onUpdateBatchQuantity={() => {}}
-          onClearBatch={() => {}}
-          onOpenBatchModal={() => {}}
-          onOpenExcelModal={() => {}}
-          onOpenCreatePOModal={() => {}}
-          onAddAllLowStock={() => {}}
+          onToggleAddToBatch={() => { }}
+          onUpdateBatchQuantity={() => { }}
+          onClearBatch={() => { }}
+          onOpenBatchModal={() => { }}
+          onOpenExcelModal={() => { }}
+          onOpenCreatePOModal={() => { }}
+          onAddAllLowStock={() => { }}
         />,
         createMockAuth("admin")
       );
@@ -122,10 +122,10 @@ describe("End-to-End Dashboard & UI Component Verification", () => {
       const html = renderWithProviders(
         <DispatchesTab
           orders={[]}
-          onOpenBatchModal={() => {}}
-          onInspectOrder={() => {}}
-          onSimulateLogisticsScan={() => {}}
-          onMarkDeliveredImmediately={() => {}}
+          onOpenBatchModal={() => { }}
+          onInspectOrder={() => { }}
+          onSimulateLogisticsScan={() => { }}
+          onMarkDeliveredImmediately={() => { }}
         />,
         createMockAuth("admin")
       );
@@ -133,7 +133,7 @@ describe("End-to-End Dashboard & UI Component Verification", () => {
       expect(html).toContain("Live Carrier Simulation Active");
     });
 
-    it("renders CustomizationTab with clinic branding, UPI ID, and feature switches", () => {
+    it("renders CustomizationTab with hospital branding, UPI ID, and feature switches", () => {
       const html = renderWithProviders(<CustomizationTab />, createMockAuth("admin"));
       expect(html).toContain("Hospital &amp; Feature Customization");
     });

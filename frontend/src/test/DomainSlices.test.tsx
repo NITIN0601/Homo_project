@@ -89,7 +89,8 @@ describe("Domain-Specific Context Slices & Facade Integration", () => {
     expect(typeof capturedScheduling?.blockDate).toBe("function");
     expect(typeof capturedScheduling?.bookAppointment).toBe("function");
     expect(typeof capturedScheduling?.isSlotBooked).toBe("function");
-    expect(capturedScheduling?.clinicTimeInfo).toBeDefined();
+    expect(capturedScheduling?.hospitalTimeInfo).toBeDefined();
+    expect(capturedScheduling?.hospitalTimeInfo).toBeDefined();
   });
 
   it("provides useClinical hook inside AppProvider", () => {

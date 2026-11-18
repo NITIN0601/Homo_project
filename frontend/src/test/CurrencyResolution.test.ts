@@ -82,11 +82,11 @@ describe("Location-Based Currency Resolution & Modular Timezone", () => {
     it("exports all critical timezone functions and constants", () => {
       expect(typeof timezone.getUserTimezone).toBe("function");
       expect(typeof timezone.inferTimezoneFromLocation).toBe("function");
-      expect(typeof timezone.getClinicTimeInfo).toBe("function");
+      expect(typeof timezone.getHospitalTimeInfo).toBe("function");
       expect(typeof timezone.normalizeSlotToTime).toBe("function");
       expect(typeof timezone.normalizeTimeToSlot).toBe("function");
       expect(typeof timezone.isSlotPassed).toBe("function");
-      expect(typeof timezone.mapClinicSlotToUserTime).toBe("function");
+      expect(typeof timezone.mapHospitalSlotToUserTime).toBe("function");
       expect(typeof timezone.getMappedSessionHours).toBe("function");
       expect(typeof timezone.formatDualDateTime).toBe("function");
       expect(timezone.COMMON_TIMEZONES).toBeDefined();
