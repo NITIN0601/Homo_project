@@ -152,7 +152,9 @@ Homo_project/
 - `test/test_data_store.py`: Atomic write and read-back verification under parallel access.
 - `test/test_config_validation.py`: Production configuration guards and weak secret rejection.
 - `test/test_feature_flags.py`: Multi-tenant hospital feature flag isolation and role checking.
-- `backend/tests/`: 24 microservice, fault injection, and telemetry ingestion tests (100% pass).
+- `test/`: 124 integration, security, and concurrency tests (100% pass via `./test/run_tests.sh`).
+- `backend/tests/`: 25 microservice, fault injection, telemetry, and token rotation tests (100% pass).
+- **Total Backend Coverage:** 149/149 passing automated unit & integration tests (0 failures, 0 errors).
 
 ### 6.2 Frontend Test Inventory
 
@@ -373,6 +375,13 @@ The following comprehensive matrix details every audit finding, its original sta
 | **26** | **Mock Mode Production Guard** | Security | 🟡 Medium | `backend/core/config.py` | Prevented conflicting configurations (`USE_MOCK_DATA` with live keys) at boot. | **DONE** |
 | **27** | **UTC Datetime Standardization** | Standardization | 🟡 Medium | All backend services & routes | Standardized on timezone-aware `datetime.now(timezone.utc)`. | **DONE** |
 | **28** | **Repository Link Normalization** | Documentation | ℹ️ Low | All `.md` files | Replaced all local absolute paths with repository-relative paths. | **DONE** |
+| **29** | **Booking Notification Crash on Hospital Location** | Correctness | 🔴 Critical | `backend/services/email_service.py`, `backend/services/notification_service.py` | Added backward-compatible `hospital_location` and `clinic_location` parameter binding. | **DONE** |
+| **30** | **PHI Leakage via Unauthenticated Visit Summaries & Records** | HIPAA / Security | 🔴 Critical | `backend/routes/clinical_records.py` | Protected `POST /patient-records` with `require_admin_role`, `GET /visit-summaries` with patient/admin tenant filter. | **DONE** |
+| **31** | **Unauthenticated AI Audio Consultation Dictation** | Security / Cost | 🟠 High | `backend/routes/clinical_records.py` | Protected `POST /ai/upload-and-parse-audio` with `require_admin_role` and 10/min rate limit. | **DONE** |
+| **32** | **Multi-Tenant Context Header Spoofing Precedence** | Multi-Tenancy | 🟠 High | `backend/core/security.py` | Enforced strict user token `hospital_id` precedence over unverified `X-Hospital-ID` header. | **DONE** |
+| **33** | **Multi-Worker Persistent Token Revocation Blocklist** | Security | 🟠 High | `backend/core/security.py` | Stored revoked JTIs atomically in `revoked_tokens.json` to synchronize revocation across multi-worker deployments. | **DONE** |
+| **34** | **Token Refresh & Rotation Protocol** | Security / IAM | 🟡 Medium | `backend/routes/auth.py`, `frontend/src/domains/iam-auth/api/authService.ts` | Implemented `POST /api/v1/auth/refresh` with automatic token rotation and invalidation of old JTI. | **DONE** |
+| **35** | **Legacy Integration & Concurrency Test Synchronization** | Quality / CI | 🟡 Medium | `test/test_concurrent_booking.py`, `test/test_route_protection.py`, `test/test_load_100_users.py` | Synchronized test suite with production RBAC and Supabase mocking; 100% of 149 tests now pass cleanly. | **DONE** |
 
 ---
 

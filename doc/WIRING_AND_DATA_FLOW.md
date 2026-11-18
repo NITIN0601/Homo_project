@@ -135,6 +135,8 @@ sequenceDiagram
 | **Send User Invite Link** | `api.auth.invite()` | `POST /api/v1/auth/invite` | `routes/auth.py` (`services.auth_service`) | `backend/data/user_invites.json` |
 | **Accept Invite Link** | `api.auth.acceptInvite()` | `POST /api/v1/auth/accept-invite` | `routes/auth.py` (`services.auth_service`) | `clinic_accounts.json` / `clinic_users` |
 | **Verify OTP** | `api.auth.verifyOtp()` | `POST /api/v1/auth/verify-otp` | `routes/auth.py` (`services.auth_service`) | In-memory OTP buffer |
+| **Refresh Access Token** | `api.auth.refresh()` | `POST /api/v1/auth/refresh` | `routes/auth.py` (`core.security`) | `revoked_tokens.json` (Rotates JTI) |
+| **Logout & Revoke Token** | `api.auth.logout()` | `POST /api/v1/auth/logout` | `routes/auth.py` (`core.security`) | `revoked_tokens.json` (Revokes JTI) |
 | **Google Sign-In** | `api.auth.google()` | `POST /api/v1/auth/google` | `routes/auth.py` (`services.auth_service`) | Scoped local JWT session |
 | **Provision Hospital (Super Admin)** | `api.hospitals.createHospital()` | `POST /api/v1/hospitals` | `routes/hospital.py` (`services.hospital_service`) | `backend/data/hospitals.json` |
 | **Provision Doctor (Admin)** | `api.hospitals.createDoctor()` | `POST /api/v1/doctors` | `routes/hospital.py` (`services.doctor_service`) | `backend/data/doctors.json` |
