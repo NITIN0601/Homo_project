@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { ConsultationInvoice } from "@core/types";
+import { useHospital } from "@core/tenancy";
 import { formatCurrency } from "../../../shared/utils/format";
 import { sanitizeAlphanumeric } from "../../../core/security/sanitize";
 import { Modal, Input, Button } from "../../../shared/ui";
@@ -17,6 +18,7 @@ export const UtrReconciliationModal: React.FC<UtrReconciliationModalProps> = ({
   onClose,
   onConfirmReconciliation,
 }) => {
+  const hospital = useHospital();
   const [adminUtrInput, setAdminUtrInput] = useState<string>("");
 
   useEffect(() => {
@@ -81,17 +83,17 @@ export const UtrReconciliationModal: React.FC<UtrReconciliationModalProps> = ({
           <div className="text-right">
             <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">Consultation Fee</span>
             <span className="text-lg font-black text-emerald-800">
-              {formatCurrency(invoice.amount ?? invoice.amountINR, invoice.currency, invoice.currencySymbol)}
+              {formatCurrency(invoice.amount, invoice.currency, invoice.currencySymbol)}
             </span>
           </div>
         </div>
 
         <Input
           label="12-Digit UPI UTR / Transaction Ref No."
-          placeholder="e.g. 428901239845 (from hospital bank / UPI statement)"
+          placeholder={`e.g. 428901239845 (from ${hospital?.facilityLabelLower || "hospital"} bank / UPI statement)`}
           value={adminUtrInput}
           onChange={(e) => setAdminUtrInput(e.target.value.trim())}
-          helperText="Enter or update the 12-digit UTR from the hospital bank account or UPI statement to verify receipt of funds. This reference will appear on the patient's official digital tax receipt."
+          helperText={`Enter or update the 12-digit UTR from the ${hospital?.facilityLabelLower || "hospital"} bank account or UPI statement to verify receipt of funds. This reference will appear on the patient's official digital tax receipt.`}
         />
 
         {invoice.patientUpiId && (

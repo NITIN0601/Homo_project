@@ -42,7 +42,7 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
 
   const displayCurrency = payingInvoice?.currency || tenant.currency;
   const displaySymbol = payingInvoice?.currencySymbol || tenant.currencySymbol || "₹";
-  const displayAmount = payingInvoice ? (payingInvoice.amount ?? payingInvoice.amountINR) : 0;
+  const displayAmount = payingInvoice ? (payingInvoice.amount || 0) : 0;
 
   const filteredBanks = useMemo(() => {
     if (!bankSearchQuery.trim()) return INDIAN_BANKS;

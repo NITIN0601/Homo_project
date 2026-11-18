@@ -37,8 +37,7 @@ export const PostConsultationFeeModal: React.FC<PostConsultationFeeModalProps> =
       patientName: patient.name,
       doctorName: tenant.doctor.title || HOSPITAL.DOCTOR_TITLE,
       visitDate: feeDate || formatDateISO(),
-      amountINR: Number(feeAmount) || 750,
-      amount: Number(feeAmount) || 750,
+      amount: Number(feeAmount) || (tenant.doctor?.consultationFee ?? 750),
       currency: tenant.currency || "INR",
       currencySymbol: tenant.currencySymbol || "₹",
       consultationType: feeType,
@@ -51,7 +50,7 @@ export const PostConsultationFeeModal: React.FC<PostConsultationFeeModalProps> =
     };
 
     onPostInvoice(newInvoice);
-    setSuccessMessage(`✓ Consultation fee of ${formatCurrency(newInvoice.amount ?? newInvoice.amountINR, tenant.currency, tenant.currencySymbol)} posted for ${patient.name}!`);
+    setSuccessMessage(`✓ Consultation fee of ${formatCurrency(newInvoice.amount, tenant.currency, tenant.currencySymbol)} posted for ${patient.name}!`);
     setTimeout(() => {
       setSuccessMessage(null);
       onClose();

@@ -1,5 +1,5 @@
 import React from "react";
-import { useTenant } from "../../../core/tenancy/branding/ThemeProvider";
+import { useHospital } from "../../../core/tenancy/context/useHospital";
 import type { ConsultationInvoice } from "@core/types";
 import { HOSPITAL, DOCTOR } from "../../../core/config";
 import { formatCurrency } from "../../../shared/utils/format";
@@ -15,13 +15,13 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   invoice,
   onClose,
 }) => {
-  const { tenant } = useTenant();
+  const { tenant, facilityLabel } = useHospital();
 
   if (!invoice) return null;
 
   const currencyCode = invoice.currency || tenant.currency || "INR";
   const currencySymbol = invoice.currencySymbol || tenant.currencySymbol || "₹";
-  const amount = invoice.amount ?? invoice.amountINR;
+  const amount = invoice.amount;
 
   const handlePrint = () => {
     auditService.logAction("PRINTED_RECEIPT", {
@@ -40,7 +40,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
       isOpen={Boolean(invoice)}
       onClose={onClose}
       title={tenant.name || HOSPITAL.FULL_NAME}
-      subtitle="Official Healthcare Tax-Exempt Receipt"
+      subtitle={`Official ${facilityLabel} Healthcare Tax-Exempt Receipt`}
       size="lg"
       footer={
         <div className="flex justify-end gap-2 w-full no-print">

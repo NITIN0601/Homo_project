@@ -15,7 +15,9 @@ class TestInvoicesModule(unittest.TestCase):
             "patientName": "John Doe",
             "doctorName": "Dr. Bramarambha K",
             "visitDate": "2026-10-02",
-            "amountINR": 500,
+            "amount": 500,
+            "currency": "INR",
+            "currencySymbol": "₹",
             "consultationType": "In-Person Clinic Visit",
             "status": "pending",
             "issuedAt": datetime.now(timezone.utc).isoformat(),
@@ -23,7 +25,7 @@ class TestInvoicesModule(unittest.TestCase):
 
     def test_invoice_creation(self):
         self.assertEqual(self.invoice["status"], "pending")
-        self.assertEqual(self.invoice["amountINR"], 500)
+        self.assertEqual(self.invoice["amount"], 500)
 
     def test_payment_submission_transitions_to_processing(self):
         # Patient submits payment with transaction reference

@@ -29,13 +29,13 @@ export const BillingInvoicesTab: React.FC<BillingInvoicesTabProps> = ({
 
   // Summary Metrics
   const stats = useMemo(() => {
-    const totalBilled = invoices.reduce((sum, inv) => sum + (inv.amountINR || 0), 0);
+    const totalBilled = invoices.reduce((sum, inv) => sum + (inv.amount || 0), 0);
     const paidInvoices = invoices.filter((i) => i.status === "paid");
-    const totalPaid = paidInvoices.reduce((sum, inv) => sum + (inv.amountINR || 0), 0);
+    const totalPaid = paidInvoices.reduce((sum, inv) => sum + (inv.amount || 0), 0);
     const processingInvoices = invoices.filter((i) => i.status === "processing");
-    const totalProcessing = processingInvoices.reduce((sum, inv) => sum + (inv.amountINR || 0), 0);
+    const totalProcessing = processingInvoices.reduce((sum, inv) => sum + (inv.amount || 0), 0);
     const pendingInvoices = invoices.filter((i) => i.status === "pending");
-    const totalPending = pendingInvoices.reduce((sum, inv) => sum + (inv.amountINR || 0), 0);
+    const totalPending = pendingInvoices.reduce((sum, inv) => sum + (inv.amount || 0), 0);
 
     return {
       totalBilled,
@@ -226,7 +226,7 @@ export const BillingInvoicesTab: React.FC<BillingInvoicesTabProps> = ({
                     #{inv.id}
                   </span>
                   <span className="font-extrabold text-stone-900 text-base">
-                    {formatCurrency(inv.amount ?? inv.amountINR, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}
+                    {formatCurrency(inv.amount, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}
                   </span>
                   <strong className="text-stone-800 text-xs">· {inv.patientName}</strong>
                   <span className="font-mono text-stone-400 text-[11px]">({inv.patientId})</span>

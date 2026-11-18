@@ -24,12 +24,14 @@ class CreateConsultationInvoiceRequest(BaseModel):
     doctorName: str = Field(..., min_length=1, max_length=150)
     appointmentId: str | None = Field(default=None, max_length=64)
     issueDate: str | None = Field(default=None, max_length=50)
-    amountINR: float = Field(..., gt=0, le=10_000_000, description="Amount must be strictly positive")
-    amount: float | None = Field(default=None, gt=0, le=10_000_000, description="Universal amount alias")
+    amount: float = Field(..., gt=0, le=10_000_000, description="Amount must be strictly positive")
     currency: str | None = Field(
-        default="INR", max_length=10, description="Billing currency e.g. INR, USD, GBP, AED, EUR"
+        default=None, max_length=10, description="Billing currency e.g. INR, USD, GBP, AED, EUR (resolved from onboarded hospital)"
     )
-    currencySymbol: str | None = Field(default="₹", max_length=10, description="Display symbol e.g. ₹, $, £, AED, €")
+    currencySymbol: str | None = Field(
+        default=None, max_length=10, description="Display symbol e.g. ₹, $, £, AED, € (resolved from onboarded hospital)"
+    )
+    hospital_id: str | None = Field(default=None, max_length=64, description="Onboarded hospital entity ID")
     status: Literal["pending", "processing", "paid", "cancelled"] = Field(default="pending")
     description: str = Field(..., max_length=1000)
     transactionRef: str | None = Field(default=None, max_length=100)
@@ -58,7 +60,6 @@ class UpdateConsultationInvoiceRequest(BaseModel):
     paidAt: str | None = Field(default=None, max_length=50)
     customPatientUpi: str | None = Field(default=None, max_length=120)
     bankName: str | None = Field(default=None, max_length=100)
-    amountINR: float | None = Field(default=None, gt=0, le=10_000_000)
     amount: float | None = Field(default=None, gt=0, le=10_000_000)
     currency: str | None = Field(default=None, max_length=10)
     currencySymbol: str | None = Field(default=None, max_length=10)

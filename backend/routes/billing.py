@@ -54,12 +54,24 @@ async def list_invoices_endpoint(
 
 @router.post("/consultation-invoices", summary="Create consultation invoice")
 async def create_invoice_endpoint(
+    request: Request,
     payload: CreateConsultationInvoiceRequest,
     user: dict[str, Any] = Depends(require_admin_role),
 ):
     data = payload.model_dump(exclude_none=True)
     if not data.get("id"):
         data["id"] = f"INV-{int(datetime.now(timezone.utc).timestamp() * 1000)}"
+
+    # Resolve currency, symbol, and hospital scope dynamically from onboarded hospital
+    hospital_id = data.get("hospital_id") or getattr(request.state, "hospital_id", None) or user.get("hospital_id")
+    hospital = get_hospital(hospital_id)
+    if not data.get("currency"):
+        data["currency"] = hospital.get("currency") or "INR"
+    if not data.get("currencySymbol"):
+        data["currencySymbol"] = hospital.get("currencySymbol") or "₹"
+    if not data.get("hospital_id"):
+        data["hospital_id"] = hospital.get("id", "agastya")
+
     return save_invoice(data)
 
 
@@ -144,9 +156,10 @@ async def export_invoice_html(
     if not target:
         raise HTTPException(status_code=404, detail="Invoice not found")
 
-    hospital = get_hospital()
+    hospital = get_hospital(target.get("hospital_id"))
     hosp_name = hospital.get("name", settings.HOSPITAL_NAME)
-    curr_sym = target.get("currencySymbol") or "₹"
+    facility_label = "Clinic" if hospital.get("facilityType") == "clinic" else "Hospital"
+    curr_sym = target.get("currencySymbol") or hospital.get("currencySymbol") or "₹"
     amount = target.get("amount") or target.get("total") or 0.0
 
     html = f"""<!DOCTYPE html>
@@ -171,7 +184,7 @@ async def export_invoice_html(
 <body onload="window.print()">
   <div class="header">
     <h1>{hosp_name}</h1>
-    <p>Clinical Consultation & Pharmacy Invoice</p>
+    <p>Official {facility_label} Consultation &amp; Pharmacy Receipt</p>
   </div>
   <div class="meta">
     <div>

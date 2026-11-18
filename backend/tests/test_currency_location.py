@@ -7,10 +7,27 @@ import unittest
 import uuid
 
 from core.currency_utils import format_currency, infer_currency_from_country
+from services.auth_service import ACCOUNTS_FILE, INVITES_FILE
+from services.data_store import load_json, save_json
+from services.doctor_service import DOCTORS_FILE
+from services.hospital_service import HOSPITALS_FILE
 from services.onboarding_service import onboard
 
 
 class TestCurrencyLocationResolution(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls._orig_hospitals = load_json(HOSPITALS_FILE, default=[])
+        cls._orig_doctors = load_json(DOCTORS_FILE, default=[])
+        cls._orig_accounts = load_json(ACCOUNTS_FILE, default={})
+        cls._orig_invites = load_json(INVITES_FILE, default={})
+
+    @classmethod
+    def tearDownClass(cls):
+        save_json(HOSPITALS_FILE, cls._orig_hospitals)
+        save_json(DOCTORS_FILE, cls._orig_doctors)
+        save_json(ACCOUNTS_FILE, cls._orig_accounts)
+        save_json(INVITES_FILE, cls._orig_invites)
     def test_infer_currency_for_major_countries(self):
         # India -> INR
         curr = infer_currency_from_country("India")

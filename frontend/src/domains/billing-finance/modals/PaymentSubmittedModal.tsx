@@ -1,5 +1,5 @@
 import React from "react";
-import { useTenant } from "@core/tenancy";
+import { useHospital } from "@core/tenancy";
 import type { ConsultationInvoice } from "@core/types";
 import { HOSPITAL } from "../../../core/config";
 import { formatCurrency } from "../../../shared/utils/format";
@@ -19,7 +19,8 @@ export const PaymentSubmittedModal: React.FC<PaymentSubmittedModalProps> = ({
   paymentSuccessData,
   onClose,
 }) => {
-  const { tenant } = useTenant();
+  const hospital = useHospital();
+  const { tenant, facilityLabelLower } = hospital;
 
   return (
     <Modal
@@ -37,7 +38,7 @@ export const PaymentSubmittedModal: React.FC<PaymentSubmittedModalProps> = ({
 
           <div>
             <p className="text-xs text-stone-500 mt-1">
-              Your payment submission of <strong className="text-stone-900">{formatCurrency(paymentSuccessData.invoice.amount ?? paymentSuccessData.invoice.amountINR, paymentSuccessData.invoice.currency || tenant.currency, paymentSuccessData.invoice.currencySymbol || tenant.currencySymbol)}</strong> has been recorded and forwarded to the doctor.
+              Your payment submission of <strong className="text-stone-900">{formatCurrency(paymentSuccessData.invoice.amount, paymentSuccessData.invoice.currency || tenant.currency, paymentSuccessData.invoice.currencySymbol || tenant.currencySymbol)}</strong> has been recorded and forwarded to the doctor.
             </p>
           </div>
 
@@ -59,7 +60,7 @@ export const PaymentSubmittedModal: React.FC<PaymentSubmittedModalProps> = ({
           <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 text-left space-y-1">
             <p className="font-bold">🛡️ Doctor Confirmation Policy:</p>
             <p className="text-[10px] text-amber-800">
-              Per hospital audit compliance, payments remain in <strong>"Under Processing / Verification"</strong> until confirmed by {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}. Once the doctor confirms the credit in the hospital console, your status will update to <strong>"Confirmed"</strong> and your official digital tax receipt will unlock.
+              Per {facilityLabelLower} audit compliance, payments remain in <strong>"Under Processing / Verification"</strong> until confirmed by {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}. Once the doctor confirms the credit in the {facilityLabelLower} console, your status will update to <strong>"Confirmed"</strong> and your official digital tax receipt will unlock.
             </p>
           </div>
 

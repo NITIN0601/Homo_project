@@ -42,7 +42,7 @@ export class PaymentFailedError extends Error {
 export const paymentGatewayService = {
   async processPayment(params: PaymentInitiationParams): Promise<PaymentGatewayResult> {
     const { invoice, paymentMethod, patientUpiId: _patientUpiId, selectedBank, currency = "INR", amount } = params;
-    const finalAmount = amount ?? (invoice.amount ?? invoice.amountINR);
+    const finalAmount = amount ?? (invoice.amount || 0);
 
     // 1. Create Order via Backend API if backend is connected
     let orderId = `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;

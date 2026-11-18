@@ -1,5 +1,5 @@
 import React from "react";
-import { useTenant } from "../../../core/tenancy/branding/ThemeProvider";
+import { useHospital } from "@core/tenancy";
 import type { ConsultationInvoice } from "@core/types";
 import { HOSPITAL } from "../../../core/config";
 import { formatCurrency } from "../../../shared/utils/format";
@@ -12,9 +12,12 @@ interface PatientInvoicesTabProps {
   pendingInvoices: ConsultationInvoice[];
   processingInvoices: ConsultationInvoice[];
   paidInvoices: ConsultationInvoice[];
-  totalBilledINR: number;
-  totalPendingINR: number;
-  totalPaidINR: number;
+  totalBilledAmount?: number;
+  totalPendingAmount?: number;
+  totalPaidAmount?: number;
+  totalBilledINR?: number;
+  totalPendingINR?: number;
+  totalPaidINR?: number;
   onPayInvoice: (invoice: ConsultationInvoice) => void;
   onViewReceipt: (invoice: ConsultationInvoice) => void;
 }
@@ -24,25 +27,33 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
   pendingInvoices,
   processingInvoices,
   paidInvoices,
+  totalBilledAmount,
+  totalPendingAmount,
+  totalPaidAmount,
   totalBilledINR,
   totalPendingINR,
   totalPaidINR,
   onPayInvoice,
   onViewReceipt,
 }) => {
-  const { tenant } = useTenant();
+  const hospital = useHospital();
+  const { tenant, facilityLabelLower } = hospital;
+
+  const billed = totalBilledAmount ?? totalBilledINR ?? 0;
+  const pending = totalPendingAmount ?? totalPendingINR ?? 0;
+  const paid = totalPaidAmount ?? totalPaidINR ?? 0;
 
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Financial Summary KPI Cards (SSOT Shared Primitive) */}
       <InvoiceSummaryMetrics
         metrics={{
-          totalBilledINR,
+          totalBilledAmount: billed,
           totalInvoicesCount: patientInvoices.length,
-          totalPendingINR,
+          totalPendingAmount: pending,
           pendingCount: pendingInvoices.length,
           processingCount: processingInvoices.length,
-          totalPaidINR,
+          totalPaidAmount: paid,
           paidCount: paidInvoices.length,
         }}
         currency={tenant.currency}
@@ -99,7 +110,7 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
                         Amount Due
                       </span>
                       <span className="text-xl font-black text-stone-900">
-                        {formatCurrency(inv.amount ?? inv.amountINR, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}
+                        {formatCurrency(inv.amount, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}
                       </span>
                     </div>
 
@@ -110,7 +121,7 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
                         onClick={() => onPayInvoice(inv)}
                         className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-black"
                       >
-                        <span>💳</span> Settle Fee Online ({formatCurrency(inv.amount ?? inv.amountINR, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}) →
+                        <span>💳</span> Settle Fee Online ({formatCurrency(inv.amount, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}) →
                       </Button>
                     ) : (
                       <div className="bg-stone-100 text-stone-600 px-3 py-1.5 rounded-xl text-xs font-semibold border border-stone-200">
@@ -169,7 +180,7 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
                       Submitted Amount
                     </span>
                     <span className="text-xl font-black text-stone-900">
-                      {formatCurrency(inv.amount ?? inv.amountINR, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}
+                      {formatCurrency(inv.amount, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}
                     </span>
                   </div>
                 </div>
@@ -216,7 +227,7 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
                 <div className="p-3 bg-sky-50 border border-sky-200 rounded-2xl text-[11px] text-sky-900 flex items-start gap-2">
                   <span className="text-base flex-shrink-0">ℹ️</span>
                   <p>
-                    Your payment details have been forwarded to {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}'s hospital console. Once the hospital confirms the credit in their bank/UPI accounts, your status will update to <strong>"Confirmed"</strong> and your official digital tax receipt will unlock automatically.
+                    Your payment details have been forwarded to {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}'s {facilityLabelLower} console. Once the {facilityLabelLower} confirms the credit in their bank/UPI accounts, your status will update to <strong>"Confirmed"</strong> and your official digital tax receipt will unlock automatically.
                   </p>
                 </div>
               </div>
@@ -242,7 +253,7 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
                       <span className="font-mono text-[10px] font-bold bg-stone-100 text-stone-700 px-2 py-0.5 rounded">
                         #{inv.id}
                       </span>
-                      <strong className="text-stone-900 font-bold">{formatCurrency(inv.amount ?? inv.amountINR, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}</strong>
+                      <strong className="text-stone-900 font-bold">{formatCurrency(inv.amount, inv.currency || tenant.currency, inv.currencySymbol || tenant.currencySymbol)}</strong>
                       <span className="text-stone-500">· {inv.consultationType}</span>
                       <InvoiceStatusBadge status={inv.status} size="micro" />
                     </div>
