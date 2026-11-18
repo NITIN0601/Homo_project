@@ -197,7 +197,60 @@ CREATE TABLE IF NOT EXISTS public.orders (
 );
 
 -- ==============================================================================
--- 10. Row-Level Security (RLS) Policies
+-- 10. Multi-Tenant Hospitals & Doctors Tables (ACID SSOT)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.hospitals (
+    id TEXT PRIMARY KEY,
+    slug TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    short_name TEXT,
+    tagline TEXT,
+    domain TEXT,
+    subdomains TEXT[] DEFAULT '{}',
+    currency TEXT DEFAULT 'INR',
+    currency_symbol TEXT DEFAULT '₹',
+    contact JSONB NOT NULL DEFAULT '{}'::jsonb,
+    branding JSONB NOT NULL DEFAULT '{}'::jsonb,
+    features JSONB NOT NULL DEFAULT '{}'::jsonb,
+    hours JSONB NOT NULL DEFAULT '{}'::jsonb,
+    legal JSONB DEFAULT '{}'::jsonb,
+    logistics JSONB DEFAULT '{}'::jsonb,
+    is_active BOOLEAN DEFAULT true NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_hospitals_slug ON public.hospitals (slug);
+CREATE INDEX IF NOT EXISTS idx_hospitals_is_active ON public.hospitals (is_active);
+
+CREATE TABLE IF NOT EXISTS public.doctors (
+    id TEXT PRIMARY KEY,
+    hospital_id TEXT NOT NULL REFERENCES public.hospitals(id) ON DELETE RESTRICT,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    phone TEXT,
+    title TEXT,
+    qualifications TEXT,
+    experience_years INTEGER DEFAULT 0,
+    reg_no TEXT,
+    license_id TEXT,
+    specialties TEXT[] DEFAULT '{}',
+    bio TEXT,
+    consultation_fee NUMERIC(10,2) DEFAULT 500.00 NOT NULL,
+    availability JSONB DEFAULT '{}'::jsonb,
+    sharing_preferences JSONB DEFAULT '{}'::jsonb,
+    is_primary BOOLEAN DEFAULT false NOT NULL,
+    is_active BOOLEAN DEFAULT true NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT clock_timestamp() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_doctors_hospital_id ON public.doctors (hospital_id);
+CREATE INDEX IF NOT EXISTS idx_doctors_email ON public.doctors (email);
+CREATE INDEX IF NOT EXISTS idx_doctors_is_active ON public.doctors (is_active);
+
+-- ==============================================================================
+-- 11. Row-Level Security (RLS) Policies
 -- ==============================================================================
 ALTER TABLE public.patient_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.uploaded_file_hashes ENABLE ROW LEVEL SECURITY;
@@ -208,6 +261,8 @@ ALTER TABLE public.clinic_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.otp_verifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inventory ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hospitals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.doctors ENABLE ROW LEVEL SECURITY;
 
 -- Granular Security Policies
 CREATE POLICY "Allow public select on inventory" ON public.inventory FOR SELECT USING (true);
@@ -223,6 +278,10 @@ CREATE POLICY "Allow select on orders" ON public.orders FOR SELECT USING (true);
 CREATE POLICY "Allow hash check and insert for all" ON public.uploaded_file_hashes FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow insert for all clinic users" ON public.patient_records FOR INSERT WITH CHECK (true);
 CREATE POLICY "Admins view full patient records" ON public.patient_records FOR SELECT USING (true);
+CREATE POLICY "Allow public select on active hospitals" ON public.hospitals FOR SELECT USING (is_active = true);
+CREATE POLICY "Super admin full access on hospitals" ON public.hospitals FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public select on active doctors" ON public.doctors FOR SELECT USING (is_active = true);
+CREATE POLICY "Admin full access on doctors" ON public.doctors FOR ALL USING (true) WITH CHECK (true);
 
 -- Role Permissions
 GRANT SELECT ON public.inventory TO anon, authenticated;
@@ -235,5 +294,7 @@ GRANT SELECT, INSERT ON public.orders TO anon, authenticated;
 GRANT SELECT, INSERT ON public.uploaded_file_hashes TO anon, authenticated;
 GRANT INSERT ON public.patient_records TO anon, authenticated;
 GRANT SELECT ON public.mobile_patient_view TO anon, authenticated;
+GRANT SELECT ON public.hospitals TO anon, authenticated;
+GRANT SELECT ON public.doctors TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
 
