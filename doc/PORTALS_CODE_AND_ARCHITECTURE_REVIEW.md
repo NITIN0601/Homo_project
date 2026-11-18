@@ -32,88 +32,95 @@ graph TD
     ROOT["App Root (src/App.tsx)"]
     
     %% Providers
-    THEME_CTX["ThemeProvider (Multi-Tenant & Design Tokens)"]
-    APP_CTX["AppProvider / AppContext (SSOT State Machine)"]
+    THEME_CTX["ThemeProvider (@core/tenancy)"]
+    APP_CTX["AppProvider / AppContext (src/app/store/AppContext.tsx)"]
     ROOT --> THEME_CTX --> APP_CTX
     
     %% App Shell
-    SHELL["AppShell (Layout Frame)"]
+    SHELL["AppShell (src/app/layout/AppShell.tsx)"]
     APP_CTX --> SHELL
     
     %% Shell Persistent Overlays
-    SHELL --> NAV["NavBar (src/components/layout/NavBar.tsx)"]
-    SHELL --> BOTTOM_NAV["BottomNav (src/components/layout/BottomNav.tsx)"]
-    SHELL --> CART_DRAWER["CartDrawer (src/components/layout/CartDrawer.tsx)"]
-    SHELL --> TRACKING_MODAL["TrackingModal (src/components/modals/TrackingModal.tsx)"]
-    SHELL --> ORDERS_MODAL["OrdersModal (src/components/modals/OrdersModal.tsx)"]
-    SHELL --> CHATBOT["ChatbotWidget (src/components/widgets/ChatbotWidget.tsx)"]
-    SHELL --> AUTH_PANEL["AuthPanel (src/components/layout/AuthPanel.tsx)"]
-    SHELL --> FOOTER["PageFooter (src/components/layout/PageFooter.tsx)"]
+    SHELL --> NAV["NavBar (src/app/layout/NavBar.tsx)"]
+    SHELL --> BOTTOM_NAV["BottomNav (src/app/layout/BottomNav.tsx)"]
+    SHELL --> CART_DRAWER["CartDrawer (src/domains/dispensary-pharmacy/components/CartDrawer.tsx)"]
+    SHELL --> TRACKING_MODAL["TrackingModal (src/domains/dispensary-pharmacy/modals/TrackingModal.tsx)"]
+    SHELL --> ORDERS_MODAL["OrdersModal (src/domains/dispensary-pharmacy/modals/OrdersModal.tsx)"]
+    SHELL --> CHATBOT["ChatbotWidget (src/domains/patient-engagement/components/ChatbotWidget.tsx)"]
+    SHELL --> AUTH_PANEL["AuthPanel (src/domains/iam-auth/components/AuthPanel.tsx)"]
+    SHELL --> FOOTER["PageFooter (src/app/layout/PageFooter.tsx)"]
     
     %% Router
-    SHELL --> ROUTER["PageRouter (Dynamic Page Switch)"]
+    SHELL --> ROUTER["AppRouter (src/app/router/AppRouter.tsx)"]
     
     %% Customer Portal Branch
     subgraph CustomerPortal["1. Customer Portal (Patient Facing)"]
-        ROUTER --> HOME["HomePage (/home)"]
-        ROUTER --> ABOUT["AboutPage (/about)"]
-        ROUTER --> APPT_PAGE["AppointmentsPage (/appointments)"]
-        ROUTER --> ORDER_MED["OrderMedicinePage (/order-medicine)"]
-        ROUTER --> CART_PAGE["CartPage (/cart-page)"]
-        ROUTER --> VISIT_SUM["VisitSummaryPage (/visit-summary)"]
+        ROUTER --> HOME["HomePage (domains/patient-engagement/pages/HomePage.tsx)"]
+        ROUTER --> ABOUT["AboutPage (domains/patient-engagement/pages/AboutPage.tsx)"]
+        ROUTER --> APPT_PAGE["AppointmentsPage (domains/scheduling/pages/AppointmentsPage.tsx)"]
+        ROUTER --> ORDER_MED["OrderMedicinePage (domains/dispensary-pharmacy/pages/OrderMedicinePage.tsx)"]
+        ROUTER --> CART_PAGE["CartPage (domains/dispensary-pharmacy/pages/CartPage.tsx)"]
+        ROUTER --> VISIT_SUM["VisitSummaryPage (domains/clinical-ehr/pages/VisitSummaryPage.tsx)"]
         
         %% Appointments Page Children
-        APPT_PAGE --> CAL_PICKER["CalendarPicker (Slot Matrix)"]
+        APPT_PAGE --> CAL_PICKER["CalendarPicker (domains/scheduling/components/CalendarPicker.tsx)"]
         
         %% Medicine & Cart Children
-        ORDER_MED --> RX_CAPTURE["PrescriptionCaptureModal (OCR)"]
+        ORDER_MED --> RX_CAPTURE["PrescriptionCaptureModal (domains/dispensary-pharmacy/modals/PrescriptionCaptureModal.tsx)"]
         CART_PAGE --> RX_CAPTURE
         
         %% Visit Summary Children
-        VISIT_SUM --> MODAL_PAY["Settle Consultation Fee Modal (Gateway)"]
-        VISIT_SUM --> MODAL_RECEIPT["Digital Tax-Exempt Receipt Modal"]
-        VISIT_SUM --> MODAL_JSON["Classical Homeopathy Case JSON Modal"]
-        VISIT_SUM --> MODAL_EDIT_PROF["Edit Medical Profile Modal"]
+        VISIT_SUM --> MODAL_PAY["PayConsultationModal (domains/billing-finance/modals/PayConsultationModal.tsx)"]
+        VISIT_SUM --> MODAL_RECEIPT["ReceiptModal (domains/billing-finance/modals/ReceiptModal.tsx)"]
+        VISIT_SUM --> MODAL_JSON["ViewCaseRecordJsonModal (domains/clinical-ehr/modals/ViewCaseRecordJsonModal.tsx)"]
+        VISIT_SUM --> MODAL_EDIT_PROF["EditPatientProfileModal (domains/patient-engagement/modals/EditPatientProfileModal.tsx)"]
     end
     
     %% Admin Portal Branch
     subgraph AdminPortal["2. Admin & Doctor Portal (/admin-dashboard)"]
-        ROUTER --> PROT_GUARD["ProtectedRoute (Role: admin)"]
-        PROT_GUARD --> ADMIN_DASH["AdminDashboard (src/pages/AdminDashboard.tsx)"]
+        ROUTER --> PROT_GUARD["ProtectedRoute (domains/iam-auth/components/ProtectedRoute.tsx)"]
+        PROT_GUARD --> ADMIN_DASH["AdminDashboard (src/app/admin/AdminDashboard.tsx)"]
         
         ADMIN_DASH --> TAB_OVERVIEW["OverviewTab (Queue & KPIs)"]
         ADMIN_DASH --> TAB_APPTS["AppointmentsTab (Doctor Roster)"]
         ADMIN_DASH --> TAB_PATIENTS["PatientRecordsTab (EHR Clinical Files)"]
-        ADMIN_DASH --> TAB_BILLING["BillingInvoicesTab (Fee Collection)"]
+        ADMIN_DASH --> TAB_BILLING["BillingTab (Fee Collection & Ledger)"]
         ADMIN_DASH --> TAB_INVENTORY["DispensaryInventoryTab (Stock)"]
         ADMIN_DASH --> TAB_DISPATCHES["DispatchesTab (Logistics POs)"]
         ADMIN_DASH --> TAB_CALENDAR["CalendarTab (Availability & OOO)"]
-        ADMIN_DASH --> TAB_CUSTOM["CustomizationTab (Tenant Config)"]
+        ADMIN_DASH --> TAB_CUSTOM["CustomizationTab (Tenant Governance)"]
         
         %% Admin Modals
-        TAB_APPTS --> MODAL_ADMIN_BOOK["AppointmentBookingModal"]
-        TAB_APPTS --> MODAL_ADMIN_CANCEL["AppointmentCancellationModal"]
+        TAB_APPTS --> MODAL_ADMIN_BOOK["AppointmentBookingModal (domains/scheduling)"]
+        TAB_APPTS --> MODAL_ADMIN_CANCEL["AppointmentCancellationModal (domains/scheduling)"]
         
-        TAB_PATIENTS --> MODAL_UPLOAD_RX["DoctorPrescriptionUploadModal"]
-        TAB_PATIENTS --> MODAL_PRESCRIBE["PrescribeRemedyModal"]
-        TAB_PATIENTS --> MODAL_MEDIA_UP["ClinicalMediaUploadModal"]
-        TAB_PATIENTS --> MODAL_MEDIA_LIGHT["ClinicalMediaLightboxModal"]
-        TAB_PATIENTS --> MODAL_VOICE["AdminVoiceStudioModal"]
+        TAB_PATIENTS --> MODAL_UPLOAD_RX["DoctorPrescriptionUploadModal (domains/dispensary-pharmacy)"]
+        TAB_PATIENTS --> MODAL_PRESCRIBE["PrescribeRemedyModal (domains/dispensary-pharmacy)"]
+        TAB_PATIENTS --> MODAL_MEDIA_UP["ClinicalMediaUploadModal (domains/clinical-ehr)"]
+        TAB_PATIENTS --> MODAL_MEDIA_LIGHT["ClinicalMediaLightboxModal (domains/clinical-ehr)"]
+        TAB_PATIENTS --> MODAL_VOICE["AdminVoiceStudioModal (domains/clinical-ehr)"]
         
-        TAB_BILLING --> MODAL_POST_FEE["PostConsultationFeeModal"]
-        TAB_BILLING --> MODAL_UTR["UtrReconciliationModal"]
+        TAB_BILLING --> MODAL_POST_FEE["PostConsultationFeeModal (domains/billing-finance)"]
+        TAB_BILLING --> MODAL_UTR["UtrReconciliationModal (domains/billing-finance)"]
         
-        TAB_INVENTORY --> MODAL_EXCEL["ExcelSyncModal (SheetJS)"]
+        TAB_INVENTORY --> MODAL_EXCEL["ExcelSyncModal (domains/dispensary-pharmacy)"]
         
-        TAB_DISPATCHES --> MODAL_CUSTOM_PO["CustomPOModal"]
-        TAB_DISPATCHES --> MODAL_BATCH_PO["ConsolidatedBatchOrderModal"]
-        TAB_DISPATCHES --> MODAL_TIMELINE["LogisticsTimelineModal"]
+        TAB_DISPATCHES --> MODAL_CUSTOM_PO["CustomPOModal (domains/dispensary-pharmacy)"]
+        TAB_DISPATCHES --> MODAL_BATCH_PO["ConsolidatedBatchOrderModal (domains/dispensary-pharmacy)"]
+        TAB_DISPATCHES --> MODAL_TIMELINE["LogisticsTimelineModal (domains/dispensary-pharmacy)"]
         
-        TAB_CALENDAR --> MODAL_INSPECT_OOO["Blocked Date Details Modal"]
+        TAB_CALENDAR --> MODAL_INSPECT_OOO["InspectBlockedDateModal (domains/scheduling)"]
         
-        TAB_CUSTOM --> MODAL_CV_PASS["Save Customer View Passcode Modal"]
-        TAB_CUSTOM --> MODAL_CHG_PASS["Change Passcode Modal"]
-        TAB_CUSTOM --> MODAL_ADD_PASS["Add Passcode Modal"]
+        TAB_CUSTOM --> MODAL_CHG_PASS["ChangePasscodeModal (domains/iam-auth)"]
+        TAB_CUSTOM --> MODAL_ADD_PASS["AddPasscodeModal (domains/iam-auth)"]
+    end
+
+    %% Super Admin Portal Branch
+    subgraph SuperAdminPortal["3. Super Admin Portal (/super-admin-dashboard)"]
+        ROUTER --> SUPER_GUARD["ProtectedRoute (Role: super_admin)"]
+        SUPER_GUARD --> SUPER_DASH["SuperAdminDashboard (domains/tenant-governance/pages/SuperAdminDashboard.tsx)"]
+        SUPER_DASH --> ONBOARD_MODAL["OnboardHospitalModal (domains/tenant-governance/modals/OnboardHospitalModal.tsx)"]
+        SUPER_DASH --> MANAGE_FEAT["ManageFeaturesModal (domains/tenant-governance/modals/ManageFeaturesModal.tsx)"]
     end
 ```
 
@@ -156,16 +163,16 @@ graph TD
 
 ### 3.2 Dynamic Tenant Customization Cascading
 
-A core innovation in the architecture is the **Multi-Tenant Feature Cascading Pipeline**. When an administrator modifies access filters in [`CustomizationTab.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/CustomizationTab.tsx), changes are verified via admin passcode, stored in the tenant configuration, and automatically reflected in real time across customer screens without requiring full page reloads:
+A core innovation in the architecture is the **Multi-Tenant Feature Cascading Pipeline**. When an administrator modifies access filters in [`CustomizationTab.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/CustomizationTab.tsx), changes are verified via admin passcode, stored in the tenant configuration, and automatically reflected in real time across customer screens without requiring full page reloads:
 
 | Feature Flag in `tenant.features` | Admin Controller (`CustomizationTab.tsx`) | Customer Portal Effect |
 | :--- | :--- | :--- |
-| `displayDoctorDetails` | Switch: *Display Doc Details* | Controls doctor title, registration number, qualifications, and biography on [`HomePage.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/HomePage.tsx) and [`AboutPage.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/AboutPage.tsx). When switched OFF, generic clinic physician info is shown. |
-| `enableAgastyaBot` | Switch: *AgastyaBot* | Toggles the floating [`ChatbotWidget.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/components/ChatbotWidget.tsx) AI assistant and automated FAQ drawer across all patient views. |
-| `enablePatientProfileEdit` | Switch: *Patient Details Edit Option* | Shows/hides the `"Edit Profile"` button on [`VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/VisitSummaryPage.tsx). When OFF, the patient record is strictly read-only. |
-| `enablePatientMedicalRecords` | Switch: *My Summary: Display Patient Record* | Controls visibility of Tab 1 (*Medical History & Consultation Timeline*) in [`VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/VisitSummaryPage.tsx). |
-| `enableBillingHistory` | Switch: *My Summary: Billing & Payment History* | Controls visibility of Tab 2 (*Consultation Invoices, Payment Gateway, and Tax Receipts*) in [`VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/VisitSummaryPage.tsx). |
-| `enableFollowupFeedback` | Switch: *My Summary: Follow-up & Feedback* | Controls visibility of Tab 3 (*Recovery Progress Questionnaire and Google Review Sync*) in [`VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/VisitSummaryPage.tsx). |
+| `displayDoctorDetails` | Switch: *Display Doc Details* | Controls doctor title, registration number, qualifications, and biography on [`HomePage.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/HomePage.tsx) and [`AboutPage.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/AboutPage.tsx). When switched OFF, generic clinic physician info is shown. |
+| `enableAgastyaBot` | Switch: *AgastyaBot* | Toggles the floating [`ChatbotWidget.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/components/ChatbotWidget.tsx) AI assistant and automated FAQ drawer across all patient views. |
+| `enablePatientProfileEdit` | Switch: *Patient Details Edit Option* | Shows/hides the `"Edit Profile"` button on [`VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/VisitSummaryPage.tsx). When OFF, the patient record is strictly read-only. |
+| `enablePatientMedicalRecords` | Switch: *My Summary: Display Patient Record* | Controls visibility of Tab 1 (*Medical History & Consultation Timeline*) in [`VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/VisitSummaryPage.tsx). |
+| `enableBillingHistory` | Switch: *My Summary: Billing & Payment History* | Controls visibility of Tab 2 (*Consultation Invoices, Payment Gateway, and Tax Receipts*) in [`VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/VisitSummaryPage.tsx). |
+| `enableFollowupFeedback` | Switch: *My Summary: Follow-up & Feedback* | Controls visibility of Tab 3 (*Recovery Progress Questionnaire and Google Review Sync*) in [`VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/VisitSummaryPage.tsx). |
 | `enableECommerce` | Switch: *Dispensary & Medicine Ordering* | Controls visibility of the `/order-medicine` catalogue, cart drawer, and ordering workflows. |
 | `enableCustomerPayments` | Switch: *Online Checkout & Settlements* | Enables or disables online payment processing buttons on invoice cards. |
 
@@ -186,7 +193,7 @@ A core innovation in the architecture is the **Multi-Tenant Feature Cascading Pi
 #### 2. Appointments Page (`src/pages/AppointmentsPage.tsx`)
 - **Parent**: `PageRouter`.
 - **Key Modules**:
-  - [`CalendarPicker.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/components/CalendarPicker.tsx): Renders live calendar days. Blocks days in real time based on `state.blockedDates` (e.g. holidays, doctor conferences) with visual Out-of-Office tooltips.
+  - [`CalendarPicker.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/components/CalendarPicker.tsx): Renders live calendar days. Blocks days in real time based on `state.blockedDates` (e.g. holidays, doctor conferences) with visual Out-of-Office tooltips.
   - Slot Matrix: Generates 25 slots across Morning (09:00 AM – 01:00 PM) and Evening (05:00 PM – 09:00 PM). Automatically disables booked or locked slots.
   - Booking Drawer: Collects patient name, WhatsApp phone number, and chief complaint. Validates phone number and checks for slot conflicts via `api.bookAppointment`.
 
@@ -212,7 +219,7 @@ A core innovation in the architecture is the **Multi-Tenant Feature Cascading Pi
 
 #### 4. Medicine Catalogue & Cart (`src/pages/OrderMedicinePage.tsx` & `src/pages/CartPage.tsx`)
 - **Remedy Catalogue**: Explores `MEDICINE_CATALOGUE` with dynamic potencies (`30C`, `200CH`, `1M`, `Q Mother Tincture`, `6X Biochemic`).
-- **Modal**: [`PrescriptionCaptureModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/components/PrescriptionCaptureModal.tsx): Live webcam camera capture and local file drop. Simulates OCR text extraction of remedies and potencies.
+- **Modal**: [`PrescriptionCaptureModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/components/PrescriptionCaptureModal.tsx): Live webcam camera capture and local file drop. Simulates OCR text extraction of remedies and potencies.
 - **Cart Checkout**: Address entry with automatic pincode validation, courier dispatch estimate, and order placement.
 
 ---
@@ -243,51 +250,51 @@ A core innovation in the architecture is the **Multi-Tenant Feature Cascading Pi
 
 #### 2. Appointments Tab (`src/pages/admin/AppointmentsTab.tsx`)
 - **Roster Controls**: Filter by date range, branch, doctor, or status (`confirmed`, `in-progress`, `completed`, `cancelled`).
-- **Modal**: [`AppointmentBookingModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/modals/AppointmentBookingModal.tsx):
+- **Modal**: [`AppointmentBookingModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/AppointmentBookingModal.tsx):
   - Form ID: `form="appointment-booking-form"`.
   - Sticky footer with action buttons.
   - Allows booking directly into the doctor's calendar on behalf of walk-in clinic patients.
-- **Modal**: [`AppointmentCancellationModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/modals/AppointmentCancellationModal.tsx):
+- **Modal**: [`AppointmentCancellationModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/AppointmentCancellationModal.tsx):
   - Confirms slot release, reasons for cancellation, and triggers automatic WhatsApp patient notification.
 
 #### 3. Patient Records Tab (`src/pages/admin/PatientRecordsTab.tsx`)
 - **Clinical EHR Drawer**: Displays searchable list of all registered patients. Expanding a patient displays their complete consultation dossier.
-- **Modal**: [`DoctorPrescriptionUploadModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/modals/DoctorPrescriptionUploadModal.tsx):
+- **Modal**: [`DoctorPrescriptionUploadModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/DoctorPrescriptionUploadModal.tsx):
   - Form ID: `form="doctor-prescription-form"`.
   - Multi-row remedy prescription editor (Remedy name, potency, dosage, and duration).
   - Diagnostic observations, chief complaints, and lifestyle guidance.
   - Pinned sticky action footer.
-- **Modal**: [`PrescribeRemedyModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/modals/PrescribeRemedyModal.tsx):
+- **Modal**: [`PrescribeRemedyModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/PrescribeRemedyModal.tsx):
   - Fast-action single remedy allocation directly from dispensary catalogue.
-- **Modal**: [`ClinicalMediaUploadModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/modals/ClinicalMediaUploadModal.tsx):
+- **Modal**: [`ClinicalMediaUploadModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/ClinicalMediaUploadModal.tsx):
   - Uploads diagnostic tongue photos, dermatology rash images, lab pathology reports, and audio dictation files.
-- **Modal**: [`ClinicalMediaLightboxModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/modals/ClinicalMediaLightboxModal.tsx):
+- **Modal**: [`ClinicalMediaLightboxModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/ClinicalMediaLightboxModal.tsx):
   - Encrypted high-resolution viewing lightbox with variable-speed audio player (1x, 1.25x, 1.5x) and download copy actions.
-- **Modal**: [`AdminVoiceStudioModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/components/AdminVoiceStudioModal.tsx):
+- **Modal**: [`AdminVoiceStudioModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/components/AdminVoiceStudioModal.tsx):
   - Doctor audio case dictation studio with live waveform visualizer, audio recorder, and speech-to-text case analysis.
 
 #### 4. Billing & Invoices Tab (`src/pages/admin/BillingInvoicesTab.tsx`)
 - **Consultation Ledger**: Itemizes all clinic invoices, visit types, settlement statuses, and payment modes.
-- **Modal**: [`PostConsultationFeeModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/modals/PostConsultationFeeModal.tsx):
+- **Modal**: [`PostConsultationFeeModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/PostConsultationFeeModal.tsx):
   - Quick pills for common consultation amounts (₹500, ₹750, ₹1000, ₹1500).
   - Supports initial status as *"Awaiting Online Payment"* (shows on patient portal) or *"Paid at Clinic Desk (Cash)"*.
   - Sticky footer with `form="post-fee-form"`.
-- **Modal**: [`UtrReconciliationModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/modals/UtrReconciliationModal.tsx):
+- **Modal**: [`UtrReconciliationModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/UtrReconciliationModal.tsx):
   - Bank transaction reconciliation. Allows administrators to verify 12-digit UPI UTR numbers against bank statements and unlock official digital tax receipts.
 
 #### 5. Dispensary & Inventory Tab (`src/pages/admin/DispensaryInventoryTab.tsx`)
 - **Inventory Matrix**: Real-time tracking of medicine quantities, low-stock thresholds, and distributor details.
 - **Quick Restock Drawer**: Instantly increments stock quantities and syncs with backend database.
-- **Modal**: [`ExcelSyncModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/modals/ExcelSyncModal.tsx):
+- **Modal**: [`ExcelSyncModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/ExcelSyncModal.tsx):
   - Powered by SheetJS (`xlsx`). Enables bidirectional sync: exports dispensary stock to `.xlsx` and parses imported supplier spreadsheets with discrepancy diff preview.
 
 #### 6. Logistics & Dispatches Tab (`src/pages/admin/DispatchesTab.tsx`)
 - **Order Pipeline**: Manages wholesale pharmacy purchase orders and patient remedy dispatches.
-- **Modal**: [`CustomPOModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/modals/CustomPOModal.tsx):
+- **Modal**: [`CustomPOModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/CustomPOModal.tsx):
   - Creates manual distributor orders for out-of-stock potencies (Reckeweg, SBL, Schwabe).
-- **Modal**: [`ConsolidatedBatchOrderModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/modals/ConsolidatedBatchOrderModal.tsx):
+- **Modal**: [`ConsolidatedBatchOrderModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/ConsolidatedBatchOrderModal.tsx):
   - Consolidates multiple patient prescriptions into one wholesale batch purchase order dispatched via WhatsApp/Email.
-- **Modal**: [`LogisticsTimelineModal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/modals/LogisticsTimelineModal.tsx):
+- **Modal**: [`LogisticsTimelineModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/LogisticsTimelineModal.tsx):
   - Real-time courier checkpoint tracker (BlueDart Express AWB scanning).
 
 #### 7. Calendar & Doctor Availability Tab (`src/pages/admin/CalendarTab.tsx`)
@@ -321,7 +328,7 @@ A core innovation in the architecture is the **Multi-Tenant Feature Cascading Pi
 
 ## 6. Shared Architecture & UI Engineering Standards
 
-### 6.1 Viewport Clamping & Modal Architecture ([`Modal.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/components/ui/Modal.tsx))
+### 6.1 Viewport Clamping & Modal Architecture ([`Modal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/components/ui/Modal.tsx))
 
 To completely prevent popups from hanging, blurring without opening, or getting cut off on mobile/small laptops, all modals adhere to a standardized layout:
 

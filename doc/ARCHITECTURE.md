@@ -34,14 +34,14 @@ The Agastya Homoeopathy Clinic EHR is designed around four foundational principl
 
 ```mermaid
 graph TB
-    subgraph ClientLayer["Frontend Client (React 19 + TypeScript + Vite)"]
-        UI_SUPER["Super Admin Console<br/>(Multi-Hospital Registry, Dev Mode, Scaling Quotas)"]
-        UI_ADMIN["Doctor & Clinic Director Console<br/>(Doctor Roster, EHR Scribe, Dispensary, Invoices)"]
-        UI_PATIENT["Patient Portal & Guest View<br/>(Appointments, Remedies, Cart, Scoped Registration)"]
-        APP_CTX["Central State Machine (AppContext.tsx)<br/>15s Adaptive Polling + Focus Sync"]
-        THEME_CTX["ThemeProvider.tsx<br/>Dynamic Hospital Branding & Palette"]
-        API_CLIENT["Typed API Client (src/services/api.ts)"]
-        MOCK_FIXTURES["Dedicated Mock Fixtures<br/>(src/data/mocks/*)<br/>Active when VITE_USE_MOCK_DATA=true"]
+    subgraph ClientLayer["Frontend Client (React 19 + TypeScript + Feature-Sliced Architecture)"]
+        UI_SUPER["Super Admin Console<br/>(domains/tenant-governance/pages/SuperAdminDashboard.tsx)"]
+        UI_ADMIN["Doctor & Practice Admin Console<br/>(app/admin/AdminDashboard.tsx)"]
+        UI_PATIENT["Patient Portal & Guest View<br/>(domains/patient-engagement/, scheduling/, clinical-ehr/)"]
+        APP_CTX["Application State & Router<br/>(app/store/AppContext.tsx & app/router/AppRouter.tsx)"]
+        THEME_CTX["ThemeProvider (@core/tenancy)<br/>Dynamic Hospital Branding & Palette"]
+        API_CLIENT["Unified API Client Facade<br/>(app/api/apiServiceFacade.ts & @domains/*/api)"]
+        MOCK_FIXTURES["Canonical Mock Fixtures<br/>(src/mocks/*)<br/>Active when VITE_USE_MOCK_DATA=true"]
     end
 
     subgraph GatewayLayer["FastAPI Gateway & Security Layer (Port 8000)"]
@@ -51,13 +51,14 @@ graph TB
     end
 
     subgraph BackendModules["Modular Backend (backend/routes/ & backend/services/)"]
-        M_HOSP["routes/hospital.py<br/>Hospital & Doctor Provisioning, Dev Mode Toggle"]
+        M_HOSP["routes/hospital.py & services/hospital_service.py<br/>Hospital & Doctor Provisioning, Dev Mode Toggle"]
         M_AUTH["routes/auth.py & services/auth_service.py<br/>Login, OTP, JWT, User Invites (/join?token=)"]
-        M_SCHED["routes/appointments.py & services/calendar_service.py<br/>Atomic Booking, Slot Locking, GCal Sync"]
-        M_CLIN["routes/clinical.py & services/typesafe_jev_service.py<br/>EHR, Audio Watermarking, AI Scribe, JEV"]
-        M_DISP["routes/dispensary.py<br/>Inventory, Restock, Batch Orders"]
-        M_BILL["routes/billing.py<br/>Invoices, UTR Ledger, Logistics"]
-        M_COMM["services/notification_service.py<br/>WhatsApp Cloud API & Resend Email"]
+        M_SCHED["routes/scheduling.py & services/scheduling_service.py<br/>Atomic Booking, Slot Locking, GCal Sync"]
+        M_CLIN["routes/clinical_records.py & services/clinical_service.py<br/>EHR, Audio Watermarking, AI Scribe, JEV"]
+        M_DISP["routes/dispensary.py & services/dispensary_service.py<br/>Inventory, Restock, Batch Orders"]
+        M_BILL["routes/billing.py & services/billing_service.py<br/>Invoices, UTR Ledger, Logistics"]
+        M_COMM["routes/communications.py & services/notification_service.py<br/>WhatsApp Cloud API & Resend Email"]
+        M_TELEM["routes/telemetry.py & services/telemetry_service.py<br/>Zero-PHI Crash Ingestion & Reporting"]
     end
 
     subgraph DataLayer["Canonical SSOT & Local Fallback Store"]
@@ -83,6 +84,7 @@ graph TB
     QUOTA_GUARD --> M_DISP
     QUOTA_GUARD --> M_BILL
     QUOTA_GUARD --> M_COMM
+    QUOTA_GUARD --> M_TELEM
 
     M_HOSP --> TENANT_REG
     M_AUTH --> TENANT_REG
@@ -91,6 +93,7 @@ graph TB
     M_CLIN --> DB_POSTGRES
     M_DISP --> DB_POSTGRES
     M_BILL --> DB_POSTGRES
+    M_TELEM --> AUDIT_STORE
     DB_POSTGRES -.->|On DB Offline| DISK_FALLBACK
     AUDIT_MID --> AUDIT_STORE
 ```
@@ -147,7 +150,7 @@ In traditional SQLite or raw file-based JSON backends, 100 simultaneous users wr
   - `GET /api/v1/patient-records?view=mobile` redacts sensitive internal clinician notes and returns only patient-facing instructions.
 
 ### Tenant Isolation Wall
-- In [`backend/core/security.py`](file:///Users/nitin/Desktop/Project_Suspense/backend/core/security.py), `scope_items_to_patient_or_admin` checks caller identity:
+- In [`backend/core/security.py`](file:///Users/nitin/Desktop/Homo_project/backend/core/security.py), `scope_items_to_patient_or_admin` checks caller identity:
   ```python
   def scope_items_to_patient_or_admin(items: list[dict], current_user: dict | None, patient_key: str = "patient_id") -> list[dict]:
       # Patients only receive items where patient_id matches their token subject.
