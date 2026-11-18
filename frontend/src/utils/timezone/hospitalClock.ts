@@ -1,12 +1,12 @@
-import { CLINIC } from "../../config/clinic";
-import type { ClinicTimeInfo, TimeOfDayPeriod } from "./types";
+import { HOSPITAL } from "../../config/hospital";
+import type { HospitalTimeInfo, TimeOfDayPeriod } from "./types";
 
 /**
- * Returns current date and time strictly in the clinic's operational timezone (Asia/Kolkata / IST).
+ * Returns current date and time strictly in the hospital's operational timezone (Asia/Kolkata / IST).
  * Immune to the patient's device clock or geographical location.
  */
-export function getClinicTimeInfo(): ClinicTimeInfo {
-  const timeZone = CLINIC.TIMEZONE || "Asia/Kolkata";
+export function getHospitalTimeInfo(): HospitalTimeInfo {
+  const timeZone = HOSPITAL.TIMEZONE || "Asia/Kolkata";
   const now = new Date();
 
   const formatter = new Intl.DateTimeFormat("en-US", {
@@ -90,31 +90,31 @@ export function normalizeTimeToSlot(timeStr: string): string {
 }
 
 /**
- * Checks whether a given slot on a given date has already elapsed in clinic timezone (IST).
+ * Checks whether a given slot on a given date has already elapsed in hospital timezone (IST).
  */
 export function isSlotPassed(dateYMD: string, slot24: string): boolean {
   if (!dateYMD || !slot24) return false;
-  const clinicTime = getClinicTimeInfo();
-  const targetDateYMD = dateYMD.toLowerCase() === "today" ? clinicTime.todayYMD : dateYMD;
+  const hospitalTime = getHospitalTimeInfo();
+  const targetDateYMD = dateYMD.toLowerCase() === "today" ? hospitalTime.todayYMD : dateYMD;
 
-  if (targetDateYMD < clinicTime.todayYMD) return true;
-  if (targetDateYMD > clinicTime.todayYMD) return false;
+  if (targetDateYMD < hospitalTime.todayYMD) return true;
+  if (targetDateYMD > hospitalTime.todayYMD) return false;
 
   const [slotH, slotM] = slot24.split(":").map(Number);
   const slotTotalMinutes = slotH * 60 + slotM;
-  return clinicTime.currentTotalMinutes >= slotTotalMinutes;
+  return hospitalTime.currentTotalMinutes >= slotTotalMinutes;
 }
 
 /**
- * Normalizes aliases like "Today" and "Tomorrow" to "YYYY-MM-DD" in clinic operational timezone.
+ * Normalizes aliases like "Today" and "Tomorrow" to "YYYY-MM-DD" in hospital operational timezone.
  */
 export function normalizeDateAlias(dateStr: string): string {
   if (!dateStr) return "";
   const lower = dateStr.trim().toLowerCase();
-  const clinic = getClinicTimeInfo();
-  if (lower === "today") return clinic.todayYMD;
+  const hospital = getHospitalTimeInfo();
+  if (lower === "today") return hospital.todayYMD;
   if (lower === "tomorrow") {
-    const [y, m, d] = clinic.todayYMD.split("-").map(Number);
+    const [y, m, d] = hospital.todayYMD.split("-").map(Number);
     const tom = new Date(y, m - 1, d + 1);
     return `${tom.getFullYear()}-${String(tom.getMonth() + 1).padStart(2, "0")}-${String(tom.getDate()).padStart(2, "0")}`;
   }
@@ -122,13 +122,13 @@ export function normalizeDateAlias(dateStr: string): string {
 }
 
 /**
- * Checks if a given YMD string is in the past relative to the clinic's operational timezone.
+ * Checks if a given YMD string is in the past relative to the hospital's operational timezone.
  */
-export function isDatePastClinicTime(dateYMD: string): boolean {
+export function isDatePastHospitalTime(dateYMD: string): boolean {
   if (!dateYMD) return false;
-  const clinicTime = getClinicTimeInfo();
+  const hospitalTime = getHospitalTimeInfo();
   const normalized = normalizeDateAlias(dateYMD);
-  return normalized < clinicTime.todayYMD;
+  return normalized < hospitalTime.todayYMD;
 }
 
 /**
@@ -156,4 +156,3 @@ export function getTimeOfDayEmoji(period: TimeOfDayPeriod): string {
     case "Late Night":    return "🌌";
   }
 }
-

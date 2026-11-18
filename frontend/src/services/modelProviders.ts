@@ -9,7 +9,7 @@
  */
 
 import type { HomeopathicCaseRecord, UserProfile } from "../types";
-import { CLINIC, STORAGE_KEYS } from "../config";
+import { HOSPITAL, STORAGE_KEYS } from "../config";
 import { extractHomeopathicCaseRecord } from "./voiceStudio";
 import { formatDateISO } from "../utils/format";
 
@@ -31,6 +31,17 @@ export interface ModelOption {
   badge?: string;
   isCustom?: boolean;
   discoveredAt?: string;
+}
+
+/**
+ * Wraps speech-to-text transcripts with explicit OWASP LLM01 / HIPAA untrusted data fences.
+ * Strips delimiter escape sequences to prevent delimiter breakout injection attacks.
+ */
+export function wrapUntrustedTranscript(transcript: string): string {
+  const sanitized = (transcript || "")
+    .replace(/<\/?clinical_transcript_untrusted>/gi, "")
+    .trim();
+  return `Clinical transcript to structure (untrusted doctor-patient speech data):\n\n<clinical_transcript_untrusted>\n${sanitized}\n</clinical_transcript_untrusted>`;
 }
 
 export interface LLMProviderConfig {
@@ -221,24 +232,30 @@ export abstract class BaseModelProvider implements LLMProviderConfig {
 
       const dynamicRaw = localStorage.getItem(`${STORAGE_KEYS.DYNAMIC_MODELS_PREFIX}${this.id}`);
       if (dynamicRaw) this.dynamicModels = JSON.parse(dynamicRaw);
-    } catch (_e) {}
+    } catch {
+      // Storage unavailable or quota exceeded
+    }
   }
 
   private persistCustomModels(): void {
     try {
       localStorage.setItem(`${STORAGE_KEYS.CUSTOM_MODELS_PREFIX}${this.id}`, JSON.stringify(this.customModels));
-    } catch (_e) {}
+    } catch {
+      // Storage unavailable
+    }
   }
 
   private persistDynamicModels(): void {
     try {
       localStorage.setItem(`${STORAGE_KEYS.DYNAMIC_MODELS_PREFIX}${this.id}`, JSON.stringify(this.dynamicModels));
-    } catch (_e) {}
+    } catch {
+      // Storage unavailable
+    }
   }
 
   // ── Reusable Schema Validation Helper ────────────────────────────────────────
   protected sanitizeAndEnforceSchema(
-    parsed: any,
+    parsed: Record<string, any> | null | undefined,
     originalLanguage: string,
     patient?: UserProfile | null
   ): HomeopathicCaseRecord {
@@ -257,8 +274,8 @@ export abstract class BaseModelProvider implements LLMProviderConfig {
       },
       doctor_details: {
         doctor_id: parsed?.doctor_details?.doctor_id || "DOC-BK-001",
-        name: parsed?.doctor_details?.name || CLINIC.DOCTOR_TITLE,
-        clinic_name: parsed?.doctor_details?.clinic_name || CLINIC.FULL_NAME,
+        name: parsed?.doctor_details?.name || HOSPITAL.DOCTOR_TITLE,
+        hospital_name: parsed?.doctor_details?.hospital_name || HOSPITAL.FULL_NAME,
       },
       patient_details: {
         name: parsed?.patient_details?.name || patient?.name || "Patient",
@@ -289,7 +306,7 @@ export abstract class BaseModelProvider implements LLMProviderConfig {
       homeopathic_case_analysis: {
         chief_complaints: Array.isArray(parsed?.homeopathic_case_analysis?.chief_complaints) &&
           parsed.homeopathic_case_analysis.chief_complaints.length > 0
-          ? parsed.homeopathic_case_analysis.chief_complaints.map((cc: any) => ({
+          ? parsed.homeopathic_case_analysis.chief_complaints.map((cc: Record<string, any>) => ({
               location: cc.location || "General",
               sensation: cc.sensation || "Discomfort",
               modalities: {
@@ -331,7 +348,7 @@ export abstract class BaseModelProvider implements LLMProviderConfig {
       treatment_plan: {
         medicines_suggested: Array.isArray(parsed?.treatment_plan?.medicines_suggested) &&
           parsed.treatment_plan.medicines_suggested.length > 0
-          ? parsed.treatment_plan.medicines_suggested.map((m: any) => ({
+          ? parsed.treatment_plan.medicines_suggested.map((m: Record<string, any>) => ({
               remedy_name: m.remedy_name || "Nux Vomica",
               potency: m.potency || "200C",
               dosage_form: m.dosage_form || "Globules (Size 30 cane sugar pills)",
@@ -394,7 +411,7 @@ export class OpenAILikeProvider extends BaseModelProvider {
         model,
         messages: [
           { role: "system", content: CLASSICAL_HOMEOPATHY_SYSTEM_PROMPT },
-          { role: "user", content: `Clinical transcript to structure:\n\n${transcript}` },
+          { role: "user", content: wrapUntrustedTranscript(transcript) },
         ],
         response_format: { type: "json_object" },
         temperature: 0.1,
@@ -456,7 +473,7 @@ export class OpenAILikeProvider extends BaseModelProvider {
 
       this.setDynamicModels(liveList);
       return this.getAllModels();
-    } catch (_e) {
+    } catch {
       return this.getAllModels();
     }
   }
@@ -477,7 +494,7 @@ export class GeminiProvider extends BaseModelProvider {
         contents: [
           {
             role: "user",
-            parts: [{ text: `Clinical transcript to structure:\n\n${transcript}` }],
+            parts: [{ text: wrapUntrustedTranscript(transcript) }],
           },
         ],
         systemInstruction: {
@@ -540,7 +557,7 @@ export class GeminiProvider extends BaseModelProvider {
 
       this.setDynamicModels(liveList);
       return this.getAllModels();
-    } catch (_e) {
+    } catch {
       return this.getAllModels();
     }
   }
@@ -574,7 +591,7 @@ export class AnthropicProvider extends BaseModelProvider {
         temperature: 0.1,
         system: CLASSICAL_HOMEOPATHY_SYSTEM_PROMPT,
         messages: [
-          { role: "user", content: `Clinical transcript to structure:\n\n${transcript}` },
+          { role: "user", content: wrapUntrustedTranscript(transcript) },
         ],
       }),
     });
@@ -631,7 +648,7 @@ export class AnthropicProvider extends BaseModelProvider {
         .slice(0, 15);
       this.setDynamicModels(liveList);
       return this.getAllModels();
-    } catch (_e) {
+    } catch {
       return this.getAllModels();
     }
   }
@@ -657,7 +674,7 @@ export class OllamaProvider extends BaseModelProvider {
         model,
         messages: [
           { role: "system", content: CLASSICAL_HOMEOPATHY_SYSTEM_PROMPT },
-          { role: "user", content: `Clinical transcript to structure:\n\n${transcript}` },
+          { role: "user", content: wrapUntrustedTranscript(transcript) },
         ],
         format: "json",
         stream: false,
@@ -685,7 +702,7 @@ export class OllamaProvider extends BaseModelProvider {
         return { ok: true, latencyMs, message: `Local Ollama is online (${latencyMs}ms).` };
       }
       return { ok: false, latencyMs, message: `Ollama returned HTTP ${res.status}` };
-    } catch (err: any) {
+    } catch {
       const latencyMs = Math.round(performance.now() - startTime);
       return { ok: false, latencyMs, message: `Could not reach Ollama at ${this.getEndpoint(customEndpoint)}.` };
     }
@@ -713,7 +730,7 @@ export class OllamaProvider extends BaseModelProvider {
 
       this.setDynamicModels(liveList);
       return this.getAllModels();
-    } catch (_e) {
+    } catch {
       return this.getAllModels();
     }
   }
@@ -817,7 +834,7 @@ export const PROVIDER_INSTANCES: Record<LLMProviderId, BaseModelProvider> = {
     id: "ollama",
     name: "Local Ollama / On-Premise",
     shortName: "Ollama",
-    description: "100% On-premises HIPAA / ABDM privacy. Zero data leaves clinic network",
+    description: "100% On-premises HIPAA / ABDM privacy. Zero data leaves hospital network",
     icon: "🏠",
     badge: "100% Private / HIPAA",
     models: [
@@ -887,14 +904,18 @@ class ModelProviderManager {
           ...JSON.parse(savedModels),
         };
       }
-    } catch (_e) {}
+    } catch {
+      // Storage unavailable
+    }
   }
 
   private persistState(): void {
     try {
       localStorage.setItem(STORAGE_KEYS.ACTIVE_LLM_PROVIDER, this.activeProviderId);
       localStorage.setItem(STORAGE_KEYS.ACTIVE_LLM_MODELS, JSON.stringify(this.activeModelByProvider));
-    } catch (_e) {}
+    } catch {
+      // Storage unavailable
+    }
   }
 
   public getProvider(id: LLMProviderId = this.activeProviderId): BaseModelProvider {

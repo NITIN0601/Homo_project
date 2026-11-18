@@ -1,4 +1,4 @@
-import { CLINIC, OFFICE_HOURS, ALL_TIME_SLOTS } from "../../config/clinic";
+import { HOSPITAL, OFFICE_HOURS, ALL_TIME_SLOTS } from "../../config/hospital";
 import type {
   UserTimezoneInfo,
   SlotTimeMapping,
@@ -11,20 +11,20 @@ import {
   normalizeDateAlias,
   getTimeOfDayPeriod,
   getTimeOfDayEmoji,
-} from "./clinicClock";
+} from "./hospitalClock";
 
 /**
  * Returns detected local timezone information from the patient's browser environment,
  * or from a user-selected timezone override.
  */
 export function getUserTimezone(customTz?: string): UserTimezoneInfo {
-  const clinicTz: string = CLINIC.TIMEZONE || "Asia/Kolkata";
+  const hospitalTz: string = HOSPITAL.TIMEZONE || "Asia/Kolkata";
   let timeZone = customTz;
   if (!timeZone) {
     try {
-      timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || clinicTz;
+      timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || hospitalTz;
     } catch {
-      timeZone = clinicTz;
+      timeZone = hospitalTz;
     }
   }
 
@@ -80,82 +80,82 @@ export function getUserTimezone(customTz?: string): UserTimezoneInfo {
 
   const common = COMMON_TIMEZONES.find((c) => c.timeZone === timeZone);
   const regionName = common ? common.label : timeZone.replace(/_/g, " ");
-  const isClinicTimezone = timeZone === clinicTz || timeZone === "Asia/Calcutta" || timeZone === "Asia/Kolkata";
+  const isHospitalTimezone = timeZone === hospitalTz || timeZone === "Asia/Calcutta" || timeZone === "Asia/Kolkata";
 
   return {
     timeZone,
-    label: isClinicTimezone ? "IST" : (label || timeZone),
+    label: isHospitalTimezone ? "IST" : (label || timeZone),
     formattedTime,
     formattedDate,
     todayYMD,
     offset,
     regionName,
-    isClinicTimezone,
+    isHospitalTimezone,
   };
 }
 
 /**
- * Maps a clinic time slot (Asia/Kolkata) to the patient's local timezone.
+ * Maps a hospital time slot (Asia/Kolkata) to the patient's local timezone.
  */
-export function mapClinicSlotToUserTime(
+export function mapHospitalSlotToUserTime(
   dateYMD: string,
   slot24: string,
   userTz?: string
 ): SlotTimeMapping {
-  const clinicTz = CLINIC.TIMEZONE || "Asia/Kolkata";
-  const clinicTime12 = normalizeSlotToTime(slot24) + " IST";
+  const hospitalTz = HOSPITAL.TIMEZONE || "Asia/Kolkata";
+  const hospitalTime12 = normalizeSlotToTime(slot24) + " IST";
   const normalizedYMD = normalizeDateAlias(dateYMD || "today");
 
   let targetTz = userTz;
   if (!targetTz) {
     try {
-      targetTz = Intl.DateTimeFormat().resolvedOptions().timeZone || clinicTz;
+      targetTz = Intl.DateTimeFormat().resolvedOptions().timeZone || hospitalTz;
     } catch {
-      targetTz = clinicTz;
+      targetTz = hospitalTz;
     }
   }
 
-  const isDifferentTimezone = targetTz !== clinicTz && targetTz !== "Asia/Calcutta";
+  const isDifferentTimezone = targetTz !== hospitalTz && targetTz !== "Asia/Calcutta";
 
   const [hStr, mStr] = slot24.split(":");
-  const clinicH = parseInt(hStr || "0", 10);
-  const clinicM = parseInt(mStr || "0", 10);
-  const isoClinicString = `${normalizedYMD}T${(hStr || "00").padStart(2, "0")}:${(mStr || "00").padStart(2, "0")}:00+05:30`;
-  const dateObj = new Date(isoClinicString);
+  const hospitalH = parseInt(hStr || "0", 10);
+  const hospitalM = parseInt(mStr || "0", 10);
+  const isoHospitalString = `${normalizedYMD}T${(hStr || "00").padStart(2, "0")}:${(mStr || "00").padStart(2, "0")}:00+05:30`;
+  const dateObj = new Date(isoHospitalString);
 
-  let clinicDateFormatted = normalizedYMD;
+  let hospitalDateFormatted = normalizedYMD;
   try {
     const cdf = new Intl.DateTimeFormat("en-US", {
-      timeZone: clinicTz,
+      timeZone: hospitalTz,
       weekday: "short",
       month: "short",
       day: "numeric",
       year: "numeric",
     });
-    clinicDateFormatted = cdf.format(dateObj);
+    hospitalDateFormatted = cdf.format(dateObj);
   } catch {}
 
-  const clinicPeriod = getTimeOfDayPeriod(clinicH, clinicM);
-  const clinicEmoji = getTimeOfDayEmoji(clinicPeriod);
+  const hospitalPeriod = getTimeOfDayPeriod(hospitalH, hospitalM);
+  const hospitalEmoji = getTimeOfDayEmoji(hospitalPeriod);
 
   if (!isDifferentTimezone) {
     return {
       slot24,
-      clinicTime12,
-      clinicDateFormatted,
-      userTime12: clinicTime12,
+      hospitalTime12,
+      hospitalDateFormatted,
+      userTime12: hospitalTime12,
       userShortLabel: normalizeSlotToTime(slot24),
-      userDateFormatted: clinicDateFormatted,
+      userDateFormatted: hospitalDateFormatted,
       userDayOffsetDesc: "Same Day",
       isDifferentDay: false,
-      userTimeZone: clinicTz,
+      userTimeZone: hospitalTz,
       isDifferentTimezone: false,
-      fullComparison: clinicTime12,
-      userDateWithTime: `${clinicDateFormatted} · ${clinicTime12}`,
-      userHour24: clinicH,
-      userMinute: clinicM,
-      timeOfDayPeriod: clinicPeriod,
-      timeOfDayEmoji: clinicEmoji,
+      fullComparison: hospitalTime12,
+      userDateWithTime: `${hospitalDateFormatted} · ${hospitalTime12}`,
+      userHour24: hospitalH,
+      userMinute: hospitalM,
+      timeOfDayPeriod: hospitalPeriod,
+      timeOfDayEmoji: hospitalEmoji,
     };
   }
 
@@ -215,14 +215,14 @@ export function mapClinicSlotToUserTime(
 
     return {
       slot24,
-      clinicTime12,
-      clinicDateFormatted,
+      hospitalTime12,
+      hospitalDateFormatted,
       userTime12,
       userShortLabel,
       userDateFormatted,
       userDayOffsetDesc,
       isDifferentDay,
-      userTimeZone: targetTz,
+      userTimeZone: targetTz || hospitalTz,
       isDifferentTimezone: true,
       fullComparison: userTime12,
       userDateWithTime: `${userDateFormatted} · ${userTime12}`,
@@ -234,37 +234,37 @@ export function mapClinicSlotToUserTime(
   } catch {
     return {
       slot24,
-      clinicTime12,
-      clinicDateFormatted,
-      userTime12: clinicTime12,
+      hospitalTime12,
+      hospitalDateFormatted,
+      userTime12: hospitalTime12,
       userShortLabel: normalizeSlotToTime(slot24),
-      userDateFormatted: clinicDateFormatted,
+      userDateFormatted: hospitalDateFormatted,
       userDayOffsetDesc: "Same Day",
       isDifferentDay: false,
-      userTimeZone: targetTz,
+      userTimeZone: targetTz || hospitalTz,
       isDifferentTimezone: false,
-      fullComparison: clinicTime12,
-      userDateWithTime: `${clinicDateFormatted} · ${clinicTime12}`,
-      userHour24: clinicH,
-      userMinute: clinicM,
-      timeOfDayPeriod: clinicPeriod,
-      timeOfDayEmoji: clinicEmoji,
+      fullComparison: hospitalTime12,
+      userDateWithTime: `${hospitalDateFormatted} · ${hospitalTime12}`,
+      userHour24: hospitalH,
+      userMinute: hospitalM,
+      timeOfDayPeriod: hospitalPeriod,
+      timeOfDayEmoji: hospitalEmoji,
     };
   }
 }
 
 /**
- * Returns clinic operational session ranges dynamically mapped to the patient's local timezone.
+ * Returns hospital operational session ranges dynamically mapped to the patient's local timezone.
  */
 export function getMappedSessionHours(
   dateYMD?: string,
   userTz?: string
 ): MappedSessionHours {
   const normYMD = normalizeDateAlias(dateYMD || "today");
-  const mStart = mapClinicSlotToUserTime(normYMD, "10:00", userTz);
-  const mEnd = mapClinicSlotToUserTime(normYMD, "13:00", userTz);
-  const eStart = mapClinicSlotToUserTime(normYMD, "17:30", userTz);
-  const eEnd = mapClinicSlotToUserTime(normYMD, "20:00", userTz);
+  const mStart = mapHospitalSlotToUserTime(normYMD, "10:00", userTz);
+  const mEnd = mapHospitalSlotToUserTime(normYMD, "13:00", userTz);
+  const eStart = mapHospitalSlotToUserTime(normYMD, "17:30", userTz);
+  const eEnd = mapHospitalSlotToUserTime(normYMD, "20:00", userTz);
 
   const isDifferentTimezone = mStart.isDifferentTimezone;
   const tzLabel = mStart.userTime12.split(" ").pop() || "";
@@ -297,7 +297,7 @@ export function getMappedSessionHours(
 
   return {
     morning: {
-      clinicRange: "10:00 AM – 01:00 PM IST",
+      hospitalRange: "10:00 AM – 01:00 PM IST",
       userRange: morningUserRange,
       display: morningDisplay,
       badge: OFFICE_HOURS.MORNING.badge,
@@ -309,7 +309,7 @@ export function getMappedSessionHours(
       daySpanLabel: morningDaySpanLabel,
     },
     evening: {
-      clinicRange: "05:30 PM – 08:00 PM IST",
+      hospitalRange: "05:30 PM – 08:00 PM IST",
       userRange: eveningUserRange,
       display: eveningDisplay,
       badge: OFFICE_HOURS.EVENING.badge,
@@ -321,14 +321,14 @@ export function getMappedSessionHours(
       daySpanLabel: eveningDaySpanLabel,
     },
     walkin: {
-      clinicRange: "05:30 PM – 08:00 PM IST",
+      hospitalRange: "05:30 PM – 08:00 PM IST",
       userRange: eveningUserRange,
       display: walkinDisplay,
       policy: walkinPolicy,
       period: eveningPeriod,
     },
     sunday: {
-      clinicRange: OFFICE_HOURS.SUNDAY.hours,
+      hospitalRange: OFFICE_HOURS.SUNDAY.hours,
       userRange: OFFICE_HOURS.SUNDAY.hours,
       display: OFFICE_HOURS.SUNDAY.hours,
       mode: OFFICE_HOURS.SUNDAY.mode,
@@ -342,27 +342,27 @@ export function getMappedSessionHours(
 }
 
 /**
- * Returns formatted date and time in both user local timezone and clinic IST timezone.
+ * Returns formatted date and time in both user local timezone and hospital IST timezone.
  */
 export function formatDualDateTime(
   dateOrIso: Date | string,
   userTz?: string
-): { userDateTime: string; clinicDateTime: string; isDifferentTimezone: boolean } {
+): { userDateTime: string; hospitalDateTime: string; isDifferentTimezone: boolean } {
   const dateObj = typeof dateOrIso === "string" ? new Date(dateOrIso) : dateOrIso;
-  const clinicTz = CLINIC.TIMEZONE || "Asia/Kolkata";
+  const hospitalTz = HOSPITAL.TIMEZONE || "Asia/Kolkata";
 
-  const clinicFormatter = new Intl.DateTimeFormat("en-IN", {
-    timeZone: clinicTz,
+  const hospitalFormatter = new Intl.DateTimeFormat("en-IN", {
+    timeZone: hospitalTz,
     dateStyle: "full",
     timeStyle: "short",
   });
-  const clinicDateTime = `${clinicFormatter.format(dateObj)} IST`;
+  const hospitalDateTime = `${hospitalFormatter.format(dateObj)} IST`;
 
   const tzInfo = getUserTimezone(userTz);
-  if (tzInfo.isClinicTimezone) {
+  if (tzInfo.isHospitalTimezone) {
     return {
-      userDateTime: clinicDateTime,
-      clinicDateTime,
+      userDateTime: hospitalDateTime,
+      hospitalDateTime,
       isDifferentTimezone: false,
     };
   }
@@ -376,7 +376,7 @@ export function formatDualDateTime(
 
   return {
     userDateTime,
-    clinicDateTime,
+    hospitalDateTime,
     isDifferentTimezone: true,
   };
 }
@@ -390,13 +390,13 @@ export function getLocalizedSlotsForDate(
 ): LocalizedUserSlot[] {
   if (!userDateYMD) return [];
 
-  const clinicTz = CLINIC.TIMEZONE || "Asia/Kolkata";
+  const hospitalTz = HOSPITAL.TIMEZONE || "Asia/Kolkata";
   let targetTz = userTz;
   if (!targetTz) {
     try {
-      targetTz = Intl.DateTimeFormat().resolvedOptions().timeZone || clinicTz;
+      targetTz = Intl.DateTimeFormat().resolvedOptions().timeZone || hospitalTz;
     } catch {
-      targetTz = clinicTz;
+      targetTz = hospitalTz;
     }
   }
 
@@ -437,11 +437,11 @@ export function getLocalizedSlotsForDate(
     const candY = candDate.getUTCFullYear();
     const candM = String(candDate.getUTCMonth() + 1).padStart(2, "0");
     const candD = String(candDate.getUTCDate()).padStart(2, "0");
-    const clinicDateYMD = `${candY}-${candM}-${candD}`;
+    const hospitalDateYMD = `${candY}-${candM}-${candD}`;
 
     for (const slot24 of ALL_TIME_SLOTS) {
       const [h24, m24] = slot24.split(":");
-      const isoTimestamp = `${clinicDateYMD}T${h24.padStart(2, "0")}:${m24.padStart(2, "0")}:00+05:30`;
+      const isoTimestamp = `${hospitalDateYMD}T${h24.padStart(2, "0")}:${m24.padStart(2, "0")}:00+05:30`;
       const dateObj = new Date(isoTimestamp);
       const epochMs = dateObj.getTime();
 
@@ -453,7 +453,7 @@ export function getLocalizedSlotsForDate(
         continue;
       }
 
-      const slotKey = `${clinicDateYMD}_${slot24}`;
+      const slotKey = `${hospitalDateYMD}_${slot24}`;
       if (seenSlotKeys.has(slotKey)) {
         continue;
       }
@@ -469,7 +469,7 @@ export function getLocalizedSlotsForDate(
 
       const period = getTimeOfDayPeriod(userHour24, userMinute);
       const periodEmoji = getTimeOfDayEmoji(period);
-      const clinicTime12 = normalizeSlotToTime(slot24) + " IST";
+      const hospitalTime12 = normalizeSlotToTime(slot24) + " IST";
 
       results.push({
         slotKey,
@@ -479,9 +479,9 @@ export function getLocalizedSlotsForDate(
         userTime24,
         userHour24,
         userMinute,
-        clinicDateYMD,
-        clinicSlot24: slot24,
-        clinicTime12,
+        hospitalDateYMD,
+        hospitalSlot24: slot24,
+        hospitalTime12,
         isoTimestamp,
         epochMs,
         period,

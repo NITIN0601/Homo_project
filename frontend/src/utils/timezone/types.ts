@@ -19,7 +19,7 @@ export interface UserTimezoneInfo {
   todayYMD: string;
   offset: string;
   regionName: string;
-  isClinicTimezone: boolean;
+  isHospitalTimezone: boolean;
 }
 
 export type TimeOfDayPeriod =
@@ -33,8 +33,8 @@ export type TimeOfDayPeriod =
 
 export interface SlotTimeMapping {
   slot24: string;              // "17:30"
-  clinicTime12: string;        // "05:30 PM IST"
-  clinicDateFormatted: string; // "Friday, Oct 2, 2026"
+  hospitalTime12: string;      // "05:30 PM IST"
+  hospitalDateFormatted: string; // "Friday, Oct 2, 2026"
   userTime12: string;          // "08:00 AM EDT"
   userShortLabel: string;      // "8:00 AM"
   userDateFormatted: string;   // "Friday, Oct 2, 2026"
@@ -52,7 +52,7 @@ export interface SlotTimeMapping {
 
 export interface MappedSessionHours {
   morning: {
-    clinicRange: string;
+    hospitalRange: string;
     userRange: string;
     display: string;
     badge: string;
@@ -64,7 +64,7 @@ export interface MappedSessionHours {
     daySpanLabel: string;
   };
   evening: {
-    clinicRange: string;
+    hospitalRange: string;
     userRange: string;
     display: string;
     badge: string;
@@ -76,14 +76,14 @@ export interface MappedSessionHours {
     daySpanLabel: string;
   };
   walkin: {
-    clinicRange: string;
+    hospitalRange: string;
     userRange: string;
     display: string;
     policy: string;
     period: TimeOfDayPeriod;
   };
   sunday: {
-    clinicRange: string;
+    hospitalRange: string;
     userRange: string;
     display: string;
     mode: string;
@@ -103,9 +103,9 @@ export interface LocalizedUserSlot {
   userTime24: string;
   userHour24: number;
   userMinute: number;
-  clinicDateYMD: string;
-  clinicSlot24: string;
-  clinicTime12: string;
+  hospitalDateYMD: string;
+  hospitalSlot24: string;
+  hospitalTime12: string;
   isoTimestamp: string;
   epochMs: number;
   period: TimeOfDayPeriod;
@@ -122,7 +122,7 @@ export interface DetectedLocationTimezone {
   matchedLocation: string;
 }
 
-export interface ClinicTimeInfo {
+export interface HospitalTimeInfo {
   todayYMD: string;
   currentHour: number;
   currentMinute: number;

@@ -8,7 +8,7 @@
  *   • Clinical Entity Parsing for Doctor Consultation Approval
  */
 
-import { BACKEND, VOICE_STUDIO, CLINIC, DOCTOR } from "../config";
+import { BACKEND, VOICE_STUDIO, HOSPITAL, DOCTOR } from "../config";
 import { formatDateShort, formatDateISO } from "../utils/format";
 import type { PrescribedRemedyItem, VisitSummaryRecord, HomeopathicCaseRecord, UserProfile } from "../types";
 import { modelProviderManager, type LLMGenerationResult } from "./modelProviders";
@@ -372,8 +372,8 @@ export function extractHomeopathicCaseRecord(
     },
     doctor_details: {
       doctor_id: "DOC-BK-001",
-      name: CLINIC.DOCTOR_TITLE,
-      clinic_name: CLINIC.FULL_NAME,
+      name: HOSPITAL.DOCTOR_TITLE,
+      hospital_name: HOSPITAL.FULL_NAME,
     },
     patient_details: {
       name: patient?.name || "John Doe",
@@ -660,8 +660,8 @@ export function buildApprovedVisitRecord(
   return {
     id: `vis-vs-${Date.now()}`,
     visitDate: formatDateShort(new Date()),
-    doctorName: CLINIC.DOCTOR_TITLE,
-    clinicBranch: CLINIC.BRANCHES.OPD,
+    doctorName: HOSPITAL.DOCTOR_TITLE,
+    hospitalBranch: HOSPITAL.BRANCHES.OPD,
     chiefDiagnosis: draft.chiefDiagnosis,
     symptomsObserved: draft.symptomsObserved,
     prescribedRemedies: remedies,
