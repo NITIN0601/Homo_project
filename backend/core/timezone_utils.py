@@ -1,7 +1,7 @@
 """
 Unified Location-to-Timezone Resolution Utility.
 Calculates and infers the operational IANA timezone based on facility/doctor location
-(Country, State/Province, City), eliminating time entering confusion across multi-tenant clinics.
+(Country, State/Province, City), eliminating time entering confusion across multi-tenant hospitals.
 """
 
 import zoneinfo
@@ -12,7 +12,7 @@ COMMON_TIMEZONES: list[dict[str, str]] = [
     {
         "timeZone": "Asia/Kolkata",
         "label": "India Standard Time (IST, UTC+5:30)",
-        "region": "India (Clinic SSOT)",
+        "region": "India (Hospital SSOT)",
         "offset": "UTC+05:30",
     },
     {

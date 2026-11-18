@@ -57,20 +57,12 @@ class Settings:
     MAX_CUSTOMERS_PER_HOSPITAL: int = int(os.getenv("MAX_CUSTOMERS_PER_HOSPITAL", "1000"))
 
     # Hospital & Facility Profile (Configurable via Environment or Tenant Registry)
-    HOSPITAL_NAME: str = os.getenv("HOSPITAL_NAME", os.getenv("CLINIC_NAME", "General Healthcare Hospital"))
-    HOSPITAL_DOMAIN: str = os.getenv("HOSPITAL_DOMAIN", os.getenv("CLINIC_DOMAIN", "example.com"))
-    HOSPITAL_LOCATION: str = os.getenv("HOSPITAL_LOCATION", os.getenv("CLINIC_LOCATION", "Global"))
-    HOSPITAL_ADDRESS: str = os.getenv("HOSPITAL_ADDRESS", os.getenv("CLINIC_ADDRESS", "100 Medical Center Way"))
-    HOSPITAL_PHONE: str = os.getenv("HOSPITAL_PHONE", os.getenv("CLINIC_PHONE", "+1 555-0100"))
-    HOSPITAL_ADMIN_EMAIL: str = os.getenv("HOSPITAL_ADMIN_EMAIL", os.getenv("CLINIC_ADMIN_EMAIL", "admin@example.com"))
-
-    # Backward-compatible aliases for legacy CLINIC_* references
-    CLINIC_NAME: str = HOSPITAL_NAME
-    CLINIC_DOMAIN: str = HOSPITAL_DOMAIN
-    CLINIC_LOCATION: str = HOSPITAL_LOCATION
-    CLINIC_ADDRESS: str = HOSPITAL_ADDRESS
-    CLINIC_PHONE: str = HOSPITAL_PHONE
-    CLINIC_ADMIN_EMAIL: str = HOSPITAL_ADMIN_EMAIL
+    HOSPITAL_NAME: str = os.getenv("HOSPITAL_NAME", "General Healthcare Hospital")
+    HOSPITAL_DOMAIN: str = os.getenv("HOSPITAL_DOMAIN", "example.com")
+    HOSPITAL_LOCATION: str = os.getenv("HOSPITAL_LOCATION", "Global")
+    HOSPITAL_ADDRESS: str = os.getenv("HOSPITAL_ADDRESS", "100 Medical Center Way")
+    HOSPITAL_PHONE: str = os.getenv("HOSPITAL_PHONE", "+1 555-0100")
+    HOSPITAL_ADMIN_EMAIL: str = os.getenv("HOSPITAL_ADMIN_EMAIL", "admin@example.com")
     DOCTOR_NAME: str = os.getenv("DOCTOR_NAME", "Dr. Primary Physician, MD")
     DOCTOR_SHORT_NAME: str = os.getenv("DOCTOR_SHORT_NAME", "Dr. Physician")
     DOCTOR_EMAIL: str = os.getenv("DOCTOR_EMAIL", "doctor@example.com")
@@ -103,7 +95,7 @@ class Settings:
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
     OLLAMA_ENDPOINT: str = os.getenv("OLLAMA_ENDPOINT", "http://127.0.0.1:11434")
     RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")
-    RESEND_FROM_EMAIL: str = os.getenv("RESEND_FROM_EMAIL", "Healthcare Clinic <onboarding@resend.dev>")
+    RESEND_FROM_EMAIL: str = os.getenv("RESEND_FROM_EMAIL", "Healthcare Hospital <onboarding@resend.dev>")
     GOOGLE_CALENDAR_ID: str = os.getenv("GOOGLE_CALENDAR_ID", "en.indian#holiday@group.v.calendar.google.com")
     GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "backend/credentials.json")
     TYPESAFE_API_KEY: str = os.getenv("TYPESAFE_API_KEY", "")

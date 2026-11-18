@@ -25,7 +25,6 @@ class HospitalCreateRequest(BaseModel):
     logo_url: str | None = Field(default="/generic-hospital-logo.svg", example="/generic-hospital-logo.svg")
     banner_url: str | None = Field(default="/assets/banner.jpg", example="/assets/banner.jpg")
     about_hospital_text: str | None = Field(default=None, example="Specialized outpatient medical facility.")
-    about_clinic_text: str | None = Field(default=None, example="Specialized outpatient medical facility.")
     terms_conditions_text: str | None = Field(default=None)
     privacy_policy_text: str | None = Field(default=None)
     emergency_notice: str | None = Field(default=None)
@@ -76,9 +75,6 @@ class HospitalOnboardRequest(BaseModel):
     logo_url: str | None = Field(default="/generic-hospital-logo.svg", example="/generic-hospital-logo.svg")
     banner_url: str | None = Field(default="/assets/banner.jpg", example="/assets/banner.jpg")
     about_hospital_text: str | None = Field(
-        default=None, example="Comprehensive health center dedicated to clinical precision."
-    )
-    about_clinic_text: str | None = Field(
         default=None, example="Comprehensive health center dedicated to clinical precision."
     )
     terms_conditions_text: str | None = Field(default=None)

@@ -1,6 +1,6 @@
 """
 Unified Multi-Tenant Location Currency Utility.
-Infers local billing currency and symbol based on hospital/clinic/doctor location country.
+Infers local billing currency and symbol based on hospital/doctor location country.
 """
 
 SUPPORTED_CURRENCIES: list[dict[str, str]] = [

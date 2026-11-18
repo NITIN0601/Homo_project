@@ -173,8 +173,8 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
 
     date_part = req.start_time.split("T")[0] if "T" in req.start_time else req.start_time
     time_part = req.start_time.split("T")[1][:5] if "T" in req.start_time else "10:00"
-    target_facility_date = req.hospital_date or req.clinic_date
-    target_facility_slot = req.hospital_slot or req.clinic_slot
+    target_facility_date = req.hospital_date
+    target_facility_slot = req.hospital_slot
 
     with _booking_lock:
         existing = get_all_appointments()
@@ -182,11 +182,11 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
             if apt.get("status") == "Cancelled":
                 continue
 
-            # Concurrency double-booking guard against doctor's hospital/clinic slot
+            # Concurrency double-booking guard against doctor's hospital slot
             if target_facility_date and target_facility_slot:
                 if (
-                    (apt.get("hospitalDate") == target_facility_date or apt.get("clinicDate") == target_facility_date)
-                    and (apt.get("hospitalSlot") == target_facility_slot or apt.get("clinicSlot") == target_facility_slot)
+                    apt.get("hospitalDate") == target_facility_date
+                    and apt.get("hospitalSlot") == target_facility_slot
                 ) or (
                     apt.get("date") == target_facility_date and apt.get("slot") == target_facility_slot
                 ):
@@ -239,11 +239,8 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
             "time": req.user_time or time_part,
             "slot": target_facility_slot or time_part,
             "hospitalDate": target_facility_date or date_part,
-            "clinicDate": target_facility_date or date_part,
             "hospitalSlot": target_facility_slot or time_part,
-            "clinicSlot": target_facility_slot or time_part,
             "hospitalTime": target_facility_slot or time_part,
-            "clinicTime": target_facility_slot or time_part,
             "userDate": req.user_date or date_part,
             "userTime": req.user_time or time_part,
             "userTimezone": req.user_timezone,
@@ -253,7 +250,7 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
             or (
                 "Online Tele-Consultation"
                 if req.user_timezone and req.user_timezone != "Asia/Kolkata"
-                else "In-Person Clinic Visit"
+                else "In-Person Hospital Visit"
             ),
             "chiefReason": req.description or "Clinical Consultation",
             "status": "Confirmed",
@@ -289,22 +286,21 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
     # Automated Dispatch: Email & WhatsApp Confirmations
     h_city = hospital.get("contact", {}).get("address", {}).get("city", "Bengaluru")
     hospital_loc_str = f"{hospital.get('name')}, {h_city}"
-    clinic_loc_str = hospital_loc_str
 
     email_res = await send_appointment_confirmation(
         customer_email=req.user_email,
         customer_name=req.user_name,
         appointment_time=f"{date_part} at {time_part}",
         doctor_name=doctor.get("name"),
-        clinic_location=hospital_loc_str,
+        hospital_location=hospital_loc_str,
     )
 
     wa_res = await send_appointment_whatsapp_notification(
-        phone=req.user_phone or hospital.get("contact", {}).get("phone", settings.CLINIC_PHONE),
+        phone=req.user_phone or hospital.get("contact", {}).get("phone", getattr(settings, "HOSPITAL_PHONE", "+1 555-0100")),
         customer_name=req.user_name,
         appointment_time=f"{date_part} at {time_part}",
         doctor_name=doctor.get("shortName", doctor.get("name")),
-        clinic_location=hospital.get("name"),
+        hospital_location=hospital.get("name"),
     )
 
     await sync_appointment_to_supabase(apt_record)

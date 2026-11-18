@@ -18,11 +18,7 @@ class BookAppointmentRequest(BaseModel):
     doctor_id: str | None = Field(default=None, example="doc-001", description="Doctor ID in hospital roster")
     continuity_status: str | None = Field(default=None, description="Continuity tag: Continuing Care, Transferred, New")
     hospital_date: str | None = Field(default=None, description="Doctor/Hospital date in facility local timezone")
-    clinic_date: str | None = Field(default=None, description="Doctor/Hospital date in facility local timezone")
     hospital_slot: str | None = Field(
-        default=None, description="Doctor/Hospital time slot in facility local timezone (24h format)"
-    )
-    clinic_slot: str | None = Field(
         default=None, description="Doctor/Hospital time slot in facility local timezone (24h format)"
     )
     user_date: str | None = Field(default=None, description="Patient date in patient local timezone")

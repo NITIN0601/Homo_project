@@ -30,7 +30,7 @@ class Metadata(BaseModel):
 class DoctorDetails(BaseModel):
     doctor_id: str = Field(default="DOC-001")
     name: str = Field(default="")
-    clinic_name: str = Field(default="")
+    hospital_name: str = Field(default="")
 
 
 class PatientDetails(BaseModel):
