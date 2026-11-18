@@ -163,16 +163,16 @@ graph TD
 
 ### 3.2 Dynamic Tenant Customization Cascading
 
-A core innovation in the architecture is the **Multi-Tenant Feature Cascading Pipeline**. When an administrator modifies access filters in [`CustomizationTab.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/CustomizationTab.tsx), changes are verified via admin passcode, stored in the tenant configuration, and automatically reflected in real time across customer screens without requiring full page reloads:
+A core innovation in the architecture is the **Multi-Tenant Feature Cascading Pipeline**. When an administrator modifies access filters in [`CustomizationTab.tsx`](frontend/src/pages/admin/CustomizationTab.tsx), changes are verified via admin passcode, stored in the tenant configuration, and automatically reflected in real time across customer screens without requiring full page reloads:
 
 | Feature Flag in `tenant.features` | Admin Controller (`CustomizationTab.tsx`) | Customer Portal Effect |
 | :--- | :--- | :--- |
-| `displayDoctorDetails` | Switch: *Display Doc Details* | Controls doctor title, registration number, qualifications, and biography on [`HomePage.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/HomePage.tsx) and [`AboutPage.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/AboutPage.tsx). When switched OFF, generic clinic physician info is shown. |
-| `enableAgastyaBot` | Switch: *AgastyaBot* | Toggles the floating [`ChatbotWidget.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/components/ChatbotWidget.tsx) AI assistant and automated FAQ drawer across all patient views. |
-| `enablePatientProfileEdit` | Switch: *Patient Details Edit Option* | Shows/hides the `"Edit Profile"` button on [`VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/VisitSummaryPage.tsx). When OFF, the patient record is strictly read-only. |
-| `enablePatientMedicalRecords` | Switch: *My Summary: Display Patient Record* | Controls visibility of Tab 1 (*Medical History & Consultation Timeline*) in [`VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/VisitSummaryPage.tsx). |
-| `enableBillingHistory` | Switch: *My Summary: Billing & Payment History* | Controls visibility of Tab 2 (*Consultation Invoices, Payment Gateway, and Tax Receipts*) in [`VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/VisitSummaryPage.tsx). |
-| `enableFollowupFeedback` | Switch: *My Summary: Follow-up & Feedback* | Controls visibility of Tab 3 (*Recovery Progress Questionnaire and Google Review Sync*) in [`VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/VisitSummaryPage.tsx). |
+| `displayDoctorDetails` | Switch: *Display Doc Details* | Controls doctor title, registration number, qualifications, and biography on [`HomePage.tsx`](frontend/src/pages/HomePage.tsx) and [`AboutPage.tsx`](frontend/src/pages/AboutPage.tsx). When switched OFF, generic clinic physician info is shown. |
+| `enableAgastyaBot` | Switch: *AgastyaBot* | Toggles the floating [`ChatbotWidget.tsx`](frontend/src/components/ChatbotWidget.tsx) AI assistant and automated FAQ drawer across all patient views. |
+| `enablePatientProfileEdit` | Switch: *Patient Details Edit Option* | Shows/hides the `"Edit Profile"` button on [`VisitSummaryPage.tsx`](frontend/src/pages/VisitSummaryPage.tsx). When OFF, the patient record is strictly read-only. |
+| `enablePatientMedicalRecords` | Switch: *My Summary: Display Patient Record* | Controls visibility of Tab 1 (*Medical History & Consultation Timeline*) in [`VisitSummaryPage.tsx`](frontend/src/pages/VisitSummaryPage.tsx). |
+| `enableBillingHistory` | Switch: *My Summary: Billing & Payment History* | Controls visibility of Tab 2 (*Consultation Invoices, Payment Gateway, and Tax Receipts*) in [`VisitSummaryPage.tsx`](frontend/src/pages/VisitSummaryPage.tsx). |
+| `enableFollowupFeedback` | Switch: *My Summary: Follow-up & Feedback* | Controls visibility of Tab 3 (*Recovery Progress Questionnaire and Google Review Sync*) in [`VisitSummaryPage.tsx`](frontend/src/pages/VisitSummaryPage.tsx). |
 | `enableECommerce` | Switch: *Dispensary & Medicine Ordering* | Controls visibility of the `/order-medicine` catalogue, cart drawer, and ordering workflows. |
 | `enableCustomerPayments` | Switch: *Online Checkout & Settlements* | Enables or disables online payment processing buttons on invoice cards. |
 
@@ -193,7 +193,7 @@ A core innovation in the architecture is the **Multi-Tenant Feature Cascading Pi
 #### 2. Appointments Page (`src/pages/AppointmentsPage.tsx`)
 - **Parent**: `PageRouter`.
 - **Key Modules**:
-  - [`CalendarPicker.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/components/CalendarPicker.tsx): Renders live calendar days. Blocks days in real time based on `state.blockedDates` (e.g. holidays, doctor conferences) with visual Out-of-Office tooltips.
+  - [`CalendarPicker.tsx`](frontend/src/components/CalendarPicker.tsx): Renders live calendar days. Blocks days in real time based on `state.blockedDates` (e.g. holidays, doctor conferences) with visual Out-of-Office tooltips.
   - Slot Matrix: Generates 25 slots across Morning (09:00 AM – 01:00 PM) and Evening (05:00 PM – 09:00 PM). Automatically disables booked or locked slots.
   - Booking Drawer: Collects patient name, WhatsApp phone number, and chief complaint. Validates phone number and checks for slot conflicts via `api.bookAppointment`.
 
@@ -219,7 +219,7 @@ A core innovation in the architecture is the **Multi-Tenant Feature Cascading Pi
 
 #### 4. Medicine Catalogue & Cart (`src/pages/OrderMedicinePage.tsx` & `src/pages/CartPage.tsx`)
 - **Remedy Catalogue**: Explores `MEDICINE_CATALOGUE` with dynamic potencies (`30C`, `200CH`, `1M`, `Q Mother Tincture`, `6X Biochemic`).
-- **Modal**: [`PrescriptionCaptureModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/components/PrescriptionCaptureModal.tsx): Live webcam camera capture and local file drop. Simulates OCR text extraction of remedies and potencies.
+- **Modal**: [`PrescriptionCaptureModal.tsx`](frontend/src/components/PrescriptionCaptureModal.tsx): Live webcam camera capture and local file drop. Simulates OCR text extraction of remedies and potencies.
 - **Cart Checkout**: Address entry with automatic pincode validation, courier dispatch estimate, and order placement.
 
 ---
@@ -250,51 +250,51 @@ A core innovation in the architecture is the **Multi-Tenant Feature Cascading Pi
 
 #### 2. Appointments Tab (`src/pages/admin/AppointmentsTab.tsx`)
 - **Roster Controls**: Filter by date range, branch, doctor, or status (`confirmed`, `in-progress`, `completed`, `cancelled`).
-- **Modal**: [`AppointmentBookingModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/AppointmentBookingModal.tsx):
+- **Modal**: [`AppointmentBookingModal.tsx`](frontend/src/pages/admin/modals/AppointmentBookingModal.tsx):
   - Form ID: `form="appointment-booking-form"`.
   - Sticky footer with action buttons.
   - Allows booking directly into the doctor's calendar on behalf of walk-in clinic patients.
-- **Modal**: [`AppointmentCancellationModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/AppointmentCancellationModal.tsx):
+- **Modal**: [`AppointmentCancellationModal.tsx`](frontend/src/pages/admin/modals/AppointmentCancellationModal.tsx):
   - Confirms slot release, reasons for cancellation, and triggers automatic WhatsApp patient notification.
 
 #### 3. Patient Records Tab (`src/pages/admin/PatientRecordsTab.tsx`)
 - **Clinical EHR Drawer**: Displays searchable list of all registered patients. Expanding a patient displays their complete consultation dossier.
-- **Modal**: [`DoctorPrescriptionUploadModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/DoctorPrescriptionUploadModal.tsx):
+- **Modal**: [`DoctorPrescriptionUploadModal.tsx`](frontend/src/pages/admin/modals/DoctorPrescriptionUploadModal.tsx):
   - Form ID: `form="doctor-prescription-form"`.
   - Multi-row remedy prescription editor (Remedy name, potency, dosage, and duration).
   - Diagnostic observations, chief complaints, and lifestyle guidance.
   - Pinned sticky action footer.
-- **Modal**: [`PrescribeRemedyModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/PrescribeRemedyModal.tsx):
+- **Modal**: [`PrescribeRemedyModal.tsx`](frontend/src/pages/admin/modals/PrescribeRemedyModal.tsx):
   - Fast-action single remedy allocation directly from dispensary catalogue.
-- **Modal**: [`ClinicalMediaUploadModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/ClinicalMediaUploadModal.tsx):
+- **Modal**: [`ClinicalMediaUploadModal.tsx`](frontend/src/pages/admin/modals/ClinicalMediaUploadModal.tsx):
   - Uploads diagnostic tongue photos, dermatology rash images, lab pathology reports, and audio dictation files.
-- **Modal**: [`ClinicalMediaLightboxModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/ClinicalMediaLightboxModal.tsx):
+- **Modal**: [`ClinicalMediaLightboxModal.tsx`](frontend/src/pages/admin/modals/ClinicalMediaLightboxModal.tsx):
   - Encrypted high-resolution viewing lightbox with variable-speed audio player (1x, 1.25x, 1.5x) and download copy actions.
-- **Modal**: [`AdminVoiceStudioModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/components/AdminVoiceStudioModal.tsx):
+- **Modal**: [`AdminVoiceStudioModal.tsx`](frontend/src/components/AdminVoiceStudioModal.tsx):
   - Doctor audio case dictation studio with live waveform visualizer, audio recorder, and speech-to-text case analysis.
 
 #### 4. Billing & Invoices Tab (`src/pages/admin/BillingInvoicesTab.tsx`)
 - **Consultation Ledger**: Itemizes all clinic invoices, visit types, settlement statuses, and payment modes.
-- **Modal**: [`PostConsultationFeeModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/PostConsultationFeeModal.tsx):
+- **Modal**: [`PostConsultationFeeModal.tsx`](frontend/src/pages/admin/modals/PostConsultationFeeModal.tsx):
   - Quick pills for common consultation amounts (₹500, ₹750, ₹1000, ₹1500).
   - Supports initial status as *"Awaiting Online Payment"* (shows on patient portal) or *"Paid at Clinic Desk (Cash)"*.
   - Sticky footer with `form="post-fee-form"`.
-- **Modal**: [`UtrReconciliationModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/UtrReconciliationModal.tsx):
+- **Modal**: [`UtrReconciliationModal.tsx`](frontend/src/pages/admin/modals/UtrReconciliationModal.tsx):
   - Bank transaction reconciliation. Allows administrators to verify 12-digit UPI UTR numbers against bank statements and unlock official digital tax receipts.
 
 #### 5. Dispensary & Inventory Tab (`src/pages/admin/DispensaryInventoryTab.tsx`)
 - **Inventory Matrix**: Real-time tracking of medicine quantities, low-stock thresholds, and distributor details.
 - **Quick Restock Drawer**: Instantly increments stock quantities and syncs with backend database.
-- **Modal**: [`ExcelSyncModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/ExcelSyncModal.tsx):
+- **Modal**: [`ExcelSyncModal.tsx`](frontend/src/pages/admin/modals/ExcelSyncModal.tsx):
   - Powered by SheetJS (`xlsx`). Enables bidirectional sync: exports dispensary stock to `.xlsx` and parses imported supplier spreadsheets with discrepancy diff preview.
 
 #### 6. Logistics & Dispatches Tab (`src/pages/admin/DispatchesTab.tsx`)
 - **Order Pipeline**: Manages wholesale pharmacy purchase orders and patient remedy dispatches.
-- **Modal**: [`CustomPOModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/CustomPOModal.tsx):
+- **Modal**: [`CustomPOModal.tsx`](frontend/src/pages/admin/modals/CustomPOModal.tsx):
   - Creates manual distributor orders for out-of-stock potencies (Reckeweg, SBL, Schwabe).
-- **Modal**: [`ConsolidatedBatchOrderModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/ConsolidatedBatchOrderModal.tsx):
+- **Modal**: [`ConsolidatedBatchOrderModal.tsx`](frontend/src/pages/admin/modals/ConsolidatedBatchOrderModal.tsx):
   - Consolidates multiple patient prescriptions into one wholesale batch purchase order dispatched via WhatsApp/Email.
-- **Modal**: [`LogisticsTimelineModal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/pages/admin/modals/LogisticsTimelineModal.tsx):
+- **Modal**: [`LogisticsTimelineModal.tsx`](frontend/src/pages/admin/modals/LogisticsTimelineModal.tsx):
   - Real-time courier checkpoint tracker (BlueDart Express AWB scanning).
 
 #### 7. Calendar & Doctor Availability Tab (`src/pages/admin/CalendarTab.tsx`)
@@ -328,7 +328,7 @@ A core innovation in the architecture is the **Multi-Tenant Feature Cascading Pi
 
 ## 6. Shared Architecture & UI Engineering Standards
 
-### 6.1 Viewport Clamping & Modal Architecture ([`Modal.tsx`](file:///Users/nitin/Desktop/Homo_project/frontend/src/components/ui/Modal.tsx))
+### 6.1 Viewport Clamping & Modal Architecture ([`Modal.tsx`](frontend/src/components/ui/Modal.tsx))
 
 To completely prevent popups from hanging, blurring without opening, or getting cut off on mobile/small laptops, all modals adhere to a standardized layout:
 

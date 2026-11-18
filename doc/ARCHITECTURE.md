@@ -150,7 +150,7 @@ In traditional SQLite or raw file-based JSON backends, 100 simultaneous users wr
   - `GET /api/v1/patient-records?view=mobile` redacts sensitive internal clinician notes and returns only patient-facing instructions.
 
 ### Tenant Isolation Wall
-- In [`backend/core/security.py`](file:///Users/nitin/Desktop/Homo_project/backend/core/security.py), `scope_items_to_patient_or_admin` checks caller identity:
+- In [`backend/core/security.py`](backend/core/security.py), `scope_items_to_patient_or_admin` checks caller identity:
   ```python
   def scope_items_to_patient_or_admin(items: list[dict], current_user: dict | None, patient_key: str = "patient_id") -> list[dict]:
       # Patients only receive items where patient_id matches their token subject.

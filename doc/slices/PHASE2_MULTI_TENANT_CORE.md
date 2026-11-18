@@ -94,10 +94,10 @@ CREATE INDEX idx_medical_files_tenant ON patient_medical_files(hospital_id, pati
 ```
 
 ### 2. Backend Tenant Middleware & PHI Guard
-In [`backend/core/auth_middleware.py`](file:///Users/nitin/Desktop/Project_Suspense/backend/core/auth_middleware.py):
+In [`backend/core/auth_middleware.py`](backend/core/auth_middleware.py):
 1. Reads `X-Hospital-ID` header and verifies it against the authenticated user's `hospital_id` claims.
 2. Injects `current_hospital_id` into FastAPI request state: `request.state.hospital_id`.
-3. In [`backend/slices/clinical_records/router.py`](file:///Users/nitin/Desktop/Project_Suspense/backend/slices/clinical_records/router.py):
+3. In [`backend/slices/clinical_records/router.py`](backend/slices/clinical_records/router.py):
    ```python
    @router.get("/patients/{patient_id}/visits")
    async def get_patient_visits(patient_id: str, request: Request, user=Depends(get_current_user)):

@@ -19,11 +19,11 @@ This document specifies the exact refactoring sequence for all vertical slices i
 
 ## Slice 1: Global Navigation, Modals & Shell
 - **Target Files**:
-  - [`src/components/NavBar.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/components/NavBar.tsx)
-  - [`src/components/BottomNav.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/components/BottomNav.tsx)
-  - [`src/components/AuthPanel.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/components/AuthPanel.tsx)
-  - [`src/components/PageFooter.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/components/PageFooter.tsx)
-  - [`src/components/CookieConsentBanner.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/components/CookieConsentBanner.tsx)
+  - [`src/components/NavBar.tsx`](src/components/NavBar.tsx)
+  - [`src/components/BottomNav.tsx`](src/components/BottomNav.tsx)
+  - [`src/components/AuthPanel.tsx`](src/components/AuthPanel.tsx)
+  - [`src/components/PageFooter.tsx`](src/components/PageFooter.tsx)
+  - [`src/components/CookieConsentBanner.tsx`](src/components/CookieConsentBanner.tsx)
 - **Refactoring Scope**:
   - Replace raw buttons with `<Button variant="ghost" | "primary">`.
   - Replace raw auth modals with `<Modal>` primitive.
@@ -34,8 +34,8 @@ This document specifies the exact refactoring sequence for all vertical slices i
 
 ## Slice 2: Patient Scheduling & Appointment Booking
 - **Target Files**:
-  - [`src/pages/AppointmentsPage.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/AppointmentsPage.tsx)
-  - [`src/components/CalendarPicker.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/components/CalendarPicker.tsx)
+  - [`src/pages/AppointmentsPage.tsx`](src/pages/AppointmentsPage.tsx)
+  - [`src/components/CalendarPicker.tsx`](src/components/CalendarPicker.tsx)
 - **Refactoring Scope**:
   - Time slot selection grid migrated to `<Button variant="outline" | "primary" size="sm">`.
   - Triage assessment and TypeSafe AI Jev model urgency badges migrated to `<Badge variant="...">`.
@@ -46,9 +46,9 @@ This document specifies the exact refactoring sequence for all vertical slices i
 
 ## Slice 3: Pharmacy, Medicine Catalog & Cart
 - **Target Files**:
-  - [`src/pages/OrderMedicinePage.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/OrderMedicinePage.tsx)
-  - [`src/pages/CartPage.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/CartPage.tsx)
-  - [`src/components/CartDrawer.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/components/CartDrawer.tsx)
+  - [`src/pages/OrderMedicinePage.tsx`](src/pages/OrderMedicinePage.tsx)
+  - [`src/pages/CartPage.tsx`](src/pages/CartPage.tsx)
+  - [`src/components/CartDrawer.tsx`](src/components/CartDrawer.tsx)
 - **Refactoring Scope**:
   - Medicine cards migrated to `<Card variant="interactive">`.
   - Potency & quantity stepper buttons migrated to `<Button size="sm">`.
@@ -59,7 +59,7 @@ This document specifies the exact refactoring sequence for all vertical slices i
 
 ## Slice 4: Medical File, Visits, Billing & Patient Feedback
 - **Target Files**:
-  - [`src/pages/VisitSummaryPage.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/VisitSummaryPage.tsx)
+  - [`src/pages/VisitSummaryPage.tsx`](src/pages/VisitSummaryPage.tsx)
 - **Refactoring Scope**:
   - Tab navigation bar migrated to `<Tabs variant="pills">` (`Medical Records`, `Billing & Payment`, `Follow-up & Feedback`).
   - Itemized consultation invoice cards and payment status pills migrated to `<Card>` and `<Badge>`.
@@ -70,11 +70,11 @@ This document specifies the exact refactoring sequence for all vertical slices i
 
 ## Slice 5: Doctor Admin Dashboard & Clinical Modals
 - **Target Files**:
-  - [`src/pages/AdminDashboard.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/AdminDashboard.tsx)
-  - [`src/pages/admin/OverviewTab.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/OverviewTab.tsx)
-  - [`src/pages/admin/AppointmentsTab.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/AppointmentsTab.tsx)
-  - [`src/pages/admin/PatientRecordsTab.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/PatientRecordsTab.tsx)
-  - [`src/pages/admin/BillingInvoicesTab.tsx`](file:///Users/nitin/Desktop/Project_Suspense/src/pages/admin/BillingInvoicesTab.tsx)
+  - [`src/pages/AdminDashboard.tsx`](src/pages/AdminDashboard.tsx)
+  - [`src/pages/admin/OverviewTab.tsx`](src/pages/admin/OverviewTab.tsx)
+  - [`src/pages/admin/AppointmentsTab.tsx`](src/pages/admin/AppointmentsTab.tsx)
+  - [`src/pages/admin/PatientRecordsTab.tsx`](src/pages/admin/PatientRecordsTab.tsx)
+  - [`src/pages/admin/BillingInvoicesTab.tsx`](src/pages/admin/BillingInvoicesTab.tsx)
   - Modals under `src/pages/admin/modals/`:
     - `PrescribeRemedyModal.tsx`
     - `AppointmentCancellationModal.tsx`

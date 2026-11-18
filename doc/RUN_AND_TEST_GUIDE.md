@@ -21,7 +21,7 @@ This guide provides exact commands to run, debug, and test both frontend and bac
 
 1. **Activate Python Virtual Environment**:
    ```bash
-   cd /Users/nitin/Desktop/Project_Suspense
+   cd Homo_project
    source backend/venv/bin/activate
    ```
 

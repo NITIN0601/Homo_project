@@ -65,7 +65,7 @@ Homo_project/
        ...
    ```
 2. **Expose in Typed Frontend Client**:
-   Add the method to [`src/app/api/apiServiceFacade.ts`](file:///Users/nitin/Desktop/Homo_project/src/app/api/apiServiceFacade.ts):
+   Add the method to [`src/app/api/apiServiceFacade.ts`](src/app/api/apiServiceFacade.ts):
    ```typescript
    export const api = {
      inventory: {
@@ -83,7 +83,7 @@ Homo_project/
 
 ### Task 2: Modifying Colors, Themes, or Styling (SSOT)
 - **Do not hardcode hex codes or Tailwind arbitrary classes across components.**
-- Open [`src/config/theme.ts`](file:///Users/nitin/Desktop/Homo_project/src/config/theme.ts):
+- Open [`src/config/theme.ts`](src/config/theme.ts):
   - Primary, Sage, Emerald, Amber, and Slate palettes are defined here.
   - Gradients (`THEME_GRADIENTS`) and elevation shadows (`THEME_SHADOWS`) are centralized here.
   - Any edit here automatically updates buttons, headers, cards, and badges across the entire application.
@@ -91,7 +91,7 @@ Homo_project/
 ---
 
 ### Task 3: Modifying Clinic Branding, Address, or Doctor Details (SSOT)
-- Open [`src/core/config/tenants/agastya.ts`](file:///Users/nitin/Desktop/Homo_project/src/core/config/tenants/agastya.ts):
+- Open [`src/core/config/tenants/agastya.ts`](src/core/config/tenants/agastya.ts):
   - Edit `CLINIC.FULL_NAME`, `CLINIC.DOCTOR_NAME`, `CLINIC.PHONE_DISPLAY`, or `CLINIC.ADDRESS`.
   - Automatically cascades across the Navigation Bar, Footer, Consultation Invoices, Appointment Email Confirmations, and Calendar events.
 
@@ -121,7 +121,7 @@ When `VITE_USE_MOCK_DATA="false"`, the application boots with clean empty states
 ---
 
 ### Task 6: Adding a New Database Column or Table
-1. Open [`supabase/init.sql`](file:///Users/nitin/Desktop/Homo_project/supabase/init.sql).
+1. Open [`supabase/init.sql`](supabase/init.sql).
 2. Add your table definition with appropriate constraints and Row-Level Security (RLS) policies.
 3. Update `backend/services/supabase_service.py` to include any query helpers.
 4. If testing without live Supabase, ensure the corresponding data store fallback in `backend/services/data_store.py` mirrors the fields.

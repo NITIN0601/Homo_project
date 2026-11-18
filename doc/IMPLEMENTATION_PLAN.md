@@ -172,7 +172,7 @@ def _save_accounts(accounts: dict[str, Any]) -> None:
 ### 3.6 Auto-fix 50 Ruff Violations
 
 ```bash
-cd /path/to/Project_Suspense
+cd /path/to/Homo_project
 backend/venv/bin/ruff check backend/ --fix
 backend/venv/bin/ruff format backend/
 # Remaining 6 manual: remove 2nd filter_holidays_by_month, remove dead imports

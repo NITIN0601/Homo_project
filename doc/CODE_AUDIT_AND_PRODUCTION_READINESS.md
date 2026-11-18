@@ -38,7 +38,7 @@ However there are **56 ruff violations** (50 auto-fixable), **7 logic/correctnes
 ## 2. Architecture Overview
 
 ```
-Project_Suspense/
+Homo_project/
 ├── backend/                  # FastAPI + Pydantic v2 (Python 3.14)
 │   ├── core/                 # config.py · security.py · audit.py
 │   ├── routes/               # Thin HTTP handlers (vertical slices)

@@ -121,7 +121,7 @@ A patient (e.g. *John Doe*, `usr-001`) may book a consultation at **Agastya Homo
 1. **Mandatory `hospital_id` in Data Schema**:
    - Every appointment (`booked_appointments`), medical file (`patient_medical_files`), visit summary (`visit_summaries`), invoice (`consultation_invoices`), and order (`orders`) must have a non-null `hospital_id` column.
 2. **Backend Tenant Isolation Guard**:
-   - In [`backend/core/auth_middleware.py`](file:///Users/nitin/Desktop/Project_Suspense/backend/core/auth_middleware.py), incoming requests validate:
+   - In [`backend/core/auth_middleware.py`](backend/core/auth_middleware.py), incoming requests validate:
      ```python
      if record.hospital_id != current_tenant_hospital_id:
          audit_logger.record_phi_violation(...)
@@ -167,8 +167,8 @@ We implement standard **shadcn/ui & Radix UI design patterns** using TypeScript:
 ---
 
 ## 6. Detailed Phase Specifications
-See the dedicated phase specification documents under [`doc/slices/`](file:///Users/nitin/Desktop/Project_Suspense/doc/slices/):
-- [`PHASE1_UI_PRIMITIVES_AND_TOKENS.md`](file:///Users/nitin/Desktop/Project_Suspense/doc/slices/PHASE1_UI_PRIMITIVES_AND_TOKENS.md)
-- [`PHASE2_MULTI_TENANT_CORE.md`](file:///Users/nitin/Desktop/Project_Suspense/doc/slices/PHASE2_MULTI_TENANT_CORE.md)
-- [`PHASE3_SLICES_MIGRATION.md`](file:///Users/nitin/Desktop/Project_Suspense/doc/slices/PHASE3_SLICES_MIGRATION.md)
+See the dedicated phase specification documents under [`doc/slices/`](doc/slices/):
+- [`PHASE1_UI_PRIMITIVES_AND_TOKENS.md`](doc/slices/PHASE1_UI_PRIMITIVES_AND_TOKENS.md)
+- [`PHASE2_MULTI_TENANT_CORE.md`](doc/slices/PHASE2_MULTI_TENANT_CORE.md)
+- [`PHASE3_SLICES_MIGRATION.md`](doc/slices/PHASE3_SLICES_MIGRATION.md)
 

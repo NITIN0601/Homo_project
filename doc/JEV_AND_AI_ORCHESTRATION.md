@@ -47,7 +47,7 @@ A linear pipeline implemented natively in FastAPI executes with maximum speed, z
 
 ## 4. Active Implementation: TypeSafe AI's Jev Model Integration
 
-As requested, the application now integrates **TypeSafe AI's Jev Model** as the primary decision engine in [`backend/services/typesafe_jev_service.py`](file:///Users/nitin/Desktop/Project_Suspense/backend/services/typesafe_jev_service.py), exposed via `POST /api/v1/ai/jev-classify` and `POST /api/v1/ai/jev-repertorize`.
+As requested, the application now integrates **TypeSafe AI's Jev Model** as the primary decision engine in [`backend/services/typesafe_jev_service.py`](backend/services/typesafe_jev_service.py), exposed via `POST /api/v1/ai/jev-classify` and `POST /api/v1/ai/jev-repertorize`.
 
 ### Supported Question Schema Types:
 1. **`Noul`**: Binary questions returning `{ "value": bool, "probability": float }` (e.g. `is_emergency`).
@@ -81,5 +81,5 @@ result = classifier.invoke({
 
 1. **Keep Native FastAPI + Pydantic v2 as the SSOT**: Maintain our lightweight, typed extraction pipeline in `backend/services/llm_scribe.py`.
 2. **Avoid LangChain / LangGraph at this stage**: Do not add unnecessary abstraction layers that degrade concurrency performance and introduce maintenance liabilities.
-3. **TypeSafe AI Jev Model Active**: Fully implemented in [`backend/services/typesafe_jev_service.py`](file:///Users/nitin/Desktop/Project_Suspense/backend/services/typesafe_jev_service.py) with offline calibrated fallback when `TYPESAFE_API_KEY` is not present.
+3. **TypeSafe AI Jev Model Active**: Fully implemented in [`backend/services/typesafe_jev_service.py`](backend/services/typesafe_jev_service.py) with offline calibrated fallback when `TYPESAFE_API_KEY` is not present.
 
