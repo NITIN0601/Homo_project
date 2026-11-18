@@ -120,6 +120,19 @@
     justify-content: center;
   }
 
+  /* ── Performance & Rendering Containment ────────────────────────────── */
+  /* Skips off-screen layout and paint calculations for long lists and tabs */
+  .content-visibility-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 500px;
+  }
+  .contain-paint {
+    contain: paint;
+  }
+  .contain-layout {
+    contain: layout style;
+  }
+
   /* Glassmorphism card */
   .glass {
     background: rgba(255, 255, 255, 0.72);

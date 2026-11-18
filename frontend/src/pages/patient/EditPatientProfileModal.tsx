@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Button, Modal, Input } from "../../../components/ui";
-import { sanitizeText, sanitizeArrayOfStrings } from "../../../utils/sanitize";
+import { Button, Modal, Input } from "../../components/ui";
+import { sanitizeText, sanitizeArrayOfStrings } from "../../utils/sanitize";
 
 interface EditPatientProfileModalProps {
   isOpen: boolean;
@@ -91,7 +91,7 @@ export const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = (
         </div>
       }
     >
-      <form id="edit-patient-profile-form" onSubmit={handleSavePatientProfile} className="p-5 sm:p-6 space-y-4 text-xs">
+      <form id="edit-patient-profile-form" onSubmit={handleSavePatientProfile} className="space-y-4 text-xs">
         {editProfileSuccess && (
           <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-950 font-bold rounded-2xl flex items-center gap-2">
             <span>✓</span> {editProfileSuccess}

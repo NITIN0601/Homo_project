@@ -3,7 +3,7 @@ import { useApp } from "../../context/AppContext";
 import { useTenant } from "../../context/ThemeProvider";
 import type { VisitSummaryRecord } from "../../types";
 import { type CustomerFeedback, INITIAL_CUSTOMER_FEEDBACKS } from "../../types/feedback";
-import { CLINIC, DOCTOR } from "../../config";
+import { HOSPITAL, DOCTOR } from "../../config";
 import { formatDateTime } from "../../utils/format";
 import { Button, Textarea } from "../../components/ui";
 
@@ -138,7 +138,7 @@ export const PatientFeedbackTab: React.FC<PatientFeedbackTabProps> = ({
             <span>Submit Treatment Response & Doctor Feedback</span>
           </h3>
           <p className="text-xs text-stone-500 mt-0.5">
-            Feedback is confidential and securely transmitted directly to {tenant.doctor.name || CLINIC.DOCTOR_NAME} for review prior to your next appointment.
+            Feedback is confidential and securely transmitted directly to {tenant.doctor.name || HOSPITAL.DOCTOR_NAME} for review prior to your next appointment.
           </p>
         </div>
 
@@ -149,7 +149,7 @@ export const PatientFeedbackTab: React.FC<PatientFeedbackTabProps> = ({
             </div>
             <h4 className="text-base font-bold text-emerald-900">Feedback Successfully Submitted!</h4>
             <p className="text-xs text-emerald-800 max-w-md mx-auto leading-relaxed">
-              Thank you for your update. {tenant.doctor.name || CLINIC.DOCTOR_NAME} has received your treatment feedback and symptom notes. Your clinical file has been annotated accordingly.
+              Thank you for your update. {tenant.doctor.name || HOSPITAL.DOCTOR_NAME} has received your treatment feedback and symptom notes. Your clinical file has been annotated accordingly.
             </p>
 
             {allowGoogleReview && lastSubmittedReviewText && (
@@ -258,7 +258,7 @@ export const PatientFeedbackTab: React.FC<PatientFeedbackTabProps> = ({
                 {[
                   { id: "topic: Consultation & Diagnosis", label: "Consultation & Diagnosis", emoji: "🩺" },
                   { id: "topic: Remedy Effectiveness & Recovery", label: "Remedy & Recovery", emoji: "🌿" },
-                  { id: "topic: Clinic Experience & Scheduling", label: "Clinic Experience & Delivery", emoji: "🏥" },
+                  { id: "topic: Hospital Experience & Scheduling", label: "Hospital Experience & Delivery", emoji: "🏥" },
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -315,7 +315,7 @@ export const PatientFeedbackTab: React.FC<PatientFeedbackTabProps> = ({
             {/* Subjective Comments with Topic Placeholder */}
             <div className="space-y-1.5">
               <Textarea
-                label={`Comments & Observations for ${tenant.doctor.name || CLINIC.DOCTOR_NAME}`}
+                label={`Comments & Observations for ${tenant.doctor.name || HOSPITAL.DOCTOR_NAME}`}
                 rows={4}
                 value={feedbackComments}
                 onChange={(e) => setFeedbackComments(e.target.value)}
@@ -324,7 +324,7 @@ export const PatientFeedbackTab: React.FC<PatientFeedbackTabProps> = ({
                     ? "topic: Consultation & Diagnosis <Please enter your comments on physician attention, question thoroughness, and diagnostic clarity...>"
                     : feedbackTopic === "topic: Remedy Effectiveness & Recovery"
                       ? "topic: Remedy Effectiveness & Recovery <Please enter your comments on homoeopathic remedy response, symptom relief, energy, or sleep...>"
-                      : "topic: Clinic Experience & Scheduling <Please enter your comments on punctuality, staff assistance, clinic hygiene, and medicine courier speed...>"
+                      : "topic: Hospital Experience & Scheduling <Please enter your comments on punctuality, staff assistance, hospital hygiene, and medicine courier speed...>"
                 }
                 helperText="Include any specific symptom timelines, medication observations, or feedback for doctor review."
               />
@@ -340,10 +340,10 @@ export const PatientFeedbackTab: React.FC<PatientFeedbackTabProps> = ({
               />
               <div className="text-xs">
                 <span className="font-bold text-stone-800 flex items-center gap-1.5">
-                  <span>🌟</span> Permit doctor to showcase as a Verified Google Review / Clinic Testimonial
+                  <span>🌟</span> Permit doctor to showcase as a Verified Google Review / Hospital Testimonial
                 </span>
                 <span className="text-[10px] text-stone-500 block mt-0.5">
-                  Doctor admin verifies feedback before showcasing on Google Maps and public clinic review board.
+                  Doctor admin verifies feedback before showcasing on Google Maps and public hospital review board.
                 </span>
               </div>
             </label>
@@ -354,7 +354,7 @@ export const PatientFeedbackTab: React.FC<PatientFeedbackTabProps> = ({
                 Need urgent medical guidance before your follow-up date?
               </span>
               <a
-                href={`https://wa.me/${(tenant.contact.phone || CLINIC.PHONE_TEL).replace(/[^0-9]/g, "")}?text=Hello%20Doctor,%20this%20is%20regarding%20my%20recent%20consultation`}
+                href={`https://wa.me/${(tenant.contact.phone || HOSPITAL.PHONE_TEL).replace(/[^0-9]/g, "")}?text=Hello%20Doctor,%20this%20is%20regarding%20my%20recent%20consultation`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-emerald-700 font-bold text-xs hover:underline flex items-center gap-1"

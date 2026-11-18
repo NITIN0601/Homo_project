@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useTenant } from "../../context/ThemeProvider";
 import type { VisitSummaryRecord } from "../../types";
-import { CLINIC } from "../../config";
+import { HOSPITAL } from "../../config";
 import { Button, Badge } from "../../components/ui";
 import { PrescribedRemediesList } from "../../components/common";
 
@@ -140,7 +140,7 @@ export const MedicalRecordsTab: React.FC<MedicalRecordsTabProps> = ({
                       <h3 className="font-bold text-stone-900 text-sm sm:text-base">{visit.chiefDiagnosis}</h3>
                     </div>
                     <p className="text-xs text-stone-500 mt-0.5">
-                      {visit.visitDate} · Attending: <span className="font-semibold text-stone-700">{visit.doctorName}</span> · {visit.clinicBranch}
+                      {visit.visitDate} · Attending: <span className="font-semibold text-stone-700">{visit.doctorName}</span> · {visit.hospitalBranch}
                     </p>
                   </div>
 
@@ -240,7 +240,7 @@ export const MedicalRecordsTab: React.FC<MedicalRecordsTabProps> = ({
                         <div className="text-[10px] text-stone-500 bg-white/70 p-2 rounded-lg flex items-center gap-1.5 border border-purple-100">
                           <span>🔒</span>
                           <span>
-                            Physician discretion applied: Sensitive constitutional miasms & psychiatric notes remain private to {tenant.doctor.name || CLINIC.DOCTOR_NAME}.
+                            Physician discretion applied: Sensitive constitutional miasms & psychiatric notes remain private to {tenant.doctor.name || HOSPITAL.DOCTOR_NAME}.
                           </span>
                         </div>
                       </div>

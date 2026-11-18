@@ -1,5 +1,5 @@
 import React from "react";
-import { CLINIC } from "../../config";
+import { HOSPITAL } from "../../config";
 import type { HospitalTenantConfig, HospitalDoctor } from "../../types/tenant";
 import type { UserTimezoneInfo, MappedSessionHours } from "../../utils/timezone";
 
@@ -16,20 +16,20 @@ export const ConsultationScheduleGuide: React.FC<ConsultationScheduleGuideProps>
   userTzInfo,
   sessionHours,
 }) => {
-  const isTelemedicineClinic = tenant.features.enableTelemedicine && tenant.hours?.walkinAllowed === false;
+  const isTelemedicineHospital = tenant.features.enableTelemedicine && tenant.hours?.walkinAllowed === false;
   const doctorSchedule = activeDoctor.availability?.schedule;
-  const hasWalkins = !isTelemedicineClinic && (doctorSchedule?.walkinDays ? doctorSchedule.walkinDays.length > 0 : true);
-  const morningHoursDisplay = !userTzInfo.isClinicTimezone
+  const hasWalkins = !isTelemedicineHospital && (doctorSchedule?.walkinDays ? doctorSchedule.walkinDays.length > 0 : true);
+  const morningHoursDisplay = !userTzInfo.isHospitalTimezone
     ? sessionHours.morning.display
     : (activeDoctor.availability?.morningHours || sessionHours.morning.display);
-  const eveningHoursDisplay = !userTzInfo.isClinicTimezone
+  const eveningHoursDisplay = !userTzInfo.isHospitalTimezone
     ? sessionHours.evening.display
     : (activeDoctor.availability?.eveningHours || sessionHours.evening.display);
   const walkinDaysDisplay = doctorSchedule?.walkinDays?.join(", ") || tenant.hours?.walkinDaysSummary || "Monday to Saturday";
   const apptDaysDisplay = doctorSchedule?.appointmentOnlyDays?.join(", ") || tenant.hours?.appointmentDaysSummary || "Morning sessions & Sundays";
   const offDaysList = doctorSchedule?.offDays || [];
 
-  if (isTelemedicineClinic || !hasWalkins) {
+  if (isTelemedicineHospital || !hasWalkins) {
     return (
       <div className="bg-sky-50/90 border border-sky-200/90 rounded-2xl p-4 text-xs space-y-1.5 shadow-2xs mb-6">
         <div className="flex items-center gap-2 font-extrabold text-sky-950">
@@ -54,7 +54,7 @@ export const ConsultationScheduleGuide: React.FC<ConsultationScheduleGuideProps>
         <p className="text-blue-900 leading-relaxed text-[11px]">
           Walk-ins welcomed directly at{" "}
           <a
-            href={tenant.contact.mapsUrl || CLINIC.ADDRESS.MAPS_URL}
+            href={tenant.contact.mapsUrl || HOSPITAL.ADDRESS.MAPS_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="font-bold underline decoration-blue-400 hover:text-blue-950 inline-flex items-center gap-1 cursor-pointer"

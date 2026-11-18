@@ -34,7 +34,7 @@ export const en = {
   },
   calendar: {
     title: "Doctor Schedule, Out-of-Office & Availability Manager",
-    blockDates: "Block Clinic Dates & Time Slots",
+    blockDates: "Block Hospital Dates & Time Slots",
     allDay: "All Day (Full Day)",
     timeBased: "Specific Time / Hours",
     morningSession: "Morning Session",

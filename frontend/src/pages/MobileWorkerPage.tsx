@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useApp } from "../context/AppContext";
 import { useTenant } from "../context/ThemeProvider";
-import { BACKEND, USE_MOCK_DATA, CLINIC } from "../config";
+import { BACKEND, USE_MOCK_DATA, HOSPITAL } from "../config";
 import { formatDateISO, splitFullName, combineFullName } from "../utils/format";
 import {
   processSecureImageUpload,
@@ -213,7 +213,7 @@ export const MobileWorkerPage: React.FC = () => {
             <h1 className="text-sm font-extrabold tracking-wide uppercase">{tenant.shortName || tenant.name} Mobile Clinic</h1>
             <p className="text-[11px] text-emerald-200 flex items-center gap-1 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Local Wi-Fi · {CLINIC.BRANCHES.TELE}
+              Local Wi-Fi · {HOSPITAL.BRANCHES.TELE}
             </p>
           </div>
         </div>

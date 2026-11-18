@@ -1,5 +1,5 @@
 import React from "react";
-import { useCart } from "../../context/slices/CartContext";
+import { useCart } from "../../context/CartContext";
 import type { CartItem } from "../../types";
 import { THEME_GRADIENTS } from "../../config";
 import { formatINR } from "../../utils/format";

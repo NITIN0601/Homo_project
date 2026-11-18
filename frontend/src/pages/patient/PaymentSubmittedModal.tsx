@@ -1,9 +1,9 @@
 import React from "react";
-import { useTenant } from "../../../context/ThemeProvider";
-import type { ConsultationInvoice } from "../../../types";
-import { CLINIC } from "../../../config";
-import { formatCurrency } from "../../../utils/format";
-import { Button, Modal } from "../../../components/ui";
+import { useTenant } from "../../context/ThemeProvider";
+import type { ConsultationInvoice } from "../../types";
+import { HOSPITAL } from "../../config";
+import { formatCurrency } from "../../utils/format";
+import { Button, Modal } from "../../components/ui";
 
 interface PaymentSubmittedModalProps {
   paymentSuccessData: {
@@ -30,7 +30,7 @@ export const PaymentSubmittedModal: React.FC<PaymentSubmittedModalProps> = ({
       size="sm"
     >
       {paymentSuccessData && (
-        <div className="p-6 text-center space-y-4 text-xs">
+        <div className="text-center space-y-4 text-xs">
           <div className="w-16 h-16 rounded-full bg-sky-100 text-sky-800 text-3xl font-black flex items-center justify-center mx-auto shadow-inner">
             ⏳
           </div>
@@ -59,7 +59,7 @@ export const PaymentSubmittedModal: React.FC<PaymentSubmittedModalProps> = ({
           <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 text-left space-y-1">
             <p className="font-bold">🛡️ Doctor Confirmation Policy:</p>
             <p className="text-[10px] text-amber-800">
-              Per clinic audit compliance, payments remain in <strong>"Under Processing / Verification"</strong> until confirmed by {tenant.doctor.title || CLINIC.DOCTOR_TITLE}. Once the doctor confirms the credit in the clinic console, your status will update to <strong>"Confirmed"</strong> and your official digital tax receipt will unlock.
+              Per hospital audit compliance, payments remain in <strong>"Under Processing / Verification"</strong> until confirmed by {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}. Once the doctor confirms the credit in the hospital console, your status will update to <strong>"Confirmed"</strong> and your official digital tax receipt will unlock.
             </p>
           </div>
 

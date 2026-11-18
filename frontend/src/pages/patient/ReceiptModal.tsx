@@ -1,9 +1,9 @@
 import React from "react";
-import { useTenant } from "../../../context/ThemeProvider";
-import type { ConsultationInvoice } from "../../../types";
-import { CLINIC, DOCTOR } from "../../../config";
-import { formatCurrency } from "../../../utils/format";
-import { Button, Modal } from "../../../components/ui";
+import { useTenant } from "../../context/ThemeProvider";
+import type { ConsultationInvoice } from "../../types";
+import { HOSPITAL, DOCTOR } from "../../config";
+import { formatCurrency } from "../../utils/format";
+import { Button, Modal } from "../../components/ui";
 
 interface ReceiptModalProps {
   invoice: ConsultationInvoice | null;
@@ -26,7 +26,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
     <Modal
       isOpen={Boolean(invoice)}
       onClose={onClose}
-      title={tenant.name || CLINIC.FULL_NAME}
+      title={tenant.name || HOSPITAL.FULL_NAME}
       subtitle="Official Healthcare Tax-Exempt Receipt"
       size="lg"
       footer={
@@ -49,14 +49,14 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
       }
     >
       {invoice && (
-        <div className="p-6 space-y-4 text-xs">
+        <div className="space-y-4 text-xs">
           {/* Doctor & Patient Info Block */}
           <div className="grid grid-cols-2 gap-4 pb-4 border-b border-stone-200">
             <div className="space-y-1">
               <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Attending Physician</span>
               <p className="font-bold text-stone-900 text-sm">{invoice.doctorName}</p>
-              <p className="text-stone-500">{tenant.doctor.title || DOCTOR.TITLE} · {tenant.contact.phoneDisplay || CLINIC.PHONE_DISPLAY}</p>
-              <p className="text-stone-500 text-[11px]">{tenant.contact.address.street || CLINIC.ADDRESS.STREET}, {tenant.contact.address.city || CLINIC.ADDRESS.CITY}</p>
+              <p className="text-stone-500">{tenant.doctor.title || DOCTOR.TITLE} · {tenant.contact.phoneDisplay || HOSPITAL.PHONE_DISPLAY}</p>
+              <p className="text-stone-500 text-[11px]">{tenant.contact.address.street || HOSPITAL.ADDRESS.STREET}, {tenant.contact.address.city || HOSPITAL.ADDRESS.CITY}</p>
             </div>
             <div className="space-y-1 text-right">
               <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Patient Name</span>

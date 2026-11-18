@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { useApp, MEDICINE_CATALOGUE } from "../context/AppContext";
 import { useTenant } from "../context/ThemeProvider";
 import { Button } from "../components/ui";
-import { CLINIC, REMEDY_CATEGORIES, THEME_GRADIENTS } from "../config";
+import { HOSPITAL, REMEDY_CATEGORIES, THEME_GRADIENTS } from "../config";
 import { formatINR } from "../utils/format";
 import type { Medicine } from "../types";
 
@@ -112,7 +112,7 @@ const OrderMedicinePage: React.FC = () => {
         </div>
         <h1 className="text-xl font-bold text-stone-900">{tenant.name} Pharmacy</h1>
         <p className="text-stone-600 text-sm">
-          Online medicine dispensary ordering is currently not available for this medical center. Prescriptions are dispensed directly at clinic appointments or via partner pharmacies.
+          Online medicine dispensary ordering is currently not available for this medical center. Prescriptions are dispensed directly at hospital appointments or via partner pharmacies.
         </p>
         <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
           <Button variant="primary" onClick={() => navigateTo("appointments")}>
@@ -134,7 +134,7 @@ const OrderMedicinePage: React.FC = () => {
         <div>
           <h1 className="font-extrabold text-xl text-stone-800">Your Prescribed Medicines</h1>
           <p className="text-stone-500 text-sm mt-1 max-w-xs">
-            Please sign in to view medicines prescribed by {tenant.doctor.name || CLINIC.DOCTOR_NAME}.
+            Please sign in to view medicines prescribed by {tenant.doctor.name || HOSPITAL.DOCTOR_NAME}.
           </p>
         </div>
         <Button
@@ -155,7 +155,7 @@ const OrderMedicinePage: React.FC = () => {
         <div className="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-xl text-white" aria-hidden="true">💊</div>
         <div>
           <h1 className="font-extrabold text-stone-800 text-xl leading-tight">Your Prescribed Medicines</h1>
-          <p className="text-stone-500 text-xs mt-0.5">Prescribed by {tenant.doctor.title || CLINIC.DOCTOR_TITLE}</p>
+          <p className="text-stone-500 text-xs mt-0.5">Prescribed by {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}</p>
         </div>
       </div>
 
@@ -224,7 +224,7 @@ const OrderMedicinePage: React.FC = () => {
           <div>
             <p className="font-extrabold text-stone-700">No medicines prescribed yet</p>
             <p className="text-stone-500 text-sm mt-1 max-w-xs">
-              Once {tenant.doctor.name || CLINIC.DOCTOR_NAME} assigns medicines to your profile after your consultation, they'll appear here.
+              Once {tenant.doctor.name || HOSPITAL.DOCTOR_NAME} assigns medicines to your profile after your consultation, they'll appear here.
             </p>
           </div>
           <Button
@@ -238,8 +238,8 @@ const OrderMedicinePage: React.FC = () => {
 
       {/* Disclaimer */}
       <p className="text-[11px] text-stone-400 text-center pb-4">
-        These medicines are prescribed specifically for you by {tenant.doctor.title || CLINIC.DOCTOR_TITLE}. Do not share with others.
-        For queries, contact <a href={`tel:${tenant.contact.phone || CLINIC.PHONE_TEL}`} className="underline font-medium">{tenant.contact.phoneDisplay || CLINIC.PHONE_DISPLAY}</a>.
+        These medicines are prescribed specifically for you by {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}. Do not share with others.
+        For queries, contact <a href={`tel:${tenant.contact.phone || HOSPITAL.PHONE_TEL}`} className="underline font-medium">{tenant.contact.phoneDisplay || HOSPITAL.PHONE_DISPLAY}</a>.
       </p>
     </div>
   );

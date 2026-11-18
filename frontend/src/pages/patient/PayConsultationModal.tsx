@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from "react";
-import { useApp } from "../../../context/AppContext";
-import { useTenant } from "../../../context/ThemeProvider";
-import type { ConsultationInvoice } from "../../../types";
-import { CLINIC, DOCTOR, INDIAN_BANKS } from "../../../config";
-import { formatCurrency, formatDateTime } from "../../../utils/format";
-import { sanitizeText } from "../../../utils/sanitize";
-import { Button, Modal, Input } from "../../../components/ui";
+import { useApp } from "../../context/AppContext";
+import { useTenant } from "../../context/ThemeProvider";
+import type { ConsultationInvoice } from "../../types";
+import { HOSPITAL, DOCTOR, INDIAN_BANKS } from "../../config";
+import { formatCurrency, formatDateTime } from "../../utils/format";
+import { sanitizeText } from "../../utils/sanitize";
+import { Button, Modal, Input } from "../../components/ui";
 
 interface PayConsultationModalProps {
   payingInvoice: ConsultationInvoice | null;
@@ -98,7 +98,7 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
       isOpen={Boolean(payingInvoice)}
       onClose={onClose}
       title="Settle Consultation Fee"
-      subtitle={payingInvoice ? `Invoice #${payingInvoice.id} · ${tenant.name || CLINIC.FULL_NAME}` : undefined}
+      subtitle={payingInvoice ? `Invoice #${payingInvoice.id} · ${tenant.name || HOSPITAL.FULL_NAME}` : undefined}
       size="md"
       footer={
         payingInvoice ? (
@@ -179,7 +179,7 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
           </div>
 
           {/* Interactive Form Body */}
-          <form id="patient-settle-fee-form" onSubmit={handlePayInvoice} className="p-6 space-y-4 text-xs overflow-y-auto">
+          <form id="patient-settle-fee-form" onSubmit={handlePayInvoice} className="space-y-4 text-xs">
             {/* ── UPI Tab ─────────────────────────────────────────────────── */}
             {paymentMethodTab === "upi" && (
               <div className="space-y-4">
@@ -207,13 +207,13 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
 
                   <div className="space-y-1">
                     <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block">
-                      Clinic Direct UPI ID
+                      Hospital Direct UPI ID
                     </span>
                     <p className="font-mono text-xs font-black text-emerald-800 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 inline-block">
                       {DOCTOR.UPI_ID}
                     </p>
                     <p className="text-[11px] text-stone-500">
-                      Scan with GPay, PhonePe, Paytm, or BHIM to send {formatCurrency(displayAmount, displayCurrency, displaySymbol)} directly to {tenant.doctor.title || CLINIC.DOCTOR_TITLE}.
+                      Scan with GPay, PhonePe, Paytm, or BHIM to send {formatCurrency(displayAmount, displayCurrency, displaySymbol)} directly to {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}.
                     </p>
                   </div>
                 </div>

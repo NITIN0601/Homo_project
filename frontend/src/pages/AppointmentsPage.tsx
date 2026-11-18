@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { useApp } from "../context/AppContext";
 import { useTenant } from "../context/ThemeProvider";
-import CalendarPicker from "../components/forms/CalendarPicker";
+import CalendarPicker from "../components/calendar";
 import { Button, Badge, Card, Textarea } from "../components/ui";
 import {
-  CLINIC,
+  HOSPITAL,
   MORNING_SLOTS,
   EVENING_SLOTS,
   ALL_TIME_SLOTS,
@@ -292,14 +292,17 @@ const AppointmentsPage: React.FC = () => {
         return;
       }
 
-      if (isSlotBooked(selectedLocalizedSlot.clinicDateYMD, selectedLocalizedSlot.clinicSlot24)) {
+      const activeSlotDate = selectedLocalizedSlot.hospitalDateYMD;
+      const activeSlotTime = selectedLocalizedSlot.hospitalSlot24;
+
+      if (isSlotBooked(activeSlotDate, activeSlotTime)) {
         setErrors({
           selectedSlot: `The ${selectedLocalizedSlot.userTime12} consultation slot has already been reserved by another patient. Please choose an available time slot.`,
         });
         return;
       }
 
-      const blk = isSlotBlocked(selectedLocalizedSlot.clinicDateYMD, selectedLocalizedSlot.clinicSlot24);
+      const blk = isSlotBlocked(activeSlotDate, activeSlotTime);
       if (blk) {
         setErrors({
           selectedSlot: `The ${selectedLocalizedSlot.userTime12} time slot is currently blocked by doctor schedule (${blk.reason}). Please choose an available time slot.`,
@@ -316,9 +319,9 @@ const AppointmentsPage: React.FC = () => {
     setLoading(true);
 
     const userTz = userTzInfo;
-    const isOverseasPatient = !userTz.isClinicTimezone;
+    const isOverseasPatient = !userTz.isHospitalTimezone;
 
-    const chosenDoctorName = selectedDoctor?.name || tenant.doctor.name || CLINIC.DOCTOR_NAME;
+    const chosenDoctorName = selectedDoctor?.name || tenant.doctor.name || HOSPITAL.DOCTOR_NAME;
     const chosenDoctorId = selectedDoctor?.id || tenant.doctor.id || "doc-default";
     const contStatus = continuity?.status === "preferred_doctor_available"
       ? "Continuing Care"
@@ -328,9 +331,9 @@ const AppointmentsPage: React.FC = () => {
 
     const aptDate = selectedLocalizedSlot ? selectedLocalizedSlot.userDateYMD : form.selectedDate;
     const aptTime = selectedLocalizedSlot ? selectedLocalizedSlot.userTime12 : form.selectedSlot;
-    const clinicDate = selectedLocalizedSlot ? selectedLocalizedSlot.clinicDateYMD : form.selectedDate;
-    const clinicSlot = selectedLocalizedSlot ? selectedLocalizedSlot.clinicSlot24 : form.selectedSlot;
-    const clinicTime = selectedLocalizedSlot ? selectedLocalizedSlot.clinicTime12 : form.selectedSlot;
+    const hospitalDate = selectedLocalizedSlot ? selectedLocalizedSlot.hospitalDateYMD : form.selectedDate;
+    const hospitalSlot = selectedLocalizedSlot ? selectedLocalizedSlot.hospitalSlot24 : form.selectedSlot;
+    const hospitalTime = selectedLocalizedSlot ? selectedLocalizedSlot.hospitalTime12 : form.selectedSlot;
     const isoStartTime = selectedLocalizedSlot
       ? selectedLocalizedSlot.isoTimestamp
       : toISO(form.selectedDate, form.selectedSlot);
@@ -346,10 +349,10 @@ const AppointmentsPage: React.FC = () => {
       patientEmail: form.email.trim().toLowerCase(),
       date: aptDate,
       time: aptTime,
-      slot: clinicSlot,
-      clinicDate,
-      clinicSlot,
-      clinicTime,
+      slot: hospitalSlot,
+      hospitalDate,
+      hospitalSlot,
+      hospitalTime,
       userDate: aptDate,
       userTime: aptTime,
       timeZone: userTzInfo.timeZone,
@@ -357,7 +360,7 @@ const AppointmentsPage: React.FC = () => {
       doctorName: chosenDoctorName,
       hospitalId: tenant.id,
       continuityStatus: contStatus,
-      type: isOverseasPatient ? "Online Tele-Consultation" : "In-Person Clinic Visit",
+      type: isOverseasPatient ? "Online Tele-Consultation" : "In-Person Hospital Visit",
       chiefReason: form.notes.trim() || "General Consultation & Follow-up",
       status: "Confirmed",
       createdAt: new Date().toISOString(),
@@ -372,7 +375,7 @@ const AppointmentsPage: React.FC = () => {
       },
       startTime: isoStartTime,
       endTime:   isoEndTime,
-      providerCalendarId:      selectedDoctor?.calendar_id || CLINIC.DOCTOR_EMAIL,
+      providerCalendarId:      selectedDoctor?.calendar_id || HOSPITAL.DOCTOR_EMAIL,
       patientCalendarSyncRequested: form.syncToPatientCal,
       doctorId: chosenDoctorId,
       doctorName: chosenDoctorName,
@@ -393,8 +396,8 @@ const AppointmentsPage: React.FC = () => {
       doctor_id: chosenDoctorId,
       calendar_id: payload.providerCalendarId,
       continuity_status: contStatus,
-      clinic_date: clinicDate,
-      clinic_slot: clinicSlot,
+      hospital_date: hospitalDate,
+      hospital_slot: hospitalSlot,
       user_date: aptDate,
       user_time: aptTime,
       user_timezone: userTzInfo.timeZone,

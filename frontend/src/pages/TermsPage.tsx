@@ -1,14 +1,14 @@
 import React from "react";
 import { useApp } from "../context/AppContext";
-import { useClinic } from "../hooks/useClinic";
+import { useHospital } from "../hooks/useHospital";
 
 export const TermsPage: React.FC = () => {
   const { navigateTo } = useApp();
-  const clinic = useClinic();
+  const hospital = useHospital();
 
-  const customTerms = clinic.legal?.termsConditionsText;
+  const customTerms = hospital.legal?.termsConditionsText;
   const emergencyNotice =
-    clinic.legal?.emergencyNotice ||
+    hospital.legal?.emergencyNotice ||
     "The web application is not intended for medical emergencies. Please seek immediate medical attention or call emergency services in case of an acute or life-threatening situation.";
 
   return (
@@ -20,7 +20,7 @@ export const TermsPage: React.FC = () => {
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-stone-800">Terms &amp; Conditions</h1>
             <p className="text-stone-500 text-xs mt-0.5">
-              {clinic.name} · {clinic.address.short}
+              {hospital.name} · {hospital.address.short}
             </p>
           </div>
         </div>
@@ -28,7 +28,7 @@ export const TermsPage: React.FC = () => {
 
       {/* Terms Body */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 card-shadow border border-stone-100 space-y-6 text-stone-700 text-xs sm:text-sm leading-relaxed">
-        
+
         {/* Medical Emergency Disclaimer Banner */}
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-amber-900 text-xs space-y-1">
           <p className="font-extrabold text-sm flex items-center gap-1.5">
@@ -44,13 +44,13 @@ export const TermsPage: React.FC = () => {
         ) : (
           <section className="space-y-3">
             <p className="font-semibold text-stone-800 text-sm">
-              By using the {clinic.name} web application, you agree to the following:
+              By using the {hospital.name} web application, you agree to the following:
             </p>
 
             <ul className="space-y-3 pl-1">
               <li className="flex items-start gap-2.5">
                 <span className="text-emerald-600 font-bold mt-0.5">•</span>
-                <span>Appointment requests are subject to availability and confirmation by {clinic.shortName}.</span>
+                <span>Appointment requests are subject to availability and confirmation by {hospital.shortName}.</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="text-emerald-600 font-bold mt-0.5">•</span>
@@ -58,7 +58,7 @@ export const TermsPage: React.FC = () => {
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="text-emerald-600 font-bold mt-0.5">•</span>
-                <span>Appointments may be cancelled or rescheduled by either the patient or clinic with reasonable notice.</span>
+                <span>Appointments may be cancelled or rescheduled by either the patient or {hospital.facilityLabelLower} with reasonable notice.</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="text-emerald-600 font-bold mt-0.5">•</span>
@@ -70,11 +70,11 @@ export const TermsPage: React.FC = () => {
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="text-emerald-600 font-bold mt-0.5">•</span>
-                <span>Patient information will be handled in accordance with {clinic.shortName}&apos;s Privacy Policy and applicable healthcare regulations.</span>
+                <span>Patient information will be handled in accordance with {hospital.shortName}&apos;s Privacy Policy and applicable healthcare regulations.</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="text-emerald-600 font-bold mt-0.5">•</span>
-                <span>{clinic.name} reserves the right to update its services, clinical timings, and platform terms when required.</span>
+                <span>{hospital.name} reserves the right to update its services, clinical timings, and platform terms when required.</span>
               </li>
             </ul>
 

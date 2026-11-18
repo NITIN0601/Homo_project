@@ -1,12 +1,12 @@
 import React from "react";
 import { useApp } from "../context/AppContext";
-import { useClinic } from "../hooks/useClinic";
+import { useHospital } from "../hooks/useHospital";
 
 export const PrivacyPolicyPage: React.FC = () => {
   const { navigateTo } = useApp();
-  const clinic = useClinic();
+  const hospital = useHospital();
 
-  const customPolicy = clinic.legal?.privacyPolicyText;
+  const customPolicy = hospital.legal?.privacyPolicyText;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6" style={{ animation: "fadeInUp 0.35s ease both" }}>
@@ -17,7 +17,7 @@ export const PrivacyPolicyPage: React.FC = () => {
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-stone-800">Privacy Policy</h1>
             <p className="text-stone-500 text-xs mt-0.5">
-              {clinic.name} · {clinic.address.short}
+              {hospital.name} · {hospital.address.short}
             </p>
           </div>
         </div>
@@ -30,7 +30,7 @@ export const PrivacyPolicyPage: React.FC = () => {
             <span>🔒</span> Patient Privacy &amp; Confidentiality
           </p>
           <p>
-            At <strong>{clinic.name}</strong>, we respect the privacy and confidentiality of our patients. Personal information, including contact details, appointment information, and clinical records, is collected strictly for providing medical care, managing appointments, maintaining electronic health records, and follow-up clinical support.
+            At <strong>{hospital.name}</strong>, we respect the privacy and confidentiality of our patients. Personal information, including contact details, appointment information, and clinical records, is collected strictly for providing medical care, managing appointments, maintaining electronic health records, and follow-up clinical support.
           </p>
         </div>
 
@@ -61,15 +61,15 @@ export const PrivacyPolicyPage: React.FC = () => {
         )}
 
         <section className="space-y-2 pt-2 border-t border-stone-100">
-          <h3 className="text-sm font-extrabold text-stone-900">Contact the Clinic</h3>
+          <h3 className="text-sm font-extrabold text-stone-900">Contact the {hospital.facilityLabel}</h3>
           <p className="text-xs text-stone-600">
             For questions or requests regarding your patient records or appointment details, please reach out to us:
           </p>
           <p className="text-xs text-stone-700 font-semibold">
-            📧 Email: <a href={`mailto:${clinic.email}`} className="text-emerald-700 hover:underline">{clinic.email}</a> · 📞 Phone / WhatsApp: <a href={`tel:${clinic.phoneTel}`} className="text-emerald-700 hover:underline">{clinic.phone}</a>
+            📧 Email: <a href={`mailto:${hospital.email}`} className="text-emerald-700 hover:underline">{hospital.email}</a> · 📞 Phone / WhatsApp: <a href={`tel:${hospital.phoneTel}`} className="text-emerald-700 hover:underline">{hospital.phone}</a>
           </p>
           <p className="text-xs text-stone-500">
-            📍 {clinic.address.full}
+            📍 {hospital.address.full}
           </p>
         </section>
 

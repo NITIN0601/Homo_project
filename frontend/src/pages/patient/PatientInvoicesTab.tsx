@@ -1,7 +1,7 @@
 import React from "react";
 import { useTenant } from "../../context/ThemeProvider";
 import type { ConsultationInvoice } from "../../types";
-import { CLINIC } from "../../config";
+import { HOSPITAL } from "../../config";
 import { formatCurrency } from "../../utils/format";
 import { Button, Badge } from "../../components/ui";
 import { InvoiceSummaryMetrics, InvoiceStatusBadge } from "../../components/common";
@@ -215,7 +215,7 @@ export const PatientInvoicesTab: React.FC<PatientInvoicesTabProps> = ({
                 <div className="p-3 bg-sky-50 border border-sky-200 rounded-2xl text-[11px] text-sky-900 flex items-start gap-2">
                   <span className="text-base flex-shrink-0">ℹ️</span>
                   <p>
-                    Your payment details have been forwarded to {tenant.doctor.title || CLINIC.DOCTOR_TITLE}'s clinic console. Once the clinic confirms the credit in their bank/UPI accounts, your status will update to <strong>"Confirmed"</strong> and your official digital tax receipt will unlock automatically.
+                    Your payment details have been forwarded to {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}'s hospital console. Once the hospital confirms the credit in their bank/UPI accounts, your status will update to <strong>"Confirmed"</strong> and your official digital tax receipt will unlock automatically.
                   </p>
                 </div>
               </div>

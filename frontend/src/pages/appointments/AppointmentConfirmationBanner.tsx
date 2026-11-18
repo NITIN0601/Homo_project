@@ -23,13 +23,13 @@ export const AppointmentConfirmationBanner: React.FC<AppointmentConfirmationBann
   const [claiming, setClaiming] = useState(false);
   const [claimed, setClaimed] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
-  const isOverseas = !userTzInfo.isClinicTimezone;
+  const isOverseas = !userTzInfo.isHospitalTimezone;
 
-  const clinicName = tenant.name || "General Healthcare Clinic";
+  const hospitalName = tenant.name || "General Healthcare Hospital";
   const doctorDisplayName = payload.doctorName || tenant.doctor?.name || "Consulting Doctor";
-  const clinicShortLocation = tenant.contact.address.city
+  const hospitalShortLocation = tenant.contact.address.city
     ? `${tenant.contact.address.city}, ${tenant.contact.address.state}`
-    : "Clinic Center";
+    : "Hospital Center";
 
   const formattedAppointmentTime =
     new Date(payload.startTime).toLocaleString("en-US", {
@@ -90,8 +90,8 @@ export const AppointmentConfirmationBanner: React.FC<AppointmentConfirmationBann
     setResending(true);
     await api.email.sendNotification({
       email: payload.patientDetails.email,
-      subject: `Appointment Confirmed — ${clinicName}`,
-      body: `Dear ${payload.patientDetails.name}, your appointment with ${doctorDisplayName} at ${clinicName} (${clinicShortLocation}) is confirmed for ${formattedAppointmentTime}.`,
+      subject: `Appointment Confirmed — ${hospitalName}`,
+      body: `Dear ${payload.patientDetails.name}, your appointment with ${doctorDisplayName} at ${hospitalName} (${hospitalShortLocation}) is confirmed for ${formattedAppointmentTime}.`,
     });
     setResending(false);
     setResentSuccess(true);
@@ -99,7 +99,7 @@ export const AppointmentConfirmationBanner: React.FC<AppointmentConfirmationBann
   };
 
   const handleWhatsAppConfirm = () => {
-    const waMessage = `Hi ${tenant.shortName || clinicName}! I have booked an appointment.\n\nPatient: ${payload.patientDetails.name}\nDate & Time: ${formattedAppointmentTime}\nDoctor: ${doctorDisplayName}\nClinic: ${clinicShortLocation}`;
+    const waMessage = `Hi ${tenant.shortName || hospitalName}! I have booked an appointment.\n\nPatient: ${payload.patientDetails.name}\nDate & Time: ${formattedAppointmentTime}\nDoctor: ${doctorDisplayName}\nHospital: ${hospitalShortLocation}`;
     api.whatsapp.openChat(waMessage);
   };
 
@@ -141,11 +141,11 @@ export const AppointmentConfirmationBanner: React.FC<AppointmentConfirmationBann
           {/* Email Preview Card */}
           <div className="bg-white rounded-xl p-3.5 border border-emerald-100 text-xs text-stone-700 space-y-1.5 font-sans">
             <p className="font-bold text-stone-900">
-              Subject: <span className="text-emerald-800">Appointment Booking Confirmed — {tenant.shortName || clinicName}</span>
+              Subject: <span className="text-emerald-800">Appointment Booking Confirmed — {tenant.shortName || hospitalName}</span>
             </p>
             <p className="text-stone-600 text-[11px] leading-relaxed">
               Dear <strong>{payload.patientDetails.name}</strong>,<br />
-              Your consultation with <strong>{doctorDisplayName}</strong> is scheduled for <strong>{formattedAppointmentTime}</strong> at <strong>{clinicShortLocation}</strong>. A Google Calendar invite (.ics) has been dispatched to {payload.patientDetails.email}.
+              Your consultation with <strong>{doctorDisplayName}</strong> is scheduled for <strong>{formattedAppointmentTime}</strong> at <strong>{hospitalShortLocation}</strong>. A Google Calendar invite (.ics) has been dispatched to {payload.patientDetails.email}.
             </p>
           </div>
 
@@ -185,8 +185,8 @@ export const AppointmentConfirmationBanner: React.FC<AppointmentConfirmationBann
             { l: "Phone Number",            v: payload.patientDetails.phone },
             { l: "Appointment Date & Time", v: formattedAppointmentTime },
             { l: "Doctor",                  v: doctorDisplayName },
-            { l: "Clinic Location",         v: clinicShortLocation },
-            { l: "Consult Type",            v: isOverseas ? "International Tele-Consultation" : "In-Clinic / Tele-Consultation" },
+            { l: "Hospital Location",       v: hospitalShortLocation },
+            { l: "Consult Type",            v: isOverseas ? "International Tele-Consultation" : "In-Hospital / Tele-Consultation" },
           ].map(({ l, v }) => (
             <div key={l} className="flex justify-between text-xs py-1 border-b border-stone-200/50 last:border-none">
               <span className="text-stone-400 font-medium">{l}</span>

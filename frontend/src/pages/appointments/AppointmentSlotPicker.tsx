@@ -2,12 +2,12 @@ import React, { useMemo, useRef, useEffect } from "react";
 import { useApp } from "../../context/AppContext";
 import { useTenant } from "../../context/ThemeProvider";
 import {
-  CLINIC,
+  HOSPITAL,
   THEME_COLORS,
 } from "../../config";
 import { formatDateFull } from "../../utils/format";
 import {
-  getClinicDateOperatingStatus,
+  getHospitalDateOperatingStatus,
 } from "../../utils/schedulingEngine";
 import type { LocalizedUserSlot } from "../../utils/timezone";
 import type { HospitalDoctor } from "../../types/tenant";
@@ -32,7 +32,7 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
   selectedDoctor,
   error,
 }) => {
-  const { state, userTzInfo, clinicTimeInfo } = useApp();
+  const { state, userTzInfo, hospitalTimeInfo } = useApp();
   const { tenant } = useTenant();
 
   // Extract booked slots across dates
@@ -40,8 +40,8 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
     return state.appointments
       .filter((a) => a.status !== "Cancelled")
       .flatMap((a) => [
-        a.clinicSlot || a.slot || a.time,
-        `${a.clinicDate || a.date}_${a.clinicSlot || a.slot || a.time}`,
+        a.hospitalSlot || a.slot || a.time,
+        `${a.hospitalDate || a.date}_${a.hospitalSlot || a.slot || a.time}`,
       ])
       .filter(Boolean);
   }, [state.appointments]);
@@ -51,7 +51,7 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
   // Modular Scheduling Engine: compute date availability, elapsed status, and localized slots
   const operatingStatus = useMemo(
     () =>
-      getClinicDateOperatingStatus(
+      getHospitalDateOperatingStatus(
         selectedDate,
         userTzInfo.timeZone,
         bookedSlots,
@@ -72,7 +72,7 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
     if (!selectedSlot || operatingStatus.slots.length === 0) return null;
     return operatingStatus.slots.find(
       (s) =>
-        (selectedLocalizedSlotKey ? s.slotKey === selectedLocalizedSlotKey : s.clinicSlot24 === selectedSlot)
+        (selectedLocalizedSlotKey ? s.slotKey === selectedLocalizedSlotKey : s.hospitalSlot24 === selectedSlot)
     ) || null;
   }, [selectedSlot, selectedLocalizedSlotKey, operatingStatus.slots]);
 
@@ -81,7 +81,7 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
     if (selectedSlotObj && selectedSlotObj.disabled) {
       onSelectSlotRef.current("");
     }
-  }, [clinicTimeInfo.formattedTime, selectedSlotObj]);
+  }, [hospitalTimeInfo.formattedTime, selectedSlotObj]);
 
   if (!selectedDate) {
     return (
@@ -102,7 +102,7 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
         <span className="text-3xl block mb-2" aria-hidden="true">🏖️</span>
         <h3 className="text-rose-900 font-bold text-base mb-1">Doctor Out of Office / Unavailable All Day</h3>
         <p className="text-rose-700 text-xs font-medium mb-3">
-          {tenant.doctor?.name || CLINIC.DOCTOR_NAME} is unavailable on{" "}
+          {tenant.doctor?.name || HOSPITAL.DOCTOR_NAME} is unavailable on{" "}
           <strong className="font-bold underline">
             {formatDateFull(selectedDate + "T00:00:00")}
           </strong>
@@ -157,7 +157,7 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
           <div className="flex items-center gap-2 font-black text-amber-950 text-sm">
             <span className="text-xl">⚠️</span>
             <span>
-              {operatingStatus.isClinicDayEnded && operatingStatus.isTodayInUserTz
+              {operatingStatus.isHospitalDayEnded && operatingStatus.isTodayInUserTz
                 ? "No Available Appointments for Today"
                 : "No Available Slots for this Date"}
             </span>
@@ -181,7 +181,7 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
         <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-start gap-2">
           <span className="text-base">🗓️</span>
           <div>
-            <strong className="font-bold">Sunday Consultations:</strong> Consultations on Sunday are scheduled <em>by prior appointment only</em>. Please select your preferred slot and clinic reception will confirm your consultation.
+            <strong className="font-bold">Sunday Consultations:</strong> Consultations on Sunday are scheduled <em>by prior appointment only</em>. Please select your preferred slot and hospital reception will confirm your consultation.
           </div>
         </div>
       )}
@@ -204,20 +204,20 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
               const selected =
                 selectedLocalizedSlotKey
                   ? slot.slotKey === selectedLocalizedSlotKey
-                  : slot.clinicSlot24 === selectedSlot;
+                  : slot.hospitalSlot24 === selectedSlot;
 
               return (
                 <button
                   key={slot.slotKey}
                   type="button"
-                  id={`slot-${slot.clinicSlot24.replace(":", "")}`}
+                  id={`slot-${slot.hospitalSlot24.replace(":", "")}`}
                   role="option"
                   aria-selected={selected}
                   aria-disabled={slot.disabled}
                   disabled={slot.disabled}
                   onClick={() =>
                     !slot.disabled &&
-                    onSelectSlot(slot.clinicSlot24, {
+                    onSelectSlot(slot.hospitalSlot24, {
                       slotKey: slot.slotKey,
                       userDateYMD: slot.userDateYMD,
                       userTime12: slot.userTime12,
@@ -225,9 +225,9 @@ export const AppointmentSlotPicker: React.FC<AppointmentSlotPickerProps> = ({
                       userTime24: `${String(slot.userHour24).padStart(2, "0")}:${String(slot.userMinute).padStart(2, "0")}`,
                       userHour24: slot.userHour24,
                       userMinute: slot.userMinute,
-                      clinicDateYMD: slot.clinicDateYMD,
-                      clinicSlot24: slot.clinicSlot24,
-                      clinicTime12: slot.clinicTime12,
+                      hospitalDateYMD: slot.hospitalDateYMD,
+                      hospitalSlot24: slot.hospitalSlot24,
+                      hospitalTime12: slot.hospitalTime12,
                       isoTimestamp: slot.isoTimestamp,
                       epochMs: slot.epochMs,
                       period: slot.period,

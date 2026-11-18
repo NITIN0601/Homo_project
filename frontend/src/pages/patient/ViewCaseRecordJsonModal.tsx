@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import type { VisitSummaryRecord } from "../../../types";
-import { getPatientVisibleCaseRecord } from "../../../services/voiceStudio";
-import { Button, Modal } from "../../../components/ui";
+import type { VisitSummaryRecord } from "../../types";
+import { getPatientVisibleCaseRecord } from "../../services/voiceStudio";
+import { Button, Modal } from "../../components/ui";
 
 interface ViewCaseRecordJsonModalProps {
   visit: VisitSummaryRecord | null;
@@ -56,7 +56,7 @@ export const ViewCaseRecordJsonModal: React.FC<ViewCaseRecordJsonModalProps> = (
       }
     >
       {visit && caseRecord && (
-        <div className="p-6 space-y-4 text-xs">
+        <div className="space-y-4 text-xs">
           <div className="bg-purple-50 border border-purple-200 p-3 rounded-xl text-purple-900 space-y-1">
             <p className="font-bold">🛡️ Doctor Certified & Privacy Filtered Record</p>
             <p className="text-[11px] text-purple-800">

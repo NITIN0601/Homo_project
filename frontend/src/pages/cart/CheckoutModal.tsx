@@ -3,7 +3,7 @@ import type { CartItem, PlacedOrder, AuthUser } from "../../types";
 import { Modal } from "../../components/ui";
 import { useToast } from "../../context/ToastContext";
 import {
-  CLINIC,
+  HOSPITAL,
   LOGISTICS,
   LOGISTICS_HUBS,
   COMMERCE_CONFIG,
@@ -44,8 +44,8 @@ const CheckoutModalBody: React.FC<Omit<CheckoutModalProps, "isOpen">> = ({
     fullName: authUser?.name || "Guest Patient",
     phone: authUser?.phone || "+91 98765 43210",
     street: authUser?.address?.street || "12 Gandhi Marg",
-    city: authUser?.address?.city || CLINIC.ADDRESS.CITY,
-    pincode: authUser?.address?.pincode || CLINIC.ADDRESS.PINCODE,
+    city: authUser?.address?.city || HOSPITAL.ADDRESS.CITY,
+    pincode: authUser?.address?.pincode || HOSPITAL.ADDRESS.PINCODE,
   });
 
   const [paymentMethod, setPaymentMethod]   = useState<PaymentMethodId>(
@@ -131,7 +131,7 @@ const CheckoutModalBody: React.FC<Omit<CheckoutModalProps, "isOpen">> = ({
         trackingId: randomTrackNumber,
         estimatedDelivery: COMMERCE_CONFIG.ESTIMATED_DELIVERY,
         trackingSteps: [
-          { status: "Order Placed & Verified", location: LOGISTICS_HUBS.CLINIC_HUB, timestamp: "Just now", completed: true },
+          { status: "Order Placed & Verified", location: LOGISTICS_HUBS.HOSPITAL_HUB, timestamp: "Just now", completed: true },
           { status: `Handed over to ${partner}`, location: "Sort Facility Hub", timestamp: "Expected today", completed: false, active: true },
           { status: "In Transit across State Hub", location: "En-Route", timestamp: "Pending", completed: false },
           { status: "Out for Delivery", location: `${addressData.city} Delivery Station`, timestamp: "Pending", completed: false },
@@ -151,8 +151,21 @@ const CheckoutModalBody: React.FC<Omit<CheckoutModalProps, "isOpen">> = ({
       title="Payment & Delivery Details"
       subtitle={authUser ? `User: ${authUser.name} (${authUser.role})` : "Guest Checkout"}
       size="md"
+      footer={
+        <div className="w-full">
+          <button
+            type="submit"
+            form="checkout-form"
+            disabled={processing}
+            className="w-full py-3.5 rounded-xl font-black text-sm text-white btn-shadow transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ background: THEME_GRADIENTS.PRIMARY }}
+          >
+            {processing ? "Processing Order & Generating Tracking ID…" : `Pay ${formatINR(total)} & Place Order →`}
+          </button>
+        </div>
+      }
     >
-      <form onSubmit={handleFormSubmit} className="p-6 space-y-6 text-xs">
+      <form id="checkout-form" onSubmit={handleFormSubmit} className="space-y-6 text-xs">
         {/* Delivery Address Section */}
         <DeliveryAddressForm
           data={addressData}
@@ -173,18 +186,6 @@ const CheckoutModalBody: React.FC<Omit<CheckoutModalProps, "isOpen">> = ({
           newCardData={newCardData}
           onNewCardDataChange={handleNewCardChange}
         />
-
-        {/* Final Submit Button */}
-        <div className="pt-4 border-t border-stone-100">
-          <button
-            type="submit"
-            disabled={processing}
-            className="w-full py-3.5 rounded-xl font-black text-sm text-white btn-shadow transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-            style={{ background: THEME_GRADIENTS.PRIMARY }}
-          >
-            {processing ? "Processing Order & Generating Tracking ID…" : `Pay ${formatINR(total)} & Place Order →`}
-          </button>
-        </div>
       </form>
     </Modal>
   );

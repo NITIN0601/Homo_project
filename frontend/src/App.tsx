@@ -37,7 +37,7 @@ const SuperAdminDashboard = React.lazy(() => import("./pages/SuperAdminDashboard
 const MobileWorkerPage  = React.lazy(() => import("./pages/MobileWorkerPage"));
 const PrivacyPolicyPage = React.lazy(() => import("./pages/PrivacyPolicyPage"));
 const TermsPage         = React.lazy(() => import("./pages/TermsPage"));
-const JoinClinicPage    = React.lazy(() => import("./pages/JoinClinicPage"));
+const JoinHospitalPage  = React.lazy(() => import("./pages/JoinHospitalPage"));
 const NotFoundPage      = React.lazy(() => import("./pages/NotFoundPage"));
 
 // ─── Suspense Fallback ────────────────────────────────────────────────────────
@@ -95,7 +95,7 @@ const PageRouter: React.FC = () => {
       return <TermsPage />;
 
     case "join":
-      return <JoinClinicPage />;
+      return <JoinHospitalPage />;
 
     case "404":
       return <NotFoundPage />;

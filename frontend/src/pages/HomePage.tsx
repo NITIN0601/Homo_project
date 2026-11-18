@@ -1,7 +1,7 @@
 import React from "react";
 import { useApp } from "../context/AppContext";
-import { useClinic } from "../hooks/useClinic";
-import { CARE_AREA_PILLS, CLINIC, OFFICE_HOURS } from "../config";
+import { useHospital } from "../hooks/useHospital";
+import { CARE_AREA_PILLS, HOSPITAL, OFFICE_HOURS } from "../config";
 
 /**
  * HomePage — Dynamic White-Label Patient Landing
@@ -10,15 +10,15 @@ import { CARE_AREA_PILLS, CLINIC, OFFICE_HOURS } from "../config";
  */
 const HomePage: React.FC = () => {
   const { state, navigateTo, sessionHours } = useApp();
-  const clinic = useClinic();
+  const hospital = useHospital();
   const { authUser } = state;
   const isSuperAdmin = authUser?.role === "super_admin";
   const isAdmin = authUser?.role === "admin" || isSuperAdmin;
 
   const quickLinks = [
-    { icon: "📅", label: "Book Appointment",  page: "appointments"  as const, desc: "Schedule in-person or tele-consultation" },
+    { icon: "📅", label: "Book Appointment", page: "appointments" as const, desc: "Schedule in-person or tele-consultation" },
     ...(authUser ? [{ icon: "📋", label: "My Clinical Summary", page: "visit-summary" as const, desc: "View doctor notes & prescription timeline" }] : []),
-    { icon: "🌿", label: "About Clinic",       page: "about"         as const, desc: "Doctor credentials & clinic philosophy" },
+    { icon: "🌿", label: "About Hospital", page: "about" as const, desc: "Doctor credentials & hospital philosophy" },
     ...(isSuperAdmin ? [{ icon: "⚡", label: "Super Admin", page: "super-admin-dashboard" as const, desc: "Hospital onboarding & fleet manager" }] : []),
     ...(isAdmin && !isSuperAdmin ? [{ icon: "🔒", label: "Admin Console", page: "admin-dashboard" as const, desc: "Doctor clinical roster & inventory" }] : []),
   ];
@@ -27,25 +27,26 @@ const HomePage: React.FC = () => {
     <div className="max-w-3xl mx-auto flex flex-col items-center text-center gap-8 py-8 px-4" style={{ animation: "fadeInUp 0.3s ease both" }}>
       {/* Hero mark */}
       <img
-        src={clinic.logoUrl}
-        alt={`${clinic.name} Logo`}
+        src={hospital.logoUrl}
+        alt={`${hospital.name} Logo`}
         className="w-24 h-24 object-contain drop-shadow-md"
         width={96}
         height={96}
+        decoding="async"
       />
 
       <div className="space-y-2">
         <h1 className="text-3xl sm:text-4xl font-black text-stone-800 leading-tight">
-          {clinic.name}
+          {hospital.name}
         </h1>
         <p
           className="font-bold text-sm tracking-wide"
-          style={{ color: clinic.branding.primaryColor }}
+          style={{ color: hospital.branding.primaryColor }}
         >
-          {clinic.tagline || CLINIC.TAGLINE}
+          {hospital.tagline || HOSPITAL.TAGLINE}
         </p>
         <p className="text-stone-500 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto">
-          Under the expert clinical care of <strong>{clinic.primaryDoctorName}</strong> ({clinic.primaryDoctorQualifications}). {clinic.primaryDoctorTitle} with {clinic.primaryDoctorExperience} of dedicated clinical experience.
+          Under the expert clinical care of <strong>{hospital.primaryDoctorName}</strong> ({hospital.primaryDoctorQualifications}). {hospital.primaryDoctorTitle} with {hospital.primaryDoctorExperience} of dedicated clinical experience.
         </p>
         {authUser && (
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold mt-2">
@@ -70,13 +71,12 @@ const HomePage: React.FC = () => {
 
       {/* Quick navigation cards (Dynamically justified for 2 tiles when unauthenticated) */}
       <div
-        className={`grid grid-cols-1 ${
-          quickLinks.length === 2
-            ? "sm:grid-cols-2 max-w-2xl mx-auto"
-            : quickLinks.length === 4
+        className={`grid grid-cols-1 ${quickLinks.length === 2
+          ? "sm:grid-cols-2 max-w-2xl mx-auto"
+          : quickLinks.length === 4
             ? "sm:grid-cols-2 lg:grid-cols-4"
             : "sm:grid-cols-3"
-        } gap-4 w-full`}
+          } gap-4 w-full`}
       >
         {quickLinks.map(({ icon, label, page, desc }) => (
           <button
@@ -92,39 +92,39 @@ const HomePage: React.FC = () => {
         ))}
       </div>
 
-      {/* Clinic Location & Office Hours SSOT Cards */}
+      {/* Hospital Location & Office Hours SSOT Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full text-left">
         {/* Location & Contact Card */}
         <div className="bg-white border border-stone-200/80 rounded-2xl p-5 shadow-xs space-y-3">
           <div className="flex items-center gap-2 border-b border-stone-100 pb-2.5">
             <span className="text-xl">📍</span>
             <div>
-              <p className="font-extrabold text-stone-800 text-xs uppercase tracking-wider">Clinic Location &amp; Contact</p>
-              <p className="text-stone-400 text-[10px]">{clinic.name}</p>
+              <p className="font-extrabold text-stone-800 text-xs uppercase tracking-wider">Hospital Location &amp; Contact</p>
+              <p className="text-stone-400 text-[10px]">{hospital.name}</p>
             </div>
           </div>
 
           <div className="space-y-1.5 text-xs text-stone-600">
-            <p className="font-bold text-stone-800">{clinic.address.street}</p>
-            <p>{clinic.address.short} – {clinic.address.pincode}</p>
+            <p className="font-bold text-stone-800">{hospital.address.street}</p>
+            <p>{hospital.address.short} – {hospital.address.pincode}</p>
             <div className="pt-1.5 border-t border-stone-100 space-y-1">
               <p className="flex items-center gap-2">
                 <span className="text-stone-400">📞 Phone / WhatsApp:</span>
-                <a href={`tel:${clinic.phoneTel}`} className="font-bold text-emerald-800 hover:underline">
-                  {clinic.phone}
+                <a href={`tel:${hospital.phoneTel}`} className="font-bold text-emerald-800 hover:underline">
+                  {hospital.phone}
                 </a>
               </p>
               <p className="flex items-center gap-2">
                 <span className="text-stone-400">✉️ Email:</span>
-                <a href={`mailto:${clinic.email}`} className="font-bold text-emerald-800 hover:underline">
-                  {clinic.email}
+                <a href={`mailto:${hospital.email}`} className="font-bold text-emerald-800 hover:underline">
+                  {hospital.email}
                 </a>
               </p>
             </div>
           </div>
 
           <a
-            href={clinic.address.mapsUrl}
+            href={hospital.address.mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-900 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 transition-colors"

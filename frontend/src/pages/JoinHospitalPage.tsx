@@ -4,7 +4,7 @@ import { useTenant } from "../context/ThemeProvider";
 import { Button, Card, Input } from "../components/ui";
 import { api } from "../services/api";
 
-export const JoinClinicPage: React.FC = () => {
+export const JoinHospitalPage: React.FC = () => {
   const { dispatch, navigateTo } = useApp();
   const { tenant } = useTenant();
 
@@ -200,7 +200,7 @@ export const JoinClinicPage: React.FC = () => {
             onClick={() => navigateTo("home")}
             className="text-xs text-stone-400 hover:text-stone-700 underline cursor-pointer"
           >
-            ← Return to Clinic Home
+            ← Return to Hospital Home
           </button>
         </div>
       </Card>
@@ -208,5 +208,4 @@ export const JoinClinicPage: React.FC = () => {
   );
 };
 
-export default JoinClinicPage;
-
+export default JoinHospitalPage;

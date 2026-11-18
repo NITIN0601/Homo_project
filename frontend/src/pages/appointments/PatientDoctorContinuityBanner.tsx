@@ -50,7 +50,7 @@ export const PatientDoctorContinuityBanner: React.FC<PatientDoctorContinuityBann
           </Badge>
         </div>
         <p className="text-indigo-900 text-xs leading-relaxed">
-          <strong>{continuity.previous_doctor_name || "Your previous physician"}</strong> is no longer practicing at this clinic.
+          <strong>{continuity.previous_doctor_name || "Your previous physician"}</strong> is no longer practicing at this hospital.
           Your constitutional repertory and medical history have been assigned to <strong>{alt.name}</strong> ({alt.qualifications}).
         </p>
         <div className="flex items-center justify-between pt-1">

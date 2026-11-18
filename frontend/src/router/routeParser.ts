@@ -146,9 +146,9 @@ export function syncUrlWithState(page: Page, adminTab?: AdminTab, replace: boole
   }
 
   const pageSubtitle = ROUTE_TITLE_MAP[targetUrl] || "Clinical Portal";
-  const existingClinic = typeof document !== "undefined" && document.title.includes(" — ")
+  const existingHospital = typeof document !== "undefined" && document.title.includes(" — ")
     ? document.title.split(" — ")[0]
     : "Healthcare Portal";
-  document.title = `${existingClinic} — ${pageSubtitle}`;
+  document.title = `${existingHospital} — ${pageSubtitle}`;
 }
 

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useApp, MEDICINE_CATALOGUE } from "../context/AppContext";
 import { useTenant } from "../context/ThemeProvider";
 import type { VisitSummaryRecord, ConsultationInvoice } from "../types";
-import { CLINIC } from "../config";
+import { HOSPITAL } from "../config";
 import { formatCurrency } from "../utils/format";
 import { Button, Tabs } from "../components/ui";
 import { DashboardErrorBoundary } from "../components/common/DashboardErrorBoundary";
@@ -10,11 +10,11 @@ import { DashboardErrorBoundary } from "../components/common/DashboardErrorBound
 import MedicalRecordsTab from "./patient/MedicalRecordsTab";
 import PatientInvoicesTab from "./patient/PatientInvoicesTab";
 import PatientFeedbackTab from "./patient/PatientFeedbackTab";
-import EditPatientProfileModal from "./patient/modals/EditPatientProfileModal";
-import ViewCaseRecordJsonModal from "./patient/modals/ViewCaseRecordJsonModal";
-import PayConsultationModal from "./patient/modals/PayConsultationModal";
-import PaymentSubmittedModal from "./patient/modals/PaymentSubmittedModal";
-import ReceiptModal from "./patient/modals/ReceiptModal";
+import EditPatientProfileModal from "./patient/EditPatientProfileModal";
+import ViewCaseRecordJsonModal from "./patient/ViewCaseRecordJsonModal";
+import PayConsultationModal from "./patient/PayConsultationModal";
+import PaymentSubmittedModal from "./patient/PaymentSubmittedModal";
+import ReceiptModal from "./patient/ReceiptModal";
 
 export const VisitSummaryPage: React.FC = () => {
   const { state, addToCart, navigateTo, openAuthModal, updatePatientMedicalFile } = useApp();
@@ -34,8 +34,8 @@ export const VisitSummaryPage: React.FC = () => {
       {
         id: "vis-101",
         visitDate: "Sep 15, 2026",
-        doctorName: tenant.features.displayDoctorDetails !== false ? (tenant.doctor.title || CLINIC.DOCTOR_TITLE) : "Attending Homoeopathic Physician",
-        clinicBranch: CLINIC.BRANCHES.TELE,
+        doctorName: tenant.features.displayDoctorDetails !== false ? (tenant.doctor.title || HOSPITAL.DOCTOR_TITLE) : "Attending Homoeopathic Physician",
+        hospitalBranch: HOSPITAL.BRANCHES.TELE,
         chiefDiagnosis: "Acute Dyspepsia with Post-Exercise Muscle Fatigue",
         symptomsObserved: ["Bloating post meals", "Hamstring strain", "Acidity after coffee"],
         prescribedRemedies: [
@@ -101,7 +101,7 @@ export const VisitSummaryPage: React.FC = () => {
             ? "/visit-summary?tab=feedback"
             : "/visit-summary?tab=records";
       window.history.pushState({ tab }, "", newPath);
-      const hospitalName = tenant.name || CLINIC.NAME;
+      const hospitalName = tenant.name || HOSPITAL.NAME;
       document.title =
         tab === "payments"
           ? `My Consultation Billing & Payment History — ${hospitalName}`
@@ -289,7 +289,7 @@ export const VisitSummaryPage: React.FC = () => {
 
         {/* Status Indicator */}
         <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
-          <span>🔒</span> Verified Patient View · {tenant.features.displayDoctorDetails !== false ? (tenant.doctor.title || CLINIC.DOCTOR_TITLE) : tenant.name}
+          <span>🔒</span> Verified Patient View · {tenant.features.displayDoctorDetails !== false ? (tenant.doctor.title || HOSPITAL.DOCTOR_TITLE) : tenant.name}
         </div>
       </div>
 
@@ -299,7 +299,7 @@ export const VisitSummaryPage: React.FC = () => {
           <span className="text-3xl">🔒</span>
           <h3 className="font-extrabold text-base">Summary Modules Restricted</h3>
           <p className="text-xs text-amber-800 max-w-md mx-auto">
-            Medical history records, consultation billing, and follow-up submissions are currently restricted by the clinic administrator. Please contact clinic reception directly for assistance.
+            Medical history records, consultation billing, and follow-up submissions are currently restricted by the hospital administrator. Please contact hospital reception directly for assistance.
           </p>
         </div>
       ) : (
