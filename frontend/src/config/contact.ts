@@ -3,35 +3,35 @@
  * Single Source of Truth for clinic communications, phone lines, emails,
  * WhatsApp Cloud integration, and external mapping URLs.
  */
-import { CLINIC, DOCTOR } from "./clinic";
+import { HOSPITAL, DOCTOR } from "./hospital";
 
 // ─── Contact Channels ────────────────────────────────────────────────────────
 export const CONTACT_INFO = {
-  PHONE_DISPLAY:   CLINIC.PHONE_DISPLAY,
-  PHONE_TEL:       CLINIC.PHONE_TEL,
-  SUPPORT_EMAIL:   CLINIC.SUPPORT_EMAIL,
-  DOCTOR_EMAIL:    DOCTOR.EMAIL,
-  PHARMACY_EMAIL:  CLINIC.PHARMACY_EMAIL,
-  ADDRESS_FULL:    CLINIC.ADDRESS.FULL,
-  MAPS_URL:        CLINIC.ADDRESS.MAPS_URL,
+  PHONE_DISPLAY: HOSPITAL.PHONE_DISPLAY,
+  PHONE_TEL: HOSPITAL.PHONE_TEL,
+  SUPPORT_EMAIL: HOSPITAL.SUPPORT_EMAIL,
+  DOCTOR_EMAIL: DOCTOR.EMAIL,
+  PHARMACY_EMAIL: HOSPITAL.PHARMACY_EMAIL,
+  ADDRESS_FULL: HOSPITAL.ADDRESS.FULL,
+  MAPS_URL: HOSPITAL.ADDRESS.MAPS_URL,
 } as const;
 
 // ─── WhatsApp Business (SSOT) ────────────────────────────────────────────────
 export const WHATSAPP = {
-  NUMBER:           "+919845012345",
-  NUMBER_CLEAN:     "919845012345",
-  ACCOUNT_ID:       "WABA-9845012345",
-  DEFAULT_MESSAGE:  `Hello ${CLINIC.FULL_NAME}! 👋 I would like to schedule a consultation with ${DOCTOR.NAME}.`,
+  NUMBER: "+919845012345",
+  NUMBER_CLEAN: "919845012345",
+  ACCOUNT_ID: "WABA-9845012345",
+  DEFAULT_MESSAGE: `Hello ${HOSPITAL.FULL_NAME}! 👋 I would like to schedule a consultation with ${DOCTOR.NAME}.`,
 
   TEMPLATES: {
-    INQUIRY: `Hello ${DOCTOR.NAME}! I would like to inquire about consultation timings at ${CLINIC.NAME}.`,
-    WALKIN: `Hello ${DOCTOR.NAME}! Inquiring about evening walk-in OPD today at ${CLINIC.ADDRESS.SHORT}.`,
+    INQUIRY: `Hello ${DOCTOR.NAME}! I would like to inquire about consultation timings at ${HOSPITAL.NAME}.`,
+    WALKIN: `Hello ${DOCTOR.NAME}! Inquiring about evening walk-in OPD today at ${HOSPITAL.ADDRESS.SHORT}.`,
     APPOINTMENT: (patientName: string) =>
       `Hi ${DOCTOR.NAME}, I'd like to book an appointment. Patient: ${patientName}`,
     CONSULTATION_SUMMARY: (patientName: string, diagnosis: string, advice?: string) =>
-      `Hello ${patientName}! Your consultation with ${DOCTOR.NAME} has been finalized via ${CLINIC.NAME} Clinic.\nDiagnosis: ${diagnosis}\n${advice ? `Diet & Advice: ${advice}\n` : ""}Check your ${CLINIC.NAME} Portal for your complete record.`,
+      `Hello ${patientName}! Your consultation with ${DOCTOR.NAME} has been finalized via ${HOSPITAL.NAME} Hospital.\nDiagnosis: ${diagnosis}\n${advice ? `Diet & Advice: ${advice}\n` : ""}Check your ${HOSPITAL.NAME} Portal for your complete record.`,
     PHARMACY_PO: (poNumber: string, summary: string) =>
-      `Official Purchase Order ${poNumber} from ${CLINIC.FULL_NAME}:\n${summary}`,
+      `Official Purchase Order ${poNumber} from ${HOSPITAL.FULL_NAME}:\n${summary}`,
   },
 
   /** Helper to construct sanitized WhatsApp URL */
@@ -58,7 +58,7 @@ export const WHATSAPP = {
 
 // ─── External Links ───────────────────────────────────────────────────────────
 export const EXTERNAL_LINKS = {
-  MAPS:     CLINIC.ADDRESS.MAPS_URL,
-  WEBSITE:  CLINIC.WEBSITE,
-  AYUSH:    "https://main.ayush.gov.in/",
+  MAPS: HOSPITAL.ADDRESS.MAPS_URL,
+  WEBSITE: HOSPITAL.WEBSITE,
+  AYUSH: "https://main.ayush.gov.in/",
 } as const;

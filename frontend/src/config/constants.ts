@@ -2,8 +2,8 @@
  * ─── EHR Platform — Central Configuration (SSOT) ─────────────────
  *
  * Modular SSOT Architecture & Propagation Map:
- *   • clinic.ts   → Doctor credentials, clinic branding, addresses, office hours, appointment slots
- *                   Propagates to: ChatbotWidget, ClinicFooter, AboutPage, HomePage, AdminDashboard,
+ *   • hospital.ts → Doctor credentials, hospital branding, addresses, office hours, appointment slots
+ *                   Propagates to: ChatbotWidget, PageFooter, AboutPage, HomePage, AdminDashboard,
  *                   AdminVoiceStudioModal, voiceStudio, AppointmentsPage, VisitSummaryPage,
  *                   PrivacyPolicyPage, TermsPage
  *   • contact.ts  → Phone numbers, email addresses, WhatsApp configurations, message templates

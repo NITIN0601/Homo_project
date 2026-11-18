@@ -1,5 +1,5 @@
 import type { PatientMedicalFile } from "../../types";
-import { CLINIC } from "../../config";
+import { HOSPITAL } from "../../config";
 
 export const MOCK_VISIT_SUMMARIES: Record<string, PatientMedicalFile> = {
   "usr-001": {
@@ -17,8 +17,8 @@ export const MOCK_VISIT_SUMMARIES: Record<string, PatientMedicalFile> = {
       {
         id: "vis-101",
         visitDate: "Sep 15, 2026",
-        doctorName: CLINIC.DOCTOR_TITLE,
-        clinicBranch: CLINIC.BRANCHES.TELE,
+        doctorName: HOSPITAL.DOCTOR_TITLE,
+        hospitalBranch: HOSPITAL.BRANCHES.TELE,
         chiefDiagnosis: "Acute Dyspepsia with Post-Exercise Muscle Fatigue",
         symptomsObserved: ["Bloating post meals", "Hamstring strain", "Acidity after coffee"],
         prescribedRemedies: [
@@ -40,8 +40,8 @@ export const MOCK_VISIT_SUMMARIES: Record<string, PatientMedicalFile> = {
           },
           doctor_details: {
             doctor_id: "DOC-BK-001",
-            name: CLINIC.DOCTOR_TITLE,
-            clinic_name: CLINIC.FULL_NAME,
+            name: HOSPITAL.DOCTOR_TITLE,
+            hospital_name: HOSPITAL.FULL_NAME,
           },
           patient_details: {
             name: "John Doe",
@@ -129,8 +129,8 @@ export const MOCK_VISIT_SUMMARIES: Record<string, PatientMedicalFile> = {
       {
         id: "vis-100",
         visitDate: "Aug 02, 2026",
-        doctorName: CLINIC.DOCTOR_TITLE,
-        clinicBranch: CLINIC.BRANCHES.MALLESHWARAM,
+        doctorName: HOSPITAL.DOCTOR_TITLE,
+        hospitalBranch: HOSPITAL.BRANCHES.MALLESHWARAM,
         chiefDiagnosis: "Initial Constitutional Evaluation & Allergic Sensitivity",
         symptomsObserved: ["Morning sneezing fits", "Skin itching on sun exposure"],
         prescribedRemedies: [
@@ -155,8 +155,8 @@ export const MOCK_VISIT_SUMMARIES: Record<string, PatientMedicalFile> = {
       {
         id: "vis-201",
         visitDate: "Sep 20, 2026",
-        doctorName: CLINIC.DOCTOR_TITLE,
-        clinicBranch: CLINIC.BRANCHES.TELE,
+        doctorName: HOSPITAL.DOCTOR_TITLE,
+        hospitalBranch: HOSPITAL.BRANCHES.TELE,
         chiefDiagnosis: "Anxiety-linked Abdominal Discomfort & Sun Headache",
         symptomsObserved: ["Flatulence late afternoon", "Throbbing frontal headache"],
         prescribedRemedies: [

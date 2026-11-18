@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { useTenant } from "../context/ThemeProvider";
-import { CLINIC, DOCTOR, OFFICE_HOURS } from "../config";
+import { HOSPITAL, DOCTOR, OFFICE_HOURS } from "../config";
 import type { HospitalTenantConfig, HospitalDoctor } from "../types/tenant";
 
-export interface ClinicFacade {
+export interface HospitalFacade {
   tenant: HospitalTenantConfig;
   id: string;
   name: string;
@@ -31,7 +31,10 @@ export interface ClinicFacade {
   primaryDoctorQualifications: string;
   primaryDoctorExperience: string;
   primaryDoctorAbout: string;
-  aboutClinicText: string;
+  facilityType: "hospital" | "clinic";
+  facilityLabel: "Hospital" | "Clinic";
+  facilityLabelLower: "hospital" | "clinic";
+  aboutHospitalText: string;
   branding: HospitalTenantConfig["branding"];
   features: HospitalTenantConfig["features"];
   legal?: HospitalTenantConfig["legal"];
@@ -39,7 +42,7 @@ export interface ClinicFacade {
   officeHours: typeof OFFICE_HOURS;
 }
 
-export function useClinic(): ClinicFacade {
+export function useHospital(): HospitalFacade {
   const { tenant, isFeatureEnabled } = useTenant();
 
   return useMemo(() => {
@@ -67,26 +70,33 @@ export function useClinic(): ClinicFacade {
         ? tenant.specialties
         : Array.from(new Set(doctorsList.flatMap((d) => d.specialties || [])));
 
-    const street = tenant.contact.address.street || CLINIC.ADDRESS.STREET;
-    const city = tenant.contact.address.city || CLINIC.ADDRESS.CITY;
-    const state = tenant.contact.address.state || CLINIC.ADDRESS.STATE;
-    const pincode = tenant.contact.address.pincode || CLINIC.ADDRESS.PINCODE;
-    const country = tenant.contact.address.country || CLINIC.ADDRESS.COUNTRY;
+    const street = tenant.contact.address.street || HOSPITAL.ADDRESS.STREET;
+    const city = tenant.contact.address.city || HOSPITAL.ADDRESS.CITY;
+    const state = tenant.contact.address.state || HOSPITAL.ADDRESS.STATE;
+    const pincode = tenant.contact.address.pincode || HOSPITAL.ADDRESS.PINCODE;
+    const country = tenant.contact.address.country || HOSPITAL.ADDRESS.COUNTRY;
 
-    const aboutClinicText =
-      tenant.branding.aboutClinicText ||
-      `${tenant.name || CLINIC.FULL_NAME} provides personalized clinical consultations, comprehensive outpatient evaluations, and dedicated continuing care.`;
+    const facilityType: "hospital" | "clinic" = tenant.facilityType === "clinic" ? "clinic" : "hospital";
+    const facilityLabel: "Hospital" | "Clinic" = facilityType === "clinic" ? "Clinic" : "Hospital";
+    const facilityLabelLower: "hospital" | "clinic" = facilityType;
+
+    const aboutHospitalText =
+      tenant.branding.aboutHospitalText ||
+      `${tenant.name || HOSPITAL.FULL_NAME} provides personalized clinical consultations, comprehensive outpatient evaluations, and dedicated continuing care.`;
 
     return {
       tenant,
       id: tenant.id,
-      name: tenant.name || CLINIC.FULL_NAME,
-      shortName: tenant.shortName || CLINIC.NAME,
-      tagline: tenant.tagline || CLINIC.TAGLINE,
-      logoUrl: tenant.branding.logoUrl || CLINIC.LOGO_PATH,
-      phone: tenant.contact.phoneDisplay || tenant.contact.phone || CLINIC.PHONE_DISPLAY,
-      phoneTel: tenant.contact.phone || CLINIC.PHONE_TEL,
-      email: tenant.contact.email || CLINIC.SUPPORT_EMAIL,
+      name: tenant.name || HOSPITAL.FULL_NAME,
+      shortName: tenant.shortName || HOSPITAL.NAME,
+      tagline: tenant.tagline || HOSPITAL.TAGLINE,
+      facilityType,
+      facilityLabel,
+      facilityLabelLower,
+      logoUrl: tenant.branding.logoUrl || HOSPITAL.LOGO_PATH,
+      phone: tenant.contact.phoneDisplay || tenant.contact.phone || HOSPITAL.PHONE_DISPLAY,
+      phoneTel: tenant.contact.phone || HOSPITAL.PHONE_TEL,
+      email: tenant.contact.email || HOSPITAL.SUPPORT_EMAIL,
       address: {
         street,
         city,
@@ -95,7 +105,7 @@ export function useClinic(): ClinicFacade {
         country,
         full: `${street}, ${city}, ${state} – ${pincode}`,
         short: `${city}, ${state}`,
-        mapsUrl: tenant.contact.mapsUrl || CLINIC.ADDRESS.MAPS_URL,
+        mapsUrl: tenant.contact.mapsUrl || HOSPITAL.ADDRESS.MAPS_URL,
       },
       doctor: primaryDoctor,
       doctors: doctorsList,
@@ -105,7 +115,7 @@ export function useClinic(): ClinicFacade {
       primaryDoctorQualifications: primaryDoctor.qualifications,
       primaryDoctorExperience: `${primaryDoctor.experienceYears} Years`,
       primaryDoctorAbout: primaryDoctor.aboutText || "",
-      aboutClinicText,
+      aboutHospitalText,
       branding: tenant.branding,
       features: tenant.features,
       legal: tenant.legal,
@@ -115,4 +125,4 @@ export function useClinic(): ClinicFacade {
   }, [tenant, isFeatureEnabled]);
 }
 
-export default useClinic;
+export default useHospital;

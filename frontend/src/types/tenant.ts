@@ -15,7 +15,7 @@ export interface HospitalBranding {
   logoUrl?: string;
   bannerUrl?: string;
   aboutDocText?: string;
-  aboutClinicText?: string;
+  aboutHospitalText?: string;
 }
 
 export interface DoctorSharingPreferences {
@@ -23,6 +23,7 @@ export interface DoctorSharingPreferences {
   shareSpecialties?: boolean;
   shareQualifications?: boolean;
   shareDirectPhone?: boolean;
+  shareDirectEmail?: boolean;
 }
 
 export interface DoctorWeeklySchedule {
@@ -122,7 +123,7 @@ export interface CustomizationAuditLogEntry {
   timestamp: string;
   adminName: string;
   adminId: string;
-  action: "TOGGLE_FEATURE" | "CHANGE_PASSCODE" | "ADD_PASSCODE" | "DELETE_PASSCODE";
+  action: "TOGGLE_FEATURE" | "CHANGE_PASSCODE" | "ADD_PASSCODE" | "DELETE_PASSCODE" | "UPDATE_PROFILE";
   targetKey?: string;
   oldValue?: any;
   newValue?: any;
@@ -149,9 +150,11 @@ export interface HospitalHoursConfig {
 export interface HospitalTenantConfig {
   id: string;                      // Unique internal tenant ID (e.g., "agastya", "citycare")
   slug: string;                    // URL slug
+  isActive?: boolean;              // Active status of tenant
   domain?: string;                 // Primary custom domain (e.g., "agastyahomoeo.com")
   subdomains?: string[];           // List of matching subdomains (e.g., ["agastya"])
   name: string;                    // Official Hospital / Clinic Name
+  facilityType?: "hospital" | "clinic"; // Facility classification & dynamic terminology (default: "hospital")
   shortName: string;
   tagline: string;
   doctor: HospitalDoctor;          // Primary / default attending physician

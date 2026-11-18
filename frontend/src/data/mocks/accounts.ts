@@ -1,9 +1,14 @@
 import type { UserProfile } from "../../types";
-import { CLINIC, DEMO_CREDENTIALS, DOCTOR } from "../../config";
+import { HOSPITAL, DEMO_CREDENTIALS, DOCTOR, USE_MOCK_DATA } from "../../config";
+
+// Enterprise Security Guard (OWASP A07 / Defense in Depth):
+// In production non-mock mode, redact hardcoded passwords so mock secrets are never bundled or exposed in client memory.
+const isProdStrict = Boolean(import.meta.env?.PROD && !USE_MOCK_DATA);
+const getGuardedPassword = (pass: string) => (isProdStrict ? "[REDACTED_IN_PRODUCTION]" : pass);
 
 export const MOCK_ACCOUNTS: Record<string, { password: string; profile: UserProfile }> = {
   [DEMO_CREDENTIALS.SUPER_ADMIN.email]: {
-    password: DEMO_CREDENTIALS.SUPER_ADMIN.password,
+    password: getGuardedPassword(DEMO_CREDENTIALS.SUPER_ADMIN.password),
     profile: {
       id:       DEMO_CREDENTIALS.SUPER_ADMIN.id,
       name:     DEMO_CREDENTIALS.SUPER_ADMIN.name,
@@ -20,7 +25,7 @@ export const MOCK_ACCOUNTS: Record<string, { password: string; profile: UserProf
     },
   },
   "superadmin@platform.internal": {
-    password: "admin123",
+    password: getGuardedPassword("admin123"),
     profile: {
       id:       "usr-superadmin-002",
       name:     "Platform Systems Architect",
@@ -37,25 +42,25 @@ export const MOCK_ACCOUNTS: Record<string, { password: string; profile: UserProf
     },
   },
   [DEMO_CREDENTIALS.ADMIN.email]: {
-    password: DEMO_CREDENTIALS.ADMIN.password,
+    password: getGuardedPassword(DEMO_CREDENTIALS.ADMIN.password),
     profile: {
       id:       "usr-admin-001",
-      name:     CLINIC.DOCTOR_NAME,
+      name:     HOSPITAL.DOCTOR_NAME,
       initials: "BK",
-      email:    CLINIC.DOCTOR_EMAIL,
+      email:    HOSPITAL.DOCTOR_EMAIL,
       role:     "admin",
-      phone:    CLINIC.PHONE_DISPLAY,
+      phone:    HOSPITAL.PHONE_DISPLAY,
       address: {
-        street:  CLINIC.ADDRESS.STREET,
-        city:    CLINIC.ADDRESS.CITY,
-        state:   CLINIC.ADDRESS.STATE,
-        pincode: CLINIC.ADDRESS.PINCODE,
+        street:  HOSPITAL.ADDRESS.STREET,
+        city:    HOSPITAL.ADDRESS.CITY,
+        state:   HOSPITAL.ADDRESS.STATE,
+        pincode: HOSPITAL.ADDRESS.PINCODE,
       },
       savedUpiId: DOCTOR.UPI_ID,
       savedCards: [
         {
           id: "card-admin-1",
-          cardHolder: CLINIC.DOCTOR_NAME,
+          cardHolder: HOSPITAL.DOCTOR_NAME,
           cardNumber: "**** **** **** 9911",
           brand: "Visa",
           expiry: "09/29",
@@ -65,7 +70,7 @@ export const MOCK_ACCOUNTS: Record<string, { password: string; profile: UserProf
     },
   },
   [DEMO_CREDENTIALS.PATIENT.email]: {
-    password: DEMO_CREDENTIALS.PATIENT.password,
+    password: getGuardedPassword(DEMO_CREDENTIALS.PATIENT.password),
     profile: {
       id:       "usr-001",
       name:     "John Doe",
@@ -96,25 +101,25 @@ export const MOCK_ACCOUNTS: Record<string, { password: string; profile: UserProf
     },
   },
   "admin@agastyahomoeo.com": {
-    password: "admin123",
+    password: getGuardedPassword("admin123"),
     profile: {
       id:       "usr-admin-001",
-      name:     CLINIC.DOCTOR_NAME,
+      name:     HOSPITAL.DOCTOR_NAME,
       initials: "BK",
-      email:    CLINIC.DOCTOR_EMAIL,
+      email:    HOSPITAL.DOCTOR_EMAIL,
       role:     "admin",
-      phone:    CLINIC.PHONE_DISPLAY,
+      phone:    HOSPITAL.PHONE_DISPLAY,
       address: {
-        street:  CLINIC.ADDRESS.STREET,
-        city:    CLINIC.ADDRESS.CITY,
-        state:   CLINIC.ADDRESS.STATE,
-        pincode: CLINIC.ADDRESS.PINCODE,
+        street:  HOSPITAL.ADDRESS.STREET,
+        city:    HOSPITAL.ADDRESS.CITY,
+        state:   HOSPITAL.ADDRESS.STATE,
+        pincode: HOSPITAL.ADDRESS.PINCODE,
       },
       savedUpiId: DOCTOR.UPI_ID,
       savedCards: [
         {
           id: "card-admin-1",
-          cardHolder: CLINIC.DOCTOR_NAME,
+          cardHolder: HOSPITAL.DOCTOR_NAME,
           cardNumber: "**** **** **** 9911",
           brand: "Visa",
           expiry: "09/29",
@@ -124,7 +129,7 @@ export const MOCK_ACCOUNTS: Record<string, { password: string; profile: UserProf
     },
   },
   "john@agastyahomoeo.com": {
-    password: "patient123",
+    password: getGuardedPassword("patient123"),
     profile: {
       id:       "usr-001",
       name:     "John Doe",
@@ -162,7 +167,7 @@ export const MOCK_ACCOUNTS: Record<string, { password: string; profile: UserProf
     },
   },
   "priya@agastyahomoeo.com": {
-    password: "priya2026",
+    password: getGuardedPassword("priya2026"),
     profile: {
       id:       "usr-002",
       name:     "Priya Sharma",

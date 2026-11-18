@@ -29,7 +29,7 @@ export const DEFAULT_FACILITY_CONFIG = {
   defaultCardRadius: "1.25rem",
   defaultButtonRadius: "0.75rem",
   defaultFontSans: '"Inter", sans-serif',
-  defaultLogoUrl: "/generic-clinic-logo.svg",
+  defaultLogoUrl: "/generic-hospital-logo.svg",
   defaultBannerUrl: "/assets/banner.jpg",
 } as const;
 
@@ -176,8 +176,8 @@ export const PATIENT_PORTAL_FEATURES: readonly FeatureDefinition[] = [
   },
   {
     key: "enableAgastyaBot",
-    label: "ClinicBot AI Assistant Widget",
-    description: "Floating patient assistant widget for remedy FAQs, clinic timings, and appointment queries",
+    label: "Facility AI Assistant Widget",
+    description: "Floating patient assistant widget for remedy FAQs, facility timings, and appointment queries",
     icon: "🤖",
     category: "patient",
   },
@@ -189,4 +189,55 @@ export const PATIENT_PORTAL_FEATURES: readonly FeatureDefinition[] = [
     category: "patient",
   },
 ] as const;
+
+export interface GeneratedLegalTemplates {
+  aboutHospitalText: string;
+  emergencyNotice: string;
+  termsConditionsText: string;
+  privacyPolicyText: string;
+}
+
+export function generateDefaultLegalTemplates(
+  facilityName: string,
+  facilityType: "hospital" | "clinic" = "hospital",
+  city = "our local center",
+  phone = "+91 98450 12345",
+  email = "care@hospital.org"
+): GeneratedLegalTemplates {
+  const resolvedName = facilityName.trim() || (facilityType === "clinic" ? "Care Clinic" : "Care Hospital");
+  const typeLabelLower = facilityType === "clinic" ? "clinic" : "hospital";
+
+  return {
+    aboutHospitalText: `${resolvedName} is dedicated to delivering evidence-based, compassionate outpatient care and personalized wellness treatments in ${city}. Our experienced physicians and medical staff combine clinical precision with holistic care to ensure enduring vitality and individualized healing for every patient.`,
+    emergencyNotice: `The ${resolvedName} web portal is designed for scheduled consultations and outpatient care. In life-threatening emergencies, acute chest pain, or severe respiratory distress, please call emergency services immediately or visit your nearest emergency room.`,
+    termsConditionsText: `1. APPOINTMENTS & CLINICAL CONSULTATIONS
+All clinical consultations with ${resolvedName} are conducted on a scheduled appointment basis. While our clinical staff makes every effort to adhere to appointed slots, urgent patient cases may occasionally require minor schedule adjustments.
+
+2. PATIENT INFORMATION ACCURACY
+Patients agree to provide accurate, comprehensive medical history, existing medications, and known allergies. Diagnostic evaluations and treatment recommendations provided by ${resolvedName} are tailored specifically to the symptoms and history reported.
+
+3. OUTCOMES & THERAPEUTIC RESPONSE
+Medical treatment responses vary between individuals based on clinical constitution, chronicity, and lifestyle factors. While our clinical team utilizes proven methodologies, no specific therapeutic timeline or result is guaranteed.
+
+4. CANCELLATION & RESCHEDULING
+Appointments may be rescheduled or cancelled with reasonable advance notice by either the patient or ${resolvedName}.
+
+5. JURISDICTION & GOVERNANCE
+These Terms & Conditions are governed by the applicable healthcare and consumer protection laws of the jurisdiction in which ${resolvedName} operates.`,
+    privacyPolicyText: `1. COMMITMENT TO PATIENT DATA PRIVACY
+At ${resolvedName}, safeguarding your personal and health information is our highest priority. This Privacy Policy outlines how our ${typeLabelLower} collects, protects, and manages your Protected Health Information (PHI).
+
+2. COLLECTION & CLINICAL PURPOSE
+We collect demographic details, contact numbers, clinical notes, and prescription history solely for the purpose of medical consultations, treatment monitoring, and care coordination.
+
+3. ZERO DATA COMMERCIALIZATION
+${resolvedName} strictly adheres to DPDP and HIPAA privacy standards. Your personal and health data is NEVER sold, rented, or distributed to third-party marketing companies.
+
+4. RECORD RETENTION & ACCESS RIGHTS
+Electronic clinical records are stored securely within isolated tenant databases. You have the right to inspect, request copies, or ask for corrections to your medical file by reaching out to our administration at ${email} or ${phone}.
+
+5. DATA SECURITY & ENCRYPTION
+All data transmitted to and from ${resolvedName} is protected using modern industry-standard encryption protocols.`,
+  };
+}
 

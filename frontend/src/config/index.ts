@@ -3,7 +3,7 @@
  * Modular grouping of all application constants, tokens, and configuration.
  *
  * Submodules:
- *   • ./clinic   → Clinic identity, primary doctor credentials, office hours & appointment schedules
+ *   • ./hospital → Hospital identity, primary doctor credentials, office hours & appointment schedules
  *   • ./contact  → Phone numbers, emails, WhatsApp templates & external links
  *   • ./medical  → Clinical specialisations, care areas, remedy categories, suppliers & logistics
  *   • ./theme    → Brand colors, gradients, font tokens & styles
@@ -11,7 +11,7 @@
  */
 
 export * from "./env";
-export * from "./clinic";
+export * from "./hospital";
 export * from "./contact";
 export * from "./medical";
 export * from "./theme";

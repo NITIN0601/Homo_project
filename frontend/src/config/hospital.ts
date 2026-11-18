@@ -15,7 +15,7 @@ export const DOCTOR = {
   EXPERIENCE_YEARS: "10 Years",
   EXPERIENCE_DESC: "10 years of dedicated clinical experience providing individualised healthcare",
   EMAIL:           "doctor@example.com",
-  UPI_ID:          "clinic@upi",
+  UPI_ID:          "hospital@upi",
 
   BIO_SUMMARY:
     "Experienced clinical practitioner dedicated to holistic patient wellness, compassionate care, and evidence-based clinical medicine.",
@@ -43,13 +43,13 @@ export const DOCTOR_BIO = {
   experience: DOCTOR.EXPERIENCE_DETAIL,
 } as const;
 
-// ─── Clinic Identity (SSOT Baseline Placeholders) ────────────────────────────
-export const CLINIC = {
-  NAME:              "General Clinic",
-  FULL_NAME:         "General Healthcare Clinic",
+// ─── Hospital Identity (SSOT Baseline Placeholders) ───────────────────────────
+export const HOSPITAL = {
+  NAME:              "General Hospital",
+  FULL_NAME:         "General Healthcare Hospital",
   TAGLINE:           "Patient-Centered Healthcare & Lasting Wellness",
   SECONDARY_TAGLINE: "Your Health • Our Priority",
-  WEBSITE:           "https://clinic.example.com",
+  WEBSITE:           "https://hospital.example.com",
   TIMEZONE:          "Asia/Kolkata",
   TIMEZONE_LABEL:    "IST (Indian Standard Time, UTC+5:30)",
   TIMEZONE_OFFSET:   "+05:30",
@@ -82,8 +82,8 @@ export const CLINIC = {
   PHARMACY_EMAIL:  "pharmacy@example.com",
 
   // Assets
-  LOGO_PATH:       "/generic-clinic-logo.svg",
-  LOGO_ALT:        "General Healthcare Clinic — Patient-Centered Healthcare",
+  LOGO_PATH:       "/generic-hospital-logo.svg",
+  LOGO_ALT:        "General Healthcare Hospital — Patient-Centered Healthcare",
 
   // Address (SSOT)
   ADDRESS: {
@@ -104,7 +104,7 @@ export const CLINIC = {
   BRANCHES: {
     MALLESHWARAM: "Main Medical Center",
     TELE:         "Virtual Consultation Care Hub",
-    OPD:          "Outpatient Medical Clinic",
+    OPD:          "Outpatient Medical Center",
   },
 
   // Trust Badges
@@ -171,3 +171,5 @@ export const ALL_TIME_SLOTS: readonly string[] = [
   ...MORNING_SLOTS,
   ...EVENING_SLOTS,
 ] as const;
+
+export default HOSPITAL;

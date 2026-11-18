@@ -86,3 +86,30 @@ export function registerHospitalTenant(tenant: HospitalTenantConfig): void {
 export function updateHospitalTenantInRegistry(tenant: HospitalTenantConfig): void {
   registerHospitalTenant(tenant);
 }
+
+/**
+ * Deactivates or removes a hospital tenant from the registry.
+ */
+export function deleteHospitalTenantFromRegistry(tenantId: string): void {
+  const key = tenantId.toLowerCase();
+  if (HOSPITAL_TENANTS[key]) {
+    HOSPITAL_TENANTS[key] = {
+      ...HOSPITAL_TENANTS[key],
+      isActive: false,
+    };
+  }
+
+  const currentCustom = loadCustomTenantsFromStorage();
+  if (currentCustom[key]) {
+    delete currentCustom[key];
+    saveCustomTenantsToStorage(currentCustom);
+  }
+
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem(`hospital_tenant_custom_v1_${key}`);
+    } catch {}
+    window.dispatchEvent(new CustomEvent("tenant_registry_updated", { detail: { tenantId } }));
+    window.dispatchEvent(new Event("tenant_features_changed"));
+  }
+}

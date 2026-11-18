@@ -125,16 +125,16 @@ export const PHARMACY_SUPPLIERS = {
 
 // ─── Standard Logistics Checkpoints & Hubs (SSOT) ─────────────────────────────
 export const LOGISTICS_HUBS = {
-  CLINIC_HUB:           "Central Clinic Hub, Malleshwaram",
-  SUB_STATION:          "Malleshwaram Delivery Sub-Station",
-  CLINIC_INVENTORY:     "Central Clinic Dispensary, Malleshwaram",
-  MEMBER_STATION:       "Malleshwaram Station",
-  BLUEDART_BENGALURU:   "BlueDart Logistics Hub, Bengaluru",
-  SORT_YESHWANTHPUR:    "Sort Facility, Yeshwanthpur",
-  DELHIVERY_PEENYA:     "Delhivery Hub, Peenya",
-  DELHIVERY_SORT:       "Delhivery Sort Center, Bengaluru",
-  CENTRAL_PHARMACY_HUB: "Central Pharmacy Hub, Bengaluru",
-  LOGISTICS_BENGALURU:  "Logistics Hub, Bengaluru",
+  HOSPITAL_HUB:         "Central Hospital Hub, Metropolis",
+  SUB_STATION:          "Metropolis Delivery Sub-Station",
+  HOSPITAL_INVENTORY:   "Central Hospital Dispensary, Metropolis",
+  MEMBER_STATION:       "Metropolis Station",
+  BLUEDART_BENGALURU:   "BlueDart Logistics Hub, Metropolis",
+  SORT_YESHWANTHPUR:    "Sort Facility, Metropolis",
+  DELHIVERY_PEENYA:     "Delhivery Hub, Metropolis",
+  DELHIVERY_SORT:       "Delhivery Sort Center, Metropolis",
+  CENTRAL_PHARMACY_HUB: "Central Pharmacy Hub, Metropolis",
+  LOGISTICS_BENGALURU:  "Logistics Hub, Metropolis",
 } as const;
 
 // ─── Courier Partners & Logistics Configuration ──────────────────────────────
@@ -164,7 +164,7 @@ export const DISPATCH_STATUS_CONFIG = {
     pulseColor: "bg-sky-500",
   },
   out_for_delivery: {
-    label: "Out for Clinic Delivery",
+    label: "Out for Hospital Delivery",
     badgeClass: "bg-purple-100 text-purple-900 border border-purple-300",
     icon: "🛵",
     isPulse: true,
@@ -193,6 +193,6 @@ export const DEFAULT_DOCTOR_TODOS = [
   { id: "todo-2", task: "Upload classical prescription for Priya Sharma (#usr-002)", category: "Prescription" as const, priority: "High" as const, completed: false, patientId: "usr-002" },
   { id: "todo-3", task: "Review blood report & totality for Rajesh Varma (#usr-003)", category: "Follow-up" as const, priority: "High" as const, completed: false, patientId: "usr-003" },
   { id: "todo-4", task: "Batch order Arnica Montana 30C & Nux Vomica 30C (+50 units each)", category: "Inventory" as const, priority: "High" as const, completed: false },
-  { id: "todo-5", task: "Verify BlueDart dispatch tracking BD-88492019-IN for clinic delivery", category: "Inventory" as const, priority: "Routine" as const, completed: false },
+  { id: "todo-5", task: "Verify BlueDart dispatch tracking BD-88492019-IN for hospital delivery", category: "Inventory" as const, priority: "Routine" as const, completed: false },
 ] as const;
 

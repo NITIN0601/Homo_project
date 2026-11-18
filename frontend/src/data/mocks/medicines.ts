@@ -1,5 +1,5 @@
 import type { Medicine } from "../../types";
-import { CLINIC } from "../../config";
+import { HOSPITAL } from "../../config";
 
 export const MOCK_MEDICINES: Medicine[] = [
   {
@@ -10,7 +10,7 @@ export const MOCK_MEDICINES: Medicine[] = [
     priceINR: 160,
     category: "acute",
     prescribedToPatientIds: ["usr-001", "usr-002"],
-    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Muscle Soreness & Trauma · Take 4 globules BD after meals`,
+    doctorNote: `Prescribed by ${HOSPITAL.DOCTOR_NAME} for Muscle Soreness & Trauma · Take 4 globules BD after meals`,
   },
   {
     id: "m2",
@@ -20,7 +20,7 @@ export const MOCK_MEDICINES: Medicine[] = [
     priceINR: 210,
     category: "constitutional",
     prescribedToPatientIds: ["usr-002"],
-    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Chronic Bloating & Anxiety · Take 2 drops in water before bedtime`,
+    doctorNote: `Prescribed by ${HOSPITAL.DOCTOR_NAME} for Chronic Bloating & Anxiety · Take 2 drops in water before bedtime`,
   },
   {
     id: "m3",
@@ -30,7 +30,7 @@ export const MOCK_MEDICINES: Medicine[] = [
     priceINR: 140,
     category: "acute",
     prescribedToPatientIds: ["usr-001"],
-    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Dyspepsia & Acidity · Take 4 drops post dinner`,
+    doctorNote: `Prescribed by ${HOSPITAL.DOCTOR_NAME} for Dyspepsia & Acidity · Take 4 drops post dinner`,
   },
   {
     id: "m4",
@@ -40,7 +40,7 @@ export const MOCK_MEDICINES: Medicine[] = [
     priceINR: 195,
     category: "constitutional",
     prescribedToPatientIds: ["usr-001", "usr-002"],
-    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Constitutional Skin Rash · Single weekly dose on Sunday morning`,
+    doctorNote: `Prescribed by ${HOSPITAL.DOCTOR_NAME} for Constitutional Skin Rash · Single weekly dose on Sunday morning`,
   },
   {
     id: "m5",
@@ -50,7 +50,7 @@ export const MOCK_MEDICINES: Medicine[] = [
     priceINR: 120,
     category: "acute",
     prescribedToPatientIds: ["usr-002"],
-    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Acute Throbbing Headache · Take 4 globules hourly during acute attack`,
+    doctorNote: `Prescribed by ${HOSPITAL.DOCTOR_NAME} for Acute Throbbing Headache · Take 4 globules hourly during acute attack`,
   },
   {
     id: "m6",
@@ -60,7 +60,7 @@ export const MOCK_MEDICINES: Medicine[] = [
     priceINR: 220,
     category: "constitutional",
     prescribedToPatientIds: ["usr-002"],
-    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Sun Headache & Allergic Rhinitis · Take 4 globules daily`,
+    doctorNote: `Prescribed by ${HOSPITAL.DOCTOR_NAME} for Sun Headache & Allergic Rhinitis · Take 4 globules daily`,
   },
   {
     id: "m7",
@@ -70,7 +70,7 @@ export const MOCK_MEDICINES: Medicine[] = [
     priceINR: 185,
     category: "tissue-salt",
     prescribedToPatientIds: ["usr-001"],
-    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Joint Flexibility · Take 4 tablets thrice daily`,
+    doctorNote: `Prescribed by ${HOSPITAL.DOCTOR_NAME} for Joint Flexibility · Take 4 tablets thrice daily`,
   },
   {
     id: "m8",
@@ -80,7 +80,7 @@ export const MOCK_MEDICINES: Medicine[] = [
     priceINR: 175,
     category: "tissue-salt",
     prescribedToPatientIds: ["usr-001", "usr-002"],
-    doctorNote: `Prescribed by ${CLINIC.DOCTOR_NAME} for Immunity Support & First Stage Inflammation · Take 4 tablets BD`,
+    doctorNote: `Prescribed by ${HOSPITAL.DOCTOR_NAME} for Immunity Support & First Stage Inflammation · Take 4 tablets BD`,
   },
 ];
 

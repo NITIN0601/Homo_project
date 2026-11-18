@@ -31,8 +31,9 @@ export const AGASTYA_TENANT: HospitalTenantConfig = {
   id: "agastya",
   slug: "agastya",
   domain: "agastyahomoeopathy.com",
-  subdomains: ["agastya", "clinic", "ehr"],
-  name: "Agastya Homoeopathy Clinic",
+  subdomains: ["agastya", "hospital", "clinic", "ehr"],
+  name: "Agastya Homoeopathy Hospital",
+  facilityType: "hospital",
   shortName: "Agastya",
   tagline: "Gentle Healing, Lasting Wellness",
   doctor: PRIMARY_DOCTOR,
@@ -86,8 +87,8 @@ export const AGASTYA_TENANT: HospitalTenantConfig = {
     logoUrl: "/agastya-logo.png",
     bannerUrl: "/assets/banner.jpg",
     aboutDocText: PRIMARY_DOCTOR.aboutText,
-    aboutClinicText:
-      "Agastya Homoeopathy Clinic provides gentle, individualised classical homoeopathic healthcare serving patients globally with comprehensive case assessments, personalised treatment plans, and continuous clinical follow-up.",
+    aboutHospitalText:
+      "Agastya Homoeopathy Hospital provides gentle, individualised classical homoeopathic healthcare serving patients globally with comprehensive case assessments, personalised treatment plans, and continuous clinical follow-up.",
   },
   features: {
     enableECommerce: true,

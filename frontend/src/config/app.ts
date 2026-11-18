@@ -3,7 +3,7 @@
  * Central configuration for storage keys, dev ports, demo credentials,
  * phase feature flags, backend endpoints, and inventory defaults.
  */
-import { CLINIC, DOCTOR } from "./clinic";
+import { HOSPITAL, DOCTOR } from "./hospital";
 import { ENV } from "./env";
 
 // ─── Environment & Mock Data SSOT Toggle ──────────────────────────────────────
@@ -120,8 +120,8 @@ export const INVENTORY = {
 
 // ─── Default Form Placeholders ────────────────────────────────────────────────
 export const PLACEHOLDERS = {
-  PHONE:   CLINIC.PHONE_DISPLAY,
-  CITY:    `City (e.g. ${CLINIC.ADDRESS.CITY})`,
-  PINCODE: `Pincode (e.g. ${CLINIC.ADDRESS.PINCODE})`,
+  PHONE:   HOSPITAL.PHONE_DISPLAY,
+  CITY:    `City (e.g. ${HOSPITAL.ADDRESS.CITY})`,
+  PINCODE: `Pincode (e.g. ${HOSPITAL.ADDRESS.PINCODE})`,
   EMAIL:   DOCTOR.EMAIL,
 } as const;

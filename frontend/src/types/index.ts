@@ -125,7 +125,7 @@ export interface HomeopathicCaseRecord {
   doctor_details: {
     doctor_id: string;
     name: string;
-    clinic_name: string;
+    hospital_name: string;
   };
   patient_details: {
     name: string;
@@ -211,7 +211,7 @@ export interface VisitSummaryRecord {
   id: string;
   visitDate: string;
   doctorName: string;
-  clinicBranch: string;
+  hospitalBranch: string;
   chiefDiagnosis: string;
   symptomsObserved: string[];
   prescribedRemedies: PrescribedRemedyItem[];
@@ -313,13 +313,13 @@ export interface BookedAppointment {
   date: string;
   time: string;
   slot: string;
-  clinicDate?: string;
-  clinicSlot?: string;
-  clinicTime?: string;
+  hospitalDate?: string;
+  hospitalSlot?: string;
+  hospitalTime?: string;
   userDate?: string;
   userTime?: string;
   timeZone?: string;
-  type: "In-Person Clinic Visit" | "Online Tele-Consultation";
+  type: "In-Person Hospital Visit" | "Online Tele-Consultation";
   chiefReason: string;
   status: "Confirmed" | "In Consultation" | "Completed" | "Pending" | "Cancelled";
   notes?: string;
@@ -445,7 +445,7 @@ export interface ConsultationInvoice {
   amount?: number;
   currency?: string;
   currencySymbol?: string;
-  consultationType: "In-Person Clinic Visit" | "Online Tele-Consultation" | "Follow-up Review";
+  consultationType: "In-Person Hospital Visit" | "Online Tele-Consultation" | "Follow-up Review";
   notes?: string;
   status: ConsultationInvoiceStatus;
   issuedAt: string;

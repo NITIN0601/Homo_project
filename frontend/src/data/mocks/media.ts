@@ -87,11 +87,11 @@ export const MOCK_PHARMACY_ORDERS: PharmacyPurchaseOrder[] = [
     status: "in_transit",
     currentCheckpointIdx: 2,
     checkpoints: [
-      { title: "PO Dispatched & Acknowledged by Pharmacy", location: LOGISTICS_HUBS.CLINIC_HUB, time: "Sep 30, 10:15 AM", completed: true },
+      { title: "PO Dispatched & Acknowledged by Pharmacy", location: LOGISTICS_HUBS.HOSPITAL_HUB, time: "Sep 30, 10:15 AM", completed: true },
       { title: "Packed & Handed to BlueDart Cargo", location: LOGISTICS_HUBS.BLUEDART_BENGALURU, time: "Sep 30, 11:45 AM", completed: true },
       { title: "In Transit across State Logistics Sort Facility", location: LOGISTICS_HUBS.SORT_YESHWANTHPUR, time: "Sep 30, 01:20 PM", completed: true, current: true },
-      { title: "Out for Delivery to Clinic", location: LOGISTICS_HUBS.SUB_STATION, time: "Expected 03:45 PM", completed: false },
-      { title: "Package Received & Added to Inventory Stock", location: LOGISTICS_HUBS.CLINIC_INVENTORY, time: "Pending", completed: false },
+      { title: "Out for Delivery to Hospital", location: LOGISTICS_HUBS.SUB_STATION, time: "Expected 03:45 PM", completed: false },
+      { title: "Package Received & Added to Inventory Stock", location: LOGISTICS_HUBS.HOSPITAL_INVENTORY, time: "Pending", completed: false },
     ],
   },
   {
@@ -117,11 +117,11 @@ export const MOCK_PHARMACY_ORDERS: PharmacyPurchaseOrder[] = [
     status: "delivered",
     currentCheckpointIdx: 4,
     checkpoints: [
-      { title: "PO Dispatched via Email", location: LOGISTICS_HUBS.CLINIC_HUB, time: "Sep 28, 02:40 PM", completed: true },
+      { title: "PO Dispatched via Email", location: LOGISTICS_HUBS.HOSPITAL_HUB, time: "Sep 28, 02:40 PM", completed: true },
       { title: "Packed & Picked Up by Courier", location: LOGISTICS_HUBS.DELHIVERY_PEENYA, time: "Sep 28, 05:10 PM", completed: true },
       { title: "In Transit across State Sorting Center", location: LOGISTICS_HUBS.DELHIVERY_SORT, time: "Sep 29, 08:30 AM", completed: true },
-      { title: "Out for Delivery to Clinic", location: LOGISTICS_HUBS.MEMBER_STATION, time: "Sep 29, 11:15 AM", completed: true },
-      { title: "Package Received & Restocked (+35 Units)", location: LOGISTICS_HUBS.CLINIC_INVENTORY, time: "Sep 29, 01:20 PM", completed: true },
+      { title: "Out for Delivery to Hospital", location: LOGISTICS_HUBS.MEMBER_STATION, time: "Sep 29, 11:15 AM", completed: true },
+      { title: "Package Received & Restocked (+35 Units)", location: LOGISTICS_HUBS.HOSPITAL_INVENTORY, time: "Sep 29, 01:20 PM", completed: true },
     ],
   },
 ];

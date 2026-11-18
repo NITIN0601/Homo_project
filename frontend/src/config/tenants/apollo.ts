@@ -59,6 +59,7 @@ export const APOLLO_DEMO_TENANT: HospitalTenantConfig = {
   domain: "apollo.telecare.in",
   subdomains: ["apollo", "telecare"],
   name: "Apollo TeleCare & Integrative Health",
+  facilityType: "hospital",
   shortName: "Apollo Care",
   tagline: "Accessible Clinical Excellence Everywhere",
   doctor: APOLLO_DOCTORS[0],
@@ -110,7 +111,7 @@ export const APOLLO_DEMO_TENANT: HospitalTenantConfig = {
     logoUrl: "/favicon.ico",
     bannerUrl: "/assets/banner.jpg",
     aboutDocText: APOLLO_DOCTORS[0].aboutText,
-    aboutClinicText:
+    aboutHospitalText:
       "Apollo TeleCare brings tertiary healthcare, multi-specialty clinical consultations, and continuous health monitoring directly into patient homes.",
   },
   features: {

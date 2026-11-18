@@ -30,9 +30,10 @@ export const VANILLA_DEFAULT_TENANT: HospitalTenantConfig = {
   id: "default",
   slug: "default",
   domain: "localhost",
-  subdomains: ["default", "clinic", "ehr"],
-  name: "General Healthcare Clinic",
-  shortName: "General Clinic",
+  subdomains: ["default", "hospital", "clinic", "ehr"],
+  name: "General Healthcare Hospital",
+  facilityType: "hospital",
+  shortName: "General Hospital",
   tagline: "Patient-centered healthcare with clinical precision",
   doctor: PRIMARY_DOCTOR,
   doctors: [PRIMARY_DOCTOR],
@@ -80,11 +81,11 @@ export const VANILLA_DEFAULT_TENANT: HospitalTenantConfig = {
     neutralBg: "#fafaf9",
     cardRadius: "1.25rem",
     buttonRadius: "0.75rem",
-    logoUrl: "/generic-clinic-logo.svg",
+    logoUrl: "/generic-hospital-logo.svg",
     fontSans: '"Inter", sans-serif',
     aboutDocText: PRIMARY_DOCTOR.aboutText,
-    aboutClinicText:
-      "General Healthcare Clinic provides comprehensive outpatient clinical consultations, individualized preventive assessments, and evidence-based patient-centered care.",
+    aboutHospitalText:
+      "General Healthcare Hospital provides comprehensive outpatient clinical consultations, individualized preventive assessments, and evidence-based patient-centered care.",
   },
   features: {
     enableECommerce: true,
