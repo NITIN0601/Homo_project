@@ -15,13 +15,21 @@ from schemas.hospital import (
     HospitalFeaturesUpdateRequest,
     HospitalOnboardRequest,
 )
-from services.doctor_service import create_doctor, get_doctor, list_doctors
+from services.doctor_service import (
+    create_doctor,
+    delete_doctor,
+    get_doctor,
+    list_doctors,
+    save_doctor,
+)
 from services.hospital_service import (
     create_hospital,
+    delete_hospital,
     get_hospital,
     list_hospitals,
     resolve_hospital,
     save_hospital,
+    update_hospital_customization,
 )
 from services.onboarding_service import onboard
 
@@ -116,7 +124,9 @@ async def update_hospital_details_endpoint(
     }
 
 
-@router.put("/super-admin/hospitals/{hospital_id}/doctors/{doctor_id}", summary="Update doctor details (Super Admin only)")
+@router.put(
+    "/super-admin/hospitals/{hospital_id}/doctors/{doctor_id}", summary="Update doctor details (Super Admin only)"
+)
 @router.put("/doctors/{doctor_id}", summary="Update doctor details")
 async def update_doctor_endpoint(
     doctor_id: str,
@@ -151,6 +161,67 @@ async def update_doctor_endpoint(
         "message": f"Doctor '{doc.get('name')}' updated successfully.",
         "doctor": doc,
     }
+
+
+@router.delete("/super-admin/hospitals/{hospital_id}", summary="Deactivate or delete hospital (Super Admin only)")
+async def delete_hospital_endpoint(
+    hospital_id: str,
+    permanent: bool = Query(default=False, description="Permanent hard delete instead of soft deactivation"),
+    user: dict = Depends(require_super_admin_role),
+):
+    """Platform Super Admin: Soft-deactivates or permanently removes a hospital tenant."""
+    deleted = delete_hospital(hospital_id, soft_delete=not permanent)
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"Hospital '{hospital_id}' not found.")
+    return {
+        "status": "success",
+        "message": f"Hospital '{deleted.get('name')}' successfully {'deactivated' if not permanent else 'deleted'}.",
+        "hospital_id": hospital_id,
+        "is_active": deleted.get("isActive", False),
+    }
+
+
+@router.delete(
+    "/super-admin/hospitals/{hospital_id}/doctors/{doctor_id}", summary="Deactivate or remove doctor (Admin only)"
+)
+@router.delete("/doctors/{doctor_id}", summary="Deactivate or remove doctor")
+async def delete_doctor_endpoint(
+    doctor_id: str,
+    hospital_id: str | None = None,
+    permanent: bool = Query(default=False, description="Permanent hard delete instead of soft deactivation"),
+    user: dict = Depends(require_admin_role),
+):
+    """Admin / Super Admin: Soft-deactivates or removes a doctor from the hospital roster."""
+    deleted = delete_doctor(doctor_id, hospital_id=hospital_id, soft_delete=not permanent)
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"Doctor '{doctor_id}' not found.")
+    return {
+        "status": "success",
+        "message": f"Doctor '{deleted.get('name')}' successfully {'deactivated' if not permanent else 'deleted'}.",
+        "doctor_id": doctor_id,
+        "is_active": deleted.get("isActive", False),
+    }
+
+
+@router.put("/hospitals/{hospital_id}/customization", summary="Update clinic customization & doctor bio (Admin)")
+async def update_hospital_customization_endpoint(
+    hospital_id: str,
+    payload: dict,
+    user: dict = Depends(require_admin_role),
+):
+    """
+    Hospital Admin & Super Admin: Updates clinic branding, contact info, operating hours,
+    and doctor credentials from the Customization Tab with real-time persistent SSOT.
+    """
+    try:
+        updated = update_hospital_customization(hospital_id, payload)
+        return {
+            "status": "success",
+            "message": f"Customization for '{updated.get('name')}' saved and synchronized live.",
+            "hospital": updated,
+        }
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
 
 
 @router.post("/hospitals", summary="Create a new hospital tenant (Super Admin only)")
@@ -276,5 +347,3 @@ async def update_hospital_features(
     }
     save_hospital(updated_record)
     return {"status": "updated", "hospital_id": hospital_id, "features": updated_features}
-
-

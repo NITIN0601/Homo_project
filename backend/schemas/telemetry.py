@@ -3,9 +3,10 @@ Pydantic Schemas for HIPAA-Compliant Error Telemetry & Crash Reporting.
 Enforces zero PHI/PII data collection with automated stripping.
 """
 
-from typing import Any, Optional
-from pydantic import BaseModel, Field, field_validator
 import re
+from typing import Any
+
+from pydantic import BaseModel, Field, field_validator
 
 # Regex patterns for client-side and server-side PHI/PII scrubbing
 EMAIL_REGEX = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
@@ -15,7 +16,7 @@ CREDIT_CARD_REGEX = re.compile(r"\b(?:\d{4}[-\s]?){3}\d{4}\b")
 SSN_REGEX = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
 
 
-def scrub_phi_pii(text: Optional[str]) -> str:
+def scrub_phi_pii(text: str | None) -> str:
     """Scrub potential patient identifiers, emails, phones, and tokens from strings."""
     if not text:
         return ""
@@ -28,12 +29,12 @@ def scrub_phi_pii(text: Optional[str]) -> str:
 
 
 class DeviceContext(BaseModel):
-    screen_width: Optional[int] = Field(default=None, description="Screen viewport width in pixels")
-    screen_height: Optional[int] = Field(default=None, description="Screen viewport height in pixels")
-    user_agent: Optional[str] = Field(default="", description="Browser and operating system user-agent")
-    language: Optional[str] = Field(default="", description="Browser primary locale e.g. en-US")
-    platform: Optional[str] = Field(default="", description="Platform identifier e.g. MacIntel, Win32")
-    online: Optional[bool] = Field(default=True, description="Network online status")
+    screen_width: int | None = Field(default=None, description="Screen viewport width in pixels")
+    screen_height: int | None = Field(default=None, description="Screen viewport height in pixels")
+    user_agent: str | None = Field(default="", description="Browser and operating system user-agent")
+    language: str | None = Field(default="", description="Browser primary locale e.g. en-US")
+    platform: str | None = Field(default="", description="Platform identifier e.g. MacIntel, Win32")
+    online: bool | None = Field(default=True, description="Network online status")
 
     @field_validator("user_agent", mode="before")
     def scrub_ua(cls, v: Any) -> str:
@@ -42,7 +43,7 @@ class DeviceContext(BaseModel):
 
 class LocationContext(BaseModel):
     timezone: str = Field(default="UTC", description="Detected IANA timezone e.g. America/New_York")
-    locale: Optional[str] = Field(default="en-US", description="Regional locale formatting")
+    locale: str | None = Field(default="en-US", description="Regional locale formatting")
 
     @field_validator("timezone", mode="before")
     def validate_tz(cls, v: Any) -> str:
@@ -56,12 +57,12 @@ class CrashReportPayload(BaseModel):
     timestamp: str = Field(..., description="ISO 8601 UTC timestamp")
     error_name: str = Field(..., description="JavaScript Error name e.g. RangeError, TypeError")
     error_message: str = Field(..., description="Sanitized runtime error message")
-    stack_trace: Optional[str] = Field(default="", description="Sanitized call stack trace")
-    component_stack: Optional[str] = Field(default="", description="Sanitized React component stack")
+    stack_trace: str | None = Field(default="", description="Sanitized call stack trace")
+    component_stack: str | None = Field(default="", description="Sanitized React component stack")
     url: str = Field(default="", description="Active route URL path stripped of query tokens")
-    route: Optional[str] = Field(default="", description="Application page or route name")
-    device: Optional[DeviceContext] = Field(default=None, description="Technical device viewport and browser context")
-    location: Optional[LocationContext] = Field(default=None, description="Timezone and locale context")
+    route: str | None = Field(default="", description="Application page or route name")
+    device: DeviceContext | None = Field(default=None, description="Technical device viewport and browser context")
+    location: LocationContext | None = Field(default=None, description="Timezone and locale context")
     source: str = Field(default="frontend_boundary", description="Source boundary or middleware origin")
     user_action: str = Field(default="report_and_reload", description="User trigger action e.g. report_and_reload")
 

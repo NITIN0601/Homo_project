@@ -46,4 +46,3 @@ async def restock_inventory_endpoint(item_id: str, req: RestockRequest | None = 
         raise HTTPException(status_code=404, detail="Inventory item not found")
     await sync_inventory_to_supabase(updated)
     return {"success": True, "item": updated}
-

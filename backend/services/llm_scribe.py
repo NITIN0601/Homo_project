@@ -49,16 +49,12 @@ def sanitize_patient_context(transcript: str, patient_name: str | None) -> str:
     return clean
 
 
-async def structure_with_gemini(
-    transcript: str,
-    api_key: str,
-    model: str = "gemini-2.5-flash"
-) -> str:
+async def structure_with_gemini(transcript: str, api_key: str, model: str = "gemini-2.5-flash") -> str:
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
     payload = {
         "contents": [{"role": "user", "parts": [{"text": f"Transcript:\n{transcript}"}]}],
         "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT}]},
-        "generationConfig": {"responseMimeType": "application/json", "temperature": 0.1}
+        "generationConfig": {"responseMimeType": "application/json", "temperature": 0.1},
     }
     async with httpx.AsyncClient(timeout=45.0) as client:
         res = await client.post(url, json=payload)
@@ -67,20 +63,16 @@ async def structure_with_gemini(
         return data["candidates"][0]["content"]["parts"][0]["text"]
 
 
-async def structure_with_groq(
-    transcript: str,
-    api_key: str,
-    model: str = "llama-3.3-70b-versatile"
-) -> str:
+async def structure_with_groq(transcript: str, api_key: str, model: str = "llama-3.3-70b-versatile") -> str:
     url = "https://api.groq.com/openai/v1/chat/completions"
     payload = {
         "model": model,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Transcript:\n{transcript}"}
+            {"role": "user", "content": f"Transcript:\n{transcript}"},
         ],
         "response_format": {"type": "json_object"},
-        "temperature": 0.1
+        "temperature": 0.1,
     }
     headers = {"Authorization": f"Bearer {api_key}"}
     async with httpx.AsyncClient(timeout=45.0) as client:
@@ -91,19 +83,17 @@ async def structure_with_groq(
 
 
 async def structure_with_ollama(
-    transcript: str,
-    endpoint: str = "http://127.0.0.1:11434",
-    model: str = "llama3.3"
+    transcript: str, endpoint: str = "http://127.0.0.1:11434", model: str = "llama3.3"
 ) -> str:
     url = f"{endpoint.rstrip('/')}/api/chat"
     payload = {
         "model": model,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Transcript:\n{transcript}"}
+            {"role": "user", "content": f"Transcript:\n{transcript}"},
         ],
         "format": "json",
-        "stream": False
+        "stream": False,
     }
     async with httpx.AsyncClient(timeout=60.0) as client:
         res = await client.post(url, json=payload)
@@ -112,20 +102,16 @@ async def structure_with_ollama(
         return data["message"]["content"]
 
 
-async def structure_with_openai(
-    transcript: str,
-    api_key: str,
-    model: str = "gpt-4o"
-) -> str:
+async def structure_with_openai(transcript: str, api_key: str, model: str = "gpt-4o") -> str:
     url = "https://api.openai.com/v1/chat/completions"
     payload = {
         "model": model,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Transcript:\n{transcript}"}
+            {"role": "user", "content": f"Transcript:\n{transcript}"},
         ],
         "response_format": {"type": "json_object"},
-        "temperature": 0.1
+        "temperature": 0.1,
     }
     headers = {"Authorization": f"Bearer {api_key}"}
     async with httpx.AsyncClient(timeout=45.0) as client:
@@ -135,26 +121,16 @@ async def structure_with_openai(
         return data["choices"][0]["message"]["content"]
 
 
-async def structure_with_anthropic(
-    transcript: str,
-    api_key: str,
-    model: str = "claude-3-5-sonnet-20241022"
-) -> str:
+async def structure_with_anthropic(transcript: str, api_key: str, model: str = "claude-3-5-sonnet-20241022") -> str:
     url = "https://api.anthropic.com/v1/messages"
     payload = {
         "model": model,
         "max_tokens": 4096,
         "system": SYSTEM_PROMPT,
-        "messages": [
-            {"role": "user", "content": f"Transcript:\n{transcript}"}
-        ],
-        "temperature": 0.1
+        "messages": [{"role": "user", "content": f"Transcript:\n{transcript}"}],
+        "temperature": 0.1,
     }
-    headers = {
-        "x-api-key": api_key,
-        "anthropic-version": "2023-06-01",
-        "Content-Type": "application/json"
-    }
+    headers = {"x-api-key": api_key, "anthropic-version": "2023-06-01", "Content-Type": "application/json"}
     async with httpx.AsyncClient(timeout=45.0) as client:
         res = await client.post(url, json=payload, headers=headers)
         res.raise_for_status()
@@ -178,16 +154,16 @@ def get_heuristic_case_record(transcript: str, language: str) -> HomeopathicCase
                     sensation="Burning heaviness and acid reflux",
                     modalities=Modalities(
                         aggravation="Mental exertion, post-meal heaviness, morning",
-                        amelioration="Warm drinks, quiet rest"
-                    )
+                        amelioration="Warm drinks, quiet rest",
+                    ),
                 )
             ],
             "generals_and_constitution": {
                 "thermal_state": "Chilly",
                 "thirst": "Thirstless",
                 "cravings_aversions": {"cravings": ["Spicy food"], "aversions": []},
-                "mental_emotional_state": "Fastidious, irritable, overworked"
-            }
+                "mental_emotional_state": "Fastidious, irritable, overworked",
+            },
         },
         treatment_plan={
             "medicines_suggested": [
@@ -196,10 +172,10 @@ def get_heuristic_case_record(transcript: str, language: str) -> HomeopathicCase
                     potency="200C",
                     dosage_form="Globules (Size 30 cane sugar pills)",
                     frequency="Twice daily",
-                    instructions="Take 4 globules on clean tongue at bedtime. Avoid coffee 30 mins before."
+                    instructions="Take 4 globules on clean tongue at bedtime. Avoid coffee 30 mins before.",
                 )
             ]
-        }
+        },
     )
 
 
@@ -208,7 +184,7 @@ async def execute_scribe_pipeline(
     provider: str = "gemini",
     model: str | None = None,
     patient_name: str | None = None,
-    language: str = "Telugu"
+    language: str = "Telugu",
 ) -> tuple[HomeopathicCaseRecord, str, int]:
     """
     Main orchestration function:
@@ -218,6 +194,7 @@ async def execute_scribe_pipeline(
     Returns: (validated_case_record, provider_used, latency_ms)
     """
     import time
+
     start_time = time.perf_counter()
 
     # Step 1: PII Redaction
@@ -231,37 +208,29 @@ async def execute_scribe_pipeline(
             key = settings.GROQ_API_KEY
             if not key:
                 raise ValueError("GROQ_API_KEY is not configured on the local server.")
-            raw_json_str = await structure_with_groq(
-                safe_transcript, key, model or "llama-3.3-70b-versatile"
-            )
+            raw_json_str = await structure_with_groq(safe_transcript, key, model or "llama-3.3-70b-versatile")
         elif provider == "gemini":
             key = settings.GEMINI_API_KEY
             if not key:
                 raise ValueError("GEMINI_API_KEY is not configured on the local server.")
-            raw_json_str = await structure_with_gemini(
-                safe_transcript, key, model or "gemini-2.5-flash"
-            )
+            raw_json_str = await structure_with_gemini(safe_transcript, key, model or "gemini-2.5-flash")
         elif provider == "openai":
             key = settings.OPENAI_API_KEY
             if not key:
                 raise ValueError("OPENAI_API_KEY is not configured on the local server.")
-            raw_json_str = await structure_with_openai(
-                safe_transcript, key, model or "gpt-4o"
-            )
+            raw_json_str = await structure_with_openai(safe_transcript, key, model or "gpt-4o")
         elif provider == "anthropic":
             key = settings.ANTHROPIC_API_KEY
             if not key:
                 raise ValueError("ANTHROPIC_API_KEY is not configured on the local server.")
-            raw_json_str = await structure_with_anthropic(
-                safe_transcript, key, model or "claude-3-5-sonnet-20241022"
-            )
+            raw_json_str = await structure_with_anthropic(safe_transcript, key, model or "claude-3-5-sonnet-20241022")
         elif provider == "ollama":
             endpoint = settings.OLLAMA_ENDPOINT or "http://127.0.0.1:11434"
-            raw_json_str = await structure_with_ollama(
-                safe_transcript, endpoint, model or "llama3.3"
-            )
+            raw_json_str = await structure_with_ollama(safe_transcript, endpoint, model or "llama3.3")
         else:
-            raise ValueError(f"Unsupported LLM provider '{provider}'. Supported: gemini, groq, openai, anthropic, ollama.")
+            raise ValueError(
+                f"Unsupported LLM provider '{provider}'. Supported: gemini, groq, openai, anthropic, ollama."
+            )
 
         # Step 2: Clean and validate with Pydantic v2
         clean_json = clean_markdown_json(raw_json_str)
@@ -281,10 +250,7 @@ async def execute_scribe_pipeline(
 
 
 async def parse_clinical_text_to_case_analysis(
-    text: str,
-    provider: str = "gemini",
-    model: str | None = None,
-    api_key: str | None = None
+    text: str, provider: str = "gemini", model: str | None = None, api_key: str | None = None
 ) -> dict[str, Any]:
     """
     Universal multi-provider clinical parsing:
@@ -318,7 +284,9 @@ async def parse_clinical_text_to_case_analysis(
         key = api_key or settings.ANTHROPIC_API_KEY
         if not key:
             raise ValueError("ANTHROPIC_API_KEY is not configured on the local server.")
-        raw_json = await structure_with_anthropic(transcript=text, api_key=key, model=model or "claude-3-5-sonnet-20241022")
+        raw_json = await structure_with_anthropic(
+            transcript=text, api_key=key, model=model or "claude-3-5-sonnet-20241022"
+        )
     elif prov == "ollama":
         endpoint = settings.OLLAMA_ENDPOINT or "http://127.0.0.1:11434"
         raw_json = await structure_with_ollama(transcript=text, endpoint=endpoint, model=model or "llama3.3")

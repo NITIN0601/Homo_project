@@ -65,6 +65,7 @@ async def send_appointment_whatsapp_notification(
 
     try:
         import httpx
+
         url = f"https://graph.facebook.com/v18.0/{WHATSAPP_PHONE_ID}/messages"
         headers = {
             "Authorization": f"Bearer {WHATSAPP_API_TOKEN}",
@@ -106,12 +107,16 @@ async def send_visit_followup_and_feedback(
     h_name = hospital.get("name", settings.CLINIC_NAME)
     doc_name = doctor_name or doctor.get("name")
     addr_dict = hospital.get("contact", {}).get("address", {})
-    addr_str = f"{addr_dict.get('street', '')}, {addr_dict.get('city', '')} – {addr_dict.get('pincode', '')}" if addr_dict else settings.CLINIC_ADDRESS
+    addr_str = (
+        f"{addr_dict.get('street', '')}, {addr_dict.get('city', '')} – {addr_dict.get('pincode', '')}"
+        if addr_dict
+        else settings.CLINIC_ADDRESS
+    )
     h_phone = hospital.get("contact", {}).get("phone", settings.CLINIC_PHONE)
     admin_email = hospital.get("contact", {}).get("email") or CLINIC_ADMIN_EMAIL
 
     remedy_rows = ""
-    for r in (prescribed_remedies or []):
+    for r in prescribed_remedies or []:
         r_name = r.get("medicineName") or r.get("name") or "Prescribed Remedy"
         r_potency = r.get("potency", "30C")
         r_dosage = r.get("dosage", "As directed")
@@ -200,6 +205,7 @@ async def send_visit_followup_and_feedback(
 
     try:
         import httpx
+
         headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
         async with httpx.AsyncClient(timeout=8.0) as client:
             resp = await client.post(RESEND_API_URL, json=payload, headers=headers)
@@ -210,4 +216,3 @@ async def send_visit_followup_and_feedback(
             }
     except Exception as exc:
         return {"success": False, "error": str(exc), "whatsapp": wa_result}
-

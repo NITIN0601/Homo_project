@@ -68,6 +68,7 @@ async def validate_payment_endpoint(payload: PaymentValidateRequest):
 
 # ─── Orders & 3rd Party Logistics API ─────────────────────────────────────────
 
+
 @router.get("/orders", summary="List all orders")
 async def list_orders_endpoint(user: dict[str, Any] | None = Depends(get_current_user_optional)):
     all_orders = get_all_orders()
@@ -116,9 +117,19 @@ async def track_shipment_endpoint(tracking_id: str):
         "status": "in_transit",
         "courierPartner": default_courier,
         "trackingSteps": [
-            {"status": "Order Placed & Verified", "location": shipping_origin, "timestamp": "Just now", "completed": True},
-            {"status": f"Handed over to {default_courier}", "location": "Sort Facility Hub", "timestamp": "In Progress", "completed": False, "active": True},
+            {
+                "status": "Order Placed & Verified",
+                "location": shipping_origin,
+                "timestamp": "Just now",
+                "completed": True,
+            },
+            {
+                "status": f"Handed over to {default_courier}",
+                "location": "Sort Facility Hub",
+                "timestamp": "In Progress",
+                "completed": False,
+                "active": True,
+            },
         ],
         "estimatedDelivery": "3-5 business days",
     }
-

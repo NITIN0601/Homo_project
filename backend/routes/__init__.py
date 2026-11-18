@@ -20,4 +20,3 @@ __all__ = [
     "hospital_router",
     "scheduling_router",
 ]
-

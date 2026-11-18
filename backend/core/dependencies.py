@@ -1,6 +1,7 @@
 """
 Shared FastAPI Dependencies and Rate Limiting Infrastructure.
 """
+
 from collections.abc import Callable
 
 from fastapi import Request
@@ -27,6 +28,7 @@ except ImportError:
         def limit(self, *args, **kwargs) -> Callable:
             def decorator(func):
                 return func
+
             return decorator
 
     limiter = DummyLimiter()  # type: ignore
@@ -39,5 +41,6 @@ except ImportError:
             status_code=429,
             content={"detail": "Rate limit exceeded."},
         )
+
 
 __all__ = ["limiter", "rate_limit_handler", "RateLimitExceeded"]

@@ -36,6 +36,7 @@ def hash_password(password: str, salt: str | None = None) -> tuple[str, str]:
         raise ValueError("Password must be at least 6 characters.")
     if salt is None:
         import os
+
         salt = os.urandom(16).hex()
     pwd_bytes = password.encode("utf-8")
     salt_bytes = salt.encode("utf-8")
@@ -183,19 +184,10 @@ def scope_items_to_patient_or_admin(
     if role in ("admin", "super_admin"):
         return items
 
-    patient_ids = {
-        val
-        for val in (user.get("sub"), user.get("id"), user.get("email"))
-        if val
-    }
+    patient_ids = {val for val in (user.get("sub"), user.get("id"), user.get("email")) if val}
 
-    return [
-        item for item in items
-        if any(item.get(field) in patient_ids for field in id_fields)
-    ]
+    return [item for item in items if any(item.get(field) in patient_ids for field in id_fields)]
 
 
 # Alias for backward compatibility
 verify_local_jwt = verify_access_token
-
-

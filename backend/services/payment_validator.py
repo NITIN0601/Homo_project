@@ -21,11 +21,12 @@ from typing import Any
 
 class PaymentMethod(str, Enum):
     """Supported payment methods for validation routing."""
+
     VISA = "visa"
     MASTERCARD = "mastercard"
-    CARD = "card"       # Auto-detects Visa vs Mastercard
+    CARD = "card"  # Auto-detects Visa vs Mastercard
     UPI = "upi"
-    VPA = "vpa"         # Alias for UPI
+    VPA = "vpa"  # Alias for UPI
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,7 @@ class PaymentValidationResult:
         field_flags: UI-targeted mapping of form field keys to specific error flags.
         metadata: Diagnostic context (e.g. detected card brand, length, masked string).
     """
+
     is_valid: bool
     method: str
     sanitized_input: str
@@ -78,9 +80,7 @@ class PaymentValidator:
     )
 
     # UPI VPA syntax: ^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$
-    _UPI_PATTERN: re.Pattern = re.compile(
-        r"^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$"
-    )
+    _UPI_PATTERN: re.Pattern = re.compile(r"^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$")
 
     # ── OFFLINE INTEGRITY ALGORITHMS ─────────────────────────────────────────
     @staticmethod
@@ -132,11 +132,7 @@ class PaymentValidator:
         """Helper to create a PCI/PII-safe masked string for audit logs and UI confirmation."""
         if len(value) <= (visible_start + visible_end):
             return "*" * len(value)
-        return (
-            value[:visible_start]
-            + ("*" * (len(value) - visible_start - visible_end))
-            + value[-visible_end:]
-        )
+        return value[:visible_start] + ("*" * (len(value) - visible_start - visible_end)) + value[-visible_end:]
 
     # ── VALIDATION METHODS ───────────────────────────────────────────────────
     @classmethod
@@ -189,7 +185,9 @@ class PaymentValidator:
             field_flags["card_number"] = msg
 
         if len(sanitized) not in (13, 16, 19):
-            msg = f"Invalid Visa card length ({len(sanitized)} digits). Visa cards must be exactly 13, 16, or 19 digits."
+            msg = (
+                f"Invalid Visa card length ({len(sanitized)} digits). Visa cards must be exactly 13, 16, or 19 digits."
+            )
             errors.append(msg)
             field_flags["card_number"] = msg
 
@@ -270,10 +268,7 @@ class PaymentValidator:
         in_2series_range = 2221 <= prefix_4 <= 2720
 
         if not (in_legacy_range or in_2series_range):
-            msg = (
-                "Invalid Mastercard prefix: must start with 51-55 (legacy) "
-                "or 2221-2720 (2-series IIN range)."
-            )
+            msg = "Invalid Mastercard prefix: must start with 51-55 (legacy) or 2221-2720 (2-series IIN range)."
             errors.append(msg)
             field_flags["card_number"] = msg
 
@@ -450,10 +445,7 @@ class PaymentValidator:
         validator_fn = router_map.get(normalized_method)
         if not validator_fn:
             supported = sorted(set(router_map.keys()))
-            msg = (
-                f"Unsupported payment method '{method}'. "
-                f"Supported methods are: {', '.join(supported)}"
-            )
+            msg = f"Unsupported payment method '{method}'. Supported methods are: {', '.join(supported)}"
             return PaymentValidationResult(
                 is_valid=False,
                 method=normalized_method,

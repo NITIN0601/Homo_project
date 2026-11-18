@@ -19,11 +19,17 @@ class HospitalCreateRequest(BaseModel):
     country: str | None = Field(default="India", example="India")
     currency: str | None = Field(default=None, example="INR")
     currency_symbol: str | None = Field(default=None, example="₹")
+    facility_type: str | None = Field(default="hospital", example="hospital", description="'hospital' or 'clinic'")
     primary_color: str = Field(default="#0d9488", example="#0d9488")
     accent_color: str = Field(default="#14b8a6", example="#14b8a6")
-    logo_url: str | None = Field(default="/generic-clinic-logo.svg", example="/generic-clinic-logo.svg")
+    logo_url: str | None = Field(default="/generic-hospital-logo.svg", example="/generic-hospital-logo.svg")
     banner_url: str | None = Field(default="/assets/banner.jpg", example="/assets/banner.jpg")
+    about_hospital_text: str | None = Field(default=None, example="Specialized outpatient medical facility.")
     about_clinic_text: str | None = Field(default=None, example="Specialized outpatient medical facility.")
+    terms_conditions_text: str | None = Field(default=None)
+    privacy_policy_text: str | None = Field(default=None)
+    emergency_notice: str | None = Field(default=None)
+    legal: dict[str, str | None] | None = Field(default=None)
     features: dict[str, bool] | None = Field(
         default=None,
         description="Feature flag overrides (enableECommerce, enableVoiceStudio, etc.)",
@@ -64,11 +70,21 @@ class HospitalOnboardRequest(BaseModel):
     country: str | None = Field(default="India")
     currency: str | None = Field(default=None, example="INR")
     currency_symbol: str | None = Field(default=None, example="₹")
+    facility_type: str | None = Field(default="hospital", example="hospital", description="'hospital' or 'clinic'")
     primary_color: str = Field(default="#1e3a8a")
     accent_color: str = Field(default="#0284c7")
-    logo_url: str | None = Field(default="/generic-clinic-logo.svg", example="/generic-clinic-logo.svg")
+    logo_url: str | None = Field(default="/generic-hospital-logo.svg", example="/generic-hospital-logo.svg")
     banner_url: str | None = Field(default="/assets/banner.jpg", example="/assets/banner.jpg")
-    about_clinic_text: str | None = Field(default=None, example="Comprehensive health center dedicated to clinical precision.")
+    about_hospital_text: str | None = Field(
+        default=None, example="Comprehensive health center dedicated to clinical precision."
+    )
+    about_clinic_text: str | None = Field(
+        default=None, example="Comprehensive health center dedicated to clinical precision."
+    )
+    terms_conditions_text: str | None = Field(default=None)
+    privacy_policy_text: str | None = Field(default=None)
+    emergency_notice: str | None = Field(default=None)
+    legal: dict[str, str | None] | None = Field(default=None)
 
     # Operational Hours & Scheduling
     timezone: str | None = Field(default="Asia/Kolkata", example="Asia/Kolkata")

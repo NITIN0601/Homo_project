@@ -5,12 +5,13 @@ Stores sanitized, zero-PHI/PII developer diagnostics to disk and audit log.
 
 import json
 import logging
-from pathlib import Path
 import threading
+from pathlib import Path
 from typing import Any
+
+from core.audit import record_audit_entry
 from fastapi import APIRouter, HTTPException, status
 from schemas.telemetry import CrashReportPayload
-from core.audit import record_audit_entry
 
 logger = logging.getLogger("telemetry_routes")
 
@@ -45,19 +46,19 @@ async def ingest_crash_report(payload: CrashReportPayload):
         record_crash_report(report_data)
 
         # Also write a forensic audit entry for administrative oversight
-        record_audit_entry({
-            "action": "CRASH_REPORT_INGESTED",
-            "incident_id": payload.incident_id,
-            "error_name": payload.error_name,
-            "route": payload.route or payload.url,
-            "source": payload.source,
-            "user_action": payload.user_action,
-            "timestamp": payload.timestamp,
-        })
-
-        logger.info(
-            f"Ingested sanitized crash report #{payload.incident_id} ({payload.error_name} at {payload.url})"
+        record_audit_entry(
+            {
+                "action": "CRASH_REPORT_INGESTED",
+                "incident_id": payload.incident_id,
+                "error_name": payload.error_name,
+                "route": payload.route or payload.url,
+                "source": payload.source,
+                "user_action": payload.user_action,
+                "timestamp": payload.timestamp,
+            }
         )
+
+        logger.info(f"Ingested sanitized crash report #{payload.incident_id} ({payload.error_name} at {payload.url})")
 
         return {
             "status": "recorded",

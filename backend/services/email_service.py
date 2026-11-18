@@ -12,6 +12,7 @@ from services.hospital_service import get_hospital
 
 try:
     import httpx
+
     HAS_HTTPX = True
 except ImportError:
     HAS_HTTPX = False
@@ -52,7 +53,11 @@ async def send_appointment_confirmation(
     admin_email = CLINIC_ADMIN_EMAIL or hospital.get("contact", {}).get("email")
     clinic_phone = hospital.get("contact", {}).get("phone") or settings.CLINIC_PHONE
     addr_dict = hospital.get("contact", {}).get("address", {})
-    addr_str = f"{addr_dict.get('street', '')}, {addr_dict.get('city', '')} – {addr_dict.get('pincode', '')}" if addr_dict else settings.CLINIC_ADDRESS
+    addr_str = (
+        f"{addr_dict.get('street', '')}, {addr_dict.get('city', '')} – {addr_dict.get('pincode', '')}"
+        if addr_dict
+        else settings.CLINIC_ADDRESS
+    )
 
     subject = f"Appointment Confirmed — {h_name}"
     html_content = f"""
@@ -139,10 +144,7 @@ async def send_appointment_confirmation(
                     return {"success": False, "error": data.get("message", resp.text), "status_code": resp.status_code}
         else:
             req = urllib.request.Request(
-                RESEND_API_URL,
-                data=json.dumps(payload).encode("utf-8"),
-                headers=headers,
-                method="POST"
+                RESEND_API_URL, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST"
             )
             with urllib.request.urlopen(req, timeout=10.0) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
@@ -169,7 +171,9 @@ async def send_doctor_onboarding_email(
     key = api_key or RESEND_API_KEY
     subject = f"Welcome to {hospital_name} — Doctor Portal Credentials & Activation"
 
-    reg_row = f'<p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Medical Reg:</strong> {reg_no}</p>' if reg_no else ""
+    reg_row = (
+        f'<p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Medical Reg:</strong> {reg_no}</p>' if reg_no else ""
+    )
 
     html_content = f"""
     <!DOCTYPE html>
@@ -254,10 +258,7 @@ async def send_doctor_onboarding_email(
                     return {"success": False, "error": data.get("message", resp.text), "status_code": resp.status_code}
         else:
             req = urllib.request.Request(
-                RESEND_API_URL,
-                data=json.dumps(payload).encode("utf-8"),
-                headers=headers,
-                method="POST"
+                RESEND_API_URL, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST"
             )
             with urllib.request.urlopen(req, timeout=10.0) as resp:
                 data = json.loads(resp.read().decode("utf-8"))

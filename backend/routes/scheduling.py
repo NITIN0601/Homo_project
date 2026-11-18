@@ -82,7 +82,9 @@ async def detect_client_geo(request: Request):
         "status": "success",
         "ip": client_ip,
         "country": "Detected",
-        "timezone": "America/New_York" if client_ip.startswith("127.") or client_ip in ("::1", "localhost") else "Asia/Kolkata",
+        "timezone": "America/New_York"
+        if client_ip.startswith("127.") or client_ip in ("::1", "localhost")
+        else "Asia/Kolkata",
         "detection_source": "network_ip_resolver",
     }
 
@@ -111,7 +113,10 @@ async def list_holidays_endpoint(
         )
 
 
-@router.post("/calendar/holidays/sync", summary="Sync Indian holidays from Google Calendar and save to persistent storage (1st Jan Yearly Sync)")
+@router.post(
+    "/calendar/holidays/sync",
+    summary="Sync Indian holidays from Google Calendar and save to persistent storage (1st Jan Yearly Sync)",
+)
 async def sync_holidays_endpoint(
     year: int = Query(default=2026, ge=2024, le=2030),
     force: bool = Query(default=True),
@@ -134,9 +139,7 @@ async def sync_holidays_endpoint(
 
 
 @router.get("/calendar/check-date", summary="Check if a specific date is an Indian holiday")
-async def check_holiday_date_endpoint(
-    date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", examples=["2026-11-08"])
-):
+async def check_holiday_date_endpoint(date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$", examples=["2026-11-08"])):
     try:
         year = int(date.split("-")[0])
         holidays = await fetch_google_calendar_indian_holidays(year=year)
@@ -170,6 +173,8 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
 
     date_part = req.start_time.split("T")[0] if "T" in req.start_time else req.start_time
     time_part = req.start_time.split("T")[1][:5] if "T" in req.start_time else "10:00"
+    target_facility_date = req.hospital_date or req.clinic_date
+    target_facility_slot = req.hospital_slot or req.clinic_slot
 
     with _booking_lock:
         existing = get_all_appointments()
@@ -177,14 +182,17 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
             if apt.get("status") == "Cancelled":
                 continue
 
-            # Concurrency double-booking guard against doctor's clinic slot
-            if req.clinic_date and req.clinic_slot:
-                if (apt.get("clinicDate") == req.clinic_date and apt.get("clinicSlot") == req.clinic_slot) or (
-                    apt.get("date") == req.clinic_date and apt.get("slot") == req.clinic_slot
+            # Concurrency double-booking guard against doctor's hospital/clinic slot
+            if target_facility_date and target_facility_slot:
+                if (
+                    (apt.get("hospitalDate") == target_facility_date or apt.get("clinicDate") == target_facility_date)
+                    and (apt.get("hospitalSlot") == target_facility_slot or apt.get("clinicSlot") == target_facility_slot)
+                ) or (
+                    apt.get("date") == target_facility_date and apt.get("slot") == target_facility_slot
                 ):
                     raise HTTPException(
                         status_code=status.HTTP_409_CONFLICT,
-                        detail=f"Time slot {req.clinic_slot} on {req.clinic_date} is already booked. Please choose a different slot.",
+                        detail=f"Time slot {target_facility_slot} on {target_facility_date} is already booked. Please choose a different slot.",
                     )
 
             # Fallback legacy check by start_time / date_part
@@ -204,8 +212,8 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
         continuity_info = resolve_patient_doctor_continuity(
             hospital_id=hospital.get("id"),
             patient_identifier=req.user_email or req.user_phone or "",
-            preferred_date=req.clinic_date or date_part,
-            preferred_slot=req.clinic_slot or time_part,
+            preferred_date=target_facility_date or date_part,
+            preferred_slot=target_facility_slot or time_part,
         )
         cont_status = req.continuity_status or (
             "Continuing Care"
@@ -229,16 +237,24 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
             "patientEmail": req.user_email,
             "date": req.user_date or date_part,
             "time": req.user_time or time_part,
-            "slot": req.clinic_slot or time_part,
-            "clinicDate": req.clinic_date or date_part,
-            "clinicSlot": req.clinic_slot or time_part,
-            "clinicTime": req.clinic_slot or time_part,
+            "slot": target_facility_slot or time_part,
+            "hospitalDate": target_facility_date or date_part,
+            "clinicDate": target_facility_date or date_part,
+            "hospitalSlot": target_facility_slot or time_part,
+            "clinicSlot": target_facility_slot or time_part,
+            "hospitalTime": target_facility_slot or time_part,
+            "clinicTime": target_facility_slot or time_part,
             "userDate": req.user_date or date_part,
             "userTime": req.user_time or time_part,
             "userTimezone": req.user_timezone,
             "start_time": req.start_time,
             "end_time": req.end_time,
-            "type": req.consultation_type or ("Online Tele-Consultation" if req.user_timezone and req.user_timezone != "Asia/Kolkata" else "In-Person Clinic Visit"),
+            "type": req.consultation_type
+            or (
+                "Online Tele-Consultation"
+                if req.user_timezone and req.user_timezone != "Asia/Kolkata"
+                else "In-Person Clinic Visit"
+            ),
             "chiefReason": req.description or "Clinical Consultation",
             "status": "Confirmed",
             "continuityStatus": cont_status,
@@ -272,14 +288,15 @@ async def book_appointment_endpoint(req: BookAppointmentRequest):
 
     # Automated Dispatch: Email & WhatsApp Confirmations
     h_city = hospital.get("contact", {}).get("address", {}).get("city", "Bengaluru")
-    clinic_loc_str = f"{hospital.get('name')}, {h_city}"
+    hospital_loc_str = f"{hospital.get('name')}, {h_city}"
+    clinic_loc_str = hospital_loc_str
 
     email_res = await send_appointment_confirmation(
         customer_email=req.user_email,
         customer_name=req.user_name,
         appointment_time=f"{date_part} at {time_part}",
         doctor_name=doctor.get("name"),
-        clinic_location=clinic_loc_str,
+        clinic_location=hospital_loc_str,
     )
 
     wa_res = await send_appointment_whatsapp_notification(
@@ -354,7 +371,11 @@ async def create_appointment_endpoint(payload: dict[str, Any]):
         with _booking_lock:
             existing = get_all_appointments()
             for apt in existing:
-                if (apt.get("date") == date) and (apt.get("slot") == slot or apt.get("time") == slot) and apt.get("status") != "Cancelled":
+                if (
+                    (apt.get("date") == date)
+                    and (apt.get("slot") == slot or apt.get("time") == slot)
+                    and apt.get("status") != "Cancelled"
+                ):
                     raise HTTPException(
                         status_code=status.HTTP_409_CONFLICT,
                         detail=f"Time slot {slot} on {date} is already booked.",
@@ -386,4 +407,3 @@ async def list_blocked_dates_endpoint():
 @router.post("/blocked-dates", summary="Save doctor blocked dates")
 async def save_blocked_dates_endpoint(payload: list[dict[str, Any]]):
     return save_blocked_dates(payload)
-

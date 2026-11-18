@@ -19,12 +19,14 @@ logger = logging.getLogger("typesafe_jev")
 @dataclass
 class Noul:
     """Yes/No probabilistic question returning boolean value and calibrated probability."""
+
     instructions: str
 
 
 @dataclass
 class Choice:
     """Multi-category selection returning chosen key, probability, and distribution."""
+
     instructions: str
     criteria: dict[str, str] = field(default_factory=dict)
 
@@ -32,6 +34,7 @@ class Choice:
 @dataclass
 class Score:
     """Continuous rating returning numeric score and confidence index."""
+
     instructions: str
     min_value: float = 1.0
     max_value: float = 10.0
@@ -74,6 +77,7 @@ class TypeSafeClassifier:
         if self.api_key and not self.api_key.startswith("dummy"):
             try:
                 import httpx
+
                 resp = httpx.post(
                     "https://api.typesafe.ai/v1/classify",
                     headers={"Authorization": f"Bearer {self.api_key}"},
@@ -143,9 +147,15 @@ class TypeSafeClassifier:
             elif isinstance(q, Score):
                 # Severity / rating continuous score
                 severity_words = {
-                    "mild": 2.0, "slight": 2.5, "moderate": 5.0,
-                    "considerable": 6.5, "severe": 8.5, "excruciating": 9.8,
-                    "emergency": 9.9, "chronic": 4.5, "acute": 7.5
+                    "mild": 2.0,
+                    "slight": 2.5,
+                    "moderate": 5.0,
+                    "considerable": 6.5,
+                    "severe": 8.5,
+                    "excruciating": 9.8,
+                    "emergency": 9.9,
+                    "chronic": 4.5,
+                    "acute": 7.5,
                 }
                 detected_scores = [score for word, score in severity_words.items() if word in text_lower]
                 final_score = (sum(detected_scores) / len(detected_scores)) if detected_scores else 4.0
@@ -168,7 +178,9 @@ def classify_clinical_state_with_jev(
     if not questions_schema:
         # Default Clinical Triage Question Set
         questions_schema = {
-            "is_emergency": Noul(instructions="Does this clinical presentation indicate an immediate life-threatening emergency?"),
+            "is_emergency": Noul(
+                instructions="Does this clinical presentation indicate an immediate life-threatening emergency?"
+            ),
             "consultation_modality": Choice(
                 instructions="Determine the recommended consultation mode for this case.",
                 criteria={
@@ -176,7 +188,11 @@ def classify_clinical_state_with_jev(
                     "tele_consult": "Chronic constitutional review, indigestion, mild rhinitis, or follow-up remedy adjustment.",
                 },
             ),
-            "severity_index": Score(instructions="Assess the clinical severity index on a scale from 1.0 to 10.0.", min_value=1.0, max_value=10.0),
+            "severity_index": Score(
+                instructions="Assess the clinical severity index on a scale from 1.0 to 10.0.",
+                min_value=1.0,
+                max_value=10.0,
+            ),
             "primary_miasm": Choice(
                 instructions="Identify dominant Hahnemannian miasmatic predisposition.",
                 criteria={
@@ -191,9 +207,5 @@ def classify_clinical_state_with_jev(
     return {
         "status": "success",
         "engine": "TypeSafe AI Jev Model (langchain-typesafe)",
-        "results": {
-            k: (v.model_dump() if hasattr(v, "model_dump") else v.__dict__)
-            for k, v in raw_results.items()
-        },
+        "results": {k: (v.model_dump() if hasattr(v, "model_dump") else v.__dict__) for k, v in raw_results.items()},
     }
-

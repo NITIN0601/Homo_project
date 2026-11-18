@@ -59,9 +59,7 @@ def get_calendar_service():
         return None
 
     try:
-        creds = service_account.Credentials.from_service_account_file(
-            CREDENTIALS_PATH, scopes=SCOPES
-        )
+        creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=SCOPES)
         service = build("calendar", "v3", credentials=creds, cache_discovery=False)
         return service
     except Exception as exc:
@@ -91,18 +89,10 @@ async def create_google_calendar_event(
 
     # Validation
     if not validate_email_address(user_email):
-        return {
-            "success": False,
-            "error": f"Invalid email format: '{user_email}'",
-            "code": "INVALID_EMAIL"
-        }
+        return {"success": False, "error": f"Invalid email format: '{user_email}'", "code": "INVALID_EMAIL"}
 
     if not validate_future_date(start_time_iso):
-        return {
-            "success": False,
-            "error": "Appointment start date/time must be in the future.",
-            "code": "PAST_DATE"
-        }
+        return {"success": False, "error": "Appointment start date/time must be in the future.", "code": "PAST_DATE"}
 
     service = get_calendar_service()
 
@@ -144,11 +134,7 @@ async def create_google_calendar_event(
 
     try:
         # Pass sendUpdates='all' to force automated Google email invites
-        created_event = service.events().insert(
-            calendarId=target_cal_id,
-            body=event_body,
-            sendUpdates="all"
-        ).execute()
+        created_event = service.events().insert(calendarId=target_cal_id, body=event_body, sendUpdates="all").execute()
 
         return {
             "success": True,
@@ -159,8 +145,4 @@ async def create_google_calendar_event(
         }
     except Exception as exc:
         logger.error("Google Calendar API error: %s", exc)
-        return {
-            "success": False,
-            "error": str(exc),
-            "code": "GCAL_API_ERROR"
-        }
+        return {"success": False, "error": str(exc), "code": "GCAL_API_ERROR"}

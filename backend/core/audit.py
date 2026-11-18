@@ -27,15 +27,15 @@ AUDIT_DIR = Path(__file__).resolve().parent.parent / "data"
 AUDIT_DIR.mkdir(parents=True, exist_ok=True)
 AUDIT_LOG_FILE = AUDIT_DIR / "audit_traces.jsonl"
 
-_AUDIT_WRITE_LOCK = threading.Lock()   # in-process guard
+_AUDIT_WRITE_LOCK = threading.Lock()  # in-process guard
 
 _audit_logger = logging.getLogger("ehr.audit")
 _audit_logger.setLevel(logging.INFO)
 if not _audit_logger.handlers:
     _audit_handler = logging.handlers.RotatingFileHandler(
         filename=str(AUDIT_LOG_FILE),
-        maxBytes=500_000,        # Cap active log file at 500 KB
-        backupCount=2,           # Keep at most 2 backup rotations
+        maxBytes=500_000,  # Cap active log file at 500 KB
+        backupCount=2,  # Keep at most 2 backup rotations
         encoding="utf-8",
     )
     _audit_handler.setFormatter(logging.Formatter("%(message)s"))
@@ -67,6 +67,7 @@ class AuditTraceMiddleware(BaseHTTPMiddleware):
         if auth_header.startswith("Bearer "):
             try:
                 from core.security import verify_access_token
+
                 token = auth_header.split("Bearer ", 1)[1].strip()
                 payload = verify_access_token(token)
                 if payload:
@@ -100,13 +101,18 @@ class AuditTraceMiddleware(BaseHTTPMiddleware):
                 add_admin_alert(
                     component="phi_security_guard",
                     message=f"Unauthorized PHI access attempt: {request.method} {request.url.path} by user {user_id} (hospital {hospital_id})",
-                    details={"trace_id": trace_id, "session_id": session_id, "hospital_id": hospital_id, "ip": entry["client_ip"]}
+                    details={
+                        "trace_id": trace_id,
+                        "session_id": session_id,
+                        "hospital_id": hospital_id,
+                        "ip": entry["client_ip"],
+                    },
                 )
             elif response.status_code >= 500:
                 add_admin_alert(
                     component="system_error",
                     message=f"Internal error on {request.method} {request.url.path} (status {response.status_code})",
-                    details={"trace_id": trace_id, "session_id": session_id, "hospital_id": hospital_id}
+                    details={"trace_id": trace_id, "session_id": session_id, "hospital_id": hospital_id},
                 )
 
             # Attach trace & tenant headers to client response
@@ -134,7 +140,6 @@ class AuditTraceMiddleware(BaseHTTPMiddleware):
             add_admin_alert(
                 component="unhandled_exception",
                 message=f"Critical exception on {request.method} {request.url.path}: {exc}",
-                details={"trace_id": trace_id, "error": str(exc)}
+                details={"trace_id": trace_id, "error": str(exc)},
             )
             raise exc
-

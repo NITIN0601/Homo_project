@@ -5,6 +5,7 @@ Prioritizes backend/data/hospitals.json with seamless future PostgreSQL / Supaba
 """
 
 import logging
+from datetime import datetime, timezone
 from typing import Any
 
 from core.config import settings
@@ -140,14 +141,19 @@ def create_hospital(data: dict[str, Any]) -> dict[str, Any]:
         "id": h_id,
         "slug": h_id,
         "name": data.get("name", "New Healthcare Center"),
-        "shortName": data.get("short_name") or data.get("name", "New Clinic"),
+        "facilityType": data.get("facility_type") or data.get("facilityType") or "hospital",
+        "shortName": data.get("short_name") or data.get("name", "New Hospital"),
         "tagline": data.get("tagline", "Quality patient-first healthcare"),
         "domain": data.get("domain", f"{h_id}.org"),
-        "subdomains": [h_id, "clinic", "ehr"],
+        "subdomains": [h_id, "hospital", "clinic", "ehr"],
         "currency": data.get("currency") or "INR",
         "currencySymbol": data.get("currencySymbol") or "₹",
         "hours": data.get("hours"),
-        "legal": data.get("legal"),
+        "legal": data.get("legal") or {
+            "termsConditionsText": data.get("terms_conditions_text"),
+            "privacyPolicyText": data.get("privacy_policy_text"),
+            "emergencyNotice": data.get("emergency_notice"),
+        },
         "contact": {
             "phone": data.get("phone", "+91 98450 12345"),
             "phoneDisplay": data.get("phone", "+91 98450 12345"),
@@ -167,14 +173,107 @@ def create_hospital(data: dict[str, Any]) -> dict[str, Any]:
             "neutralBg": "#fafaf9",
             "cardRadius": "1.25rem",
             "buttonRadius": "0.75rem",
-            "logoUrl": data.get("logo_url") or data.get("logoUrl") or "/generic-clinic-logo.svg",
+            "logoUrl": data.get("logo_url") or data.get("logoUrl") or "/generic-hospital-logo.svg",
             "bannerUrl": data.get("banner_url") or data.get("bannerUrl") or "/assets/banner.jpg",
-            "aboutClinicText": data.get("about_clinic_text") or data.get("aboutClinicText") or f"{data.get('name', 'Hospital')} provides comprehensive patient care.",
+            "aboutHospitalText": data.get("about_hospital_text")
+            or data.get("aboutHospitalText")
+            or data.get("about_clinic_text")
+            or data.get("aboutClinicText")
+            or f"{data.get('name', 'Hospital')} provides comprehensive patient care.",
+            "aboutClinicText": data.get("about_hospital_text")
+            or data.get("aboutHospitalText")
+            or data.get("about_clinic_text")
+            or data.get("aboutClinicText")
+            or f"{data.get('name', 'Hospital')} provides comprehensive patient care.",
         },
         "features": {**default_features, **(data.get("features") or {})},
         "isActive": True,
     }
     return save_hospital(record)
+
+
+def delete_hospital(hospital_id: str, soft_delete: bool = True) -> dict[str, Any] | None:
+    """
+    Deactivates or deletes a hospital tenant.
+    Defaults to soft-delete (isActive=False) to prevent data orphanages across historical appointments.
+    Cascades deactivation to all associated doctors.
+    """
+    hospitals = get_all_hospitals()
+    target_id = hospital_id.strip().lower()
+    idx = next((i for i, h in enumerate(hospitals) if h.get("id", "").lower() == target_id), None)
+    if idx is None:
+        return None
+
+    target = hospitals[idx]
+    if soft_delete:
+        target["isActive"] = False
+        target["deactivatedAt"] = datetime.now(timezone.utc).isoformat()
+        hospitals[idx] = target
+    else:
+        target = hospitals.pop(idx)
+
+    save_json(HOSPITALS_FILE, hospitals)
+
+    # Cascade soft deactivation to associated doctors
+    try:
+        from services.doctor_service import DOCTORS_FILE, get_all_doctors
+
+        doctors = get_all_doctors()
+        updated = False
+        for doc in doctors:
+            if doc.get("hospitalId", "").lower() == target_id:
+                if soft_delete:
+                    doc["isActive"] = False
+                    doc["deactivatedAt"] = datetime.now(timezone.utc).isoformat()
+                updated = True
+        if updated:
+            if not soft_delete:
+                doctors = [d for d in doctors if d.get("hospitalId", "").lower() != target_id]
+            save_json(DOCTORS_FILE, doctors)
+    except Exception as exc:
+        logger.warning(f"Error cascading hospital deletion to doctors: {exc}")
+
+    logger.info(f"Hospital '{hospital_id}' {'soft-deactivated' if soft_delete else 'permanently removed'}.")
+    return target
+
+
+def update_hospital_customization(hospital_id: str, updates: dict[str, Any]) -> dict[str, Any]:
+    """
+    Atomically updates hospital and clinic branding, contact info, and bio
+    from the Admin Customization Tab, maintaining single source of truth across all sessions.
+    """
+    hospital = get_hospital(hospital_id)
+    if not hospital:
+        raise ValueError(f"Hospital '{hospital_id}' not found.")
+
+    for field in ("name", "shortName", "tagline", "hours", "currency", "currencySymbol", "facilityType", "legal"):
+        if field in updates:
+            hospital[field] = updates[field]
+
+    if "contact" in updates and isinstance(updates["contact"], dict):
+        hospital["contact"] = {**(hospital.get("contact") or {}), **updates["contact"]}
+
+    if "branding" in updates and isinstance(updates["branding"], dict):
+        hospital["branding"] = {**(hospital.get("branding") or {}), **updates["branding"]}
+
+    if "doctor" in updates and isinstance(updates["doctor"], dict):
+        hospital["doctor"] = {**(hospital.get("doctor") or {}), **updates["doctor"]}
+        # Also sync to doctor registry if doctor id is provided
+        doc_id = updates["doctor"].get("id")
+        if doc_id:
+            try:
+                from services.doctor_service import get_doctor, save_doctor
+
+                doc = get_doctor(doc_id, hospital_id=hospital_id)
+                if doc:
+                    doc.update(updates["doctor"])
+                    doc["updatedAt"] = datetime.now(timezone.utc).isoformat()
+                    save_doctor(doc)
+            except Exception as exc:
+                logger.warning(f"Could not auto-sync doctor record: {exc}")
+
+    hospital["updatedAt"] = datetime.now(timezone.utc).isoformat()
+    return save_hospital(hospital)
 
 
 def _fallback_hospital() -> dict[str, Any]:
@@ -201,4 +300,3 @@ def _fallback_hospital() -> dict[str, Any]:
         },
         "isActive": True,
     }
-

@@ -147,7 +147,7 @@ async def get_patient_records(
     view: str = Query("mobile", description="mobile (text-only, no file paths) or admin (full paths)"),
     authorization: str | None = Header(None),
 ):
-    is_mobile = (view.lower() == "mobile")
+    is_mobile = view.lower() == "mobile"
     user = None
     if authorization:
         parts = authorization.split()
@@ -192,7 +192,8 @@ async def get_patient_records(
             user_id = user.get("sub") or user.get("id") or user.get("email")
             user_name = (user.get("name") or "").lower()
             records = [
-                r for r in records
+                r
+                for r in records
                 if (r.get("patient_name") or "").lower() == user_name
                 or r.get("patient_id") == user_id
                 or r.get("id") == user_id
@@ -396,18 +397,28 @@ async def upload_prescription_endpoint(
     check_phi_access_permission(patient_id, authorization)
     file_name = file.filename if file and file.filename else f"rx_{int(datetime.now().timestamp())}.jpg"
     inventory = get_all_inventory()
-    mock_remedies = [
-        {
-            "medicineId": item.get("id", f"m{idx+1}"),
-            "medicineName": item.get("name", "Prescribed Remedy"),
-            "potency": item.get("potency", "30C"),
-            "dosage": "4 globules twice daily after meals",
-            "duration": "10 days",
-        }
-        for idx, item in enumerate(inventory[:2])
-    ] if inventory else [
-        {"medicineId": "m1", "medicineName": "Constitutional Remedy", "potency": "30C", "dosage": "4 globules twice daily", "duration": "10 days"}
-    ]
+    mock_remedies = (
+        [
+            {
+                "medicineId": item.get("id", f"m{idx + 1}"),
+                "medicineName": item.get("name", "Prescribed Remedy"),
+                "potency": item.get("potency", "30C"),
+                "dosage": "4 globules twice daily after meals",
+                "duration": "10 days",
+            }
+            for idx, item in enumerate(inventory[:2])
+        ]
+        if inventory
+        else [
+            {
+                "medicineId": "m1",
+                "medicineName": "Constitutional Remedy",
+                "potency": "30C",
+                "dosage": "4 globules twice daily",
+                "duration": "10 days",
+            }
+        ]
+    )
 
     parsed_record = {
         "id": f"vis-{int(datetime.now().timestamp() * 1000)}",
@@ -466,4 +477,3 @@ async def jev_repertorize_endpoint(req: JevRepertorizeRequest):
 @router.post("/prescriptions/upload", summary="Prescription upload (documented schema alias)")
 async def upload_prescription_alias_endpoint(file: UploadFile | None = File(None)):
     return await upload_prescription_endpoint(patient_id="usr-demo-01", file=file)
-

@@ -3,7 +3,8 @@ Unit Tests for Location-to-Timezone Resolution & Onboarding Integration.
 """
 
 import unittest
-from core.timezone_utils import infer_timezone_from_location, get_timezone_details
+
+from core.timezone_utils import get_timezone_details, infer_timezone_from_location
 
 
 class TestTimezoneLocationResolution(unittest.TestCase):
@@ -75,4 +76,3 @@ class TestTimezoneLocationResolution(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

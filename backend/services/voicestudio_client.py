@@ -13,9 +13,7 @@ VOICESTUDIO_URL = "http://127.0.0.1:3900/v1/audio/transcriptions"
 
 
 async def transcribe_audio_with_voicestudio(
-    file_path: Path,
-    language: str | None = None,
-    estimated_duration_seconds: int = 60
+    file_path: Path, language: str | None = None, estimated_duration_seconds: int = 60
 ) -> dict[str, Any]:
     """
     Transcribes audio file using VoiceStudio Whisper server.
@@ -30,10 +28,7 @@ async def transcribe_audio_with_voicestudio(
         async with httpx.AsyncClient(timeout=timeout_seconds) as client:
             with open(file_path, "rb") as f:
                 files = {"file": (file_path.name, f, "audio/webm")}
-                data = {
-                    "model": "whisper-1",
-                    "response_format": "verbose_json"
-                }
+                data = {"model": "whisper-1", "response_format": "verbose_json"}
                 if language and language != "auto":
                     data["language"] = language
 
@@ -46,7 +41,7 @@ async def transcribe_audio_with_voicestudio(
                         "language": payload.get("language", language or "en"),
                         "duration": payload.get("duration", estimated_duration_seconds),
                         "source": "voicestudio-daemon",
-                        "status": "success"
+                        "status": "success",
                     }
     except Exception as e:
         # VoiceStudio is either not running or encountered a network error.
@@ -57,5 +52,5 @@ async def transcribe_audio_with_voicestudio(
             "duration": 0,
             "source": "voicestudio-daemon",
             "status": "error",
-            "error_detail": f"VoiceStudio STT daemon unreachable at {VOICESTUDIO_URL}. Ensure local daemon is running on port 3900. ({e!s})"
+            "error_detail": f"VoiceStudio STT daemon unreachable at {VOICESTUDIO_URL}. Ensure local daemon is running on port 3900. ({e!s})",
         }

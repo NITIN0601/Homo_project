@@ -26,7 +26,9 @@ class CreateConsultationInvoiceRequest(BaseModel):
     issueDate: str | None = Field(default=None, max_length=50)
     amountINR: float = Field(..., gt=0, le=10_000_000, description="Amount must be strictly positive")
     amount: float | None = Field(default=None, gt=0, le=10_000_000, description="Universal amount alias")
-    currency: str | None = Field(default="INR", max_length=10, description="Billing currency e.g. INR, USD, GBP, AED, EUR")
+    currency: str | None = Field(
+        default="INR", max_length=10, description="Billing currency e.g. INR, USD, GBP, AED, EUR"
+    )
     currencySymbol: str | None = Field(default="₹", max_length=10, description="Display symbol e.g. ₹, $, £, AED, €")
     status: Literal["pending", "processing", "paid", "cancelled"] = Field(default="pending")
     description: str = Field(..., max_length=1000)

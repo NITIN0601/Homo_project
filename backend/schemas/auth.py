@@ -57,4 +57,3 @@ class AcceptGoogleInviteRequest(BaseModel):
     token: str = Field(..., example="inv_abc123456")
     email: str = Field(..., example="patient@gmail.com")
     name: str = Field(default="Google Patient", example="Google Patient")
-

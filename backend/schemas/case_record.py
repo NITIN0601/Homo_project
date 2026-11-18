@@ -157,6 +157,7 @@ class HomeopathicCaseRecord(BaseModel):
     Master Clinical Schema for Classical Homeopathy Consultations.
     Matches standard homeopathic case taking (Hahnemannian Organon §83-§104).
     """
+
     metadata: Metadata = Field(default_factory=Metadata)
     doctor_details: DoctorDetails = Field(default_factory=DoctorDetails)
     patient_details: PatientDetails = Field(default_factory=PatientDetails)
@@ -164,6 +165,4 @@ class HomeopathicCaseRecord(BaseModel):
     homeopathic_case_analysis: HomeopathicCaseAnalysis = Field(default_factory=HomeopathicCaseAnalysis)
     clinical_summary: ClinicalSummary = Field(default_factory=ClinicalSummary)
     treatment_plan: TreatmentPlan = Field(default_factory=TreatmentPlan)
-    patient_visibility_permissions: PatientVisibilityPermissions = Field(
-        default_factory=PatientVisibilityPermissions
-    )
+    patient_visibility_permissions: PatientVisibilityPermissions = Field(default_factory=PatientVisibilityPermissions)

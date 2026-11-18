@@ -3,8 +3,6 @@ Unified Multi-Tenant Location Currency Utility.
 Infers local billing currency and symbol based on hospital/clinic/doctor location country.
 """
 
-from typing import Any
-
 SUPPORTED_CURRENCIES: list[dict[str, str]] = [
     {"code": "INR", "symbol": "₹", "name": "Indian Rupee (INR)", "locale": "en_IN"},
     {"code": "USD", "symbol": "$", "name": "US Dollar (USD)", "locale": "en_US"},
@@ -45,7 +43,30 @@ def infer_currency_from_country(country: str | None = None) -> dict[str, str]:
     if c in ["canada", "ca"]:
         return {"code": "CAD", "symbol": "C$", "name": "Canadian Dollar (CAD)", "locale": "en_CA"}
 
-    if c in ["germany", "france", "spain", "italy", "netherlands", "ireland", "belgium", "austria", "portugal", "greece", "finland", "europe", "eu", "de", "fr", "es", "it", "nl", "ie", "be", "at", "pt"]:
+    if c in [
+        "germany",
+        "france",
+        "spain",
+        "italy",
+        "netherlands",
+        "ireland",
+        "belgium",
+        "austria",
+        "portugal",
+        "greece",
+        "finland",
+        "europe",
+        "eu",
+        "de",
+        "fr",
+        "es",
+        "it",
+        "nl",
+        "ie",
+        "be",
+        "at",
+        "pt",
+    ]:
         return {"code": "EUR", "symbol": "€", "name": "Euro (EUR)", "locale": "de_DE"}
 
     if c in ["japan", "jp"]:

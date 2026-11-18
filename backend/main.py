@@ -121,14 +121,16 @@ async def global_unhandled_exception_handler(request: Request, exc: Exception):
     }
 
     record_crash_report(report_data)
-    record_audit_entry({
-        "action": "SERVER_UNHANDLED_EXCEPTION",
-        "incident_id": incident_id,
-        "error_name": type(exc).__name__,
-        "route": clean_path,
-        "method": request.method,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    })
+    record_audit_entry(
+        {
+            "action": "SERVER_UNHANDLED_EXCEPTION",
+            "incident_id": incident_id,
+            "error_name": type(exc).__name__,
+            "route": clean_path,
+            "method": request.method,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+    )
 
     return JSONResponse(
         status_code=500,
@@ -138,6 +140,7 @@ async def global_unhandled_exception_handler(request: Request, exc: Exception):
             "message": "This issue has been safely recorded for our engineering team without storing any personal or clinical information.",
         },
     )
+
 
 # CORS Middleware
 app.add_middleware(
@@ -241,4 +244,5 @@ app.include_router(api_router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -13,7 +13,9 @@ from schemas.case_record import HomeopathicCaseRecord
 class TextParseRequest(BaseModel):
     text: str = Field(..., description="Raw clinical dictation or patient consultation text")
     provider: str | None = Field(default="gemini", description="LLM Provider: gemini, groq, openai, anthropic, ollama")
-    model: str | None = Field(default=None, description="Specific model name (e.g. gemini-2.5-flash, llama-3.3-70b-versatile)")
+    model: str | None = Field(
+        default=None, description="Specific model name (e.g. gemini-2.5-flash, llama-3.3-70b-versatile)"
+    )
     api_key: str | None = Field(default=None, description="Optional custom user API key for BYOK")
     patient_name: str | None = Field(default="Anonymous Consultation", description="Patient identifier")
 

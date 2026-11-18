@@ -2,6 +2,7 @@
 Shared async HTTP client pool for all external service calls.
 Prevents creating a new TCP connection per request (Supabase, LLM APIs, etc.)
 """
+
 import httpx
 
 _client: httpx.AsyncClient | None = None
@@ -22,4 +23,3 @@ async def close_client() -> None:
     if _client and not _client.is_closed:
         await _client.aclose()
         _client = None
-

@@ -5,6 +5,7 @@ Supports 1 to N doctors per hospital with dynamic practitioner resolution.
 """
 
 import logging
+from datetime import datetime, timezone
 from typing import Any
 
 from core.config import settings
@@ -70,7 +71,9 @@ def get_doctor(doctor_id: str | None = None, hospital_id: str | None = None) -> 
         if d.get("licenseId", "").lower() == target_id:
             return d
 
-    logger.warning(f"Doctor '{doctor_id}' not found in registry. Falling back to primary doctor for hospital '{hospital_id}'.")
+    logger.warning(
+        f"Doctor '{doctor_id}' not found in registry. Falling back to primary doctor for hospital '{hospital_id}'."
+    )
     return get_primary_doctor(hospital_id)
 
 
@@ -98,6 +101,7 @@ def create_doctor(data: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("hospital_id is required to create a doctor.")
 
     import uuid
+
     doc_id = data.get("id") or f"doc-{uuid.uuid4().hex[:6]}"
     record = {
         "id": doc_id,
@@ -123,6 +127,34 @@ def create_doctor(data: dict[str, Any]) -> dict[str, Any]:
     return save_doctor(record)
 
 
+def delete_doctor(doctor_id: str, hospital_id: str | None = None, soft_delete: bool = True) -> dict[str, Any] | None:
+    """
+    Deletes or deactivates a doctor from the roster.
+    Defaults to soft-delete to preserve patient historical records and appointment logs.
+    """
+    doctors = get_all_doctors()
+    target_id = doctor_id.strip().lower()
+    idx = next((i for i, d in enumerate(doctors) if d.get("id", "").lower() == target_id), None)
+    if idx is None:
+        return None
+
+    target = doctors[idx]
+    if hospital_id and target.get("hospitalId", "").lower() != hospital_id.strip().lower():
+        return None
+
+    if soft_delete:
+        target["isActive"] = False
+        target["isPrimary"] = False
+        target["deactivatedAt"] = datetime.now(timezone.utc).isoformat()
+        doctors[idx] = target
+    else:
+        target = doctors.pop(idx)
+
+    save_json(DOCTORS_FILE, doctors)
+    logger.info(f"Doctor '{doctor_id}' {'soft-deactivated' if soft_delete else 'permanently removed'}.")
+    return target
+
+
 def _fallback_doctor() -> dict[str, Any]:
     """Safety fallback doctor entity if store is completely empty."""
     return {
@@ -138,4 +170,3 @@ def _fallback_doctor() -> dict[str, Any]:
         "isPrimary": True,
         "isActive": True,
     }
-

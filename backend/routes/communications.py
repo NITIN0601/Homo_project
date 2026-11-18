@@ -50,4 +50,3 @@ async def send_whatsapp_message_endpoint(req: WhatsAppMessageRequest):
         "type": req.type,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
-

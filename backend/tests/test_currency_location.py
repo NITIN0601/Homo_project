@@ -5,7 +5,8 @@ Unit Tests for Location-to-Currency Resolution and Dynamic Country Billing.
 import asyncio
 import unittest
 import uuid
-from core.currency_utils import infer_currency_from_country, format_currency, SUPPORTED_CURRENCIES
+
+from core.currency_utils import format_currency, infer_currency_from_country
 from services.onboarding_service import onboard
 
 
@@ -84,11 +85,13 @@ class TestCurrencyLocationResolution(unittest.TestCase):
             self.assertEqual(tenant.get("currency"), "USD")
             self.assertEqual(tenant.get("currencySymbol"), "$")
         finally:
-            from services.hospital_service import get_all_hospitals, save_json, HOSPITALS_FILE
+            from services.hospital_service import HOSPITALS_FILE, get_all_hospitals, save_json
+
             hospitals = [h for h in get_all_hospitals() if h.get("id") != unique_id]
             save_json(HOSPITALS_FILE, hospitals)
 
-            from services.doctor_service import get_all_doctors, DOCTORS_FILE
+            from services.doctor_service import DOCTORS_FILE, get_all_doctors
+
             doctors = [d for d in get_all_doctors() if d.get("hospitalId") != unique_id]
             save_json(DOCTORS_FILE, doctors)
 

@@ -103,7 +103,9 @@ def resolve_patient_doctor_continuity(
         apt_phone = _clean_phone(apt.get("patientPhone") or apt.get("user_phone"))
 
         is_email_match = bool(clean_ident_lower and apt_email and clean_ident_lower == apt_email)
-        is_phone_match = bool(clean_phone_val and apt_phone and (clean_phone_val in apt_phone or apt_phone in clean_phone_val))
+        is_phone_match = bool(
+            clean_phone_val and apt_phone and (clean_phone_val in apt_phone or apt_phone in clean_phone_val)
+        )
 
         if is_email_match or is_phone_match:
             # Exclude cancelled appointments when determining continuity of care
@@ -140,7 +142,9 @@ def resolve_patient_doctor_continuity(
     # Resolve doctor profile
     doc_profile = next((d for d in hospital_docs if d.get("id") == prev_doc_id), None)
     if not doc_profile and prev_doc_name:
-        doc_profile = next((d for d in hospital_docs if d.get("name") == prev_doc_name or d.get("shortName") == prev_doc_name), None)
+        doc_profile = next(
+            (d for d in hospital_docs if d.get("name") == prev_doc_name or d.get("shortName") == prev_doc_name), None
+        )
 
     # 4.1 Check if treating doctor is inactive or left clinic
     is_doc_active = bool(doc_profile and doc_profile.get("isActive", True))
@@ -223,4 +227,3 @@ def resolve_patient_doctor_continuity(
         "case_transfer_required": False,
         "hospital_doctors": active_summaries,
     }
-

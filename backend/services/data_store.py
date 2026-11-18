@@ -28,6 +28,7 @@ class InterProcessLock:
     Dual-layer concurrency lock combining threading.Lock (intra-process threads)
     and fcntl.flock (inter-process OS kernel locks for multi-worker scaling).
     """
+
     def __init__(self, lock_file: str = "booking.lock"):
         self.lock_path = BACKEND_DATA_DIR / lock_file
         self._thread_lock = threading.Lock()
@@ -120,7 +121,6 @@ def save_json(filename: str, data: Any) -> None:
                 pass
 
 
-
 # ─── Appointments Store ───────────────────────────────────────────────────────
 
 APPOINTMENTS_FILE = "appointments_sync.json"
@@ -207,11 +207,9 @@ def get_all_visit_summaries() -> dict[str, Any]:
 
 def save_visit_summary(patient_id: str, visit_record: dict[str, Any]) -> dict[str, Any]:
     current = get_all_visit_summaries()
-    patient_file = current.get(patient_id, {
-        "patientId": patient_id,
-        "patientName": visit_record.get("patientName", "Patient"),
-        "visits": []
-    })
+    patient_file = current.get(
+        patient_id, {"patientId": patient_id, "patientName": visit_record.get("patientName", "Patient"), "visits": []}
+    )
     visits = patient_file.get("visits", [])
     visits.insert(0, visit_record)
     patient_file["visits"] = visits
@@ -225,11 +223,7 @@ def get_patient_medical_file(patient_id: str) -> dict[str, Any] | None:
     if patient_id in summaries:
         return summaries[patient_id]
     # Return placeholder patient record
-    return {
-        "patientId": patient_id,
-        "patientName": f"Patient ({patient_id})",
-        "visits": []
-    }
+    return {"patientId": patient_id, "patientName": f"Patient ({patient_id})", "visits": []}
 
 
 def get_patient_prescribed_remedies(patient_id: str) -> list[dict[str, Any]]:
@@ -286,12 +280,15 @@ WHATSAPP_CONFIG_FILE = "whatsapp_settings.json"
 
 
 def get_whatsapp_config() -> dict[str, Any]:
-    return load_json(WHATSAPP_CONFIG_FILE, default={
-        "doctorName": settings.DOCTOR_SHORT_NAME,
-        "whatsappNumber": settings.CLINIC_PHONE,
-        "autoNotifyRegistration": True,
-        "autoNotifyPrescriptions": True,
-    })
+    return load_json(
+        WHATSAPP_CONFIG_FILE,
+        default={
+            "doctorName": settings.DOCTOR_SHORT_NAME,
+            "whatsappNumber": settings.CLINIC_PHONE,
+            "autoNotifyRegistration": True,
+            "autoNotifyPrescriptions": True,
+        },
+    )
 
 
 def save_whatsapp_config(config: dict[str, Any]) -> dict[str, Any]:
@@ -318,5 +315,3 @@ def save_order(order: dict[str, Any]) -> list[dict[str, Any]]:
         current.insert(0, order)
     save_json(ORDERS_FILE, current)
     return current
-
-

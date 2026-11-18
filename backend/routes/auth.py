@@ -214,5 +214,3 @@ async def accept_invite_google_endpoint(req: AcceptGoogleInviteRequest):
         }
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
-
-

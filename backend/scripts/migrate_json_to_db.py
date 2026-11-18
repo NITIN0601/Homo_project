@@ -74,14 +74,23 @@ async def migrate_to_supabase():
             logger.info(f"Loaded {len(invoices)} invoices for migration.")
 
         # 5. Migrate Users
-        accounts = load_json_file("clinic_accounts.json", {})
+        accounts = load_json_file("hospital_accounts.json", {})
         if accounts:
             logger.info(f"Loaded {len(accounts)} accounts for migration.")
+
+        # 6. Migrate Multi-Tenant Hospitals & Doctors (ACID Parity)
+        hospitals = load_json_file("hospitals.json", [])
+        if hospitals:
+            logger.info(f"Loaded {len(hospitals)} hospital tenants for migration.")
+
+        doctors = load_json_file("doctors.json", [])
+        if doctors:
+            logger.info(f"Loaded {len(doctors)} doctors for migration.")
 
     logger.info("Migration assessment completed.")
 
 
 if __name__ == "__main__":
     import asyncio
-    asyncio.run(migrate_to_supabase())
 
+    asyncio.run(migrate_to_supabase())

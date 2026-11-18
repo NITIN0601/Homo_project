@@ -40,7 +40,7 @@ def generate_clinical_watermark(
     doctor_name: str | None = None,
     doctor_id: str = "DOC-001",
     clinic_name: str | None = None,
-    patient_id: str | None = None
+    patient_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Generates a cryptographically signed health-data watermark.
@@ -56,9 +56,7 @@ def generate_clinical_watermark(
     timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     pseudonymized_patient = hashlib.sha256((patient_id or "ANONYMOUS").encode()).hexdigest()[:16]
 
-    payload_string = (
-        f"{interaction_id}|{file_sha256}|{doctor_id}|{c_name}|{timestamp}|{pseudonymized_patient}"
-    )
+    payload_string = f"{interaction_id}|{file_sha256}|{doctor_id}|{c_name}|{timestamp}|{pseudonymized_patient}"
     signature = hmac.new(WATERMARK_SECRET_KEY, payload_string.encode("utf-8"), hashlib.sha256).hexdigest()
 
     watermark_data = {
@@ -80,10 +78,7 @@ def generate_clinical_watermark(
             "signature_hmac_sha256": signature,
             "watermarked_at_utc": timestamp,
         },
-        "patient_provenance": {
-            "pseudonymized_id_hash": pseudonymized_patient,
-            "pii_redacted": True
-        }
+        "patient_provenance": {"pseudonymized_id_hash": pseudonymized_patient, "pii_redacted": True},
     }
 
     # Persist watermark manifest sidecar to disk
@@ -101,10 +96,7 @@ def verify_audio_watermark(interaction_id: str) -> dict[str, Any]:
     """
     manifest_path = WATERMARKS_DIR / f"{interaction_id}.watermark.json"
     if not manifest_path.exists():
-        return {
-            "valid": False,
-            "reason": "Watermark manifest not found. File may be unverified or forged."
-        }
+        return {"valid": False, "reason": "Watermark manifest not found. File may be unverified or forged."}
 
     with open(manifest_path, encoding="utf-8") as f:
         data = json.load(f)
@@ -115,7 +107,7 @@ def verify_audio_watermark(interaction_id: str) -> dict[str, Any]:
         return {
             "valid": False,
             "watermark_meta": data,
-            "reason": "Audio recording has been purged by doctor (Right to Erasure)."
+            "reason": "Audio recording has been purged by doctor (Right to Erasure).",
         }
 
     # Verify sha256 checksum of existing recording
@@ -130,7 +122,7 @@ def verify_audio_watermark(interaction_id: str) -> dict[str, Any]:
         return {
             "valid": False,
             "watermark_meta": data,
-            "reason": f"Tampering detected! Audio hash ({current_sha[:10]}...) does not match watermark ({expected_sha[:10]}...)."
+            "reason": f"Tampering detected! Audio hash ({current_sha[:10]}...) does not match watermark ({expected_sha[:10]}...).",
         }
 
     # Recompute HMAC signature
@@ -146,20 +138,18 @@ def verify_audio_watermark(interaction_id: str) -> dict[str, Any]:
         return {
             "valid": False,
             "watermark_meta": data,
-            "reason": "Watermark cryptographic signature is invalid or modified."
+            "reason": "Watermark cryptographic signature is invalid or modified.",
         }
 
     return {
         "valid": True,
         "watermark_meta": data,
-        "reason": "Cryptographic watermark verified. Clinical provenance and audio integrity intact."
+        "reason": "Cryptographic watermark verified. Clinical provenance and audio integrity intact.",
     }
 
 
 async def save_recording_stream(
-    file: UploadFile,
-    interaction_id: str,
-    patient_id: str | None = None
+    file: UploadFile, interaction_id: str, patient_id: str | None = None
 ) -> tuple[Path, str, int, dict[str, Any]]:
     """
     Stream upload directly to disk in 1MB chunks.
@@ -184,11 +174,7 @@ async def save_recording_stream(
     file_hash = sha256.hexdigest()
 
     # Generate and bind cryptographic health-data watermark
-    watermark = generate_clinical_watermark(
-        interaction_id=interaction_id,
-        file_sha256=file_hash,
-        patient_id=patient_id
-    )
+    watermark = generate_clinical_watermark(interaction_id=interaction_id, file_sha256=file_hash, patient_id=patient_id)
 
     return destination, file_hash, total_bytes, watermark
 
@@ -196,6 +182,7 @@ async def save_recording_stream(
 def sanitize_safe_id(raw_id: str) -> str:
     """Enforces strict alphanumeric identifiers to prevent directory traversal attacks."""
     import re
+
     cleaned = re.sub(r"[^a-zA-Z0-9_\-]", "", raw_id)
     if not cleaned:
         raise ValueError("Invalid interaction identifier.")

@@ -2,12 +2,13 @@
   {
     "id": "default",
     "slug": "default",
-    "name": "General Healthcare Clinic",
-    "shortName": "General Clinic",
+    "name": "General Healthcare Hospital",
+    "shortName": "General Hospital",
     "tagline": "Patient-centered healthcare with clinical precision",
     "domain": "localhost",
     "subdomains": [
       "default",
+      "hospital",
       "clinic",
       "ehr"
     ],
@@ -71,8 +72,8 @@
   {
     "id": "agastya",
     "slug": "agastya",
-    "name": "Agastya Classical Homeopathy Clinic",
-    "shortName": "Agastya Clinic",
+    "name": "Agastya Classical Homeopathy Hospital",
+    "shortName": "Agastya Hospital",
     "tagline": "Root-cause homeopathic healing with clinical precision",
     "domain": "agastyahomoeo.com",
     "subdomains": [

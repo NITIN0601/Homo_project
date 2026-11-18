@@ -23,7 +23,7 @@ from core.timezone_utils import infer_timezone_from_location
 from services.auth_service import create_user_invite, register_user, validate_email
 from services.doctor_service import create_doctor
 from services.email_service import send_appointment_confirmation, send_doctor_onboarding_email
-from services.hospital_service import create_hospital
+from services.hospital_service import create_hospital, delete_hospital
 
 logger = logging.getLogger("onboarding_service")
 
@@ -83,16 +83,33 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
 
     # Legal policies
     legal = {
-        "termsConditionsText": payload.get("terms_conditions") or payload.get("legal", {}).get("termsConditionsText"),
-        "privacyPolicyText": payload.get("privacy_policy") or payload.get("legal", {}).get("privacyPolicyText"),
-        "emergencyNotice": payload.get("emergency_notice") or f"Emergency services at {name} should be contacted immediately by telephone in life-threatening scenarios.",
+        "termsConditionsText": payload.get("terms_conditions_text")
+        or payload.get("terms_conditions")
+        or payload.get("legal", {}).get("termsConditionsText"),
+        "privacyPolicyText": payload.get("privacy_policy_text")
+        or payload.get("privacy_policy")
+        or payload.get("legal", {}).get("privacyPolicyText"),
+        "emergencyNotice": payload.get("emergency_notice")
+        or payload.get("legal", {}).get("emergencyNotice")
+        or f"Emergency services at {name} should be contacted immediately by telephone in life-threatening scenarios.",
         "lastUpdated": datetime.now(timezone.utc).isoformat(),
     }
+
+    facility_type = payload.get("facility_type") or payload.get("facilityType") or "hospital"
+
+    about_text = (
+        payload.get("about_hospital_text")
+        or payload.get("about_clinic_text")
+        or payload.get("branding", {}).get("aboutHospitalText")
+        or payload.get("branding", {}).get("aboutClinicText")
+        or f"{name} provides comprehensive patient consultations and evidence-based clinical care."
+    )
 
     hospital_record = {
         "id": clean_id,
         "slug": clean_id,
         "name": name,
+        "facilityType": facility_type,
         "short_name": payload.get("short_name") or name.split()[0],
         "tagline": payload.get("tagline") or "Compassionate Healthcare with Clinical Precision",
         "phone": payload.get("phone", "+91 98450 00000"),
@@ -103,9 +120,10 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
         "country": payload.get("country", "India"),
         "primary_color": primary_color,
         "accent_color": accent_color,
-        "logo_url": payload.get("logo_url") or payload.get("branding", {}).get("logoUrl") or "/generic-clinic-logo.svg",
+        "logo_url": payload.get("logo_url") or payload.get("branding", {}).get("logoUrl") or "/generic-hospital-logo.svg",
         "banner_url": payload.get("banner_url") or payload.get("branding", {}).get("bannerUrl") or "/assets/banner.jpg",
-        "about_clinic_text": payload.get("about_clinic_text") or payload.get("branding", {}).get("aboutClinicText"),
+        "about_hospital_text": about_text,
+        "about_clinic_text": about_text,
     }
 
     # Location-based timezone inference: ensures zero ambiguity when entering operational hours
@@ -115,9 +133,7 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
     explicit_tz = payload.get("timezone")
 
     if not explicit_tz or (
-        explicit_tz == "Asia/Kolkata"
-        and country
-        and country.strip().lower() not in ["india", "bharat", "in"]
+        explicit_tz == "Asia/Kolkata" and country and country.strip().lower() not in ["india", "bharat", "in"]
     ):
         inferred = infer_timezone_from_location(country=country, state=state, city=city)
         facility_tz = inferred["timeZone"]
@@ -171,17 +187,25 @@ async def _onboard_hospital(payload: dict[str, Any], actor_email: str) -> dict[s
             },
             "is_primary": True,
         }
-        doctor_resp = await _onboard_doctor(doc_payload, actor_email=actor_email)
-        doctor_result = doctor_resp.get("doctor")
-        invite_result = doctor_resp.get("invite")
-        email_delivery = doctor_resp.get("email_delivery")
+        try:
+            doctor_resp = await _onboard_doctor(doc_payload, actor_email=actor_email)
+            doctor_result = doctor_resp.get("doctor")
+            invite_result = doctor_resp.get("invite")
+            email_delivery = doctor_resp.get("email_delivery")
+        except Exception as exc:
+            # Atomic transaction rollback: clean up the newly created hospital if lead doctor fails
+            logger.error(f"Lead doctor onboarding failed for hospital '{clean_id}'. Rolling back hospital: {exc}")
+            delete_hospital(clean_id, soft_delete=False)
+            raise ValueError(f"Onboarding failed during doctor provisioning: {exc}") from exc
 
-    record_audit_entry({
-        "event_type": "HOSPITAL_ONBOARDED",
-        "actor": actor_email,
-        "details": {"hospital_id": clean_id, "name": name, "has_doctor": bool(doctor_result)},
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    })
+    record_audit_entry(
+        {
+            "event_type": "HOSPITAL_ONBOARDED",
+            "actor": actor_email,
+            "details": {"hospital_id": clean_id, "name": name, "has_doctor": bool(doctor_result)},
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+    )
 
     return {
         "status": "success",
@@ -214,12 +238,15 @@ async def _onboard_doctor(payload: dict[str, Any], actor_email: str) -> dict[str
         "phone": payload.get("phone", "+91 98450 12345"),
         "experienceYears": int(payload.get("experience_years") or 5),
         "qualifications": payload.get("qualifications", "MBBS, MD"),
-        "specialties": payload.get("specialties") if isinstance(payload.get("specialties"), list) else [s.strip() for s in str(payload.get("specialties", "")).split(",") if s.strip()],
+        "specialties": payload.get("specialties")
+        if isinstance(payload.get("specialties"), list)
+        else [s.strip() for s in str(payload.get("specialties", "")).split(",") if s.strip()],
         "calendarId": "primary",
         "avatarUrl": payload.get("avatar_url") or "/assets/doctor-placeholder.jpg",
         "bio": payload.get("bio") or "Dedicated medical professional providing personalized holistic healthcare.",
         "consultationFee": float(payload.get("consultation_fee") or payload.get("consultationFee") or 750.0),
-        "availability": payload.get("availability") or {
+        "availability": payload.get("availability")
+        or {
             "days": payload.get("available_days", "Monday – Saturday"),
             "morningHours": payload.get("morning_hours", "10:00 AM – 01:30 PM"),
             "eveningHours": payload.get("evening_hours", "05:00 PM – 08:30 PM"),
@@ -252,6 +279,7 @@ async def _onboard_doctor(payload: dict[str, Any], actor_email: str) -> dict[str
 
     # Dispatch Welcome & Credential Email via Resend
     from services.hospital_service import get_hospital
+
     hospital_data = get_hospital(hospital_id)
     hospital_name = hospital_data.get("name", "Medical Clinic")
 
@@ -265,12 +293,14 @@ async def _onboard_doctor(payload: dict[str, Any], actor_email: str) -> dict[str
         reg_no=doc_record["regNo"],
     )
 
-    record_audit_entry({
-        "event_type": "DOCTOR_ONBOARDED",
-        "actor": actor_email,
-        "details": {"doctor_id": doc_id, "email": doc_email, "hospital_id": hospital_id},
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    })
+    record_audit_entry(
+        {
+            "event_type": "DOCTOR_ONBOARDED",
+            "actor": actor_email,
+            "details": {"doctor_id": doc_id, "email": doc_email, "hospital_id": hospital_id},
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+    )
 
     return {
         "status": "success",
@@ -330,12 +360,14 @@ async def _onboard_patient(payload: dict[str, Any], actor_email: str) -> dict[st
         doctor_id=assigned_doc_id,
     )
 
-    record_audit_entry({
-        "event_type": "PATIENT_ONBOARDED",
-        "actor": actor_email,
-        "details": {"email": patient_email, "hospital_id": hospital_id, "assigned_doctor": assigned_doc_id},
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    })
+    record_audit_entry(
+        {
+            "event_type": "PATIENT_ONBOARDED",
+            "actor": actor_email,
+            "details": {"email": patient_email, "hospital_id": hospital_id, "assigned_doctor": assigned_doc_id},
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+    )
 
     return {
         "status": "success",

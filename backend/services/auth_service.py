@@ -23,7 +23,7 @@ from services.data_store import load_json, save_json
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-ACCOUNTS_FILE = DATA_DIR / "clinic_accounts.json"
+ACCOUNTS_FILE = DATA_DIR / "hospital_accounts.json"
 
 AUTH_SECRET = settings.JWT_SECRET.encode("utf-8")
 
@@ -70,11 +70,11 @@ def validate_email(email: str) -> str:
 
 
 def _load_accounts() -> dict[str, Any]:
-    accounts = load_json("clinic_accounts.json", default=None)
+    accounts = load_json("hospital_accounts.json", default=None)
     if accounts is not None:
         return accounts
 
-    # Seed default clinic admin and demo patient for first launch
+    # Seed default hospital admin and demo patient for first launch
     admin_hash, admin_salt = hash_password("admin123")
     patient_hash, patient_salt = hash_password("patient123")
     initial_accounts = {
@@ -86,7 +86,7 @@ def _load_accounts() -> dict[str, Any]:
             "phone": settings.CLINIC_PHONE,
             "hash": admin_hash,
             "salt": admin_salt,
-            "created_at": datetime.now(timezone.utc).isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat(),
         },
         f"superadmin@{settings.CLINIC_DOMAIN}": {
             "id": "usr-super-001",
@@ -96,7 +96,7 @@ def _load_accounts() -> dict[str, Any]:
             "phone": settings.CLINIC_PHONE,
             "hash": admin_hash,
             "salt": admin_salt,
-            "created_at": datetime.now(timezone.utc).isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat(),
         },
         f"admin@{settings.CLINIC_DOMAIN}": {
             "id": "usr-admin-001",
@@ -106,7 +106,7 @@ def _load_accounts() -> dict[str, Any]:
             "phone": settings.CLINIC_PHONE,
             "hash": admin_hash,
             "salt": admin_salt,
-            "created_at": datetime.now(timezone.utc).isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat(),
         },
         f"john@{settings.CLINIC_DOMAIN}": {
             "id": "usr-001",
@@ -116,16 +116,16 @@ def _load_accounts() -> dict[str, Any]:
             "phone": "+91 98765 43210",
             "hash": patient_hash,
             "salt": patient_salt,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        },
     }
-    save_json("clinic_accounts.json", initial_accounts)
+    save_json("hospital_accounts.json", initial_accounts)
     return initial_accounts
 
 
 def _save_accounts(accounts: dict[str, Any]) -> None:
     """Atomically persists accounts file using the shared SSOT data store."""
-    save_json("clinic_accounts.json", accounts)
+    save_json("hospital_accounts.json", accounts)
 
 
 def generate_local_jwt(payload: dict[str, Any], expires_days: int = 7) -> str:
@@ -172,7 +172,8 @@ def register_user(
             raise ValueError(f"Platform limit reached: Maximum {settings.MAX_ADMINS} Admins allowed.")
     elif assigned_role == "patient":
         current_patients = sum(
-            1 for a in accounts.values()
+            1
+            for a in accounts.values()
             if a.get("role") == "patient" and a.get("hospital_id", "").lower() == assigned_hospital
         )
         if current_patients >= settings.MAX_CUSTOMERS_PER_HOSPITAL:
@@ -211,7 +212,7 @@ def register_user(
         "phone": phone or "+91 98765 00000",
         "hash": pwd_hash,
         "salt": salt,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
     accounts[clean_email] = new_profile
@@ -226,7 +227,7 @@ def register_user(
         "email": clean_email,
         "role": new_profile["role"],
         "hospital_id": assigned_hospital,
-        "phone": new_profile["phone"]
+        "phone": new_profile["phone"],
     }
     token = generate_local_jwt(user_view)
     return user_view, token
@@ -249,7 +250,7 @@ def authenticate_user(email: str, password: str) -> tuple[dict[str, Any], str]:
         "name": account["name"],
         "email": account["email"],
         "role": account["role"],
-        "phone": account.get("phone", "")
+        "phone": account.get("phone", ""),
     }
     token = generate_local_jwt(user_view)
     return user_view, token
@@ -342,21 +343,30 @@ def authenticate_or_register_google_user(
     is_in_accounts_as_admin = bool(existing and existing.get("role") in ("admin", "super_admin"))
 
     from services.doctor_service import get_all_doctors
-    matching_doctor = next((d for d in get_all_doctors() if (d.get("email") or "").strip().lower() == clean_email), None)
+
+    matching_doctor = next(
+        (d for d in get_all_doctors() if (d.get("email") or "").strip().lower() == clean_email), None
+    )
     is_in_doctors_registry = bool(matching_doctor)
 
     invites = load_json(INVITES_FILE, default={})
     matching_invite_token, matching_invite = next(
-        ((t, inv) for t, inv in invites.items() if (inv.get("email") or "").strip().lower() == clean_email and inv.get("role") in ("admin", "doctor") and not inv.get("is_claimed")),
-        (None, None)
+        (
+            (t, inv)
+            for t, inv in invites.items()
+            if (inv.get("email") or "").strip().lower() == clean_email
+            and inv.get("role") in ("admin", "doctor")
+            and not inv.get("is_claimed")
+        ),
+        (None, None),
     )
     is_invited_as_doctor = bool(matching_invite)
 
     is_authorized_admin = (
-        clean_email in authorized_admin_emails or
-        is_in_accounts_as_admin or
-        is_in_doctors_registry or
-        is_invited_as_doctor
+        clean_email in authorized_admin_emails
+        or is_in_accounts_as_admin
+        or is_in_doctors_registry
+        or is_invited_as_doctor
     )
 
     if portal_intent == "admin" and not is_authorized_admin:
@@ -364,12 +374,16 @@ def authenticate_or_register_google_user(
 
     assigned_role = "admin" if is_authorized_admin else "patient"
     assigned_hospital = (
-        hospital_id or
-        (matching_doctor.get("hospitalId") if matching_doctor else None) or
-        (matching_invite.get("hospital_id") if matching_invite else None) or
-        (existing.get("hospital_id") if existing else None) or
-        getattr(settings, "DEFAULT_HOSPITAL_ID", "default")
-    ).strip().lower()
+        (
+            hospital_id
+            or (matching_doctor.get("hospitalId") if matching_doctor else None)
+            or (matching_invite.get("hospital_id") if matching_invite else None)
+            or (existing.get("hospital_id") if existing else None)
+            or getattr(settings, "DEFAULT_HOSPITAL_ID", "default")
+        )
+        .strip()
+        .lower()
+    )
 
     if matching_invite and matching_invite_token:
         matching_invite["is_claimed"] = True
@@ -401,7 +415,8 @@ def authenticate_or_register_google_user(
     # New user registering automatically via Google (Passwordless)
     if assigned_role == "patient":
         current_patients = sum(
-            1 for a in accounts.values()
+            1
+            for a in accounts.values()
             if a.get("role") == "patient" and a.get("hospital_id", "").lower() == assigned_hospital
         )
         if current_patients >= settings.MAX_CUSTOMERS_PER_HOSPITAL:
@@ -414,7 +429,9 @@ def authenticate_or_register_google_user(
     ln = parts[-1] if len(parts) > 1 else "Patient"
     mn = " ".join(parts[1:-1]) if len(parts) > 2 else ""
 
-    user_id = (matching_doctor.get("id") if matching_doctor else None) or (f"usr-doc-{uuid.uuid4().hex[:6]}" if assigned_role == "admin" else f"usr-{uuid.uuid4().hex[:8]}")
+    user_id = (matching_doctor.get("id") if matching_doctor else None) or (
+        f"usr-doc-{uuid.uuid4().hex[:6]}" if assigned_role == "admin" else f"usr-{uuid.uuid4().hex[:8]}"
+    )
 
     account_entry = {
         "id": user_id,
@@ -425,7 +442,9 @@ def authenticate_or_register_google_user(
         "email": clean_email,
         "role": assigned_role,
         "hospital_id": assigned_hospital,
-        "phone": (matching_doctor.get("phone") if matching_doctor else None) or (matching_invite.get("phone") if matching_invite else "") or (settings.CLINIC_PHONE if assigned_role == "admin" else ""),
+        "phone": (matching_doctor.get("phone") if matching_doctor else None)
+        or (matching_invite.get("phone") if matching_invite else "")
+        or (settings.CLINIC_PHONE if assigned_role == "admin" else ""),
         "provider": "google",
         "has_password": False,
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -479,8 +498,3 @@ def accept_user_invite_with_google(
     save_json(INVITES_FILE, invites)
 
     return profile, jwt_token
-
-
-
-
-

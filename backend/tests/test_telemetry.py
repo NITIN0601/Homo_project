@@ -5,6 +5,7 @@ Unit tests for HIPAA-compliant Zero-PHI Telemetry and Crash Reporting.
 import json
 import unittest
 from pathlib import Path
+
 from fastapi.testclient import TestClient
 from main import app
 from schemas.telemetry import scrub_phi_pii
@@ -49,14 +50,11 @@ class TestTelemetryEndpoints(unittest.TestCase):
                 "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
                 "language": "en-US",
                 "platform": "MacIntel",
-                "online": True
+                "online": True,
             },
-            "location": {
-                "timezone": "America/New_York",
-                "locale": "en-US"
-            },
+            "location": {"timezone": "America/New_York", "locale": "en-US"},
             "source": "RootErrorBoundary",
-            "user_action": "report_and_reload"
+            "user_action": "report_and_reload",
         }
 
         resp = self.client.post("/api/telemetry/report", json=payload)
@@ -67,9 +65,9 @@ class TestTelemetryEndpoints(unittest.TestCase):
 
         # Verify crash log exists and contains the sanitized entry
         self.assertTrue(CRASH_LOG_FILE.exists())
-        with open(CRASH_LOG_FILE, "r", encoding="utf-8") as f:
+        with open(CRASH_LOG_FILE, encoding="utf-8") as f:
             lines = f.readlines()
-        
+
         found = False
         for line in reversed(lines):
             try:
@@ -101,7 +99,7 @@ class TestTelemetryEndpoints(unittest.TestCase):
         self.assertTrue(data["incident_id"].startswith("inc-be-"))
 
         # Verify crash log captured the unhandled backend exception with sanitized error message
-        with open(CRASH_LOG_FILE, "r", encoding="utf-8") as f:
+        with open(CRASH_LOG_FILE, encoding="utf-8") as f:
             lines = f.readlines()
 
         found = False

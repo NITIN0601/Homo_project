@@ -16,6 +16,7 @@ from typing import Any
 
 try:
     import httpx
+
     HAS_HTTPX = True
 except ImportError:
     HAS_HTTPX = False
@@ -26,8 +27,7 @@ logger = logging.getLogger("calendar_service")
 # Google Calendar Public Feed for Holidays in India
 GOOGLE_CALENDAR_ID = "en.indian#holiday@group.v.calendar.google.com"
 GOOGLE_HOLIDAYS_ICS_URL = (
-    "https://calendar.google.com/calendar/ical/"
-    "en.indian%23holiday%40group.v.calendar.google.com/public/basic.ics"
+    "https://calendar.google.com/calendar/ical/en.indian%23holiday%40group.v.calendar.google.com/public/basic.ics"
 )
 
 # Persistent storage directory
@@ -81,13 +81,11 @@ HOLIDAY_EMOJI_DICT: dict[str, str] = {
     "sankranti": "🪁",
     "vasant panchami": "🛐",
     "basant panchami": "🛐",
-
     # National & Gazetted
     "republic day": "🇮🇳",
     "independence day": "🇮🇳",
     "gandhi jayanti": "🕊️",
     "ambedkar": "📜",
-
     # Hindu Festivals & Observances
     "maha shivaratri": "🥛",
     "shivaratri": "🥛",
@@ -120,7 +118,6 @@ HOLIDAY_EMOJI_DICT: dict[str, str] = {
     "bhai dooj": "👫",
     "chhath puja": "☀️",
     "chhath": "☀️",
-
     # Islamic Holidays
     "eid al-fitr": "🌙",
     "ramadan": "🌙",
@@ -130,15 +127,12 @@ HOLIDAY_EMOJI_DICT: dict[str, str] = {
     "ashura": "🛐",
     "milad un-nabi": "🕌",
     "id-e-milad": "🕌",
-
     # Christian Holidays
     "good friday": "✝️",
     "easter": "🥚",
     "christmas": "🎄",
-
     # Sikh Holidays
     "guru nanak": "🪯",
-
     # State Holidays
     "rajyotsava": "💛",
 }
@@ -187,17 +181,11 @@ async def fetch_google_calendar_indian_holidays(year: int, force_refresh: bool =
     try:
         if HAS_HTTPX:
             async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
-                resp = await client.get(
-                    GOOGLE_HOLIDAYS_ICS_URL,
-                    headers={"User-Agent": "EHR-AppointmentEngine/1.0"}
-                )
+                resp = await client.get(GOOGLE_HOLIDAYS_ICS_URL, headers={"User-Agent": "EHR-AppointmentEngine/1.0"})
                 resp.raise_for_status()
                 ics_content = resp.text
         else:
-            req = urllib.request.Request(
-                GOOGLE_HOLIDAYS_ICS_URL,
-                headers={"User-Agent": "EHR-AppointmentEngine/1.0"}
-            )
+            req = urllib.request.Request(GOOGLE_HOLIDAYS_ICS_URL, headers={"User-Agent": "EHR-AppointmentEngine/1.0"})
             with urllib.request.urlopen(req, timeout=10.0) as resp:
                 ics_content = resp.read().decode("utf-8", errors="ignore")
     except Exception as exc:
@@ -276,6 +264,3 @@ async def fetch_google_calendar_indian_holidays(year: int, force_refresh: bool =
 def filter_holidays_by_month(holidays: list[dict[str, Any]], month_1_indexed: int) -> list[dict[str, Any]]:
     """Filter holidays for a specific month (1=Jan .. 12=Dec)."""
     return [h for h in holidays if h.get("month") == month_1_indexed]
-
-
-

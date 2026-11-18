@@ -37,7 +37,9 @@ class Settings:
     # Supabase / PostgreSQL Configuration
     SUPABASE_REST_URL: str = os.getenv("SUPABASE_REST_URL", "http://127.0.0.1:54321/rest/v1").rstrip("/")
     SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy")
-    SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy_service")
+    SUPABASE_SERVICE_KEY: str = os.getenv(
+        "SUPABASE_SERVICE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy_service"
+    )
 
     # Authentication & Security
     JWT_SECRET: str = os.getenv("JWT_SECRET", "ehr-platform-jwt-secret-key-2026-secure-auth")
@@ -54,13 +56,21 @@ class Settings:
     MAX_ADMINS: int = int(os.getenv("MAX_ADMINS", "10"))
     MAX_CUSTOMERS_PER_HOSPITAL: int = int(os.getenv("MAX_CUSTOMERS_PER_HOSPITAL", "1000"))
 
-    # Clinic Profile & Identity (Configurable via Environment or Tenant Registry)
-    CLINIC_NAME: str = os.getenv("CLINIC_NAME", "General Healthcare Clinic")
-    CLINIC_DOMAIN: str = os.getenv("CLINIC_DOMAIN", "example.com")
-    CLINIC_LOCATION: str = os.getenv("CLINIC_LOCATION", "Global")
-    CLINIC_ADDRESS: str = os.getenv("CLINIC_ADDRESS", "100 Medical Center Way")
-    CLINIC_PHONE: str = os.getenv("CLINIC_PHONE", "+1 555-0100")
-    CLINIC_ADMIN_EMAIL: str = os.getenv("CLINIC_ADMIN_EMAIL", "admin@example.com")
+    # Hospital & Facility Profile (Configurable via Environment or Tenant Registry)
+    HOSPITAL_NAME: str = os.getenv("HOSPITAL_NAME", os.getenv("CLINIC_NAME", "General Healthcare Hospital"))
+    HOSPITAL_DOMAIN: str = os.getenv("HOSPITAL_DOMAIN", os.getenv("CLINIC_DOMAIN", "example.com"))
+    HOSPITAL_LOCATION: str = os.getenv("HOSPITAL_LOCATION", os.getenv("CLINIC_LOCATION", "Global"))
+    HOSPITAL_ADDRESS: str = os.getenv("HOSPITAL_ADDRESS", os.getenv("CLINIC_ADDRESS", "100 Medical Center Way"))
+    HOSPITAL_PHONE: str = os.getenv("HOSPITAL_PHONE", os.getenv("CLINIC_PHONE", "+1 555-0100"))
+    HOSPITAL_ADMIN_EMAIL: str = os.getenv("HOSPITAL_ADMIN_EMAIL", os.getenv("CLINIC_ADMIN_EMAIL", "admin@example.com"))
+
+    # Backward-compatible aliases for legacy CLINIC_* references
+    CLINIC_NAME: str = HOSPITAL_NAME
+    CLINIC_DOMAIN: str = HOSPITAL_DOMAIN
+    CLINIC_LOCATION: str = HOSPITAL_LOCATION
+    CLINIC_ADDRESS: str = HOSPITAL_ADDRESS
+    CLINIC_PHONE: str = HOSPITAL_PHONE
+    CLINIC_ADMIN_EMAIL: str = HOSPITAL_ADMIN_EMAIL
     DOCTOR_NAME: str = os.getenv("DOCTOR_NAME", "Dr. Primary Physician, MD")
     DOCTOR_SHORT_NAME: str = os.getenv("DOCTOR_SHORT_NAME", "Dr. Physician")
     DOCTOR_EMAIL: str = os.getenv("DOCTOR_EMAIL", "doctor@example.com")
@@ -97,7 +107,9 @@ class Settings:
     GOOGLE_CALENDAR_ID: str = os.getenv("GOOGLE_CALENDAR_ID", "en.indian#holiday@group.v.calendar.google.com")
     GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "backend/credentials.json")
     TYPESAFE_API_KEY: str = os.getenv("TYPESAFE_API_KEY", "")
-    CLINICAL_WATERMARK_SECRET: str = os.getenv("CLINICAL_WATERMARK_SECRET", "replace_with_a_secure_random_64_char_hex_secret_here")
+    CLINICAL_WATERMARK_SECRET: str = os.getenv(
+        "CLINICAL_WATERMARK_SECRET", "replace_with_a_secure_random_64_char_hex_secret_here"
+    )
 
     # Voice Studio / Transcription
     VOICESTUDIO_URL: str = os.getenv("VOICESTUDIO_URL", "http://127.0.0.1:3900/v1/audio/transcriptions")
@@ -158,5 +170,3 @@ def get_supabase_service_key() -> str:
 
 def is_mock_enabled() -> bool:
     return os.getenv("USE_MOCK_DATA", str(settings.USE_MOCK_DATA)).lower() in ("true", "1", "yes")
-
-

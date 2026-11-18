@@ -36,10 +36,7 @@ _LAST_RECONCILIATION_TIME: str | None = None
 
 
 def record_admin_alert(
-    level: str,
-    component: str,
-    message: str,
-    details: dict[str, Any] | None = None
+    level: str, component: str, message: str, details: dict[str, Any] | None = None
 ) -> dict[str, Any]:
     """
     Registers an actionable system alert for clinic administrators.
@@ -51,7 +48,7 @@ def record_admin_alert(
         "level": level.upper(),  # "INFO", "WARNING", "ERROR", "CRITICAL"
         "component": component,
         "message": message,
-        "details": details or {}
+        "details": details or {},
     }
     _ADMIN_ALERTS.insert(0, alert)
     if len(_ADMIN_ALERTS) > _MAX_ALERTS:
@@ -72,10 +69,7 @@ def record_admin_alert(
 
 
 def add_admin_alert(
-    component: str,
-    message: str,
-    level: str = "ERROR",
-    details: dict[str, Any] | None = None
+    component: str, message: str, level: str = "ERROR", details: dict[str, Any] | None = None
 ) -> dict[str, Any]:
     """Helper alias for record_admin_alert to support audit and background middleware."""
     return record_admin_alert(level=level, component=component, message=message, details=details)
@@ -101,7 +95,7 @@ def get_headers(use_service_role: bool = False) -> dict[str, str]:
         "apikey": key,
         "Authorization": f"Bearer {key}",
         "Content-Type": "application/json",
-        "Prefer": "return=representation"
+        "Prefer": "return=representation",
     }
 
 
@@ -116,7 +110,7 @@ def _load_fallback(file_path: Path) -> list[dict[str, Any]]:
             level="ERROR",
             component="fallback_storage",
             message=f"Corrupt or unreadable fallback file: {file_path.name}",
-            details={"error": str(exc), "path": str(file_path)}
+            details={"error": str(exc), "path": str(file_path)},
         )
         return []
 
@@ -130,7 +124,7 @@ def _save_fallback(file_path: Path, data: list[dict[str, Any]]) -> None:
             level="CRITICAL",
             component="fallback_storage",
             message=f"Failed to persist fallback file: {file_path.name}",
-            details={"error": str(exc), "path": str(file_path)}
+            details={"error": str(exc), "path": str(file_path)},
         )
 
 
@@ -141,26 +135,16 @@ async def check_supabase_health() -> dict[str, Any]:
         client = await get_client()
         res = await client.get(url, headers=get_headers(), timeout=2.0)
         is_online = res.status_code in (200, 404, 301, 302)
-        return {
-            "online": is_online,
-            "status_code": res.status_code,
-            "endpoint": get_rest_url()
-        }
+        return {"online": is_online, "status_code": res.status_code, "endpoint": get_rest_url()}
     except Exception as exc:
-        return {
-            "online": False,
-            "error": str(exc),
-            "endpoint": get_rest_url()
-        }
+        return {"online": False, "error": str(exc), "endpoint": get_rest_url()}
 
 
 # ─── Anti-Spam Cryptographic Hash Validation ──────────────────────────────────
 
+
 async def check_and_insert_file_hash(
-    file_hash: str,
-    file_name: str | None = None,
-    file_size_bytes: int | None = None,
-    uploaded_by: str = "mobile_worker"
+    file_hash: str, file_name: str | None = None, file_size_bytes: int | None = None, uploaded_by: str = "mobile_worker"
 ) -> dict[str, Any]:
     """
     Checks if an image/snapshot SHA-256 hash already exists.
@@ -172,7 +156,7 @@ async def check_and_insert_file_hash(
         "file_hash": file_hash,
         "file_name": file_name,
         "file_size_bytes": file_size_bytes,
-        "uploaded_by": uploaded_by
+        "uploaded_by": uploaded_by,
     }
 
     synced_to_supabase = False
@@ -193,7 +177,7 @@ async def check_and_insert_file_hash(
                 level="ERROR",
                 component="supabase_anti_spam",
                 message=f"Supabase returned HTTP {res.status_code} during hash registration",
-                details={"status_code": res.status_code, "body": res.text[:200], "hash": file_hash}
+                details={"status_code": res.status_code, "body": res.text[:200], "hash": file_hash},
             )
     except ValueError:
         raise
@@ -202,7 +186,7 @@ async def check_and_insert_file_hash(
             level="WARNING",
             component="supabase_connection",
             message=f"Supabase unreachable during hash verification: {exc}. Using local fallback.",
-            details={"error": str(exc), "hash": file_hash}
+            details={"error": str(exc), "hash": file_hash},
         )
 
     # Local Fallback check
@@ -240,12 +224,13 @@ def _record_hash_locally(record: dict[str, Any], synced: bool = True) -> None:
 
 # ─── Patient EHR Records ──────────────────────────────────────────────────────
 
+
 async def insert_patient_record(
     patient_name: str,
     homeopathic_analysis: dict[str, Any],
     visiting_date: str | None = None,
     local_audio_path: str | None = None,
-    prescription_image_path: str | None = None
+    prescription_image_path: str | None = None,
 ) -> dict[str, Any]:
     """
     Inserts a consultation record into public.patient_records.
@@ -261,7 +246,7 @@ async def insert_patient_record(
         "local_audio_path": local_audio_path,
         "prescription_image_path": prescription_image_path,
         "homeopathic_analysis": homeopathic_analysis,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
     url = f"{get_rest_url()}/patient_records"
@@ -280,14 +265,14 @@ async def insert_patient_record(
                 level="ERROR",
                 component="supabase_ehr",
                 message=f"Supabase returned HTTP {res.status_code} during patient record insert",
-                details={"status_code": res.status_code, "body": res.text[:200], "patient_name": patient_name}
+                details={"status_code": res.status_code, "body": res.text[:200], "patient_name": patient_name},
             )
     except httpx.RequestError as exc:
         record_admin_alert(
             level="WARNING",
             component="supabase_connection",
             message=f"Supabase connection dropped/offline during patient record insert: {exc}. Persisting to local fallback.",
-            details={"error": str(exc), "patient_name": patient_name}
+            details={"error": str(exc), "patient_name": patient_name},
         )
 
     # Local fallback storage with explicit sync tracking (SSOT)
@@ -329,14 +314,14 @@ async def fetch_patient_records(is_mobile_view: bool = False) -> list[dict[str, 
                 level="ERROR",
                 component="supabase_ehr",
                 message=f"Supabase query returned HTTP {res.status_code}",
-                details={"status_code": res.status_code, "body": res.text[:200]}
+                details={"status_code": res.status_code, "body": res.text[:200]},
             )
     except httpx.RequestError as exc:
         record_admin_alert(
             level="WARNING",
             component="supabase_connection",
             message=f"Supabase connection dropped or unavailable: {exc}. Serving patient records from local fallback.",
-            details={"error": str(exc)}
+            details={"error": str(exc)},
         )
 
     fallback_records = _load_fallback(RECORDS_FILE)
@@ -347,7 +332,9 @@ async def fetch_patient_records(is_mobile_view: bool = False) -> list[dict[str, 
         un_synced_fallback = [r for r in fallback_records if r.get("id") not in supabase_ids]
 
         if un_synced_fallback:
-            logger.info("Found %d offline records not yet in Supabase. Merging to prevent split-brain.", len(un_synced_fallback))
+            logger.info(
+                "Found %d offline records not yet in Supabase. Merging to prevent split-brain.", len(un_synced_fallback)
+            )
             # Merge to return complete dataset
             combined = list(un_synced_fallback) + list(supabase_records)
         else:
@@ -377,6 +364,7 @@ async def fetch_patient_records(is_mobile_view: bool = False) -> list[dict[str, 
 
 # ─── Supabase Appointments Integration ────────────────────────────────────────
 
+
 async def sync_appointment_to_supabase(appointment: dict[str, Any]) -> dict[str, Any] | None:
     """
     Saves or syncs an appointment to public.appointments table in Supabase.
@@ -405,21 +393,21 @@ async def sync_appointment_to_supabase(appointment: dict[str, Any]) -> dict[str,
                 level="ERROR",
                 component="supabase_appointments",
                 message=f"Supabase appointment sync returned HTTP {res.status_code}",
-                details={"status_code": res.status_code, "body": res.text[:200], "patient": payload["patient_name"]}
+                details={"status_code": res.status_code, "body": res.text[:200], "patient": payload["patient_name"]},
             )
     except httpx.RequestError as exc:
         record_admin_alert(
             level="WARNING",
             component="supabase_connection",
             message=f"Supabase appointment sync connection dropped: {exc}",
-            details={"error": str(exc), "patient": payload["patient_name"]}
+            details={"error": str(exc), "patient": payload["patient_name"]},
         )
     except Exception as exc:
         record_admin_alert(
             level="ERROR",
             component="supabase_appointments",
             message=f"Unexpected error syncing appointment: {exc}",
-            details={"error": str(exc)}
+            details={"error": str(exc)},
         )
     return None
 
@@ -475,7 +463,9 @@ def format_supabase_inventory(item: dict[str, Any]) -> dict[str, Any]:
         "lastRestocked": str(item.get("last_restocked") or item.get("lastRestocked", "")),
         "expiryDate": str(item.get("expiry_date") or item.get("expiryDate", "")),
         "batchNumber": item.get("batch_number") or item.get("batchNumber", ""),
-        "isActive": bool(item.get("is_active", True) if item.get("is_active") is not None else item.get("isActive", True)),
+        "isActive": bool(
+            item.get("is_active", True) if item.get("is_active") is not None else item.get("isActive", True)
+        ),
     }
 
 
@@ -494,21 +484,21 @@ async def fetch_appointments_from_supabase() -> list[dict[str, Any]]:
                 level="ERROR",
                 component="supabase_appointments",
                 message=f"Failed to fetch appointments from Supabase: HTTP {res.status_code}",
-                details={"status_code": res.status_code, "body": res.text[:200]}
+                details={"status_code": res.status_code, "body": res.text[:200]},
             )
     except httpx.RequestError as exc:
         record_admin_alert(
             level="WARNING",
             component="supabase_connection",
             message=f"Supabase connection dropped while fetching appointments: {exc}",
-            details={"error": str(exc)}
+            details={"error": str(exc)},
         )
     except Exception as exc:
         record_admin_alert(
             level="ERROR",
             component="supabase_appointments",
             message=f"Unexpected error fetching appointments: {exc}",
-            details={"error": str(exc)}
+            details={"error": str(exc)},
         )
     return []
 
@@ -530,19 +520,20 @@ async def update_appointment_status_in_supabase(appointment_id: str, new_status:
                 level="ERROR",
                 component="supabase_appointments",
                 message=f"Failed to update appointment {appointment_id} in Supabase: HTTP {res.status_code}",
-                details={"status_code": res.status_code, "body": res.text[:200]}
+                details={"status_code": res.status_code, "body": res.text[:200]},
             )
     except Exception as exc:
         record_admin_alert(
             level="WARNING",
             component="supabase_connection",
             message=f"Supabase update appointment status failed: {exc}",
-            details={"error": str(exc), "appointment_id": appointment_id}
+            details={"error": str(exc), "appointment_id": appointment_id},
         )
     return None
 
 
 # ─── Supabase Dispensary Inventory Integration (Priority 1) ───────────────────
+
 
 async def fetch_inventory_from_supabase() -> list[dict[str, Any]]:
     """Fetches dispensary inventory from Supabase as Priority 1."""
@@ -559,21 +550,21 @@ async def fetch_inventory_from_supabase() -> list[dict[str, Any]]:
                 level="ERROR",
                 component="supabase_inventory",
                 message=f"Failed to fetch inventory from Supabase: HTTP {res.status_code}",
-                details={"status_code": res.status_code, "body": res.text[:200]}
+                details={"status_code": res.status_code, "body": res.text[:200]},
             )
     except httpx.RequestError as exc:
         record_admin_alert(
             level="WARNING",
             component="supabase_connection",
             message=f"Supabase connection dropped while fetching inventory: {exc}",
-            details={"error": str(exc)}
+            details={"error": str(exc)},
         )
     except Exception as exc:
         record_admin_alert(
             level="ERROR",
             component="supabase_inventory",
             message=f"Unexpected error fetching inventory from Supabase: {exc}",
-            details={"error": str(exc)}
+            details={"error": str(exc)},
         )
     return []
 
@@ -605,21 +596,21 @@ async def sync_inventory_to_supabase(item: dict[str, Any]) -> dict[str, Any] | N
                 level="ERROR",
                 component="supabase_inventory",
                 message=f"Supabase inventory sync failed with HTTP {res.status_code}",
-                details={"status_code": res.status_code, "body": res.text[:200], "item_id": item.get("id")}
+                details={"status_code": res.status_code, "body": res.text[:200], "item_id": item.get("id")},
             )
     except httpx.RequestError as exc:
         record_admin_alert(
             level="WARNING",
             component="supabase_connection",
             message=f"Supabase inventory sync connection dropped: {exc}",
-            details={"error": str(exc), "item_id": item.get("id")}
+            details={"error": str(exc), "item_id": item.get("id")},
         )
     except Exception as exc:
         record_admin_alert(
             level="ERROR",
             component="supabase_inventory",
             message=f"Unexpected error syncing inventory: {exc}",
-            details={"error": str(exc), "item_id": item.get("id")}
+            details={"error": str(exc), "item_id": item.get("id")},
         )
     return None
 
@@ -660,20 +651,20 @@ async def update_inventory_item_in_supabase(item_id: str, updates: dict[str, Any
                 level="ERROR",
                 component="supabase_inventory",
                 message=f"Failed to update inventory item {item_id} in Supabase: HTTP {res.status_code}",
-                details={"status_code": res.status_code, "body": res.text[:200]}
+                details={"status_code": res.status_code, "body": res.text[:200]},
             )
     except Exception as exc:
         record_admin_alert(
             level="WARNING",
             component="supabase_connection",
             message=f"Supabase update inventory failed: {exc}",
-            details={"error": str(exc), "item_id": item_id}
+            details={"error": str(exc), "item_id": item_id},
         )
     return None
 
 
-
 # ─── Automated Reconciliation Engine (Split-Brain Prevention) ─────────────────
+
 
 async def reconcile_offline_data() -> dict[str, Any]:
     """
@@ -686,7 +677,7 @@ async def reconcile_offline_data() -> dict[str, Any]:
         return {
             "status": "deferred",
             "message": "Supabase container is currently offline or unreachable. Reconciliation deferred.",
-            "health": health
+            "health": health,
         }
 
     records_synced = 0
@@ -705,7 +696,7 @@ async def reconcile_offline_data() -> dict[str, Any]:
                     f"{get_rest_url()}/patient_records",
                     json=payload,
                     headers=get_headers(use_service_role=True),
-                    timeout=4.0
+                    timeout=4.0,
                 )
                 if res.status_code in (200, 201, 409):
                     r["_synced"] = True
@@ -729,15 +720,12 @@ async def reconcile_offline_data() -> dict[str, Any]:
                 "file_hash": h.get("file_hash"),
                 "file_name": h.get("file_name"),
                 "file_size_bytes": h.get("file_size_bytes"),
-                "uploaded_by": h.get("uploaded_by")
+                "uploaded_by": h.get("uploaded_by"),
             }
             try:
                 client = await get_client()
                 res = await client.post(
-                    f"{get_rest_url()}/uploaded_file_hashes",
-                    json=payload,
-                    headers=get_headers(),
-                    timeout=4.0
+                    f"{get_rest_url()}/uploaded_file_hashes", json=payload, headers=get_headers(), timeout=4.0
                 )
                 if res.status_code in (200, 201, 409) or "23505" in res.text:
                     h["_synced"] = True
@@ -758,7 +746,7 @@ async def reconcile_offline_data() -> dict[str, Any]:
         level="INFO",
         component="reconciliation_engine",
         message=f"Reconciliation cycle executed: {records_synced} records and {hashes_synced} hashes reconciled with Supabase.",
-        details={"records_synced": records_synced, "hashes_synced": hashes_synced, "errors": errors}
+        details={"records_synced": records_synced, "hashes_synced": hashes_synced, "errors": errors},
     )
 
     return {
@@ -766,7 +754,7 @@ async def reconcile_offline_data() -> dict[str, Any]:
         "records_synced": records_synced,
         "hashes_synced": hashes_synced,
         "errors": errors,
-        "reconciled_at": _LAST_RECONCILIATION_TIME
+        "reconciled_at": _LAST_RECONCILIATION_TIME,
     }
 
 
@@ -786,5 +774,5 @@ def get_sync_status() -> dict[str, Any]:
         "pending_sync_hashes": pending_hashes,
         "last_reconciliation_time": _LAST_RECONCILIATION_TIME,
         "active_alerts_count": len(_ADMIN_ALERTS),
-        "recent_alerts": _ADMIN_ALERTS[:5]
+        "recent_alerts": _ADMIN_ALERTS[:5],
     }
