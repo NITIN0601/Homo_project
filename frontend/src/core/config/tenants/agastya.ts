@@ -1,0 +1,111 @@
+import type { HospitalTenantConfig, HospitalDoctor } from "@core/types/tenant";
+import { THEME_COLORS, THEME_FONTS } from "../theme";
+
+const PRIMARY_DOCTOR: HospitalDoctor = {
+  id: "doc-001",
+  name: "Dr. Bramarambha K",
+  title: "Dr. Bramarambha K, MD (Homeopathic Materia Medica), SCPH",
+  regNo: "KAR-HOM-2018-0492",
+  experienceYears: 6,
+  qualifications: "Homoeopathic Physician | MD in Materia Medica | SCPH-Certified",
+  aboutText:
+    "Dr. Bramarambha K. is a Homoeopathic Physician with postgraduate specialisation in Homeopathic Materia Medica. She completed her undergraduate and postgraduate studies at Government Homoeopathic Medical College & Hospital, Bengaluru, securing 3rd rank in MD from Rajiv Gandhi University of Health Sciences (RGUHS). She is SCPH-certified with extensive clinical expertise in chronic pathology, paediatric immunity, and individualised constitutional homoeopathic care.",
+  specialties: ["Classical Homeopathy", "Chronic Pathology", "Paediatric Immunity"],
+  consultationFee: 750,
+  availability: {
+    days: "Mon - Sun",
+    morningHours: "10:30 AM – 1:30 PM",
+    eveningHours: "6:00 PM – 8:30 PM",
+    consultationFee: 750,
+    schedule: {
+      appointmentOnlyDays: ["Sunday"],
+      walkinDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      offDays: [],
+      holidays: [],
+    },
+    telemedicineOnly: false,
+  },
+};
+
+export const AGASTYA_TENANT: HospitalTenantConfig = {
+  id: "agastya",
+  slug: "agastya",
+  domain: "agastyahomoeopathy.com",
+  subdomains: ["agastya", "hospital", "clinic", "ehr"],
+  name: "Agastya Homoeopathy Hospital",
+  facilityType: "hospital",
+  shortName: "Agastya",
+  tagline: "Gentle Healing, Lasting Wellness",
+  doctor: PRIMARY_DOCTOR,
+  doctors: [PRIMARY_DOCTOR],
+  specialties: [
+    "Classical Homeopathy",
+    "Chronic Pathology",
+    "Paediatric Immunity",
+    "Allergies & Respiratory",
+    "Women's Health",
+    "Skin & Dermatological Care",
+  ],
+  hours: {
+    timezone: "Asia/Kolkata",
+    morningDisplay: "10:30 AM – 1:30 PM",
+    morningStart: "10:30",
+    morningEnd: "13:30",
+    eveningDisplay: "6:00 PM – 8:30 PM",
+    eveningStart: "18:00",
+    eveningEnd: "20:30",
+    availableDays: "Mon – Sat (Walk-in & Appt) | Sun (Prior Appt Only)",
+    sundayPolicy: "Prior Appointment Only",
+    consultationSlotMinutes: 15,
+    walkinAllowed: true,
+    walkinDaysSummary: "Mon – Sat (6:00 PM – 8:30 PM)",
+    appointmentDaysSummary: "Mon – Sat Morning (10:30 AM – 1:30 PM) & All Day Sunday",
+  },
+  contact: {
+    phone: "+919845012345",
+    phoneDisplay: "+91 98450 12345",
+    email: "doctor@agastyahomoeo.com",
+    emergencyPhone: "+919845012345",
+    address: {
+      street: "No. 10/2, 2nd Temple Road, 16th Cross, Malleshwaram",
+      city: "Bengaluru",
+      state: "Karnataka",
+      pincode: "560003",
+      country: "India",
+    },
+    mapsUrl: "https://maps.google.com/?q=No.+10/2,+2nd+Temple+Road,+16th+Cross,+Malleshwaram,+Bengaluru,+Karnataka+560003",
+    googleReviewUrl: "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4",
+  },
+  branding: {
+    primaryColor: THEME_COLORS.SAGE_900,
+    primaryDarkColor: THEME_COLORS.SAGE_950,
+    accentColor: THEME_COLORS.SAGE_500,
+    neutralBg: THEME_COLORS.STONE_50,
+    cardRadius: "1.25rem",
+    buttonRadius: "0.75rem",
+    fontSans: THEME_FONTS.FAMILY_SANS,
+    logoUrl: "/agastya-logo.png",
+    bannerUrl: "/assets/banner.jpg",
+    aboutDocText: PRIMARY_DOCTOR.aboutText,
+    aboutHospitalText:
+      "Agastya Homoeopathy Hospital provides gentle, individualised classical homoeopathic healthcare serving patients globally with comprehensive case assessments, personalised treatment plans, and continuous clinical follow-up.",
+  },
+  features: {
+    enableECommerce: true,
+    enableVoiceStudio: true,
+    enablePrescriptionScan: true,
+    enableOnlinePayments: true,
+    enableTelemedicine: true,
+    enableCustomerPayments: true,
+    enableRawCaseJson: false, // Default false: Patients see human-readable prescriptions, not raw developer JSON
+    enableGoogleReviews: true,
+    displayDoctorDetails: true,
+    enablePatientMedicalRecords: true,
+    enableBillingHistory: true,
+    enableFollowupFeedback: true,
+    enableAgastyaBot: true,
+    enablePatientProfileEdit: true,
+  },
+};
+
+export default AGASTYA_TENANT;

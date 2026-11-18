@@ -1,0 +1,127 @@
+/**
+ * ─── Application, System & Environment Configuration (SSOT) ─────────────────
+ * Central configuration for storage keys, dev ports, demo credentials,
+ * phase feature flags, backend endpoints, and inventory defaults.
+ */
+import { HOSPITAL, DOCTOR } from "./hospital";
+import { ENV } from "./env";
+
+// ─── Environment & Mock Data SSOT Toggle ──────────────────────────────────────
+export const USE_MOCK_DATA = ENV.USE_MOCK_DATA;
+
+export const MOCK_TOKENS = {
+  DEMO_JWT:   "demo-jwt-token-mock",
+  DEMO_ADMIN: "demo-admin-token-mock",
+} as const;
+
+// ─── Development & Production Ports ───────────────────────────────────────────
+export const DEV_PORTS = {
+  PATIENT: "5173",
+  ADMIN:   "5174",
+  PATIENT_URL: (hostname = "localhost") => `http://${hostname}:5173`,
+  ADMIN_URL:   (hostname = "localhost") => `http://${hostname}:5174`,
+} as const;
+
+// ─── App Storage Keys (localStorage / sessionStorage) ────────────────────────
+export const STORAGE_KEYS = {
+  // Client Authentication & Session
+  COOKIE_CONSENT:  "ehr_cookie_consent",
+  AUTH_TOKEN:      "ehr_auth_token",
+  AUTH_PROFILE:    "ehr_auth_profile",
+  EXPLICIT_LOGOUT: "ehr_explicit_logout",
+
+  // Patient Cart & Orders
+  CART: "ehr_cart",
+
+  // Calendar & Appointment Management
+  BLOCKED_DATES: "ehr_blocked_calendar_dates",
+  APPOINTMENTS:  "ehr_booked_appointments",
+  USER_TIMEZONE: "ehr_user_timezone",
+
+  // Clinical Invoices & Consultation Fees
+  CONSULTATION_INVOICES: "ehr_consultation_invoices",
+
+  // LLM & Model Studio Configuration
+  ACTIVE_LLM_PROVIDER:   "ehr_active_llm_provider",
+  ACTIVE_LLM_MODELS:     "ehr_active_llm_models",
+  CUSTOM_MODELS_PREFIX:  "ehr_custom_models_",
+  DYNAMIC_MODELS_PREFIX: "ehr_dynamic_models_",
+  LLM_KEY_GEMINI:        "ehr_llm_key_gemini",
+  LLM_KEY_GROQ:          "ehr_llm_key_groq",
+  LLM_KEY_OPENAI:        "ehr_llm_key_openai",
+  LLM_KEY_ANTHROPIC:     "ehr_llm_key_anthropic",
+  LLM_ENDPOINT_OLLAMA:   "ehr_llm_endpoint_ollama",
+} as const;
+
+// ─── Demo / Mock Credentials (DEV only — never ship to production) ────────────
+export const DEMO_CREDENTIALS = {
+  SUPER_ADMIN: { email: "superadmin@platform.ehr",   password: "admin123",   name: "Global Platform Administrator", id: "usr-superadmin-001" },
+  ADMIN:       { email: DOCTOR.EMAIL,                 password: "admin123",   name: DOCTOR.NAME },
+  PATIENT:     { email: "john@example.com",           password: "patient123", name: "John Doe", id: "usr-001" },
+  PATIENT2:    { email: "priya@example.com",          password: "patient456", name: "Priya Sharma", id: "usr-002" },
+  HINT:        "superadmin@platform.ehr · admin@example.com · john@example.com",
+} as const;
+
+// ─── Phase 1 vs Phase 2 Feature Flags (SSOT) ──────────────────────────────────
+export const PHASE_CONFIG = {
+  /** Phase 1: Patient medicine ordering is hidden; Phase 2 enables e-commerce */
+  ENABLE_MEDICINE_ORDERING: false,
+  /** Phase 1: Slide-over cart drawer and cart icon are hidden */
+  ENABLE_CART: false,
+  /** Phase 1: Credit card and UPI payment details are hidden */
+  ENABLE_PAYMENTS: false,
+  /** Phase 1: Mobile clinic outreach page is hidden */
+  ENABLE_MOBILE_CLINIC: false,
+  /** Phase 1: Specific remedy chemical/botanical names are hidden from patients */
+  SHOW_RAW_MEDICINE_NAMES: false,
+  /** Phase 1: About page link is hidden from Admin navigation */
+  ADMIN_SHOW_ABOUT: false,
+  /** Phase 1: AI Chatbot / WhatsApp widget is hidden for Admin view */
+  ADMIN_ENABLE_CHATBOT: false,
+} as const;
+
+// ─── Backend (Python FastAPI) ─────────────────────────────────────────────────
+export const BACKEND = {
+  /** Enabled automatically unless mock mode explicitly requested without backend override */
+  ENABLED:  !ENV.USE_MOCK_DATA,
+  BASE_URL: ENV.BACKEND_URL,
+} as const;
+
+// ─── Self-Hosted Supabase (Docker on Admin PC) ───────────────────────────────
+export const SUPABASE_CONFIG = {
+  URL: ENV.SUPABASE_URL,
+  ANON_KEY: ENV.SUPABASE_ANON_KEY,
+} as const;
+
+// ─── VoiceStudio (debpalash/VoiceStudio) Integration ───────────────────────────
+export const VOICE_STUDIO = {
+  ENABLED: true,
+  HTTP_BASE_URL: ENV.VOICESTUDIO_URL,
+  TRANSCRIPTION_ENDPOINT: "/v1/audio/transcriptions",
+  DEFAULT_LANGUAGE: "auto",
+  SUPPORTED_LANGUAGES: [
+    { code: "auto", label: "🌐 Auto-Detect Language (Default)" },
+    { code: "te",   label: "🇮🇳 Telugu (తెలుగు)" },
+    { code: "ta",   label: "🇮🇳 Tamil (தமிழ்)" },
+    { code: "kn",   label: "🇮🇳 Kannada (ಕನ್ನಡ)" },
+    { code: "hi",   label: "🇮🇳 Hindi (हिन्दी)" },
+    { code: "en",   label: "🇬🇧 English" },
+    { code: "fr",   label: "🇫🇷 French (Français)" },
+  ],
+} as const;
+
+// ─── Stock / Inventory Defaults ───────────────────────────────────────────────
+export const INVENTORY = {
+  LOW_STOCK_THRESHOLD: 10,   // units — warn admin below this
+  DEFAULT_REORDER_QTY: 50,
+  CURRENCY:            "INR",
+  CURRENCY_SYMBOL:     "₹",
+} as const;
+
+// ─── Default Form Placeholders ────────────────────────────────────────────────
+export const PLACEHOLDERS = {
+  PHONE:   HOSPITAL.PHONE_DISPLAY,
+  CITY:    `City (e.g. ${HOSPITAL.ADDRESS.CITY})`,
+  PINCODE: `Pincode (e.g. ${HOSPITAL.ADDRESS.PINCODE})`,
+  EMAIL:   DOCTOR.EMAIL,
+} as const;
