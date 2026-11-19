@@ -7,17 +7,29 @@ import { updateRemoteTenantCustomization } from "../configuration/tenantConfigSe
 
 const STORAGE_CUSTOM_PREFIX = "hospital_tenant_custom_v1_";
 
-const FALLBACK_DOCTOR: HospitalDoctor = {
-  id: "doc-001",
-  name: "Dr. Bramarambha K",
-  title: "Dr. Bramarambha K, MD (Homeopathic Materia Medica), SCPH",
-  regNo: "KAR-HOM-2018-0492",
-  experienceYears: 6,
-  qualifications: "Homoeopathic Physician | MD in Materia Medica | SCPH-Certified",
-  aboutText: "Homoeopathic Physician with postgraduate specialisation in Homeopathic Materia Medica.",
-  specialties: ["Classical Homeopathy", "Chronic Pathology", "Paediatric Immunity"],
-  consultationFee: 750,
-};
+/**
+ * Resolves the primary attending doctor dynamically from the tenant's own configuration.
+ * Never hardcodes any specific doctor name; if undefined, derives a neutral physician placeholder.
+ */
+function getTenantDoctor(tenant?: Partial<HospitalTenantConfig> | null): HospitalDoctor {
+  if (tenant?.doctor && tenant.doctor.name) {
+    return tenant.doctor;
+  }
+  if (tenant?.doctors && tenant.doctors.length > 0 && tenant.doctors[0]?.name) {
+    return tenant.doctors[0];
+  }
+  return {
+    id: `doc-${tenant?.id || "attending"}`,
+    name: "Attending Physician",
+    title: "Consulting Physician, MD",
+    regNo: "",
+    experienceYears: 0,
+    qualifications: "Medical Physician",
+    aboutText: `${tenant?.name || "The healthcare facility"}'s clinical medical team.`,
+    specialties: tenant?.specialties || ["General Healthcare"],
+    consultationFee: 0,
+  };
+}
 
 export interface TenantContextValue {
   tenant: HospitalTenantConfig;
@@ -34,12 +46,13 @@ const TenantContext = createContext<TenantContextValue | undefined>(undefined);
 
 function getSavedTenantOverride(base: HospitalTenantConfig): HospitalTenantConfig {
   if (typeof window === "undefined") return base;
-  const baseDoctor = base.doctor || base.doctors?.[0] || FALLBACK_DOCTOR;
+  const baseDoctor = getTenantDoctor(base);
   try {
     const raw = localStorage.getItem(`${STORAGE_CUSTOM_PREFIX}${base.id}`);
     if (raw) {
       const parsed = JSON.parse(raw);
-      const activeDoctor = { ...FALLBACK_DOCTOR, ...baseDoctor, ...(parsed.doctor || (parsed.doctors?.[0] || {})) };
+      const parsedDoc = parsed.doctor || parsed.doctors?.[0] || {};
+      const activeDoctor: HospitalDoctor = { ...baseDoctor, ...parsedDoc };
       const activeDoctors = parsed.doctors && parsed.doctors.length > 0
         ? parsed.doctors
         : (base.doctors && base.doctors.length > 0 ? [{ ...base.doctors[0], ...activeDoctor }, ...base.doctors.slice(1)] : [activeDoctor]);
@@ -88,7 +101,7 @@ export const ThemeProvider: React.FC<{
     const base = initialTenantId ? getHospitalTenantById(initialTenantId) : resolveActiveHospitalTenant();
     const guaranteedBase = {
       ...base,
-      doctor: base.doctor || base.doctors?.[0] || FALLBACK_DOCTOR,
+      doctor: getTenantDoctor(base),
     };
     return getSavedTenantOverride(guaranteedBase);
   });
@@ -97,7 +110,7 @@ export const ThemeProvider: React.FC<{
     const nextBase = getHospitalTenantById(id);
     const guaranteedNextBase = {
       ...nextBase,
-      doctor: nextBase.doctor || nextBase.doctors?.[0] || FALLBACK_DOCTOR,
+      doctor: getTenantDoctor(nextBase),
     };
     setTenant(getSavedTenantOverride(guaranteedNextBase));
     broadcastSessionEvent({ type: "TENANT_SWITCH", tenantId: id });
@@ -108,7 +121,7 @@ export const ThemeProvider: React.FC<{
 
   const updateTenant = useCallback((updates: Partial<HospitalTenantConfig>) => {
     setTenant((prev) => {
-      const baseDoctor = prev.doctor || prev.doctors?.[0] || FALLBACK_DOCTOR;
+      const baseDoctor = getTenantDoctor(prev);
       const updatedDoctor = updates.doctor
         ? { ...baseDoctor, ...updates.doctor }
         : (updates.doctors?.[0] ? { ...baseDoctor, ...updates.doctors[0] } : baseDoctor);

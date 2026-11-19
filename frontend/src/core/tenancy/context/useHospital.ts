@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useTenant } from "../branding/ThemeProvider";
-import { HOSPITAL, DOCTOR, OFFICE_HOURS } from "../../config";
+import { HOSPITAL, OFFICE_HOURS } from "../../config";
 import type { HospitalTenantConfig, HospitalDoctor } from "@core/types/tenant";
 
 export interface HospitalFacade {
@@ -54,14 +54,14 @@ export function useHospital(): HospitalFacade {
       : tenant.doctors && tenant.doctors.length > 0
         ? tenant.doctors[0]
         : {
-            id: tenant.doctor?.id || "doc-001",
-            name: DOCTOR.NAME,
-            title: DOCTOR.TITLE,
-            qualifications: DOCTOR.QUALIFICATIONS,
-            experienceYears: 6,
-            regNo: "KAR-HOM-2018-0492",
-            aboutText: DOCTOR.BIO_SUMMARY,
-            specialties: ["Classical Homeopathy", "Chronic Pathology"],
+            id: `doc-${tenant.id || "primary"}`,
+            name: "Attending Physician",
+            title: "Consulting Physician, MD",
+            qualifications: "MD, MBBS",
+            experienceYears: 5,
+            regNo: "",
+            aboutText: `${tenant.name || "The facility"}'s clinical medical care team.`,
+            specialties: tenant.specialties || ["General Healthcare"],
           };
 
     const doctorsList: HospitalDoctor[] =
