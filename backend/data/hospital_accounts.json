@@ -126,5 +126,19 @@
     "hash": "89d55129b1103d437cce75a32ee1a5b488f6c70977d5e7c9a360431fa5a12e9c",
     "salt": "2f8d53fc009b8d9b5fc2ec643be35936",
     "created_at": "2026-10-01T00:00:00.000000"
+  },
+  "priya@example.com": {
+    "id": "usr-002",
+    "name": "Priya Sharma",
+    "first_name": "Priya",
+    "middle_name": "",
+    "last_name": "Sharma",
+    "email": "priya@example.com",
+    "role": "patient",
+    "hospital_id": "agastya",
+    "phone": "+91 98111 22233",
+    "hash": "89d55129b1103d437cce75a32ee1a5b488f6c70977d5e7c9a360431fa5a12e9c",
+    "salt": "2f8d53fc009b8d9b5fc2ec643be35936",
+    "created_at": "2026-10-01T00:00:00.000000"
   }
 }

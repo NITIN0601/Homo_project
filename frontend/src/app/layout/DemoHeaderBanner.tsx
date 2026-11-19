@@ -120,15 +120,18 @@ export const DemoHeaderBanner: React.FC = () => {
             {/* 3. Patient Role & Portal */}
             <button
               onClick={() => {
-                login(MOCK_ACCOUNTS[DEMO_CREDENTIALS.PATIENT.email].profile);
-                navigateTo("home");
+                const account = MOCK_ACCOUNTS[DEMO_CREDENTIALS.PATIENT.email] || MOCK_ACCOUNTS["john@agastyahomoeo.com"];
+                if (account?.profile) {
+                  login(account.profile);
+                  navigateTo("home");
+                }
               }}
               className={`px-2.5 py-1 rounded font-bold transition-all cursor-pointer flex items-center gap-1 ${
-                !isSuperAdminPage && !isAdminPage && authUser?.id === "usr-001"
+                !isSuperAdminPage && !isAdminPage && (authUser?.id === "usr-001" || authUser?.email?.includes("john"))
                   ? "bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-400"
                   : "text-stone-300 hover:text-white hover:bg-stone-700"
               }`}
-              title="Simulate Login as Patient (John)"
+              title="Simulate Login as Patient (John Doe)"
             >
               <span>👤</span> Patient
             </button>
@@ -136,17 +139,20 @@ export const DemoHeaderBanner: React.FC = () => {
             {/* 4. Second Patient */}
             <button
               onClick={() => {
-                login(MOCK_ACCOUNTS[DEMO_CREDENTIALS.PATIENT2.email].profile);
-                navigateTo("home");
+                const account = MOCK_ACCOUNTS[DEMO_CREDENTIALS.PATIENT2.email] || MOCK_ACCOUNTS["priya@agastyahomoeo.com"];
+                if (account?.profile) {
+                  login(account.profile);
+                  navigateTo("home");
+                }
               }}
-              className={`px-2 py-1 rounded font-bold transition-colors cursor-pointer ${
-                !isSuperAdminPage && !isAdminPage && authUser?.id === "usr-002"
+              className={`px-2.5 py-1 rounded font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                !isSuperAdminPage && !isAdminPage && (authUser?.id === "usr-002" || authUser?.email?.includes("priya"))
                   ? "bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-400"
-                  : "text-stone-400 hover:text-white hover:bg-stone-700"
+                  : "text-stone-300 hover:text-white hover:bg-stone-700"
               }`}
-              title="Simulate Login as Patient (Priya)"
+              title="Simulate Login as Patient (Priya Sharma)"
             >
-              👩 Priya
+              <span>👩</span> Priya
             </button>
 
             {/* 5. Guest */}

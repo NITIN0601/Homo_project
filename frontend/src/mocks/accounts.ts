@@ -166,6 +166,37 @@ export const MOCK_ACCOUNTS: Record<string, { password: string; profile: UserProf
       ],
     },
   },
+  [DEMO_CREDENTIALS.PATIENT2.email]: {
+    password: getGuardedPassword("priya2026"),
+    profile: {
+      id:       "usr-002",
+      name:     "Priya Sharma",
+      firstName: "Priya",
+      middleName: "",
+      lastName:  "Sharma",
+      initials: "PS",
+      email:    DEMO_CREDENTIALS.PATIENT2.email,
+      role:     "patient",
+      phone:    "+91 99887 76655",
+      address: {
+        street: "12 Greenway Heights, Connaught Place",
+        city: "New Delhi",
+        state: "Delhi",
+        pincode: "110001",
+      },
+      savedUpiId: "priya.sharma@okaxis",
+      savedCards: [
+        {
+          id: "card-ps-1",
+          cardHolder: "Priya Sharma",
+          cardNumber: "**** **** **** 5544",
+          brand: "Mastercard",
+          expiry: "10/29",
+          isDefault: true,
+        },
+      ],
+    },
+  },
   "priya@agastyahomoeo.com": {
     password: getGuardedPassword("priya2026"),
     profile: {
