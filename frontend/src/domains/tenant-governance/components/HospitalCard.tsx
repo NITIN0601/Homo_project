@@ -92,7 +92,7 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
         <div className="text-xs space-y-1 bg-indigo-50/50 p-3 rounded-2xl border border-indigo-100 text-indigo-950">
           <div className="flex items-center justify-between">
             <p className="font-bold flex items-center gap-1">
-              <span aria-hidden="true">🩺</span> Lead Physician: <strong>{hospital.doctor.name}</strong>
+              <span aria-hidden="true">🩺</span> Lead Physician: <strong>{hospital.doctor?.name || "Attending Physician"}</strong>
             </p>
             {hospital.doctors && hospital.doctors.length > 1 && (
               <span className="text-[10px] font-extrabold bg-indigo-200 text-indigo-900 px-2 py-0.5 rounded-full">
@@ -100,11 +100,13 @@ export const HospitalCard: React.FC<HospitalCardProps> = ({
               </span>
             )}
           </div>
-          <p className="text-[11px] text-stone-500 pl-4">{hospital.doctor.title}</p>
-          <p className="text-[10px] text-stone-400 pl-4">
-            {hospital.doctor.qualifications} • {hospital.doctor.experienceYears} yrs exp
-          </p>
-          {hospital.doctor.regNo && (
+          {hospital.doctor?.title && <p className="text-[11px] text-stone-500 pl-4">{hospital.doctor.title}</p>}
+          {(hospital.doctor?.qualifications || hospital.doctor?.experienceYears) && (
+            <p className="text-[10px] text-stone-400 pl-4">
+              {hospital.doctor.qualifications || ""} {hospital.doctor.experienceYears ? `• ${hospital.doctor.experienceYears} yrs exp` : ""}
+            </p>
+          )}
+          {hospital.doctor?.regNo && (
             <p className="text-[10px] text-indigo-700 font-mono font-bold pl-4">Reg: {hospital.doctor.regNo}</p>
           )}
         </div>

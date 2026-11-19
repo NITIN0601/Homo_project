@@ -35,7 +35,7 @@ export const PostConsultationFeeModal: React.FC<PostConsultationFeeModalProps> =
       id: `inv-${Date.now().toString(36)}`,
       patientId: patient.id,
       patientName: patient.name,
-      doctorName: tenant.doctor.title || HOSPITAL.DOCTOR_TITLE,
+      doctorName: tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE,
       visitDate: feeDate || formatDateISO(),
       amount: Number(feeAmount) || (tenant.doctor?.consultationFee ?? 750),
       currency: tenant.currency || "INR",

@@ -1,6 +1,7 @@
 import React from "react";
 import { useApp } from "../store/AppContext";
 import { useTenant } from "../../core/tenancy/branding/ThemeProvider";
+import { useHospital } from "../../core/tenancy/context/useHospital";
 import { HOSPITAL } from "../../core/config";
 
 /**
@@ -12,7 +13,26 @@ const CURRENT_YEAR = new Date().getFullYear();
 const PageFooter: React.FC = () => {
   const { state, navigateTo, sessionHours } = useApp();
   const { tenant } = useTenant();
+  const hospital = useHospital();
   const { activePage, authUser } = state;
+
+  const doctorTitle = tenant?.doctor?.title || hospital.doctor?.title || HOSPITAL.DOCTOR_TITLE;
+  const logoUrl = tenant?.branding?.logoUrl || hospital.logoUrl || HOSPITAL.LOGO_PATH;
+  const hospitalName = tenant?.name || hospital.name || HOSPITAL.FULL_NAME;
+  const mapsUrl = tenant?.contact?.mapsUrl || hospital.address.mapsUrl || HOSPITAL.ADDRESS.MAPS_URL;
+  const addressDisplay = hospital.address.full || (
+    tenant?.contact?.address
+      ? [
+          tenant.contact.address.street,
+          tenant.contact.address.city,
+          tenant.contact.address.state,
+          tenant.contact.address.pincode,
+        ].filter(Boolean).join(", ")
+      : HOSPITAL.ADDRESS.FULL
+  );
+  const phoneDisplay = tenant?.contact?.phoneDisplay || hospital.phone || HOSPITAL.PHONE_DISPLAY;
+  const phoneTel = tenant?.contact?.phone || hospital.phoneTel || HOSPITAL.PHONE_TEL;
+  const emailDisplay = tenant?.contact?.email || hospital.email || HOSPITAL.SUPPORT_EMAIL;
 
   // 1. Dedicated Super Admin Enterprise Governance Footer
   if (activePage === "super-admin-dashboard" || authUser?.role === "super_admin") {
@@ -48,7 +68,7 @@ const PageFooter: React.FC = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-stone-500">
           <p className="text-[11px] font-medium">
-            🩺 <strong>{tenant.name}</strong> · Clinical Administration Console
+            🩺 <strong>{hospitalName}</strong> · Clinical Administration Console
           </p>
           <p className="text-[10px] text-stone-400 font-mono">
             Clinical Records &amp; Dispensary Management · Session: {authUser?.email || "Admin"}
@@ -70,8 +90,8 @@ const PageFooter: React.FC = () => {
           {/* Brand + copyright */}
           <div className="flex items-center gap-2.5">
             <img
-              src={tenant.branding.logoUrl || HOSPITAL.LOGO_PATH}
-              alt={`${tenant.name} Logo`}
+              src={logoUrl}
+              alt={`${hospitalName} Logo`}
               className="h-7 w-7 object-contain opacity-85"
               width={28}
               height={28}
@@ -80,10 +100,10 @@ const PageFooter: React.FC = () => {
             />
             <div>
               <p className="text-xs font-extrabold text-stone-800 leading-none">
-                {tenant.name}
+                {hospitalName}
               </p>
               <p className="text-[10px] text-stone-400 mt-0.5">
-                © {CURRENT_YEAR} {tenant.name}. All rights reserved.
+                © {CURRENT_YEAR} {hospitalName}. All rights reserved.
               </p>
             </div>
           </div>
@@ -119,27 +139,25 @@ const PageFooter: React.FC = () => {
           {/* Consultation, Timings, Contact & Email */}
           <div className="space-y-1 text-xs text-stone-600 leading-relaxed">
             <p className="text-stone-700">
-              Consultation by <span className="font-semibold text-stone-800">{tenant.doctor.title}</span>
+              Consultation by <span className="font-semibold text-stone-800">{doctorTitle}</span>
             </p>
             <p className="text-stone-600">
-              {sessionHours.monSatSummary}
+              {sessionHours?.monSatSummary || "Mon – Sat (10:30 AM – 1:30 PM & 6:00 PM – 8:30 PM)"}
             </p>
             <p className="text-stone-600">
-              {sessionHours.sundaySummary}
+              {sessionHours?.sundaySummary || "Sunday: Prior Appointment Only"}
             </p>
             <div className="pt-0.5 space-y-0.5 text-stone-700">
               <p>
                 <span className="font-medium">Location:</span>{" "}
                 <a
-                  href={tenant.contact.mapsUrl || HOSPITAL.ADDRESS.MAPS_URL}
+                  href={mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-stone-700 hover:text-emerald-800 hover:underline inline-flex items-baseline gap-1"
                   title="Open hospital location in Google Maps"
                 >
-                  <span>
-                    {tenant.contact.address.street}, {tenant.contact.address.city}, {tenant.contact.address.state} – {tenant.contact.address.pincode}
-                  </span>
+                  <span>{addressDisplay}</span>
                   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="opacity-70 flex-shrink-0 self-center">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                     <polyline points="15 3 21 3 21 9" />
@@ -149,14 +167,14 @@ const PageFooter: React.FC = () => {
               </p>
               <p>
                 <span className="font-medium">Contact:</span>{" "}
-                <a href={`tel:${tenant.contact.phone}`} className="text-stone-700 hover:text-emerald-800 hover:underline">
-                  {tenant.contact.phoneDisplay}
+                <a href={`tel:${phoneTel}`} className="text-stone-700 hover:text-emerald-800 hover:underline">
+                  {phoneDisplay}
                 </a>
               </p>
               <p>
                 <span className="font-medium">Email:</span>{" "}
-                <a href={`mailto:${tenant.contact.email}`} className="text-stone-700 hover:text-emerald-800 hover:underline">
-                  {tenant.contact.email}
+                <a href={`mailto:${emailDisplay}`} className="text-stone-700 hover:text-emerald-800 hover:underline">
+                  {emailDisplay}
                 </a>
               </p>
             </div>

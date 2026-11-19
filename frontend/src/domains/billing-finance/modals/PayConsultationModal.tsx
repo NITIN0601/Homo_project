@@ -230,7 +230,7 @@ export const PayConsultationModal: React.FC<PayConsultationModalProps> = ({
                       {DOCTOR.UPI_ID}
                     </p>
                     <p className="text-[11px] text-stone-500">
-                      Scan with GPay, PhonePe, Paytm, or BHIM to send {formatCurrency(displayAmount, displayCurrency, displaySymbol)} directly to {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}.
+                      Scan with GPay, PhonePe, Paytm, or BHIM to send {formatCurrency(displayAmount, displayCurrency, displaySymbol)} directly to {tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE}.
                     </p>
                   </div>
                 </div>

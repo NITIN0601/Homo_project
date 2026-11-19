@@ -35,7 +35,7 @@ export const VisitSummaryPage: React.FC = () => {
       {
         id: "vis-101",
         visitDate: "Sep 15, 2026",
-        doctorName: tenant.features.displayDoctorDetails !== false ? (tenant.doctor.title || HOSPITAL.DOCTOR_TITLE) : "Attending Homoeopathic Physician",
+        doctorName: tenant.features.displayDoctorDetails !== false ? (tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE) : "Attending Homoeopathic Physician",
         hospitalBranch: HOSPITAL.BRANCHES.TELE,
         chiefDiagnosis: "Acute Dyspepsia with Post-Exercise Muscle Fatigue",
         symptomsObserved: ["Bloating post meals", "Hamstring strain", "Acidity after coffee"],
@@ -290,7 +290,7 @@ export const VisitSummaryPage: React.FC = () => {
 
         {/* Status Indicator */}
         <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
-          <span>🔒</span> Verified Patient View · {tenant.features.displayDoctorDetails !== false ? (tenant.doctor.title || HOSPITAL.DOCTOR_TITLE) : tenant.name}
+          <span>🔒</span> Verified Patient View · {tenant.features.displayDoctorDetails !== false ? (tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE) : tenant.name}
         </div>
       </div>
 

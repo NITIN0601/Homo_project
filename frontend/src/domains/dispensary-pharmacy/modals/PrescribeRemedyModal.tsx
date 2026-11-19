@@ -39,7 +39,7 @@ export const PrescribeRemedyModal: React.FC<PrescribeRemedyModalProps> = ({
     const newVisit: VisitSummaryRecord = {
       id: `vis-${Date.now()}`,
       visitDate: formatDateShort(new Date()),
-      doctorName: tenant.doctor.title || HOSPITAL.DOCTOR_TITLE,
+      doctorName: tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE,
       hospitalBranch: HOSPITAL.BRANCHES.OPD,
       chiefDiagnosis: "Clinical Follow-up & Direct Remedy Allocation",
       symptomsObserved: ["Patient Consultation via Doctor Admin Roster"],

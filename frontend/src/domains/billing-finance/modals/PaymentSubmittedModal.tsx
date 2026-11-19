@@ -60,7 +60,7 @@ export const PaymentSubmittedModal: React.FC<PaymentSubmittedModalProps> = ({
           <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 text-left space-y-1">
             <p className="font-bold">🛡️ Doctor Confirmation Policy:</p>
             <p className="text-[10px] text-amber-800">
-              Per {facilityLabelLower} audit compliance, payments remain in <strong>"Under Processing / Verification"</strong> until confirmed by {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}. Once the doctor confirms the credit in the {facilityLabelLower} console, your status will update to <strong>"Confirmed"</strong> and your official digital tax receipt will unlock.
+              Per {facilityLabelLower} audit compliance, payments remain in <strong>"Under Processing / Verification"</strong> until confirmed by {tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE}. Once the doctor confirms the credit in the {facilityLabelLower} console, your status will update to <strong>"Confirmed"</strong> and your official digital tax receipt will unlock.
             </p>
           </div>
 

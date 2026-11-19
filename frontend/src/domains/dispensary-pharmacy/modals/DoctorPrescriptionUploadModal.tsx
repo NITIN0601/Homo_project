@@ -81,12 +81,12 @@ export const DoctorPrescriptionUploadModal: React.FC<DoctorPrescriptionUploadMod
     const newVisit: VisitSummaryRecord = {
       id: `vis-${Date.now()}`,
       visitDate: visitDate || formatDateShort(new Date()),
-      doctorName: tenant.doctor.title || HOSPITAL.DOCTOR_TITLE,
+      doctorName: tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE,
       hospitalBranch: HOSPITAL.BRANCHES.OPD,
       chiefDiagnosis: chiefDiagnosis.trim() || "Clinical Consultation",
       symptomsObserved: observedSymptoms.trim()
         ? observedSymptoms.split("\n").map((s) => s.trim()).filter(Boolean)
-        : [`Consultation with ${tenant.doctor.name || HOSPITAL.DOCTOR_NAME}`, "Symptomatic evaluation completed"],
+        : [`Consultation with ${tenant?.doctor?.name || HOSPITAL.DOCTOR_NAME}`, "Symptomatic evaluation completed"],
       prescribedRemedies: remedies.map((r, i) => ({
         medicineId: `med-rx-${Date.now()}-${i}`,
         medicineName: r.name,

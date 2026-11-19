@@ -220,7 +220,7 @@ export const AppointmentsTab: React.FC<AppointmentsTabProps> = ({
                   <span>📞</span> <strong>{apt.patientPhone}</strong>
                 </span>
                 <a
-                  href={`https://wa.me/91${apt.patientPhone.replace(/\D/g, "")}?text=Hello%20${encodeURIComponent(apt.patientName)},%20this%20is%20${encodeURIComponent(tenant.doctor.title || HOSPITAL.DOCTOR_TITLE)}%20from%20${encodeURIComponent(tenant.name || HOSPITAL.NAME)}%20regarding%20your%20consultation.`}
+                  href={`https://wa.me/91${apt.patientPhone.replace(/\D/g, "")}?text=Hello%20${encodeURIComponent(apt.patientName)},%20this%20is%20${encodeURIComponent(tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE)}%20from%20${encodeURIComponent(tenant?.name || HOSPITAL.NAME)}%20regarding%20your%20consultation.`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 cursor-pointer"

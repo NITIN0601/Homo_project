@@ -98,7 +98,7 @@ export const ConsolidatedBatchOrderModal: React.FC<ConsolidatedBatchOrderModalPr
   };
 
   const hospitalName = tenant.name || HOSPITAL.FULL_NAME;
-  const doctorTitle = tenant.doctor.title || HOSPITAL.DOCTOR_TITLE;
+  const doctorTitle = tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE;
   const hospitalAddress = `${tenant.contact.address.street || HOSPITAL.ADDRESS.STREET}, ${tenant.contact.address.city || HOSPITAL.ADDRESS.CITY}`;
 
   return (

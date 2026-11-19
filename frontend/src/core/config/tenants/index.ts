@@ -45,7 +45,7 @@ export const HOSPITAL_TENANTS: Record<string, HospitalTenantConfig> = {
   ...customTenants,
 };
 
-export const DEFAULT_HOSPITAL_TENANT = AGASTYA_TENANT;
+export const DEFAULT_HOSPITAL_TENANT = VANILLA_DEFAULT_TENANT;
 
 /**
  * Retrieve a hospital tenant by id (case-insensitive)

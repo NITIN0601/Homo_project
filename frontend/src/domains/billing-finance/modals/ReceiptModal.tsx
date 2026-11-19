@@ -68,8 +68,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             <div className="space-y-1">
               <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Attending Physician</span>
               <p className="font-bold text-stone-900 text-sm">{invoice.doctorName}</p>
-              <p className="text-stone-500">{tenant.doctor.title || DOCTOR.TITLE} · {tenant.contact.phoneDisplay || HOSPITAL.PHONE_DISPLAY}</p>
-              <p className="text-stone-500 text-[11px]">{tenant.contact.address.street || HOSPITAL.ADDRESS.STREET}, {tenant.contact.address.city || HOSPITAL.ADDRESS.CITY}</p>
+              <p className="text-stone-500">{tenant?.doctor?.title || DOCTOR.TITLE} · {tenant?.contact?.phoneDisplay || HOSPITAL.PHONE_DISPLAY}</p>
+              <p className="text-stone-500 text-[11px]">{tenant?.contact?.address?.street || HOSPITAL.ADDRESS.STREET}, {tenant?.contact?.address?.city || HOSPITAL.ADDRESS.CITY}</p>
             </div>
             <div className="space-y-1 text-right">
               <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Patient Name</span>

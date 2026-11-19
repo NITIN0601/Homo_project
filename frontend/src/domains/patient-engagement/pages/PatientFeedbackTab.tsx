@@ -100,8 +100,8 @@ export const PatientFeedbackTab: React.FC<PatientFeedbackTabProps> = ({
           </div>
           <div className="text-right">
             <span className="text-[10px] font-bold text-purple-300/70 uppercase tracking-widest">Attending Physician</span>
-            <p className="font-bold text-xs text-white">{tenant.doctor.name || DOCTOR.NAME}</p>
-            <p className="text-[11px] text-purple-300 font-medium">{tenant.doctor.title || DOCTOR.TITLE}</p>
+            <p className="font-bold text-xs text-white">{tenant?.doctor?.name || DOCTOR.NAME}</p>
+            <p className="text-[11px] text-purple-300 font-medium">{tenant?.doctor?.title || DOCTOR.TITLE}</p>
           </div>
         </div>
 

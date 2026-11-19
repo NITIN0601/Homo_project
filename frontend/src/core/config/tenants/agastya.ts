@@ -31,7 +31,7 @@ export const AGASTYA_TENANT: HospitalTenantConfig = {
   id: "agastya",
   slug: "agastya",
   domain: "agastyahomoeo.com",
-  subdomains: ["agastya", "clinic", "ehr", "localhost"],
+  subdomains: ["agastya"],
   name: "Agastya Classical Homeopathy Clinic",
   facilityType: "clinic",
   shortName: "Agastya Clinic",

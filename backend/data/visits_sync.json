@@ -682,6 +682,35 @@
         "followUpDate": "In 14 Days"
       },
       {
+        "id": "vis-e2e-demo-1",
+        "patientId": "usr-001",
+        "patientName": "John Doe",
+        "visitDate": "Nov 03, 2026",
+        "chiefDiagnosis": "Allergic Rhinitis with Migraine Aura",
+        "symptomsObserved": [
+          "Sneezing in mornings",
+          "Photophobia",
+          "Throbbing right temporal pain"
+        ],
+        "prescribedRemedies": [
+          {
+            "medicineName": "Arsenicum Album",
+            "potency": "200C",
+            "dosage": "4 pills morning",
+            "duration": "10 days"
+          },
+          {
+            "medicineName": "Belladonna",
+            "potency": "30C",
+            "dosage": "4 pills SOS for acute headache",
+            "duration": "5 days"
+          }
+        ],
+        "clinicalNotes": "Patient responded favorably to initial constitutional treatment.",
+        "lifestyleAdvice": "Avoid direct cold air exposure and sour curds.",
+        "followUpDate": "In 14 Days"
+      },
+      {
         "id": "vis-1795039738362",
         "visitDate": "18 Nov 2026",
         "chiefDiagnosis": "Uploaded Prescription Document Intake",

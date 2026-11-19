@@ -133,9 +133,9 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({
           );
 
           const sendEmailNotification = () => {
-            const hospitalName = tenant.name || HOSPITAL.FULL_NAME;
-            const doctorTitle = tenant.doctor.title || HOSPITAL.DOCTOR_TITLE;
-            const phoneDisplay = tenant.contact.phoneDisplay || HOSPITAL.PHONE_DISPLAY;
+            const hospitalName = tenant?.name || HOSPITAL.FULL_NAME;
+            const doctorTitle = tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE;
+            const phoneDisplay = tenant?.contact?.phoneDisplay || HOSPITAL.PHONE_DISPLAY;
             const subject = `Clinical Consultation Summary — ${hospitalName}`;
             const body = `Dear ${patient.name},\n\nYour clinical notes and follow-up consultation records have been updated by ${doctorTitle}.\n\nRecord ID: #${patient.id.toUpperCase()}\nHospital: ${hospitalName}\nPhone: ${phoneDisplay}\n\nWarm regards,\n${doctorTitle}`;
             window.open(

@@ -154,7 +154,7 @@ export const AdminDashboard: React.FC = () => {
                 </span>
               </div>
               <p className="text-emerald-200/90 text-xs mt-0.5">
-                {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE} · {tenant.name || HOSPITAL.NAME}
+                {tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE} · {tenant?.name || HOSPITAL.NAME}
               </p>
             </div>
           </div>

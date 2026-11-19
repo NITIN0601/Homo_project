@@ -155,7 +155,7 @@ const OrderMedicinePage: React.FC = () => {
         <div className="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-xl text-white" aria-hidden="true">💊</div>
         <div>
           <h1 className="font-extrabold text-stone-800 text-xl leading-tight">Your Prescribed Medicines</h1>
-          <p className="text-stone-500 text-xs mt-0.5">Prescribed by {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}</p>
+          <p className="text-stone-500 text-xs mt-0.5">Prescribed by {tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE}</p>
         </div>
       </div>
 
@@ -238,8 +238,8 @@ const OrderMedicinePage: React.FC = () => {
 
       {/* Disclaimer */}
       <p className="text-[11px] text-stone-400 text-center pb-4">
-        These medicines are prescribed specifically for you by {tenant.doctor.title || HOSPITAL.DOCTOR_TITLE}. Do not share with others.
-        For queries, contact <a href={`tel:${tenant.contact.phone || HOSPITAL.PHONE_TEL}`} className="underline font-medium">{tenant.contact.phoneDisplay || HOSPITAL.PHONE_DISPLAY}</a>.
+        These medicines are prescribed specifically for you by {tenant?.doctor?.title || HOSPITAL.DOCTOR_TITLE}. Do not share with others.
+        For queries, contact <a href={`tel:${tenant?.contact?.phone || HOSPITAL.PHONE_TEL}`} className="underline font-medium">{tenant?.contact?.phoneDisplay || HOSPITAL.PHONE_DISPLAY}</a>.
       </p>
     </div>
   );
